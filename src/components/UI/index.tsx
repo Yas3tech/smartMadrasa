@@ -1,0 +1,156 @@
+import React, { type ReactNode } from 'react';
+
+interface CardProps {
+    children: ReactNode;
+    className?: string;
+    onClick?: () => void;
+    id?: string;
+}
+
+export const Card = ({ children, className = '', onClick, id }: CardProps) => (
+    <div
+        id={id}
+        onClick={onClick}
+        className={`bg-white rounded-2xl border border-gray-100 shadow-soft ${onClick ? 'cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5' : ''} ${className}`}
+    >
+        {children}
+    </div>
+);
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+    size?: 'sm' | 'md' | 'lg';
+    icon?: React.ElementType;
+}
+
+export const Button = ({
+    children,
+    variant = 'primary',
+    size = 'md',
+    icon: Icon,
+    className = '',
+    ...props
+}: ButtonProps) => {
+    const baseStyles = "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
+
+    const variants = {
+        primary: "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg",
+        secondary: "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-sm",
+        danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-transparent",
+        ghost: "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
+    };
+
+    const sizes = {
+        sm: "px-3 py-1.5 text-xs",
+        md: "px-4 py-2.5 text-sm",
+        lg: "px-6 py-3 text-base"
+    };
+
+    return (
+        <button
+            className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+            {...props}
+        >
+            {Icon && <Icon size={size === 'sm' ? 16 : 18} />}
+            {children}
+        </button>
+    );
+};
+
+interface BadgeProps {
+    children: ReactNode;
+    variant?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
+    className?: string;
+}
+
+export const Badge = ({ children, variant = 'neutral', className = '' }: BadgeProps) => {
+    const variants = {
+        success: "bg-green-100 text-green-700 border-green-200",
+        warning: "bg-yellow-100 text-yellow-700 border-yellow-200",
+        error: "bg-red-100 text-red-700 border-red-200",
+        info: "bg-blue-100 text-blue-700 border-blue-200",
+        neutral: "bg-gray-100 text-gray-600 border-gray-200"
+    };
+
+    return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${variants[variant]} ${className}`}>
+            {children}
+        </span>
+    );
+};
+
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    label?: string;
+    error?: string;
+    icon?: React.ElementType;
+}
+
+export const Input = ({ label, error, icon: Icon, className = '', ...props }: InputProps) => (
+    <div className="w-full">
+        {label && <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>}
+        <div className="relative">
+            {Icon && (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Icon size={18} />
+                </div>
+            )}
+            <input
+                className={`w-full ${Icon ? 'pl-10' : 'px-4'} py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 placeholder:text-gray-400 ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''} ${className}`}
+                {...props}
+            />
+        </div>
+        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+);
+
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title?: string;
+    children: ReactNode;
+}
+
+export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+                className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+                onClick={onClose}
+            />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
+                {title && (
+                    <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <h3 className="font-bold text-lg text-gray-800">{title}</h3>
+                        <button
+                            onClick={onClose}
+                            className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                )}
+                <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Export LoadingStates components
+export {
+    SkeletonCard,
+    SkeletonText,
+    SkeletonTable,
+    SkeletonChart,
+    Spinner,
+    LoadingOverlay,
+    PageLoader,
+    EmptyState,
+    ShimmerEffect
+} from './LoadingStates';
+
+// Export FileUpload component
+export { FileUpload } from './FileUpload';

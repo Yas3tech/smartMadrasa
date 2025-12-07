@@ -1,0 +1,286 @@
+import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
+import { Card, Button, Input } from '../../components/UI';
+import { User as UserIcon, Mail, Lock, Camera, Save, Edit2 } from 'lucide-react';
+import type { Student, Parent, Teacher } from '../../types';
+
+const Profile = () => {
+    const { user } = useAuth();
+    const { users, students, classes, updateUser } = useData();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [name, setName] = useState(user?.name || '');
+    const [email, setEmail] = useState(user?.email || '');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    if (!user) return null;
+
+    const handleSaveProfile = () => {
+        if (user) {
+            updateUser(user.id, { name, email });
+            setIsEditing(false);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setName(user.name);
+        setEmail(user.email);
+        setIsEditing(false);
+    };
+
+    const handleChangePassword = () => {
+        if (newPassword !== confirmPassword) {
+            alert('Les mots de passe ne correspondent pas');
+            return;
+        }
+        if (newPassword.length < 6) {
+            alert('Le mot de passe doit contenir au moins 6 caractères');
+            return;
+        }
+        // In real app, would call Firebase auth
+        alert('Mot de passe changé avec succès!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+    };
+
+    // Get additional info based on role
+    const getStudentInfo = () => {
+        if (user.role !== 'student') return null;
+        const studentData = students.find(s => s.id === user.id) as Student;
+        if (!studentData) return null;
+
+        const parent = users.find(u => u.id === studentData.parentId);
+
+        return (
+            <Card className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Informations académiques</h3>
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Classe</span>
+                        <span className="font-semibold text-gray-900">{studentData.classId}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Parent/Tuteur</span>
+                        <span className="font-semibold text-gray-900">{parent?.name || 'Non assigné'}</span>
+                    </div>
+                    {parent && (
+                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <span className="text-sm text-gray-600">Contact parent</span>
+                            <span className="font-semibold text-gray-900">{parent.email}</span>
+                        </div>
+                    )}
+                </div>
+            </Card>
+        );
+    };
+
+    const getParentInfo = () => {
+        if (user.role !== 'parent') return null;
+        const parentData = user as Parent;
+        const children = students.filter(s => parentData.childrenIds?.includes(s.id));
+
+        return (
+            <Card className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Mes enfants</h3>
+                <div className="space-y-3">
+                    {children.length > 0 ? children.map(child => (
+                        <div key={child.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                                {child.name.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-semibold text-gray-900">{child.name}</p>
+                                <p className="text-sm text-gray-500">{child.email}</p>
+                            </div>
+                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                                {(child as Student).classId}
+                            </span>
+                        </div>
+                    )) : (
+                        <p className="text-gray-500 text-center py-4">Aucun enfant assigné</p>
+                    )}
+                </div>
+            </Card>
+        );
+    };
+
+    const getTeacherInfo = () => {
+        if (user.role !== 'teacher') return null;
+        const teacherData = user as Teacher;
+
+        return (
+            <Card className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Informations professionnelles</h3>
+                <div className="space-y-3">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600 block mb-2">Matières enseignées</span>
+                        <div className="flex flex-wrap gap-2">
+                            {teacherData.subjects?.map(subject => (
+                                <span key={subject} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
+                                    {subject}
+                                </span>
+                            )) || <span className="text-gray-500">Aucune matière assignée</span>}
+                        </div>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600 block mb-2">Classes assignées</span>
+                        <div className="flex flex-wrap gap-2">
+                            {teacherData.classIds?.map(classId => {
+                                const classGroup = classes.find(c => c.id === classId);
+                                return (
+                                    <span key={classId} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                        {classGroup ? classGroup.name : classId}
+                                    </span>
+                                );
+                            }) || <span className="text-gray-500">Aucune classe assignée</span>}
+                        </div>
+                    </div>
+                </div>
+            </Card>
+        );
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-gray-900">Mon Profil</h1>
+                {!isEditing && (
+                    <Button variant="primary" icon={Edit2} onClick={() => setIsEditing(true)}>
+                        Modifier le profil
+                    </Button>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column - Profile Picture and Basic Info */}
+                <div className="space-y-6">
+                    <Card className="p-6">
+                        <div className="flex flex-col items-center">
+                            <div className="relative mb-4">
+                                <img
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg"
+                                />
+                                {isEditing && (
+                                    <button className="absolute bottom-0 right-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors shadow-lg">
+                                        <Camera size={20} />
+                                    </button>
+                                )}
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
+                            <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                            <span className="mt-3 px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
+                                {user.role === 'student' ? 'Élève' :
+                                    user.role === 'parent' ? 'Parent' :
+                                        user.role === 'teacher' ? 'Enseignant' :
+                                            user.role === 'director' ? 'Directeur' :
+                                                'Super Admin'}
+                            </span>
+                        </div>
+                    </Card>
+
+                    {/* Role-specific info */}
+                    {getStudentInfo()}
+                    {getParentInfo()}
+                    {getTeacherInfo()}
+                </div>
+
+                {/* Right Column - Editable Information */}
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Personal Information */}
+                    <Card className="p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-gray-900">Informations personnelles</h3>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Input
+                                label="Nom complet"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                disabled={!isEditing}
+                                icon={UserIcon}
+                            />
+
+                            <Input
+                                label="Email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={!isEditing}
+                                icon={Mail}
+                            />
+
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm text-gray-600">Rôle</span>
+                                <span className="font-semibold text-gray-900 capitalize">{user.role}</span>
+                            </div>
+
+                            {isEditing && (
+                                <div className="flex justify-end gap-3 pt-4 border-t">
+                                    <Button variant="secondary" onClick={handleCancelEdit}>
+                                        Annuler
+                                    </Button>
+                                    <Button variant="primary" icon={Save} onClick={handleSaveProfile}>
+                                        Enregistrer
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+
+                    {/* Change Password */}
+                    <Card className="p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-6">Changer le mot de passe</h3>
+
+                        <div className="space-y-4">
+                            <Input
+                                label="Mot de passe actuel"
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                icon={Lock}
+                                placeholder="••••••••"
+                            />
+
+                            <Input
+                                label="Nouveau mot de passe"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                icon={Lock}
+                                placeholder="••••••••"
+                            />
+
+                            <Input
+                                label="Confirmer le mot de passe"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                icon={Lock}
+                                placeholder="••••••••"
+                            />
+
+                            <div className="flex justify-end pt-4 border-t">
+                                <Button
+                                    variant="primary"
+                                    onClick={handleChangePassword}
+                                    disabled={!currentPassword || !newPassword || !confirmPassword}
+                                >
+                                    Changer le mot de passe
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Profile;

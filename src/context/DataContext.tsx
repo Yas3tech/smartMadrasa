@@ -1,0 +1,676 @@
+﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+// import { useAuth } from './AuthContext';
+import type {
+    User,
+    Student,
+    ClassGroup,
+    Message,
+    Event,
+    Grade,
+    Attendance,
+    Course,
+    Homework
+} from '../types';
+import { isFirebaseConfigured } from '../config/firebase';
+import {
+    subscribeToUsers,
+    createUser as fbCreateUser,
+    updateUser as fbUpdateUser,
+    deleteUser as fbDeleteUser
+} from '../services/users';
+import {
+    subscribeToClasses,
+    createClass as fbCreateClass,
+    updateClass as fbUpdateClass,
+    deleteClass as fbDeleteClass
+} from '../services/classes';
+import {
+    subscribeToMessages,
+    sendMessage as fbSendMessage,
+    deleteMessage as fbDeleteMessage,
+    markMessageAsRead as fbMarkMessageAsRead,
+    updateMessage as fbUpdateMessage
+} from '../services/messages';
+import {
+    subscribeToEvents,
+    createEvent as fbCreateEvent,
+    updateEvent as fbUpdateEvent,
+    deleteEvent as fbDeleteEvent
+} from '../services/events';
+import {
+    subscribeToCourseGrades,
+    createCourseGrade as fbCreateCourseGrade,
+    updateCourseGrade as fbUpdateCourseGrade
+} from '../services/courseGrades';
+import {
+    subscribeToAttendance,
+    createAttendance as fbCreateAttendance,
+    updateAttendance as fbUpdateAttendance
+} from '../services/attendance';
+import {
+    subscribeToCourses,
+    createCourse as fbCreateCourse,
+    updateCourse as fbUpdateCourse,
+    deleteCourse as fbDeleteCourse
+} from '../services/courses';
+import {
+    subscribeToHomeworks,
+    createHomework as fbCreateHomework,
+    updateHomework as fbUpdateHomework,
+    deleteHomework as fbDeleteHomework
+} from '../services/homework';
+import {
+    subscribeToAcademicPeriods,
+    createAcademicPeriod as fbCreateAcademicPeriod,
+    updateAcademicPeriod as fbUpdateAcademicPeriod,
+    deleteAcademicPeriod as fbDeleteAcademicPeriod,
+    publishPeriodBulletins as fbPublishPeriodBulletins
+} from '../services/academicPeriods';
+import {
+    subscribeToGradeCategories,
+    createGradeCategory as fbCreateGradeCategory,
+    updateGradeCategory as fbUpdateGradeCategory,
+    deleteGradeCategory as fbDeleteGradeCategory
+} from '../services/gradeCategories';
+
+import type {
+    AcademicPeriod,
+    GradeCategory
+} from '../types/bulletin';
+
+interface DataContextType {
+    // State
+    users: User[];
+    students: Student[];
+    classes: ClassGroup[];
+    messages: Message[];
+    events: Event[];
+    grades: Grade[];
+    attendance: Attendance[];
+    courses: Course[];
+    homeworks: Homework[];
+    academicPeriods: AcademicPeriod[];
+    gradeCategories: GradeCategory[];
+    isLoading: boolean;
+    useFirebase: boolean;
+
+    // Actions
+    addUser: (user: User) => Promise<void>;
+    updateUser: (id: string, updates: Partial<User>) => Promise<void>;
+    deleteUser: (id: string) => Promise<void>;
+
+    addClass: (classGroup: ClassGroup) => Promise<void>;
+    updateClass: (id: string, updates: Partial<ClassGroup>) => Promise<void>;
+    deleteClass: (id: string) => Promise<void>;
+
+    sendMessage: (message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>;
+    deleteMessage: (id: string | number) => Promise<void>;
+    markMessageAsRead: (id: string | number) => Promise<void>;
+    updateMessage: (id: string | number, updates: Partial<Message>) => Promise<void>;
+
+    addEvent: (event: Omit<Event, 'id'>) => Promise<void>;
+    updateEvent: (id: string, updates: Partial<Event>) => Promise<void>;
+    deleteEvent: (id: string) => Promise<void>;
+
+    addGrade: (grade: Omit<Grade, 'id'>) => Promise<void>;
+    updateGrade: (id: string, updates: Partial<Grade>) => Promise<void>;
+
+    markAttendance: (record: Omit<Attendance, 'id'>) => Promise<void>;
+    updateAttendance: (id: string, status: 'present' | 'absent' | 'late', justification?: string) => Promise<void>;
+
+    addCourse: (course: Omit<Course, 'id'>) => Promise<void>;
+    updateCourse: (id: string, updates: Partial<Course>) => Promise<void>;
+    deleteCourse: (id: string) => Promise<void>;
+
+    addHomework: (homework: Omit<Homework, 'id'>) => Promise<void>;
+    updateHomework: (id: string, updates: Partial<Homework>) => Promise<void>;
+    deleteHomework: (id: string) => Promise<void>;
+
+    // Bulletin actions
+    addAcademicPeriod: (period: Omit<AcademicPeriod, 'id'>) => Promise<void>;
+    updateAcademicPeriod: (id: string, updates: Partial<AcademicPeriod>) => Promise<void>;
+    deleteAcademicPeriod: (id: string) => Promise<void>;
+    publishPeriodBulletins: (periodId: string) => Promise<void>;
+
+    addGradeCategory: (category: Omit<GradeCategory, 'id'>) => Promise<void>;
+    updateGradeCategory: (id: string, updates: Partial<GradeCategory>) => Promise<void>;
+    deleteGradeCategory: (id: string) => Promise<void>;
+}
+
+const DataContext = createContext<DataContextType | undefined>(undefined);
+
+// Mock data generators (fallback when Firebase not configured)
+const generateMockUsers = (): User[] => [
+    { id: '1', name: 'Dr. Hassan El Fassi', email: 'hassan.elfassi@school.ma', role: 'director', avatar: '👨‍💼' },
+    { id: '2', name: 'Mme. Layla El Amrani', email: 'layla.elamrani@school.ma', role: 'teacher', avatar: '👩‍🏫' },
+    { id: '3', name: 'Karim Tazi', email: 'karim.tazi@school.ma', role: 'student', avatar: '👨‍🎓', classId: 'c1' } as any,
+    { id: '4', name: 'Mme. Tazi', email: 'mme.tazi@gmail.com', role: 'parent', avatar: '👩' },
+    { id: '5', name: 'M. Amine Benjelloun', email: 'amine.benjelloun@school.ma', role: 'teacher', avatar: '👨‍🏫' },
+];
+
+const generateMockClasses = (): ClassGroup[] => [
+    { id: 'c1', name: 'Classe 1A', grade: '1ère année', teacherId: '2' },
+    { id: 'c2', name: 'Classe 2B', grade: '2ème année', teacherId: '5' },
+    { id: 'c3', name: 'Classe 3A', grade: '3ème année', teacherId: '2' },
+];
+
+const generateMockMessages = (): Message[] => [
+    {
+        id: 1,
+        senderId: 1,
+        senderName: 'Dr. Hassan El Fassi',
+        senderRole: 'director',
+        receiverId: 2,
+        subject: 'Réunion pédagogique',
+        content: 'Bonjour,\n\nJe vous invite à la réunion pédagogique de demain à 14h.\n\nCordialement,\nHassan',
+        read: false,
+        timestamp: new Date().toISOString(),
+        type: 'individual'
+    },
+    {
+        id: 2,
+        senderId: 2,
+        senderName: 'Mme. Layla El Amrani',
+        senderRole: 'teacher',
+        receiverId: 'all',
+        subject: 'Devoirs pour la semaine',
+        content: 'Chers parents,\n\nVoici les devoirs pour cette semaine...',
+        read: true,
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        type: 'broadcast'
+    }
+];
+
+const generateMockEvents = (): Event[] => [
+    {
+        id: 'e1',
+        title: 'Cours de Mathématiques',
+        description: 'Algèbre linéaire',
+        start: new Date(2025, 10, 20, 9, 0).toISOString(),
+        end: new Date(2025, 10, 20, 10, 0).toISOString(),
+        type: 'lesson',
+        classId: 'c1'
+    },
+    {
+        id: 'e2',
+        title: 'Examen d\'Arabe',
+        description: 'Grammaire et vocabulaire',
+        start: new Date(2025, 10, 22, 10, 0).toISOString(),
+        end: new Date(2025, 10, 22, 12, 0).toISOString(),
+        type: 'exam',
+        classId: 'c1'
+    }
+];
+
+const generateMockGrades = (): Grade[] => [
+    {
+        id: 'g1',
+        studentId: '3',
+        subject: 'Mathématiques',
+        score: 85,
+        maxScore: 100,
+        type: 'exam',
+        date: new Date(2025, 10, 15).toISOString(),
+        feedback: 'Très bon travail!'
+    },
+    {
+        id: 'g2',
+        studentId: '3',
+        subject: 'Arabe',
+        score: 92,
+        maxScore: 100,
+        type: 'homework',
+        date: new Date(2025, 10, 18).toISOString()
+    }
+];
+
+const generateMockAttendance = (): Attendance[] => [
+    {
+        id: 'a1',
+        date: new Date().toISOString().split('T')[0],
+        studentId: '3',
+        status: 'present',
+        classId: 'c1'
+    }
+];
+
+const generateMockHomeworks = (): Homework[] => [
+    {
+        id: 'h1',
+        title: 'Exercices de Mathématiques',
+        subject: 'Mathématiques',
+        description: 'Page 42, exercices 1 à 5',
+        dueDate: new Date(Date.now() + 86400000 * 2).toISOString(),
+        assignedBy: 'Mme. Layla El Amrani',
+        classId: 'c1',
+        maxGrade: 20
+    }
+];
+
+export const DataProvider = ({ children }: { children: ReactNode }) => {
+    // const { user } = useAuth(); // Unused
+    const useFirebase = isFirebaseConfigured;
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Local state (used for mock data OR Firebase real-time updates)
+    const [users, setUsers] = useState<User[]>([]);
+    const [classes, setClasses] = useState<ClassGroup[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [events, setEvents] = useState<Event[]>([]);
+    const [grades, setGrades] = useState<Grade[]>([]);
+    const [attendance, setAttendance] = useState<Attendance[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [homeworks, setHomeworks] = useState<Homework[]>([]);
+
+    // Bulletin state
+    const [academicPeriods, setAcademicPeriods] = useState<AcademicPeriod[]>([]);
+    const [gradeCategories, setGradeCategories] = useState<GradeCategory[]>([]);
+
+    // Initialize data: Firebase listeners OR mock data
+    useEffect(() => {
+        if (useFirebase) {
+            console.log('🔥 Using Firebase for data management');
+
+            // Subscribe to Firebase collections
+            const unsubUsers = subscribeToUsers(setUsers);
+            const unsubClasses = subscribeToClasses(setClasses);
+            const unsubMessages = subscribeToMessages(setMessages);
+            const unsubEvents = subscribeToEvents(setEvents);
+            const unsubGrades = subscribeToCourseGrades((courseGrades) => {
+                // Convert CourseGrade to Grade format for compatibility
+                const grades = courseGrades.map(cg => ({
+                    id: cg.id,
+                    studentId: cg.studentId,
+                    studentName: cg.studentName,
+                    subject: cg.courseName || 'Unknown',
+                    score: cg.score,
+                    maxScore: cg.maxScore,
+                    type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
+                    date: cg.date,
+                    feedback: cg.comment,
+                    courseId: cg.courseId, // ✅ CRITICAL FIX: Include courseId for filtering
+                    className: undefined
+                }));
+                setGrades(grades as any);
+            });
+            const unsubAttendance = subscribeToAttendance(setAttendance);
+            const unsubCourses = subscribeToCourses(setCourses);
+            const unsubHomeworks = subscribeToHomeworks(setHomeworks);
+
+            // Subscribe to bulletin system collections
+            const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
+            const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
+
+            // Role-based subscriptions could be added here if needed
+            // e.g. if (user?.role === 'teacher') ...
+
+            setIsLoading(false);
+
+            // Cleanup subscriptions on unmount
+            return () => {
+                unsubUsers();
+                unsubClasses();
+                unsubMessages();
+                unsubEvents();
+                unsubGrades();
+                unsubAttendance();
+                unsubCourses();
+                unsubHomeworks();
+                unsubAcademicPeriods();
+                unsubGradeCategories();
+            };
+        } else {
+            console.log('⚠️ Using mock data (Firebase not configured)');
+
+            // Load mock data
+            setUsers(generateMockUsers());
+            setClasses(generateMockClasses());
+            setMessages(generateMockMessages());
+            setEvents(generateMockEvents());
+            setGrades(generateMockGrades());
+            setAttendance(generateMockAttendance());
+            setCourses([]);
+            setHomeworks(generateMockHomeworks());
+            setIsLoading(false);
+        }
+    }, [useFirebase]);
+
+    // User actions
+    const addUser = async (user: User) => {
+        if (useFirebase) {
+            await fbCreateUser(user);
+        } else {
+            setUsers(prev => [...prev, user]);
+        }
+    };
+
+    const updateUser = async (id: string, updates: Partial<User>) => {
+        if (useFirebase) {
+            await fbUpdateUser(id, updates);
+        } else {
+            setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
+        }
+    };
+
+    const deleteUser = async (id: string) => {
+        if (useFirebase) {
+            await fbDeleteUser(id);
+        } else {
+            setUsers(prev => prev.filter(u => u.id !== id));
+        }
+    };
+
+    // Class actions
+    const addClass = async (classGroup: ClassGroup) => {
+        if (useFirebase) {
+            await fbCreateClass(classGroup);
+        } else {
+            setClasses(prev => [...prev, classGroup]);
+        }
+    };
+
+    const updateClass = async (id: string, updates: Partial<ClassGroup>) => {
+        if (useFirebase) {
+            await fbUpdateClass(id, updates);
+        } else {
+            setClasses(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+        }
+    };
+
+    const deleteClass = async (id: string) => {
+        if (useFirebase) {
+            await fbDeleteClass(id);
+        } else {
+            setClasses(prev => prev.filter(c => c.id !== id));
+        }
+    };
+
+    // Message actions
+    const sendMessage = async (message: Omit<Message, 'id' | 'timestamp'>) => {
+        if (useFirebase) {
+            await fbSendMessage(message);
+        } else {
+            const newMessage: Message = {
+                ...message,
+                id: Date.now(),
+                timestamp: new Date().toISOString()
+            };
+            setMessages(prev => [newMessage, ...prev]);
+        }
+    };
+
+    const deleteMessage = async (id: string | number) => {
+        if (useFirebase) {
+            await fbDeleteMessage(String(id));
+        } else {
+            setMessages(prev => prev.filter(m => m.id !== id));
+        }
+    };
+
+    const markMessageAsRead = async (id: string | number) => {
+        if (useFirebase) {
+            await fbMarkMessageAsRead(String(id));
+        } else {
+            setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+        }
+    };
+
+    const updateMessage = async (id: string | number, updates: Partial<Message>) => {
+        if (useFirebase) {
+            await fbUpdateMessage(String(id), updates);
+        } else {
+            setMessages(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
+        }
+    };
+
+    // Event actions
+    const addEvent = async (event: Omit<Event, 'id'>) => {
+        if (useFirebase) {
+            await fbCreateEvent(event);
+        } else {
+            const newEvent: Event = { ...event, id: `e${Date.now()}` };
+            setEvents(prev => [...prev, newEvent]);
+        }
+    };
+
+    const updateEvent = async (id: string, updates: Partial<Event>) => {
+        if (useFirebase) {
+            await fbUpdateEvent(id, updates);
+        } else {
+            setEvents(prev => prev.map(e => e.id === id ? { ...e, ...updates } : e));
+        }
+    };
+
+    const deleteEvent = async (id: string) => {
+        if (useFirebase) {
+            await fbDeleteEvent(id);
+        } else {
+            setEvents(prev => prev.filter(e => e.id !== id));
+        }
+    };
+
+    // Grade actions
+    const addGrade = async (grade: Omit<Grade, 'id'>) => {
+        if (useFirebase) {
+            // Convert Grade to CourseGrade format
+            const courseGrade = {
+                studentId: grade.studentId,
+                studentName: grade.studentName,
+                courseId: grade.courseId || 'unknown', // Use provided courseId
+                courseName: grade.subject,
+                periodId: academicPeriods[0]?.id || 'unknown', // Use first period as default
+                categoryId: 'cat-homework', // Default category
+                categoryName: 'Devoir',
+                title: `${grade.subject} - ${grade.type}`,
+                score: grade.score,
+                maxScore: grade.maxScore,
+                date: grade.date,
+                weight: 1,
+                teacherId: grade.teacherId || 'unknown',
+                comment: grade.feedback
+            };
+            await fbCreateCourseGrade(courseGrade);
+        } else {
+            const newGrade: Grade = { ...grade, id: `g${Date.now()}` };
+            setGrades(prev => [...prev, newGrade]);
+        }
+    };
+
+    const updateGrade = async (id: string, updates: Partial<Grade>) => {
+        if (useFirebase) {
+            // Convert updates to CourseGrade format
+            const courseGradeUpdates: any = {};
+            if (updates.score !== undefined) courseGradeUpdates.score = updates.score;
+            if (updates.maxScore !== undefined) courseGradeUpdates.maxScore = updates.maxScore;
+            if (updates.feedback !== undefined) courseGradeUpdates.comment = updates.feedback;
+            if (updates.subject !== undefined) courseGradeUpdates.courseName = updates.subject;
+
+            await fbUpdateCourseGrade(id, courseGradeUpdates);
+        } else {
+            setGrades(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
+        }
+    };
+
+    // Attendance actions
+    const markAttendance = async (record: Omit<Attendance, 'id'>) => {
+        if (useFirebase) {
+            // If courseId is present, we might want to store it differently or just in the same collection
+            await fbCreateAttendance(record.studentId, record);
+        } else {
+            const newRecord: Attendance = { ...record, id: `a${Date.now()}` };
+            setAttendance(prev => [...prev, newRecord]);
+        }
+    };
+
+    const updateAttendance = async (id: string, status: 'present' | 'absent' | 'late', justification?: string) => {
+        if (useFirebase) {
+            const record = attendance.find(a => a.id === id);
+            if (record) {
+                // We need to update the service to accept justification too, but for now let's pass it if possible or update the object
+                // Assuming fbUpdateAttendance might need refactoring or we use a generic update
+                await fbUpdateAttendance(record.studentId, id, status, justification);
+            }
+        } else {
+            setAttendance(prev => prev.map(a => a.id === id ? { ...a, status, justification, isJustified: !!justification } : a));
+        }
+    };
+
+    // Course actions
+    const addCourse = async (course: Omit<Course, 'id'>) => {
+        if (useFirebase) {
+            await fbCreateCourse(course.classId, course);
+        } else {
+            const newCourse: Course = { ...course, id: `course${Date.now()}` };
+            setCourses(prev => [...prev, newCourse]);
+        }
+    };
+
+    const updateCourse = async (id: string, updates: Partial<Course>) => {
+        if (useFirebase) {
+            const course = courses.find(c => c.id === id);
+            if (course) {
+                await fbUpdateCourse(course.classId, id, updates);
+            }
+        } else {
+            setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+        }
+    };
+
+    const deleteCourse = async (id: string) => {
+        if (useFirebase) {
+            const course = courses.find(c => c.id === id);
+            if (course) {
+                await fbDeleteCourse(course.classId, id);
+            }
+        } else {
+            setCourses(prev => prev.filter(c => c.id !== id));
+        }
+    };
+
+    // Homework actions
+    const addHomework = async (homework: Omit<Homework, 'id'>) => {
+        if (useFirebase) {
+            await fbCreateHomework(homework);
+        } else {
+            const newHomework: Homework = { ...homework, id: `h${Date.now()}` };
+            setHomeworks(prev => [...prev, newHomework]);
+        }
+    };
+
+    const updateHomework = async (id: string, updates: Partial<Homework>) => {
+        if (useFirebase) {
+            await fbUpdateHomework(id, updates);
+        } else {
+            setHomeworks(prev => prev.map(h => h.id === id ? { ...h, ...updates } : h));
+        }
+    };
+
+    const deleteHomework = async (id: string) => {
+        if (useFirebase) {
+            await fbDeleteHomework(id);
+        } else {
+            setHomeworks(prev => prev.filter(h => h.id !== id));
+        }
+    };
+
+    const students = users.filter((u): u is Student => u.role === 'student');
+
+    // Bulletin CRUD operations (mock implementation for now, will be enhanced later)
+    const addAcademicPeriod = async (period: Omit<AcademicPeriod, 'id'>) => {
+        if (useFirebase) {
+            await fbCreateAcademicPeriod(period);
+        }
+    };
+
+    const updateAcademicPeriod = async (id: string, updates: Partial<AcademicPeriod>) => {
+        if (useFirebase) {
+            await fbUpdateAcademicPeriod(id, updates);
+        }
+    };
+
+    const deleteAcademicPeriod = async (id: string) => {
+        if (useFirebase) {
+            await fbDeleteAcademicPeriod(id);
+        }
+    };
+
+    const publishPeriodBulletins = async (periodId: string) => {
+        if (useFirebase) {
+            await fbPublishPeriodBulletins(periodId);
+        }
+    };
+
+    const addGradeCategory = async (category: Omit<GradeCategory, 'id'>) => {
+        if (useFirebase) {
+            await fbCreateGradeCategory(category);
+        }
+    };
+
+    const updateGradeCategory = async (id: string, updates: Partial<GradeCategory>) => {
+        if (useFirebase) {
+            await fbUpdateGradeCategory(id, updates);
+        }
+    };
+
+    const deleteGradeCategory = async (id: string) => {
+        if (useFirebase) {
+            await fbDeleteGradeCategory(id);
+        }
+    };
+
+    const value: DataContextType = {
+        users,
+        students,
+        classes,
+        messages,
+        events,
+        grades,
+        attendance,
+        courses,
+        homeworks,
+        academicPeriods,
+        gradeCategories,
+        isLoading,
+        useFirebase,
+        addUser,
+        updateUser,
+        deleteUser,
+        addClass,
+        updateClass,
+        deleteClass,
+        sendMessage,
+        deleteMessage,
+        markMessageAsRead,
+        updateMessage,
+        addEvent,
+        updateEvent,
+        deleteEvent,
+        addGrade,
+        updateGrade,
+        markAttendance,
+        updateAttendance,
+        addCourse,
+        updateCourse,
+        deleteCourse,
+        addHomework,
+        updateHomework,
+        deleteHomework,
+        addAcademicPeriod,
+        updateAcademicPeriod,
+        deleteAcademicPeriod,
+        publishPeriodBulletins,
+        addGradeCategory,
+        updateGradeCategory,
+        deleteGradeCategory
+    };
+
+    return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+};
+
+export const useData = () => {
+    const context = useContext(DataContext);
+    if (!context) {
+        throw new Error('useData must be used within DataProvider');
+    }
+    return context;
+};
