@@ -19,6 +19,19 @@ const Profile = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
+    // Get teacher's courses, subjects and classes from courses collection
+    // MOVED BEFORE EARLY RETURN to satisfy hooks rules
+    const teacherData = useMemo(() => {
+        if (!user || user.role !== 'teacher') return { subjects: [], teacherClasses: [] };
+
+        const teacherCourses = courses.filter(c => c.teacherId === user.id);
+        const subjects = [...new Set(teacherCourses.map(c => c.subject))];
+        const classIds = [...new Set(teacherCourses.map(c => c.classId))];
+        const teacherClasses = classes.filter(c => classIds.includes(c.id));
+
+        return { subjects, teacherClasses };
+    }, [user, courses, classes]);
+
     if (!user) return null;
 
     const handleSaveProfile = () => {
@@ -54,18 +67,6 @@ const Profile = () => {
         return t(`roles.${role}`);
     };
 
-    // Get teacher's courses, subjects and classes from courses collection
-    const teacherData = useMemo(() => {
-        if (user.role !== 'teacher') return { subjects: [], teacherClasses: [] };
-
-        const teacherCourses = courses.filter(c => c.teacherId === user.id);
-        const subjects = [...new Set(teacherCourses.map(c => c.subject))];
-        const classIds = [...new Set(teacherCourses.map(c => c.classId))];
-        const teacherClasses = classes.filter(c => classIds.includes(c.id));
-
-        return { subjects, teacherClasses };
-    }, [user, courses, classes]);
-
     // Get additional info based on role
     const getStudentInfo = () => {
         if (user.role !== 'student') return null;
@@ -73,7 +74,7 @@ const Profile = () => {
         if (!studentData) return null;
 
         const parent = users.find(u => u.id === studentData.parentId);
-        const classInfo = classes.find(c => c.id === (studentData as any).classId);
+        const classInfo = classes.find(c => c.id === studentData.classId);
 
         return (
             <Card className="p-6">
@@ -108,7 +109,7 @@ const Profile = () => {
                 <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.myChildren')}</h3>
                 <div className="space-y-3">
                     {children.length > 0 ? children.map(child => {
-                        const classInfo = classes.find(c => c.id === (child as any).classId);
+                        const classInfo = classes.find(c => c.id === (child as Student).classId);
                         return (
                             <div key={child.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                                 <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">

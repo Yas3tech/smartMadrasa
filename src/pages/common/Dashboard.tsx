@@ -120,7 +120,17 @@ const Dashboard = () => {
 
     const COLORS = ['#f97316', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
-    const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, onClick }: any) => (
+    interface StatCardProps {
+        title: string;
+        value: number | string;
+        icon: React.ElementType;
+        trend?: 'up' | 'down';
+        trendValue?: string;
+        color: string;
+        onClick?: () => void;
+    }
+
+    const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, onClick }: StatCardProps) => (
         <Card
             className={`p-6 border-l-4 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${color}`}
             onClick={onClick}

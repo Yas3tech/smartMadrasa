@@ -52,7 +52,7 @@ const Resources = () => {
             subject: 'Mathématiques',
             class: 'c1',
             uploadedBy: 'Prof. Martin',
-            uploadedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+            uploadedAt: '2024-12-06T10:00:00.000Z',
             size: '2.5 MB',
             downloads: 45
         },
@@ -63,7 +63,7 @@ const Resources = () => {
             subject: 'Français',
             class: 'c1',
             uploadedBy: 'Prof. Dupont',
-            uploadedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+            uploadedAt: '2024-12-03T10:00:00.000Z',
             size: '1.8 MB',
             downloads: 62
         },
@@ -74,7 +74,7 @@ const Resources = () => {
             subject: 'Sciences',
             class: 'c1',
             uploadedBy: 'Prof. Bernard',
-            uploadedAt: new Date(Date.now() - 10 * 86400000).toISOString(),
+            uploadedAt: '2024-11-28T10:00:00.000Z',
             size: '500 KB',
             downloads: 38
         }
@@ -92,7 +92,7 @@ const Resources = () => {
         if (!fileName) return;
 
         const newResource: Resource = {
-            id: `r${Date.now()}`,
+            id: `r${Math.random().toString(36).substring(7)}`,
             name: fileName,
             type: 'pdf',
             subject,

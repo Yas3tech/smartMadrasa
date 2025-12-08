@@ -285,7 +285,7 @@ const Calendar = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">{t('calendar.type')}</label>
                             <select
                                 value={eventType}
-                                onChange={(e) => setEventType(e.target.value as any)}
+                                onChange={(e) => setEventType(e.target.value as typeof eventType)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             >
                                 <option value="lesson">{t('calendar.lesson')}</option>

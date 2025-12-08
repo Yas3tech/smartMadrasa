@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, type AuthError } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
 import { auth } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -38,11 +38,12 @@ const Login = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             // Navigation is handled by the useEffect above
-        } catch (err: any) {
-            console.error('Login error:', err);
-            if (err.code === 'auth/invalid-credential') {
+        } catch (err) {
+            const authError = err as AuthError;
+            console.error('Login error:', authError);
+            if (authError.code === 'auth/invalid-credential') {
                 setError(t('auth.errors.invalidCredentials'));
-            } else if (err.code === 'auth/too-many-requests') {
+            } else if (authError.code === 'auth/too-many-requests') {
                 setError(t('auth.errors.tooManyRequests'));
             } else {
                 setError(t('auth.errors.generic'));

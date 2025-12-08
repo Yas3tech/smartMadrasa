@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
+import type { Parent, Student } from '../../types';
 import {
     Search,
     PenSquare,
@@ -87,7 +88,7 @@ const Messages = () => {
 
                 if (u.role === 'parent') {
                     // For parents, show "Parent de [enfants]"
-                    const parent = u as any;
+                    const parent = u as Parent;
                     const children = users.filter(child =>
                         child.role === 'student' && parent.childrenIds?.includes(child.id)
                     );
@@ -97,7 +98,7 @@ const Messages = () => {
                     relatedIds.push(...children.map(c => c.id));
                 } else if (u.role === 'student') {
                     // For students, show their name
-                    const student = u as any;
+                    const student = u as Student;
                     label = `🎓 ${u.name}`;
                     searchText = `${u.name} ${t('roles.student')}`.toLowerCase();
                     // Add parent ID to related IDs
@@ -212,7 +213,7 @@ const Messages = () => {
             if (selectedClass) {
                 // Get all students in the class
                 const classStudents = users.filter(u =>
-                    u.role === 'student' && (u as any).classId === selectedClass.id
+                    u.role === 'student' && (u as Student).classId === selectedClass.id
                 );
 
                 // Get the class teacher

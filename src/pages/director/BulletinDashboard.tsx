@@ -6,6 +6,7 @@ import { subscribeToTeacherCommentsByPeriod } from '../../services/teacherCommen
 import { CheckCircle, Clock, Calendar, Users, FileText, Send, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { TeacherComment } from '../../types/bulletin';
+import type { Student } from '../../types';
 import ClassBulletinListModal from '../../components/bulletin/ClassBulletinListModal';
 
 const BulletinDashboard: React.FC = () => {
@@ -17,14 +18,8 @@ const BulletinDashboard: React.FC = () => {
     const [viewingClassId, setViewingClassId] = useState<string | null>(null);
     const isRTL = i18n.language === 'ar';
 
-    // Only directors can access this page
-    if (user?.role !== 'director' && user?.role !== 'superadmin') {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-500">{t('bulletinDashboard.restrictedAccess')}</p>
-            </div>
-        );
-    }
+    // Role check moved to after hooks
+    const canAccess = user?.role === 'director' || user?.role === 'superadmin';
 
     // Subscribe to comments for the selected period
     useEffect(() => {
@@ -48,7 +43,7 @@ const BulletinDashboard: React.FC = () => {
 
         classes.forEach(cls => {
             // Find students in this class
-            const classStudents = students.filter(s => (s as any).classId === cls.id);
+            const classStudents = students.filter(s => (s as Student).classId === cls.id);
 
             // Find courses for this class
             const classCourses = courses.filter(c => c.classId === cls.id);
@@ -128,6 +123,15 @@ const BulletinDashboard: React.FC = () => {
     };
 
     const canPublishAll = validationStats.validatedClasses === validationStats.totalClasses;
+
+    // Role check - must be after all hooks
+    if (!canAccess) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-500">{t('bulletinDashboard.restrictedAccess')}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -216,7 +220,7 @@ const BulletinDashboard: React.FC = () => {
                                             <div>
                                                 <p className="font-medium text-gray-800">{classItem.name}</p>
                                                 <p className="text-sm text-gray-500">
-                                                    {students.filter(s => (s as any).classId === classItem.id).length} {t('bulletinDashboard.students')} • {progress}% {t('bulletinDashboard.validated')}
+                                                    {students.filter(s => (s as Student).classId === classItem.id).length} {t('bulletinDashboard.students')} • {progress}% {t('bulletinDashboard.validated')}
                                                 </p>
                                             </div>
                                         </div>
@@ -288,7 +292,7 @@ const BulletinDashboard: React.FC = () => {
                     classId={viewingClassId}
                     className={classes.find(c => c.id === viewingClassId)?.name || ''}
                     period={selectedPeriodData}
-                    students={students.filter(s => (s as any).classId === viewingClassId)}
+                    students={students.filter(s => (s as Student).classId === viewingClassId)}
                     courses={courses.filter(c => c.classId === viewingClassId)}
                     grades={grades}
                     comments={periodComments}

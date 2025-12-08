@@ -35,11 +35,20 @@ import { seedDatabase } from './services/seedDatabase';
 import { seedBulletinSystem } from './services/seedBulletinData';
 import { initializeFirebaseData } from './services/initFirebase';
 
+// Declare window extensions for dev console access
+declare global {
+  interface Window {
+    seedDatabase: typeof seedDatabase;
+    seedBulletinSystem: typeof seedBulletinSystem;
+    initializeFirebaseData: typeof initializeFirebaseData;
+  }
+}
+
 // Expose functions to window for easy console access
 if (typeof window !== 'undefined') {
-  (window as any).seedDatabase = seedDatabase;
-  (window as any).seedBulletinSystem = seedBulletinSystem;
-  (window as any).initializeFirebaseData = initializeFirebaseData;
+  window.seedDatabase = seedDatabase;
+  window.seedBulletinSystem = seedBulletinSystem;
+  window.initializeFirebaseData = initializeFirebaseData;
 }
 
 function App() {

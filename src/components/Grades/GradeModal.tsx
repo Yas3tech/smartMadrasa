@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 import { X, Plus } from 'lucide-react';
-import type { Grade } from '../../types';
+import type { Grade, Student } from '../../types';
 import { useData } from '../../context/DataContext';
 
 interface GradeModalProps {
@@ -29,7 +29,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableS
 
     // Filter students by class if classId is provided
     const classStudents = classId
-        ? students.filter(s => (s as any).classId === classId)
+        ? students.filter(s => (s as Student).classId === classId)
         : students;
 
     useEffect(() => {

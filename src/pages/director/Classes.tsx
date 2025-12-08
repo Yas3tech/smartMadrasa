@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Users, GraduationCap, X } from 'lucide-react';
-import type { ClassGroup } from '../../types';
+import type { ClassGroup, Student } from '../../types';
 
 const Classes = () => {
     const { t, i18n } = useTranslation();
@@ -61,7 +61,7 @@ const Classes = () => {
     };
 
     const getClassStudents = (classId: string) => {
-        return students.filter(s => (s as any).classId === classId);
+        return students.filter(s => (s as Student).classId === classId);
     };
 
     if (user?.role !== 'teacher' && user?.role !== 'director' && user?.role !== 'superadmin') {

@@ -6,6 +6,7 @@ import { subscribeToTeacherCommentsByStudent, subscribeToTeacherCommentsByTeache
 import { MessageSquare, Save, BookOpen, ArrowLeft, TrendingUp, CheckCircle, Users, CheckSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { TeacherComment } from '../../types/bulletin';
+import type { Student } from '../../types';
 
 const TeacherBulletinGrades: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -28,14 +29,8 @@ const TeacherBulletinGrades: React.FC = () => {
 
     const locale = i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'nl' ? 'nl-NL' : 'fr-FR';
 
-    // Only teachers can access
-    if (user?.role !== 'teacher') {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-500">{t('bulletinGrades.restrictedAccess')}</p>
-            </div>
-        );
-    }
+    // Check if user is teacher (for conditional render at end, not early return)
+    const isTeacher = user?.role === 'teacher';
 
     // Subscribe to teacher comments for selected student (Detail View)
     useEffect(() => {
@@ -76,7 +71,7 @@ const TeacherBulletinGrades: React.FC = () => {
     // Get students in the selected class
     const classStudents = useMemo(() => {
         if (!selectedClassId) return [];
-        return students.filter(s => (s as any).classId === selectedClassId);
+        return students.filter(s => (s as Student).classId === selectedClassId);
     }, [selectedClassId, students]);
 
     // Calculate validation status for the class (only count courses with actual grades)
@@ -364,6 +359,15 @@ const TeacherBulletinGrades: React.FC = () => {
             }
         }
     };
+
+    // Only teachers can access - check moved here after all hooks
+    if (!isTeacher) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-500">{t('bulletinGrades.restrictedAccess')}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>

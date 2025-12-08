@@ -47,7 +47,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
         if (editingCourse) {
             setSubject(editingCourse.subject);
             setClassId(editingCourse.classId);
-            setDayOfWeek(editingCourse.dayOfWeek as any);
+            setDayOfWeek(editingCourse.dayOfWeek as typeof dayOfWeek);
             setStartTime(editingCourse.startTime);
             setEndTime(editingCourse.endTime);
             setRoom(editingCourse.room || '');
@@ -104,7 +104,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
         setLoading(true);
         try {
             // Construct the object dynamically to avoid passing 'undefined' to Firebase
-            const courseData: any = {
+            const courseData: Omit<Course, 'id'> & { room?: string; notes?: string; recurrenceStart?: string; recurrenceEnd?: string; specificDate?: string } = {
                 classId,
                 teacherId,
                 subject,

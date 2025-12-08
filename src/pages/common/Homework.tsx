@@ -67,7 +67,7 @@ const HomeworkPage = () => {
         if (!title || !dueDate || !selectedClassId) return;
 
         try {
-            const homeworkData: any = {
+            const homeworkData: Omit<Homework, 'id'> & { maxGrade?: number } = {
                 title,
                 subject,
                 description,
@@ -200,7 +200,8 @@ const HomeworkPage = () => {
             }
 
             // Submit homework with files
-            const submissionData: any = {
+            const submissionData = {
+                homeworkId: selectedHomework.id,
                 studentId: user.id,
                 studentName: user.name || '',
                 content: submissionContent,

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button } from '../../components/UI';
 import { Check, X, Clock, Users as UsersIcon, Calendar, BookOpen, AlertCircle } from 'lucide-react';
+import type { Student } from '../../types';
 
 const Attendance = () => {
     const { t, i18n } = useTranslation();
@@ -37,7 +38,7 @@ const Attendance = () => {
     // Get students for the selected course's class
     const courseStudents = useMemo(() => {
         if (!selectedCourse) return [];
-        return students.filter(s => (s as any).classId === selectedCourse.classId);
+        return students.filter(s => (s as Student).classId === selectedCourse.classId);
     }, [selectedCourse, students]);
 
     const getAttendanceRecord = (studentId: string) => {

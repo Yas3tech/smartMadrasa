@@ -49,7 +49,7 @@ const Announcements = () => {
             target: 'parents',
             author: 'Direction',
             authorRole: 'director',
-            date: new Date(Date.now() - 2 * 86400000).toISOString(),
+            date: '2024-12-06T10:00:00.000Z',
             pinned: true,
             read: false
         },
@@ -61,7 +61,7 @@ const Announcements = () => {
             target: 'all',
             author: 'Administration',
             authorRole: 'superadmin',
-            date: new Date(Date.now() - 1 * 86400000).toISOString(),
+            date: '2024-12-07T10:00:00.000Z',
             pinned: true,
             read: false
         },
@@ -73,7 +73,7 @@ const Announcements = () => {
             target: 'students',
             author: 'Bibliothécaire',
             authorRole: 'teacher',
-            date: new Date(Date.now() - 5 * 86400000).toISOString(),
+            date: '2024-12-03T10:00:00.000Z',
             pinned: false,
             read: true
         }
@@ -83,7 +83,7 @@ const Announcements = () => {
         if (!title || !content) return;
 
         const newAnnouncement: Announcement = {
-            id: `a${Date.now()}`,
+            id: `a${Math.random().toString(36).substring(7)}`,
             title,
             content,
             type,

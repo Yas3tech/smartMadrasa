@@ -18,17 +18,11 @@ const StudentBulletin: React.FC = () => {
     const [teacherComments, setTeacherComments] = useState<TeacherComment[]>([]);
     const [showPreview, setShowPreview] = useState(false);
 
-    // Only students and parents can access
-    if (user?.role !== 'student' && user?.role !== 'parent') {
-        return (
-            <div className="text-center py-12">
-                <p className="text-gray-500">{t('errors.unauthorized')}</p>
-            </div>
-        );
-    }
+    // Role check moved to after hooks
+    const canAccess = user?.role === 'student' || user?.role === 'parent';
 
-    // Get student ID
-    const studentId = user.role === 'student' ? user.id : user.id; // TODO: For parents, add child selection
+    // Get student ID - use optional chaining since user might be null at this point
+    const studentId = user?.role === 'student' ? user?.id : user?.id; // TODO: For parents, add child selection
     const studentData = students.find(s => s.id === studentId) as Student | undefined;
 
     // Subscribe to teacher comments for this student
@@ -52,7 +46,7 @@ const StudentBulletin: React.FC = () => {
     // Get courses for this student
     const studentCourses = useMemo(() => {
         if (!studentData) return [];
-        return courses.filter(c => c.classId === (studentData as any).classId);
+        return courses.filter(c => c.classId === (studentData as Student).classId);
     }, [courses, studentData]);
 
     // Calculate absences for selected period
@@ -102,6 +96,15 @@ const StudentBulletin: React.FC = () => {
         doc.save(`Bulletin_${studentData.name}_${selectedPeriodData.name}.pdf`);
         toast.success('Bulletin téléchargé');
     };
+
+    // Role check - must be after all hooks
+    if (!canAccess || !user) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-500">{t('errors.unauthorized')}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

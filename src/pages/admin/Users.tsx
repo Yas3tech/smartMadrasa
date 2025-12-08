@@ -71,7 +71,7 @@ const UserManagement = () => {
             return;
         }
 
-        const userData: any = {
+        const userData: Omit<User, 'id'> & { childrenIds?: string[] } = {
             name,
             email,
             role,

@@ -115,7 +115,7 @@ const Notifications = () => {
             type: 'system',
             title: 'Bienvenue sur SmartSchool',
             message: 'Découvrez toutes les fonctionnalités de votre plateforme',
-            timestamp: new Date(Date.now() - 86400000).toISOString(),
+            timestamp: '2024-12-07T10:00:00.000Z',
             read: true,
             priority: 'low'
         });

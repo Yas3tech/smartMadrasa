@@ -90,7 +90,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
                         status: isAbsent ? 'absent' : 'present',
                         studentName: student.name,
                         className: className,
-                    } as any);
+                    } as Omit<Grade, 'id'>);
                 }
             });
 
@@ -155,7 +155,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
                             <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')} *</label>
                             <select
                                 value={type}
-                                onChange={(e) => setType(e.target.value as any)}
+                                onChange={(e) => setType(e.target.value as typeof type)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             >
                                 <option value="exam">{t('grades.exam')}</option>
