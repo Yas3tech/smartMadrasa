@@ -67,7 +67,7 @@ export interface Event {
     description: string;
     start: string;
     end: string;
-    type: 'lesson' | 'homework' | 'exam' | 'event';
+    type: 'lesson' | 'homework' | 'exam' | 'event' | 'evaluation';
     classId?: string;
     className?: string; // Denormalized
     courseId?: string; // Lien vers un cours spécifique de la classe
@@ -80,7 +80,8 @@ export interface Grade {
     subject: string;
     score: number;
     maxScore: number;
-    type: 'exam' | 'homework' | 'participation';
+    type: 'exam' | 'homework' | 'participation' | 'evaluation';
+    title?: string; // Titre de l'évaluation (ex: "Examen chapitre 5", "Devoir maison #3")
     date: string;
     feedback?: string;
     courseId?: string; // Lien vers un cours spécifique

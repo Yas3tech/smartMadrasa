@@ -100,7 +100,7 @@ const Schedule = () => {
     // Filter exams for the current user
     const userExams = useMemo(() => {
         return events.filter(e => {
-            if (e.type !== 'exam') return false;
+            if (e.type !== 'exam' && e.type !== 'evaluation') return false;
 
             // Élève : seulement les examens de sa classe
             if (user?.role === 'student' && classId) {
@@ -235,22 +235,22 @@ const Schedule = () => {
     }, [weekCourses, weekExams]);
 
     const subjectColors: Record<string, string> = {
-        'Mathématiques': 'bg-blue-100 text-blue-700 border-blue-200',
-        'Français': 'bg-purple-100 text-purple-700 border-purple-200',
-        'Arabe': 'bg-green-100 text-green-700 border-green-200',
-        'Sciences': 'bg-orange-100 text-orange-700 border-orange-200',
-        'Histoire': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        'Sport': 'bg-red-100 text-red-700 border-red-200',
-        'Arts': 'bg-pink-100 text-pink-700 border-pink-200',
-        'Religion': 'bg-teal-100 text-teal-700 border-teal-200',
-        'Informatique': 'bg-indigo-100 text-indigo-700 border-indigo-200',
-        'Coran': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-        'Sira': 'bg-lime-100 text-lime-700 border-lime-200',
-        'Fiqh': 'bg-sky-100 text-sky-700 border-sky-200',
-        'Pause': 'bg-gray-100 text-gray-600 border-gray-200',
-        'Déjeuner': 'bg-gray-100 text-gray-600 border-gray-200',
-        'Bibliothèque': 'bg-amber-100 text-amber-700 border-amber-200',
-        'Activités': 'bg-cyan-100 text-cyan-700 border-cyan-200'
+        'Mathématiques': 'bg-blue-500 text-white border-blue-600',
+        'Français': 'bg-purple-500 text-white border-purple-600',
+        'Arabe': 'bg-green-500 text-white border-green-600',
+        'Sciences': 'bg-orange-500 text-white border-orange-600',
+        'Histoire': 'bg-yellow-500 text-yellow-900 border-yellow-600',
+        'Sport': 'bg-red-500 text-white border-red-600',
+        'Arts': 'bg-pink-500 text-white border-pink-600',
+        'Religion': 'bg-teal-500 text-white border-teal-600',
+        'Informatique': 'bg-indigo-400 text-indigo-900 border-indigo-500',
+        'Coran': 'bg-emerald-500 text-white border-emerald-600',
+        'Sira': 'bg-lime-500 text-lime-900 border-lime-600',
+        'Fiqh': 'bg-sky-500 text-white border-sky-600',
+        'Pause': 'bg-gray-400 text-gray-900 border-gray-500',
+        'Déjeuner': 'bg-gray-400 text-gray-900 border-gray-500',
+        'Bibliothèque': 'bg-amber-500 text-amber-900 border-amber-600',
+        'Activités': 'bg-cyan-500 text-white border-cyan-600'
     };
 
     const currentDay = new Date().getDay() || 7; // 1-7
@@ -333,8 +333,8 @@ const Schedule = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{t('schedule.mySchedule')}</h1>
-                    <p className="text-gray-600">{t('schedule.academicYear', { year: '2024-2025' })}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('schedule.mySchedule')}</h1>
+                    <p className="text-gray-600 dark:text-slate-400">{t('schedule.academicYear', { year: '2024-2025' })}</p>
                 </div>
 
                 {/* Week Navigation and Actions */}
@@ -393,7 +393,7 @@ const Schedule = () => {
                                 onClick={handleAddExam}
                                 className="bg-red-600 hover:bg-red-700 text-white"
                             >
-                                {t('schedule.exam')}
+                                {t('schedule.examEval')}
                             </Button>
                         </div>
                     )}
@@ -406,8 +406,8 @@ const Schedule = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                                <tr className="bg-gradient-to-r from-orange-50 to-orange-100">
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-900 border-r border-orange-200 w-32">
+                                <tr className="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-slate-700 dark:to-slate-600">
+                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-900 dark:text-white border-r border-orange-200 dark:border-slate-600 w-32">
                                         {t('schedule.timeSlot')}
                                     </th>
                                     {days.map((day, index) => {
@@ -416,13 +416,13 @@ const Schedule = () => {
                                         return (
                                             <th
                                                 key={day}
-                                                className={`px-4 py-4 text-center text-sm font-bold border-r border-orange-200 ${currentDay === dayIndex ? 'bg-orange-200 text-orange-900' : 'text-gray-900'
+                                                className={`px-4 py-4 text-center text-sm font-bold border-r border-orange-200 dark:border-slate-600 ${currentDay === dayIndex ? 'bg-orange-200 dark:bg-orange-900/50 text-orange-900 dark:text-orange-200' : 'text-gray-900 dark:text-white'
                                                     }`}
                                             >
                                                 <div className="flex flex-col items-center">
                                                     <span>{day}</span>
                                                     {currentDay === dayIndex && (
-                                                        <span className="text-xs font-normal text-orange-700">{t('schedule.today')}</span>
+                                                        <span className="text-xs font-normal text-orange-700 dark:text-orange-300">{t('schedule.today')}</span>
                                                     )}
                                                     {homeworkCount > 0 && (
                                                         <Badge variant="warning" className="mt-1 text-xs">
@@ -437,10 +437,10 @@ const Schedule = () => {
                             </thead>
                             <tbody>
                                 {scheduleSlots.map((slot, index) => (
-                                    <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                                        <td className="px-4 py-4 text-sm font-semibold text-gray-700 border-r border-gray-200 bg-gray-50">
+                                    <tr key={index} className="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                                        <td className="px-4 py-4 text-sm font-semibold text-gray-700 dark:text-slate-300 border-r border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
                                             <div className="flex items-center gap-2">
-                                                <Clock size={14} className="text-gray-400" />
+                                                <Clock size={14} className="text-gray-400 dark:text-slate-500" />
                                                 {slot.time}
                                             </div>
                                         </td>
@@ -452,7 +452,7 @@ const Schedule = () => {
                                             return (
                                                 <td
                                                     key={dayIndex}
-                                                    className={`px-4 py-4 border-r border-gray-200 text-center ${isToday ? 'bg-orange-50' : ''
+                                                    className={`px-4 py-4 border-r border-gray-200 dark:border-slate-700 text-center ${isToday ? 'bg-orange-50 dark:bg-orange-900/20' : ''
                                                         }`}
                                                 >
                                                     <div className="space-y-2">
@@ -460,7 +460,7 @@ const Schedule = () => {
                                                         {exams.map(exam => (
                                                             <div
                                                                 key={exam.id}
-                                                                className={`px-3 py-2 rounded-lg font-semibold text-sm border-2 bg-red-100 text-red-700 border-red-200 ${canEdit ? 'cursor-pointer hover:scale-105 transition-transform' : ''} relative group`}
+                                                                className={`px-3 py-2 rounded-lg font-semibold text-sm border-2 bg-red-500 text-white border-red-600 ${canEdit ? 'cursor-pointer hover:scale-105 transition-transform' : ''} relative group`}
                                                                 onClick={() => canEdit && handleEditExam(exam)}
                                                             >
                                                                 <div className="flex items-center justify-center gap-1">
@@ -486,7 +486,7 @@ const Schedule = () => {
                                                         {/* Course */}
                                                         {course ? (
                                                             <div
-                                                                className={`px-3 py-2 rounded-lg font-semibold text-sm border-2 ${subjectColors[course.subject] || 'bg-gray-100'
+                                                                className={`px-3 py-2 rounded-lg font-semibold text-sm border-2 ${subjectColors[course.subject] || 'bg-gray-500 text-white border-gray-600'
                                                                     } ${canEdit ? 'cursor-pointer hover:scale-105 transition-transform' : ''} relative group`}
                                                                 onClick={() => canEdit && handleEditCourse(course)}
                                                             >
@@ -519,22 +519,22 @@ const Schedule = () => {
                                     </tr>
                                 ))}
                                 {/* Homework Row */}
-                                <tr className="bg-gray-50 border-t-2 border-orange-200">
-                                    <td className="px-4 py-4 text-sm font-bold text-gray-900 border-r border-orange-200 bg-orange-50">
+                                <tr className="bg-gray-50 dark:bg-slate-800 border-t-2 border-orange-200 dark:border-orange-900/50">
+                                    <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white border-r border-orange-200 dark:border-slate-700 bg-orange-50 dark:bg-orange-900/30">
                                         {t('schedule.homeworkDue')}
                                     </td>
                                     {[1, 2, 3, 4, 5, 6, 7].map((dayIndex) => {
                                         const homeworks = getHomeworksForDay(dayIndex);
                                         return (
-                                            <td key={dayIndex} className="px-4 py-4 border-r border-gray-200 text-center align-top">
+                                            <td key={dayIndex} className="px-4 py-4 border-r border-gray-200 dark:border-slate-700 text-center align-top">
                                                 <div className="space-y-2">
                                                     {homeworks.map(hw => (
-                                                        <div key={hw.id} className="text-xs p-2 bg-white border border-gray-200 rounded-lg shadow-sm text-left">
-                                                            <div className="font-bold text-gray-800 flex items-center gap-1">
+                                                        <div key={hw.id} className="text-xs p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg shadow-sm text-left">
+                                                            <div className="font-bold text-gray-800 dark:text-white flex items-center gap-1">
                                                                 <BookOpen size={12} className="text-orange-500" />
                                                                 {hw.subject}
                                                             </div>
-                                                            <div className="text-gray-600 truncate">{hw.title}</div>
+                                                            <div className="text-gray-600 dark:text-slate-400 truncate">{hw.title}</div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -551,7 +551,7 @@ const Schedule = () => {
             {/* Mobile View - Today's Schedule */}
             <div className="lg:hidden">
                 <Card className="p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <Clock size={20} className="text-orange-500" />
                         {t('schedule.today')}
                     </h2>
@@ -563,16 +563,16 @@ const Schedule = () => {
                         }).map(exam => (
                             <div
                                 key={exam.id}
-                                className="p-4 rounded-xl border-2 bg-red-100 border-red-200"
+                                className="p-4 rounded-xl border-2 bg-red-500 text-white border-red-600"
                                 onClick={() => canEdit && handleEditExam(exam)}
                             >
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <GraduationCap size={16} className="text-red-600" />
-                                            <p className="font-bold text-sm text-red-800">{exam.title}</p>
+                                            <GraduationCap size={16} className="text-white" />
+                                            <p className="font-bold text-sm text-white">{exam.title}</p>
                                         </div>
-                                        <p className="text-xs text-red-600">
+                                        <p className="text-xs text-red-100">
                                             {new Date(exam.start).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })} -
                                             {new Date(exam.end).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                                         </p>
@@ -602,7 +602,7 @@ const Schedule = () => {
                             return (
                                 <div
                                     key={index}
-                                    className={`p-4 rounded-xl border-2 ${subjectColors[course.subject] || 'bg-gray-100'}`}
+                                    className={`p-4 rounded-xl border-2 ${subjectColors[course.subject] || 'bg-gray-500 text-white border-gray-600'}`}
                                     onClick={() => canEdit && handleEditCourse(course)}
                                 >
                                     <div className="flex justify-between items-center">
@@ -629,16 +629,16 @@ const Schedule = () => {
 
                         {/* Homeworks Today */}
                         {getHomeworksForDay(currentDay).length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                                     <BookOpen size={16} className="text-orange-500" />
                                     {t('schedule.homeworkDue')}
                                 </h3>
                                 <div className="space-y-2">
                                     {getHomeworksForDay(currentDay).map(hw => (
-                                        <div key={hw.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            <p className="font-bold text-sm text-gray-800">{hw.subject}</p>
-                                            <p className="text-xs text-gray-600">{hw.title}</p>
+                                        <div key={hw.id} className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
+                                            <p className="font-bold text-sm text-gray-800 dark:text-white">{hw.subject}</p>
+                                            <p className="text-xs text-gray-600 dark:text-slate-400">{hw.title}</p>
                                         </div>
                                     ))}
                                 </div>

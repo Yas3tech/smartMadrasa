@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal } from '../../components/UI';
 import {
@@ -29,7 +30,9 @@ interface Resource {
 }
 
 const Resources = () => {
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
+    const isRTL = i18n.language === 'ar';
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSubject, setSelectedSubject] = useState<string>('all');
@@ -122,15 +125,15 @@ const Resources = () => {
     const canUpload = user?.role === 'teacher' || user?.role === 'director';
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Bibliothèque de ressources</h1>
-                    <p className="text-gray-600">Documents et matériel pédagogique</p>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('resources.title')}</h1>
+                    <p className="text-gray-600">{t('resources.subtitle')}</p>
                 </div>
                 {canUpload && (
                     <Button variant="primary" icon={Upload} onClick={() => setIsModalOpen(true)}>
-                        Upload ressource
+                        {t('resources.uploadResource')}
                     </Button>
                 )}
             </div>
@@ -143,7 +146,7 @@ const Resources = () => {
                             <BookOpen className="text-blue-600" size={20} />
                         </div>
                         <div>
-                            <p className="text-xs text-gray-500">Total</p>
+                            <p className="text-xs text-gray-500">{t('resources.total')}</p>
                             <p className="text-2xl font-bold text-gray-900">{resources.length}</p>
                         </div>
                     </div>
@@ -167,7 +170,7 @@ const Resources = () => {
                             <Image className="text-purple-600" size={20} />
                         </div>
                         <div>
-                            <p className="text-xs text-gray-500">Images</p>
+                            <p className="text-xs text-gray-500">{t('resources.images')}</p>
                             <p className="text-2xl font-bold text-gray-900">
                                 {resources.filter(r => r.type === 'image').length}
                             </p>
@@ -180,7 +183,7 @@ const Resources = () => {
                             <Download className="text-orange-600" size={20} />
                         </div>
                         <div>
-                            <p className="text-xs text-gray-500">Téléchargements</p>
+                            <p className="text-xs text-gray-500">{t('resources.downloads')}</p>
                             <p className="text-2xl font-bold text-gray-900">
                                 {resources.reduce((sum, r) => sum + r.downloads, 0)}
                             </p>
@@ -193,13 +196,13 @@ const Resources = () => {
             <Card className="p-4">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400`} size={20} />
                         <input
                             type="text"
-                            placeholder="Rechercher une ressource..."
+                            placeholder={t('resources.searchResources')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none`}
                         />
                     </div>
                     <select
@@ -207,7 +210,7 @@ const Resources = () => {
                         onChange={(e) => setSelectedSubject(e.target.value)}
                         className="px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                     >
-                        <option value="all">Toutes les matières</option>
+                        <option value="all">{t('resources.allSubjects')}</option>
                         {subjects.map(s => (
                             <option key={s} value={s}>{s}</option>
                         ))}
@@ -231,22 +234,22 @@ const Resources = () => {
 
                         <div className="space-y-2 mb-4 text-sm text-gray-600">
                             <div className="flex justify-between">
-                                <span>Taille:</span>
+                                <span>{t('resources.size')}:</span>
                                 <span className="font-semibold">{resource.size}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Téléchargements:</span>
+                                <span>{t('resources.downloads')}:</span>
                                 <span className="font-semibold">{resource.downloads}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span>Par:</span>
+                                <span>{t('resources.uploadedBy')}:</span>
                                 <span className="font-semibold">{resource.uploadedBy}</span>
                             </div>
                         </div>
 
                         <div className="flex gap-2">
                             <Button variant="primary" size="sm" icon={Download} className="flex-1">
-                                Télécharger
+                                {t('resources.download')}
                             </Button>
                             <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                                 <Eye size={18} />
@@ -264,8 +267,8 @@ const Resources = () => {
             {filteredResources.length === 0 && (
                 <Card className="p-12 text-center">
                     <FolderOpen size={48} className="mx-auto mb-4 text-gray-300" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune ressource</h3>
-                    <p className="text-gray-500">Aucune ressource ne correspond à vos critères de recherche</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('resources.noResources')}</h3>
+                    <p className="text-gray-500">{t('resources.noResourcesDesc')}</p>
                 </Card>
             )}
 
@@ -273,7 +276,7 @@ const Resources = () => {
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">Upload ressource</h2>
+                        <h2 className="text-2xl font-bold text-gray-900">{t('resources.uploadResource')}</h2>
                         <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                             <X size={24} />
                         </button>
@@ -281,18 +284,18 @@ const Resources = () => {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du fichier</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('resources.fileName')}</label>
                             <input
                                 type="text"
                                 value={fileName}
                                 onChange={(e) => setFileName(e.target.value)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                                placeholder="Ex: Guide de mathématiques"
+                                placeholder={t('resources.fileNamePlaceholder')}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Matière</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('resources.subject')}</label>
                             <select
                                 value={subject}
                                 onChange={(e) => setSubject(e.target.value)}
@@ -305,7 +308,7 @@ const Resources = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Classe</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('resources.class')}</label>
                             <select
                                 value={classLevel}
                                 onChange={(e) => setClassLevel(e.target.value)}
@@ -319,16 +322,16 @@ const Resources = () => {
 
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-400 transition-colors cursor-pointer">
                             <Upload className="mx-auto mb-3 text-gray-400" size={40} />
-                            <p className="text-gray-700 font-medium mb-1">Cliquez pour sélectionner un fichier</p>
-                            <p className="text-sm text-gray-500">PDF, Word, PowerPoint, Images, Vidéos (max 50MB)</p>
+                            <p className="text-gray-700 font-medium mb-1">{t('resources.clickToSelect')}</p>
+                            <p className="text-sm text-gray-500">{t('resources.fileTypes')}</p>
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">
                             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
-                                Annuler
+                                {t('common.cancel')}
                             </Button>
                             <Button variant="primary" icon={Upload} onClick={handleUploadResource}>
-                                Upload
+                                {t('resources.upload')}
                             </Button>
                         </div>
                     </div>

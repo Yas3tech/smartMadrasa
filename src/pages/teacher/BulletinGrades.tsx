@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeToTeacherCommentsByStudent, subscribeToTeacherCommentsByTeacher, createTeacherComment, validateTeacherComment, updateTeacherComment, batchCreateTeacherComments } from '../../services/teacherComments';
@@ -7,6 +8,7 @@ import toast from 'react-hot-toast';
 import type { TeacherComment } from '../../types/bulletin';
 
 const TeacherBulletinGrades: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const {
         academicPeriods,
         courses,
@@ -15,6 +17,7 @@ const TeacherBulletinGrades: React.FC = () => {
         classes
     } = useData();
     const { user } = useAuth();
+    const isRTL = i18n.language === 'ar';
 
     const [selectedPeriod, setSelectedPeriod] = useState<string>('');
     const [selectedClassId, setSelectedClassId] = useState<string>('');
@@ -23,11 +26,13 @@ const TeacherBulletinGrades: React.FC = () => {
     const [teacherComments, setTeacherComments] = useState<TeacherComment[]>([]);
     const [classComments, setClassComments] = useState<TeacherComment[]>([]);
 
+    const locale = i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'nl' ? 'nl-NL' : 'fr-FR';
+
     // Only teachers can access
     if (user?.role !== 'teacher') {
         return (
             <div className="text-center py-12">
-                <p className="text-gray-500">Accès réservé aux professeurs</p>
+                <p className="text-gray-500">{t('bulletinGrades.restrictedAccess')}</p>
             </div>
         );
     }
@@ -74,30 +79,43 @@ const TeacherBulletinGrades: React.FC = () => {
         return students.filter(s => (s as any).classId === selectedClassId);
     }, [selectedClassId, students]);
 
-    // Calculate validation status for the class
+    // Calculate validation status for the class (only count courses with actual grades)
     const classValidationStats = useMemo(() => {
-        if (!selectedClassId || !user?.id) return { total: 0, validated: 0 };
+        if (!selectedClassId || !user?.id || !selectedPeriodData) return { total: 0, validated: 0 };
 
         const teacherCoursesInClass = courses.filter(c => c.teacherId === user.id && c.classId === selectedClassId);
         let total = 0;
         let validated = 0;
 
+        const periodStart = new Date(selectedPeriodData.startDate);
+        const periodEnd = new Date(selectedPeriodData.endDate);
+
         classStudents.forEach(student => {
             teacherCoursesInClass.forEach(course => {
-                total++;
-                const comment = classComments.find(c =>
-                    c.studentId === student.id &&
-                    c.courseId === course.id &&
-                    c.periodId === selectedPeriod
+                // Only count if student has grades for this course in this period
+                const hasGrades = grades.some(g =>
+                    g.studentId === student.id &&
+                    g.courseId === course.id &&
+                    new Date(g.date) >= periodStart &&
+                    new Date(g.date) <= periodEnd
                 );
-                if (comment?.isValidated) {
-                    validated++;
+
+                if (hasGrades) {
+                    total++;
+                    const comment = classComments.find(c =>
+                        c.studentId === student.id &&
+                        c.courseId === course.id &&
+                        c.periodId === selectedPeriod
+                    );
+                    if (comment?.isValidated) {
+                        validated++;
+                    }
                 }
             });
         });
 
         return { total, validated };
-    }, [selectedClassId, classStudents, courses, user?.id, classComments, selectedPeriod]);
+    }, [selectedClassId, classStudents, courses, user?.id, classComments, selectedPeriod, selectedPeriodData, grades]);
 
     // Calculate course averages for selected student (Detail View)
     const studentCourseAverages = useMemo(() => {
@@ -178,11 +196,11 @@ const TeacherBulletinGrades: React.FC = () => {
                         comment: commentText,
                         isValidated: false
                     });
-                    toast.success('Commentaire mis à jour');
+                    toast.success(t('bulletinGrades.commentUpdated'));
                 }
             } else {
                 if (!commentText || !commentText.trim()) {
-                    toast.error('Veuillez écrire un commentaire');
+                    toast.error(t('bulletinGrades.pleaseWriteComment'));
                     return;
                 }
 
@@ -199,10 +217,10 @@ const TeacherBulletinGrades: React.FC = () => {
                     isValidated: false
                 };
                 await createTeacherComment(comment);
-                toast.success('Commentaire enregistré');
+                toast.success(t('bulletinGrades.commentSaved'));
             }
         } catch (error) {
-            toast.error('Erreur lors de l\'enregistrement');
+            toast.error(t('bulletinGrades.saveError'));
             console.error(error);
         }
     };
@@ -211,7 +229,7 @@ const TeacherBulletinGrades: React.FC = () => {
         if (!selectedClassId || !user?.id || !selectedPeriod || !selectedPeriodData) return;
 
         if (!isValidationAllowed) {
-            toast.error(`La validation n'est pas encore ouverte pour cette période (début : ${new Date(selectedPeriodData.startDate).toLocaleDateString()})`);
+            toast.error(t('bulletinGrades.validationNotOpen', { date: new Date(selectedPeriodData.startDate).toLocaleDateString(locale) }));
             return;
         }
 
@@ -253,11 +271,11 @@ const TeacherBulletinGrades: React.FC = () => {
         });
 
         if (count === 0) {
-            toast.success('Tout est déjà validé');
+            toast.success(t('bulletinGrades.allValidated'));
             return;
         }
 
-        if (confirm(`Voulez-vous valider ${count} entrées pour cette classe (y compris les commentaires vides) ?`)) {
+        if (confirm(t('bulletinGrades.confirmValidateAll', { count }))) {
             try {
                 // 1. Batch create new comments
                 if (commentsToCreate.length > 0) {
@@ -271,9 +289,9 @@ const TeacherBulletinGrades: React.FC = () => {
 
                 // Wait a bit for Firebase to sync
                 await new Promise(resolve => setTimeout(resolve, 500));
-                toast.success('Validation en masse réussie');
+                toast.success(t('bulletinGrades.batchValidationSuccess'));
             } catch (error) {
-                toast.error('Erreur lors de la validation en masse');
+                toast.error(t('bulletinGrades.batchValidationError'));
                 console.error(error);
             }
         }
@@ -283,7 +301,7 @@ const TeacherBulletinGrades: React.FC = () => {
         if (!selectedStudent || !user?.id || !selectedPeriod || !selectedPeriodData) return;
 
         if (!isValidationAllowed) {
-            toast.error(`La validation n'est pas encore ouverte pour cette période (début : ${new Date(selectedPeriodData.startDate).toLocaleDateString()})`);
+            toast.error(t('bulletinGrades.validationNotOpen', { date: new Date(selectedPeriodData.startDate).toLocaleDateString(locale) }));
             return;
         }
 
@@ -322,11 +340,11 @@ const TeacherBulletinGrades: React.FC = () => {
         });
 
         if (count === 0) {
-            toast.success('Bulletin déjà validé pour vos matières');
+            toast.success(t('bulletinGrades.bulletinAlreadyValidated'));
             return;
         }
 
-        if (confirm(`Valider le bulletin de ${selectedStudentData?.name} pour vos matières ?`)) {
+        if (confirm(t('bulletinGrades.confirmValidateStudent', { name: selectedStudentData?.name }))) {
             try {
                 // 1. Batch create new comments
                 if (commentsToCreate.length > 0) {
@@ -339,36 +357,39 @@ const TeacherBulletinGrades: React.FC = () => {
 
                 // Wait a bit for Firebase to sync
                 await new Promise(resolve => setTimeout(resolve, 500));
-                toast.success('Bulletin validé');
+                toast.success(t('bulletinGrades.bulletinValidated'));
             } catch (error) {
-                toast.error('Erreur lors de la validation');
+                toast.error(t('bulletinGrades.validationError'));
                 console.error(error);
             }
         }
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div>
-                <h1 className="text-3xl font-bold text-gray-800">Bulletins - Commentaires</h1>
-                <p className="text-gray-600 mt-2">Validation des notes et commentaires pour les bulletins</p>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{t('bulletinGrades.title')}</h1>
+                <p className="text-gray-600 dark:text-slate-400 mt-2">{t('bulletinGrades.subtitle')}</p>
             </div>
 
             {/* Step 1: Select Period */}
             {!selectedPeriod && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold mb-4">Étape 1 : Sélectionner une période</h2>
+                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+                    <h2 className="text-xl font-semibold mb-4 dark:text-white">{t('bulletinGrades.step1')}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {academicPeriods.map(period => (
                             <button
                                 key={period.id}
                                 onClick={() => setSelectedPeriod(period.id)}
-                                className="p-6 border-2 border-gray-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left"
+                                className="p-6 border-2 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all text-left"
                             >
-                                <h3 className="font-bold text-lg text-gray-800">{period.name}</h3>
-                                <p className="text-sm text-gray-600">{period.academicYear}</p>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Du {new Date(period.startDate).toLocaleDateString()} au {new Date(period.endDate).toLocaleDateString()}
+                                <h3 className="font-bold text-lg text-gray-800 dark:text-white">{period.name}</h3>
+                                <p className="text-sm text-gray-600 dark:text-slate-400">{period.academicYear}</p>
+                                <p className="text-xs text-gray-500 dark:text-slate-500 mt-2">
+                                    {t('bulletinGrades.fromTo', {
+                                        from: new Date(period.startDate).toLocaleDateString(locale),
+                                        to: new Date(period.endDate).toLocaleDateString(locale)
+                                    })}
                                 </p>
                             </button>
                         ))}
@@ -378,26 +399,26 @@ const TeacherBulletinGrades: React.FC = () => {
 
             {/* Step 2: Select Class */}
             {selectedPeriod && !selectedClassId && (
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
                     <div className="flex items-center gap-2 mb-4">
-                        <button onClick={() => setSelectedPeriod('')} className="p-2 hover:bg-gray-100 rounded-lg">
+                        <button onClick={() => setSelectedPeriod('')} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-700 dark:text-slate-300">
                             <ArrowLeft size={20} />
                         </button>
-                        <h2 className="text-xl font-semibold">Étape 2 : Sélectionner une classe</h2>
+                        <h2 className="text-xl font-semibold dark:text-white">{t('bulletinGrades.step2')}</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {teacherClasses.map(cls => (
                             <button
                                 key={cls.id}
                                 onClick={() => setSelectedClassId(cls.id)}
-                                className="p-6 border-2 border-gray-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left flex items-center gap-4"
+                                className="p-6 border-2 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all text-left flex items-center gap-4"
                             >
-                                <div className="p-3 bg-indigo-100 rounded-full text-indigo-600">
+                                <div className="p-3 bg-indigo-100 dark:bg-indigo-900/50 rounded-full text-indigo-600 dark:text-indigo-400">
                                     <Users size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg text-gray-800">{cls.name}</h3>
-                                    <p className="text-sm text-gray-500">{cls.grade}</p>
+                                    <h3 className="font-bold text-lg text-gray-800 dark:text-white">{cls.name}</h3>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400">{cls.grade}</p>
                                 </div>
                             </button>
                         ))}
@@ -408,20 +429,20 @@ const TeacherBulletinGrades: React.FC = () => {
             {/* Step 3: Class Overview */}
             {selectedPeriod && selectedClassId && !selectedStudent && (
                 <div className="space-y-6">
-                    <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setSelectedClassId('')} className="p-2 hover:bg-gray-100 rounded-lg">
+                                <button onClick={() => setSelectedClassId('')} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-700 dark:text-slate-300">
                                     <ArrowLeft size={20} />
                                 </button>
                                 <div>
-                                    <h2 className="text-xl font-semibold">{selectedClassData?.name} - Vue d'ensemble</h2>
-                                    <p className="text-sm text-gray-500">{selectedPeriodData?.name}</p>
+                                    <h2 className="text-xl font-semibold dark:text-white">{selectedClassData?.name} - {t('bulletinGrades.overview')}</h2>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400">{selectedPeriodData?.name}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                    <p className="text-sm text-gray-500">Progression Validation</p>
+                                    <p className="text-sm text-gray-500">{t('bulletinGrades.validationProgress')}</p>
                                     <p className="font-bold text-indigo-600">
                                         {classValidationStats.validated} / {classValidationStats.total}
                                     </p>
@@ -431,19 +452,32 @@ const TeacherBulletinGrades: React.FC = () => {
                                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                                 >
                                     <CheckSquare size={18} />
-                                    Tout Valider
+                                    {t('bulletinGrades.validateAll')}
                                 </button>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {classStudents.map(student => {
-                                // Check if this student has all courses validated
+                                // Check if this student has all courses validated (only count courses with grades)
                                 const teacherCoursesInClass = courses.filter(c => c.teacherId === user?.id && c.classId === selectedClassId);
                                 const studentComments = classComments.filter(c => c.studentId === student.id && c.periodId === selectedPeriod);
 
-                                const totalCourses = teacherCoursesInClass.length;
-                                const validatedCourses = teacherCoursesInClass.filter(course =>
+                                // Only count courses where this student has grades for this period
+                                const periodStart = selectedPeriodData ? new Date(selectedPeriodData.startDate) : new Date(0);
+                                const periodEnd = selectedPeriodData ? new Date(selectedPeriodData.endDate) : new Date();
+
+                                const coursesWithGrades = teacherCoursesInClass.filter(course =>
+                                    grades.some(g =>
+                                        g.studentId === student.id &&
+                                        g.courseId === course.id &&
+                                        new Date(g.date) >= periodStart &&
+                                        new Date(g.date) <= periodEnd
+                                    )
+                                );
+
+                                const totalCourses = coursesWithGrades.length;
+                                const validatedCourses = coursesWithGrades.filter(course =>
                                     studentComments.some(c => c.courseId === course.id && c.isValidated)
                                 ).length;
 
@@ -467,10 +501,10 @@ const TeacherBulletinGrades: React.FC = () => {
                                             <div className="flex items-center gap-1 text-xs text-gray-500">
                                                 {isFullyValidated ? (
                                                     <span className="text-green-600 flex items-center gap-1">
-                                                        <CheckCircle size={12} /> Validé
+                                                        <CheckCircle size={12} /> {t('bulletinGrades.validated')}
                                                     </span>
                                                 ) : (
-                                                    <span>{validatedCourses}/{totalCourses} validés</span>
+                                                    <span>{validatedCourses}/{totalCourses} {t('bulletinGrades.validatedCount')}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -504,7 +538,7 @@ const TeacherBulletinGrades: React.FC = () => {
                                 </div>
                             </div>
                             <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-6 text-white">
-                                <p className="text-indigo-100 text-sm">Moyenne Générale</p>
+                                <p className="text-indigo-100 text-sm">{t('bulletinGrades.generalAverage')}</p>
                                 <p className="text-4xl font-bold">{overallAverage.toFixed(2)}</p>
                                 <p className="text-indigo-100 text-sm">/ 20</p>
                             </div>
@@ -516,7 +550,7 @@ const TeacherBulletinGrades: React.FC = () => {
                         {studentCourseAverages.length === 0 ? (
                             <div className="bg-white rounded-lg shadow-md p-12 text-center">
                                 <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-                                <p className="text-gray-500">Aucune note pour cette période</p>
+                                <p className="text-gray-500">{t('bulletinGrades.noGradesForPeriod')}</p>
                             </div>
                         ) : (
                             studentCourseAverages.map(({ course, gradeCount, average, existingComment }) => (
@@ -526,7 +560,7 @@ const TeacherBulletinGrades: React.FC = () => {
                                             <BookOpen size={24} className="text-indigo-600" />
                                             <div>
                                                 <h3 className="text-lg font-semibold text-gray-800">{course.subject}</h3>
-                                                <p className="text-sm text-gray-500">{gradeCount} note{gradeCount > 1 ? 's' : ''}</p>
+                                                <p className="text-sm text-gray-500">{gradeCount} {gradeCount > 1 ? t('bulletinGrades.grades') : t('bulletinGrades.grade')}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2 bg-gradient-to-br from-green-50 to-green-100 px-6 py-3 rounded-lg">
@@ -543,26 +577,26 @@ const TeacherBulletinGrades: React.FC = () => {
                                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                             <div className="flex justify-between items-start mb-2">
                                                 <p className="text-sm font-medium text-green-800">
-                                                    Commentaire validé ✓
+                                                    {t('bulletinGrades.commentValidated')} ✓
                                                 </p>
                                             </div>
                                             <p className="text-gray-700">{existingComment.comment}</p>
                                             <p className="text-xs text-gray-500 mt-2">
-                                                Validé le {new Date(existingComment.validationDate!).toLocaleDateString()}
+                                                {t('bulletinGrades.validatedOn', { date: new Date(existingComment.validationDate!).toLocaleDateString(locale) })}
                                             </p>
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
                                             <label className="block text-sm font-medium text-gray-700">
                                                 <MessageSquare size={16} className="inline mr-2" />
-                                                {existingComment ? 'Modifier le commentaire' : 'Ajouter un commentaire'}
+                                                {existingComment ? t('bulletinGrades.editComment') : t('bulletinGrades.addComment')}
                                             </label>
 
                                             <textarea
                                                 value={comments[course.id] !== undefined ? comments[course.id] : (existingComment?.comment || '')}
                                                 onChange={(e) => setComments(prev => ({ ...prev, [course.id]: e.target.value }))}
                                                 rows={3}
-                                                placeholder="Votre commentaire sur l'élève pour ce cours..."
+                                                placeholder={t('bulletinGrades.commentPlaceholder')}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                             />
                                             <button
@@ -574,7 +608,7 @@ const TeacherBulletinGrades: React.FC = () => {
                                                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                             >
                                                 <Save size={18} />
-                                                {existingComment ? 'Mettre à jour' : 'Enregistrer'}
+                                                {existingComment ? t('bulletinGrades.update') : t('common.save')}
                                             </button>
                                         </div>
                                     )}
@@ -590,7 +624,7 @@ const TeacherBulletinGrades: React.FC = () => {
                             className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-md"
                         >
                             <CheckSquare size={20} />
-                            Valider le bulletin de {selectedStudentData?.name}
+                            {t('bulletinGrades.validateBulletinFor', { name: selectedStudentData?.name })}
                         </button>
                     </div>
                 </>

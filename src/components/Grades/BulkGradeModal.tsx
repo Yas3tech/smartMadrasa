@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../UI';
 import { X, Save } from 'lucide-react';
 import type { Grade, Student } from '../../types';
@@ -9,25 +10,14 @@ export interface BulkGradeModalProps {
     className: string;
     students: Student[];
     onSave: (grades: Omit<Grade, 'id'>[]) => Promise<void>;
+    availableSubjects?: string[];
 }
 
-const SUBJECTS = [
-    'Mathématiques',
-    'Français',
-    'Arabe',
-    'Sciences',
-    'Histoire',
-    'Sport',
-    'Arts',
-    'Religion',
-    'Informatique'
-];
-
-const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGradeModalProps) => {
-    // Plus besoin de classId ici : la classe est déjà choisie à l'extérieur
-
+const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availableSubjects = [] }: BulkGradeModalProps) => {
+    const { t } = useTranslation();
     const [subject, setSubject] = useState('');
-    const [type, setType] = useState<'exam' | 'homework' | 'participation'>('exam');
+    const [type, setType] = useState<'exam' | 'homework' | 'participation' | 'evaluation'>('exam');
+    const [title, setTitle] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [maxScore, setMaxScore] = useState(20);
 
@@ -43,6 +33,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
         if (isOpen) {
             setSubject('');
             setType('exam');
+            setTitle('');
             setDate(new Date().toISOString().split('T')[0]);
             setMaxScore(20);
             setScores({});
@@ -93,12 +84,13 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                         score: isAbsent ? 0 : Number(scoreStr),
                         maxScore,
                         type,
+                        title: title || undefined,
                         date: new Date(date).toISOString(),
                         feedback: feedback[student.id],
                         status: isAbsent ? 'absent' : 'present',
                         studentName: student.name,
                         className: className,
-                    });
+                    } as any);
                 }
             });
 
@@ -118,7 +110,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6 max-w-4xl w-full mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Saisie groupée des notes</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">{t('grades.bulkEntryTitle')}</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X size={24} />
                     </button>
@@ -128,41 +120,53 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                     {/* Configuration Section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
                         <div>
-                            <p className="block text-sm font-medium text-gray-700 mb-1">Classe</p>
+                            <p className="block text-sm font-medium text-gray-700 mb-1">{t('common.class')}</p>
                             <p className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-900">
                                 {className}
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Matière *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.subject')} *</label>
                             <select
                                 value={subject}
                                 onChange={(e) => setSubject(e.target.value)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             >
-                                <option value="">Sélectionner une matière</option>
-                                {SUBJECTS.map(s => (
+                                <option value="">{t('common.selectSubject')}</option>
+                                {availableSubjects.map(s => (
                                     <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('grades.gradeTitle')} (Optionnel)</label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder={t('grades.gradeTitlePlaceholder')}
+                                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')} *</label>
                             <select
                                 value={type}
                                 onChange={(e) => setType(e.target.value as any)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             >
-                                <option value="exam">Examen</option>
-                                <option value="homework">Devoir</option>
-                                <option value="participation">Participation</option>
+                                <option value="exam">{t('grades.exam')}</option>
+                                <option value="homework">{t('grades.homework')}</option>
+                                <option value="participation">{t('grades.participation')}</option>
+                                <option value="evaluation">{t('grades.evaluation')}</option>
                             </select>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.date')} *</label>
                             <input
                                 type="date"
                                 value={date}
@@ -172,7 +176,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Note sur *</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('grades.maxScore')} *</label>
                             <input
                                 type="number"
                                 value={maxScore}
@@ -189,10 +193,10 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                             <table className="w-full">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Élève</th>
-                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 w-32">Note (/{maxScore})</th>
-                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 w-24">Absent</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Commentaire</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">{t('common.student')}</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 w-32">{t('grades.scoreArg', { max: maxScore })}</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 w-24">{t('status.absent')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">{t('grades.comment')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
@@ -225,7 +229,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                                                     value={feedback[student.id] || ''}
                                                     onChange={(e) => handleFeedbackChange(student.id, e.target.value)}
                                                     className="w-full px-3 py-1 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                                                    placeholder="Appréciation..."
+                                                    placeholder={t('grades.feedbackPlaceholder')}
                                                 />
                                             </td>
                                         </tr>
@@ -235,7 +239,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
 
                             {students.length === 0 && (
                                 <div className="p-8 text-center text-gray-500">
-                                    Aucun élève dans cette classe.
+                                    {t('grades.noStudents')}
                                 </div>
                             )}
                         </div>
@@ -244,7 +248,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-4 border-t">
                         <Button variant="secondary" onClick={onClose} type="button">
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
                         <Button
                             variant="primary"
@@ -253,7 +257,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students }: BulkGr
                             icon={Save}
                             type="button"
                         >
-                            {loading ? 'Enregistrement...' : 'Enregistrer les notes'}
+                            {loading ? t('common.saving') : t('grades.saveGrades')}
                         </Button>
                     </div>
                 </div>

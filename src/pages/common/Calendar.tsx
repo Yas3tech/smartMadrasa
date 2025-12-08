@@ -21,7 +21,7 @@ const Calendar = () => {
     const [startDate, setStartDate] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-    const [eventType, setEventType] = useState<'lesson' | 'homework' | 'exam' | 'event'>('lesson');
+    const [eventType, setEventType] = useState<'lesson' | 'homework' | 'exam' | 'event' | 'evaluation'>('lesson');
 
     const getDaysInMonth = (date: Date) => {
         const year = date.getFullYear();
@@ -45,7 +45,8 @@ const Calendar = () => {
         lesson: 'bg-blue-100 text-blue-700 border-blue-300',
         homework: 'bg-green-100 text-green-700 border-green-300',
         exam: 'bg-red-100 text-red-700 border-red-300',
-        event: 'bg-purple-100 text-purple-700 border-purple-300'
+        event: 'bg-purple-100 text-purple-700 border-purple-300',
+        evaluation: 'bg-orange-100 text-orange-700 border-orange-300'
     };
 
     const handleOpenNewEvent = () => {
@@ -290,6 +291,7 @@ const Calendar = () => {
                                 <option value="lesson">{t('calendar.lesson')}</option>
                                 <option value="homework">{t('calendar.homework')}</option>
                                 <option value="exam">{t('calendar.exam')}</option>
+                                <option value="evaluation">{t('grades.evaluation')}</option>
                                 <option value="event">{t('calendar.event')}</option>
                             </select>
                         </div>

@@ -182,7 +182,7 @@ const NotificationBell = () => {
             {/* Bell Icon Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-200 group"
+                className="relative p-2 text-gray-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-xl transition-all duration-200 group"
             >
                 <Bell size={24} className="group-hover:scale-110 transition-transform" />
                 {unreadCount > 0 && (
@@ -194,12 +194,12 @@ const NotificationBell = () => {
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 max-h-[500px] overflow-hidden flex flex-col">
+                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-50 max-h-[500px] overflow-hidden flex flex-col">
                     {/* Header */}
-                    <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100">
+                    <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30">
                         <div>
-                            <h3 className="font-bold text-gray-900">Notifications</h3>
-                            <p className="text-xs text-gray-600">
+                            <h3 className="font-bold text-gray-900 dark:text-white">Notifications</h3>
+                            <p className="text-xs text-gray-600 dark:text-slate-400">
                                 {unreadCount > 0 ? `${unreadCount} non lue(s)` : 'Tout est lu'}
                             </p>
                         </div>
@@ -214,7 +214,7 @@ const NotificationBell = () => {
                             )}
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-colors"
+                                className="p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -228,23 +228,23 @@ const NotificationBell = () => {
                                 <div
                                     key={notification.id}
                                     onClick={() => handleNotificationClick(notification)}
-                                    className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors bg-orange-50"
+                                    className="p-4 border-b border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors bg-orange-50 dark:bg-slate-800/50"
                                 >
                                     <div className="flex items-start gap-3">
-                                        <div className="p-2 rounded-lg flex-shrink-0 bg-white shadow-sm">
+                                        <div className="p-2 rounded-lg flex-shrink-0 bg-white dark:bg-slate-700 shadow-sm">
                                             {getIcon(notification.type)}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-2 mb-1">
-                                                <h4 className="text-sm font-semibold text-gray-900">
+                                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                                                     {notification.title}
                                                     <span className="ml-1 inline-block w-2 h-2 bg-orange-500 rounded-full"></span>
                                                 </h4>
-                                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                                <span className="text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
                                                     {formatTimestamp(notification.timestamp)}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-gray-600 line-clamp-2">
+                                            <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-2">
                                                 {notification.message}
                                             </p>
                                         </div>
@@ -253,8 +253,8 @@ const NotificationBell = () => {
                             ))
                         ) : (
                             <div className="p-8 text-center">
-                                <Bell size={40} className="mx-auto mb-3 text-gray-300" />
-                                <p className="text-sm text-gray-500">Aucune nouvelle notification</p>
+                                <Bell size={40} className="mx-auto mb-3 text-gray-300 dark:text-slate-600" />
+                                <p className="text-sm text-gray-500 dark:text-slate-400">Aucune nouvelle notification</p>
                             </div>
                         )}
                     </div>

@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Input } from '../../components/UI';
 import { User as UserIcon, Mail, Lock, Camera, Save, Edit2 } from 'lucide-react';
-import type { Student, Parent, Teacher } from '../../types';
+import type { Student, Parent } from '../../types';
 
 const Profile = () => {
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
-    const { users, students, classes, updateUser } = useData();
+    const { users, students, classes, courses, updateUser } = useData();
+    const isRTL = i18n.language === 'ar';
 
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(user?.name || '');
@@ -33,19 +36,35 @@ const Profile = () => {
 
     const handleChangePassword = () => {
         if (newPassword !== confirmPassword) {
-            alert('Les mots de passe ne correspondent pas');
+            alert(t('profile.passwordMismatch'));
             return;
         }
         if (newPassword.length < 6) {
-            alert('Le mot de passe doit contenir au moins 6 caractères');
+            alert(t('profile.passwordTooShort'));
             return;
         }
         // In real app, would call Firebase auth
-        alert('Mot de passe changé avec succès!');
+        alert(t('profile.passwordChanged'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
     };
+
+    const getRoleLabel = (role: string) => {
+        return t(`roles.${role}`);
+    };
+
+    // Get teacher's courses, subjects and classes from courses collection
+    const teacherData = useMemo(() => {
+        if (user.role !== 'teacher') return { subjects: [], teacherClasses: [] };
+
+        const teacherCourses = courses.filter(c => c.teacherId === user.id);
+        const subjects = [...new Set(teacherCourses.map(c => c.subject))];
+        const classIds = [...new Set(teacherCourses.map(c => c.classId))];
+        const teacherClasses = classes.filter(c => classIds.includes(c.id));
+
+        return { subjects, teacherClasses };
+    }, [user, courses, classes]);
 
     // Get additional info based on role
     const getStudentInfo = () => {
@@ -54,22 +73,23 @@ const Profile = () => {
         if (!studentData) return null;
 
         const parent = users.find(u => u.id === studentData.parentId);
+        const classInfo = classes.find(c => c.id === (studentData as any).classId);
 
         return (
             <Card className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Informations académiques</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.academicInfo')}</h3>
                 <div className="space-y-3">
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm text-gray-600">Classe</span>
-                        <span className="font-semibold text-gray-900">{studentData.classId}</span>
+                        <span className="text-sm text-gray-600">{t('profile.class')}</span>
+                        <span className="font-semibold text-gray-900">{classInfo?.name || t('profile.notAssigned')}</span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm text-gray-600">Parent/Tuteur</span>
-                        <span className="font-semibold text-gray-900">{parent?.name || 'Non assigné'}</span>
+                        <span className="text-sm text-gray-600">{t('profile.parentGuardian')}</span>
+                        <span className="font-semibold text-gray-900">{parent?.name || t('profile.notAssigned')}</span>
                     </div>
                     {parent && (
                         <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">Contact parent</span>
+                            <span className="text-sm text-gray-600">{t('profile.parentContact')}</span>
                             <span className="font-semibold text-gray-900">{parent.email}</span>
                         </div>
                     )}
@@ -85,23 +105,26 @@ const Profile = () => {
 
         return (
             <Card className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Mes enfants</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.myChildren')}</h3>
                 <div className="space-y-3">
-                    {children.length > 0 ? children.map(child => (
-                        <div key={child.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
-                                {child.name.charAt(0)}
+                    {children.length > 0 ? children.map(child => {
+                        const classInfo = classes.find(c => c.id === (child as any).classId);
+                        return (
+                            <div key={child.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
+                                    {child.name.charAt(0)}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-semibold text-gray-900">{child.name}</p>
+                                    <p className="text-sm text-gray-500">{child.email}</p>
+                                </div>
+                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                                    {classInfo?.name || (child as Student).classId}
+                                </span>
                             </div>
-                            <div className="flex-1">
-                                <p className="font-semibold text-gray-900">{child.name}</p>
-                                <p className="text-sm text-gray-500">{child.email}</p>
-                            </div>
-                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                                {(child as Student).classId}
-                            </span>
-                        </div>
-                    )) : (
-                        <p className="text-gray-500 text-center py-4">Aucun enfant assigné</p>
+                        );
+                    }) : (
+                        <p className="text-gray-500 text-center py-4">{t('profile.noChildrenAssigned')}</p>
                     )}
                 </div>
             </Card>
@@ -110,33 +133,29 @@ const Profile = () => {
 
     const getTeacherInfo = () => {
         if (user.role !== 'teacher') return null;
-        const teacherData = user as Teacher;
 
         return (
             <Card className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Informations professionnelles</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.professionalInfo')}</h3>
                 <div className="space-y-3">
                     <div className="p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm text-gray-600 block mb-2">Matières enseignées</span>
+                        <span className="text-sm text-gray-600 block mb-2">{t('profile.subjectsTaught')}</span>
                         <div className="flex flex-wrap gap-2">
-                            {teacherData.subjects?.map(subject => (
+                            {teacherData.subjects.length > 0 ? teacherData.subjects.map(subject => (
                                 <span key={subject} className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
                                     {subject}
                                 </span>
-                            )) || <span className="text-gray-500">Aucune matière assignée</span>}
+                            )) : <span className="text-gray-500">{t('profile.noSubjectsAssigned')}</span>}
                         </div>
                     </div>
                     <div className="p-3 bg-gray-50 rounded-lg">
-                        <span className="text-sm text-gray-600 block mb-2">Classes assignées</span>
+                        <span className="text-sm text-gray-600 block mb-2">{t('profile.assignedClasses')}</span>
                         <div className="flex flex-wrap gap-2">
-                            {teacherData.classIds?.map(classId => {
-                                const classGroup = classes.find(c => c.id === classId);
-                                return (
-                                    <span key={classId} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-                                        {classGroup ? classGroup.name : classId}
-                                    </span>
-                                );
-                            }) || <span className="text-gray-500">Aucune classe assignée</span>}
+                            {teacherData.teacherClasses.length > 0 ? teacherData.teacherClasses.map(classGroup => (
+                                <span key={classGroup.id} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                    {classGroup.name}
+                                </span>
+                            )) : <span className="text-gray-500">{t('profile.noClassesAssigned')}</span>}
                         </div>
                     </div>
                 </div>
@@ -145,12 +164,12 @@ const Profile = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Mon Profil</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
                 {!isEditing && (
                     <Button variant="primary" icon={Edit2} onClick={() => setIsEditing(true)}>
-                        Modifier le profil
+                        {t('profile.editProfile')}
                     </Button>
                 )}
             </div>
@@ -173,13 +192,9 @@ const Profile = () => {
                                 )}
                             </div>
                             <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
-                            <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                            <p className="text-sm text-gray-500 capitalize">{getRoleLabel(user.role)}</p>
                             <span className="mt-3 px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
-                                {user.role === 'student' ? 'Élève' :
-                                    user.role === 'parent' ? 'Parent' :
-                                        user.role === 'teacher' ? 'Enseignant' :
-                                            user.role === 'director' ? 'Directeur' :
-                                                'Super Admin'}
+                                {getRoleLabel(user.role)}
                             </span>
                         </div>
                     </Card>
@@ -195,12 +210,12 @@ const Profile = () => {
                     {/* Personal Information */}
                     <Card className="p-6">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-gray-900">Informations personnelles</h3>
+                            <h3 className="text-lg font-bold text-gray-900">{t('profile.personalInfo')}</h3>
                         </div>
 
                         <div className="space-y-4">
                             <Input
-                                label="Nom complet"
+                                label={t('profile.fullName')}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 disabled={!isEditing}
@@ -208,7 +223,7 @@ const Profile = () => {
                             />
 
                             <Input
-                                label="Email"
+                                label={t('profile.email')}
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -217,17 +232,17 @@ const Profile = () => {
                             />
 
                             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <span className="text-sm text-gray-600">Rôle</span>
-                                <span className="font-semibold text-gray-900 capitalize">{user.role}</span>
+                                <span className="text-sm text-gray-600">{t('profile.role')}</span>
+                                <span className="font-semibold text-gray-900 capitalize">{getRoleLabel(user.role)}</span>
                             </div>
 
                             {isEditing && (
                                 <div className="flex justify-end gap-3 pt-4 border-t">
                                     <Button variant="secondary" onClick={handleCancelEdit}>
-                                        Annuler
+                                        {t('common.cancel')}
                                     </Button>
                                     <Button variant="primary" icon={Save} onClick={handleSaveProfile}>
-                                        Enregistrer
+                                        {t('common.save')}
                                     </Button>
                                 </div>
                             )}
@@ -236,11 +251,11 @@ const Profile = () => {
 
                     {/* Change Password */}
                     <Card className="p-6">
-                        <h3 className="text-lg font-bold text-gray-900 mb-6">Changer le mot de passe</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-6">{t('profile.changePassword')}</h3>
 
                         <div className="space-y-4">
                             <Input
-                                label="Mot de passe actuel"
+                                label={t('profile.currentPassword')}
                                 type="password"
                                 value={currentPassword}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
@@ -249,7 +264,7 @@ const Profile = () => {
                             />
 
                             <Input
-                                label="Nouveau mot de passe"
+                                label={t('profile.newPassword')}
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -258,7 +273,7 @@ const Profile = () => {
                             />
 
                             <Input
-                                label="Confirmer le mot de passe"
+                                label={t('profile.confirmPassword')}
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -272,7 +287,7 @@ const Profile = () => {
                                     onClick={handleChangePassword}
                                     disabled={!currentPassword || !newPassword || !confirmPassword}
                                 >
-                                    Changer le mot de passe
+                                    {t('profile.changePasswordBtn')}
                                 </Button>
                             </div>
                         </div>

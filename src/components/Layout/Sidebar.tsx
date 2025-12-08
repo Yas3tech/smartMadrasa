@@ -26,9 +26,10 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isCollapsed }: SidebarProps) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user, logout } = useAuth();
     const { messages } = useData();
+    const isRTL = i18n.language === 'ar';
 
     // Count unread messages
     const unreadCount = messages.filter(m => m.receiverId === user?.id && !m.read).length;
@@ -94,16 +95,16 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
 
     return (
         <aside
-            className={`bg-white border-r border-gray-100 h-screen flex flex-col fixed left-0 top-0 z-50 shadow-soft transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+            className={`bg-white dark:bg-slate-900 ${isRTL ? 'border-l rtl:border-l' : 'border-r'} border-gray-100 dark:border-slate-700 h-screen flex flex-col fixed ${isRTL ? 'right-0' : 'left-0'} top-0 z-50 shadow-soft transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
                 }`}
         >
             {/* Header */}
-            <Link to="/" className="p-6 flex items-center gap-3 hover:bg-gray-50 transition-colors rounded-xl mx-2 mt-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-200">
+            <Link to="/" className="p-6 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors rounded-xl mx-2 mt-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-200 dark:shadow-none">
                     S
                 </div>
                 {!isCollapsed && (
-                    <span className="font-bold text-xl text-gray-800 tracking-tight">SmartMadrassa</span>
+                    <span className="font-bold text-xl text-gray-900 dark:text-white tracking-tight">SmartMadrassa</span>
                 )}
             </Link>
 
@@ -115,8 +116,8 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
                         to={link.to}
                         className={({ isActive }) =>
                             `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
-                                ? 'bg-orange-50 text-orange-600 font-medium shadow-sm'
-                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium shadow-sm'
+                                : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'
                             }`
                         }
                         title={isCollapsed ? link.label : undefined}
@@ -148,18 +149,17 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
                 ))}
             </nav>
 
-            {/* User Profile & Actions */}
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-4 border-t border-gray-100 dark:border-slate-700">
                 <div className={`flex items-center gap-3 mb-6 ${isCollapsed ? 'justify-center' : ''}`}>
                     <img
                         src={user.avatar}
                         alt={user.name}
-                        className="w-10 h-10 rounded-full bg-gray-100 border-2 border-white shadow-sm"
+                        className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 border-2 border-white dark:border-slate-600 shadow-sm"
                     />
                     {!isCollapsed && (
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
-                            <p className="text-xs text-gray-500 capitalize">
+                            <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 capitalize">
                                 {t(`roles.${user.role}`)}
                             </p>
                         </div>
@@ -174,7 +174,7 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
 
                 <button
                     onClick={logout}
-                    className={`flex items-center gap-2 text-sm text-red-500 hover:text-red-600 w-full px-2 py-2 rounded-lg hover:bg-red-50 transition-colors ${isCollapsed ? 'justify-center' : ''
+                    className={`flex items-center gap-2 text-sm text-red-500 hover:text-red-600 w-full px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ${isCollapsed ? 'justify-center' : ''
                         }`}
                     title={t('sidebar.logout')}
                 >

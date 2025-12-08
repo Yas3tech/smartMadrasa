@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
@@ -6,8 +7,10 @@ import { Plus, Edit2, Users, GraduationCap, X } from 'lucide-react';
 import type { ClassGroup } from '../../types';
 
 const Classes = () => {
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const { classes, users, students, addClass, updateClass, deleteClass } = useData();
+    const isRTL = i18n.language === 'ar';
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingClass, setEditingClass] = useState<ClassGroup | null>(null);
@@ -66,19 +69,19 @@ const Classes = () => {
             <div className="flex items-center justify-center h-96">
                 <Card className="p-8 text-center">
                     <GraduationCap size={48} className="mx-auto mb-4 text-gray-300" />
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Accès restreint</h2>
-                    <p className="text-gray-600">Cette page est réservée aux enseignants et directeurs.</p>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">{t('classes.restrictedAccess')}</h2>
+                    <p className="text-gray-600">{t('classes.restrictedAccessDesc')}</p>
                 </Card>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Gestion des Classes</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('classes.title')}</h1>
                 <Button variant="primary" icon={Plus} onClick={handleOpenNew}>
-                    Nouvelle Classe
+                    {t('classes.newClass')}
                 </Button>
             </div>
 
@@ -90,7 +93,7 @@ const Classes = () => {
                             <GraduationCap className="text-orange-600" size={28} />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 font-medium">Total Classes</p>
+                            <p className="text-sm text-gray-500 font-medium">{t('classes.totalClasses')}</p>
                             <p className="text-3xl font-bold text-gray-900">{classes.length}</p>
                         </div>
                     </div>
@@ -101,7 +104,7 @@ const Classes = () => {
                             <Users className="text-blue-600" size={28} />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 font-medium">Total Élèves</p>
+                            <p className="text-sm text-gray-500 font-medium">{t('classes.totalStudents')}</p>
                             <p className="text-3xl font-bold text-gray-900">{students.length}</p>
                         </div>
                     </div>
@@ -112,7 +115,7 @@ const Classes = () => {
                             <GraduationCap className="text-green-600" size={28} />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 font-medium">Enseignants</p>
+                            <p className="text-sm text-gray-500 font-medium">{t('classes.teachers')}</p>
                             <p className="text-3xl font-bold text-gray-900">{teachers.length}</p>
                         </div>
                     </div>
@@ -147,9 +150,9 @@ const Classes = () => {
                                         {teacher ? teacher.name.charAt(0) : '?'}
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs text-gray-500">Enseignant</p>
+                                        <p className="text-xs text-gray-500">{t('classes.teacher')}</p>
                                         <p className="font-semibold text-sm text-gray-900">
-                                            {teacher ? teacher.name : 'Non assigné'}
+                                            {teacher ? teacher.name : t('classes.notAssigned')}
                                         </p>
                                     </div>
                                 </div>
@@ -158,7 +161,7 @@ const Classes = () => {
                                 <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                                     <div className="flex items-center gap-2">
                                         <Users className="text-blue-600" size={18} />
-                                        <span className="text-sm font-medium text-gray-700">Élèves</span>
+                                        <span className="text-sm font-medium text-gray-700">{t('classes.students')}</span>
                                     </div>
                                     <span className="text-xl font-bold text-blue-600">{classStudents.length}</span>
                                 </div>
@@ -171,7 +174,7 @@ const Classes = () => {
                                         className="flex-1"
                                         onClick={() => handleEdit(classGroup)}
                                     >
-                                        Modifier
+                                        {t('common.edit')}
                                     </Button>
                                     <Button
                                         variant="danger"
@@ -182,7 +185,7 @@ const Classes = () => {
                                             setDeletingClass(classGroup);
                                         }}
                                     >
-                                        Supprimer
+                                        {t('common.delete')}
                                     </Button>
                                 </div>
                             </div>
@@ -196,7 +199,7 @@ const Classes = () => {
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">
-                            {editingClass ? 'Modifier la Classe' : 'Nouvelle Classe'}
+                            {editingClass ? t('classes.editClass') : t('classes.newClass')}
                         </h2>
                         <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                             <X size={24} />
@@ -205,27 +208,27 @@ const Classes = () => {
 
                     <div className="space-y-4">
                         <Input
-                            label="Nom de la classe"
+                            label={t('classes.className')}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Classe 1A"
                         />
 
                         <Input
-                            label="Niveau"
+                            label={t('classes.grade')}
                             value={grade}
                             onChange={(e) => setGrade(e.target.value)}
                             placeholder="1ère année"
                         />
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Enseignant</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('classes.teacher')}</label>
                             <select
                                 value={teacherId}
                                 onChange={(e) => setTeacherId(e.target.value)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             >
-                                <option value="">Sélectionner un enseignant</option>
+                                <option value="">{t('classes.selectTeacher')}</option>
                                 {teachers.map(teacher => (
                                     <option key={teacher.id} value={teacher.id}>
                                         {teacher.name}
@@ -236,10 +239,10 @@ const Classes = () => {
 
                         <div className="flex justify-end gap-3 pt-4">
                             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
-                                Annuler
+                                {t('common.cancel')}
                             </Button>
                             <Button variant="primary" onClick={handleSave}>
-                                {editingClass ? 'Enregistrer' : 'Créer'}
+                                {editingClass ? t('common.save') : t('classes.create')}
                             </Button>
                         </div>
                     </div>
@@ -254,19 +257,18 @@ const Classes = () => {
                             <span className="text-2xl">⚠️</span>
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Confirmer la suppression</h2>
-                            <p className="text-sm text-gray-500">Cette action est irréversible</p>
+                            <h2 className="text-2xl font-bold text-gray-900">{t('classes.confirmDelete')}</h2>
+                            <p className="text-sm text-gray-500">{t('classes.actionIrreversible')}</p>
                         </div>
                     </div>
 
                     <p className="text-gray-700 mb-6">
-                        Êtes-vous sûr de vouloir supprimer la classe <strong>{deletingClass?.name}</strong> ?
-                        Tous les cours et données associés seront également supprimés.
+                        {t('classes.deleteConfirmMessage', { name: deletingClass?.name })}
                     </p>
 
                     <div className="flex justify-end gap-3">
                         <Button variant="secondary" onClick={() => setDeletingClass(null)}>
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
                         <Button
                             variant="danger"
@@ -277,7 +279,7 @@ const Classes = () => {
                                 }
                             }}
                         >
-                            Supprimer définitivement
+                            {t('classes.deletePermanently')}
                         </Button>
                     </div>
                 </div>

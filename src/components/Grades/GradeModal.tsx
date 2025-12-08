@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 import { X, Plus } from 'lucide-react';
 import type { Grade } from '../../types';
@@ -10,31 +11,16 @@ interface GradeModalProps {
     onSave: (grade: Omit<Grade, 'id'>) => Promise<void>;
     editingGrade?: Grade | null;
     classId?: string;
+    availableSubjects?: string[];
 }
 
-const SUBJECTS = [
-    'Mathématiques',
-    'Français',
-    'Arabe',
-    'Sciences',
-    'Histoire',
-    'Sport',
-    'Arts',
-    'Religion',
-    'Informatique'
-];
-
-const GRADE_TYPES = [
-    { value: 'exam', label: 'Examen' },
-    { value: 'homework', label: 'Devoir' },
-    { value: 'participation', label: 'Participation' }
-];
-
-const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeModalProps) => {
+const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableSubjects = [] }: GradeModalProps) => {
+    const { t } = useTranslation();
     const { students } = useData();
     const [studentId, setStudentId] = useState('');
     const [subject, setSubject] = useState('');
-    const [type, setType] = useState<'exam' | 'homework' | 'participation'>('exam');
+    const [type, setType] = useState<'exam' | 'homework' | 'participation' | 'evaluation'>('exam');
+    const [title, setTitle] = useState('');
     const [score, setScore] = useState('');
     const [maxScore, setMaxScore] = useState('20');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -51,6 +37,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
             setStudentId(editingGrade.studentId);
             setSubject(editingGrade.subject);
             setType(editingGrade.type);
+            setTitle(editingGrade.title || '');
             setScore(editingGrade.score.toString());
             setMaxScore(editingGrade.maxScore.toString());
             setDate(new Date(editingGrade.date).toISOString().split('T')[0]);
@@ -60,6 +47,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
             setStudentId('');
             setSubject('');
             setType('exam');
+            setTitle('');
             setScore('');
             setMaxScore('20');
             setDate(new Date().toISOString().split('T')[0]);
@@ -77,6 +65,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
                 studentId,
                 subject,
                 type,
+                title: title || undefined,
                 score: parseFloat(score),
                 maxScore: parseFloat(maxScore),
                 date: new Date(date).toISOString(),
@@ -95,7 +84,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
             <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">
-                        {editingGrade ? 'Modifier la note' : 'Ajouter une note'}
+                        {editingGrade ? t('grades.editGrade') : t('grades.addGrade')}
                     </h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X size={24} />
@@ -105,14 +94,14 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Student */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Élève *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.student')} *</label>
                         <select
                             value={studentId}
                             onChange={(e) => setStudentId(e.target.value)}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             required
                         >
-                            <option value="">Sélectionner un élève</option>
+                            <option value="">{t('grades.selectStudent')}</option>
                             {classStudents.map(student => (
                                 <option key={student.id} value={student.id}>
                                     {student.name}
@@ -123,39 +112,48 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
 
                     {/* Subject */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Matière *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.subject')} *</label>
                         <select
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             required
                         >
-                            <option value="">Sélectionner une matière</option>
-                            {SUBJECTS.map(s => (
+                            <option value="">{t('common.selectSubject')}</option>
+                            {availableSubjects.map(s => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
                     </div>
 
                     {/* Type */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value as 'exam' | 'homework' | 'participation')}
-                            className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                            required
-                        >
-                            {GRADE_TYPES.map(t => (
-                                <option key={t.value} value={t.value}>{t.label}</option>
-                            ))}
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')} *</label>
+                            <select
+                                value={type}
+                                onChange={(e) => setType(e.target.value as 'exam' | 'homework' | 'participation' | 'evaluation')}
+                                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                                required
+                            >
+                                <option value="exam">{t('grades.exam')}</option>
+                                <option value="homework">{t('grades.homework')}</option>
+                                <option value="participation">{t('grades.participation')}</option>
+                                <option value="evaluation">{t('grades.evaluation')}</option>
+                            </select>
+                        </div>
+                        <Input
+                            label={`${t('grades.gradeTitle')} (optionnel)`}
+                            placeholder={t('grades.gradeTitlePlaceholder')}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
                     </div>
 
                     {/* Score and Max Score */}
                     <div className="grid grid-cols-2 gap-4">
                         <Input
-                            label="Note obtenue *"
+                            label={`${t('grades.score')} *`}
                             type="number"
                             step="0.5"
                             min="0"
@@ -164,7 +162,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
                             required
                         />
                         <Input
-                            label="Note maximale *"
+                            label={`${t('grades.maxScore')} *`}
                             type="number"
                             step="0.5"
                             min="0"
@@ -176,7 +174,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
 
                     {/* Date */}
                     <Input
-                        label="Date *"
+                        label={`${t('common.date')} *`}
                         type="date"
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
@@ -185,23 +183,23 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId }: GradeMod
 
                     {/* Feedback */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Commentaire (optionnel)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('grades.comment')} (optionnel)</label>
                         <textarea
                             value={feedback}
                             onChange={(e) => setFeedback(e.target.value)}
                             rows={3}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                            placeholder="Commentaire sur la performance de l'élève..."
+                            placeholder={t('grades.feedbackDescPlaceholder')}
                         />
                     </div>
 
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-4">
                         <Button variant="secondary" onClick={onClose} type="button">
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
                         <Button variant="primary" type="submit" disabled={loading} icon={Plus}>
-                            {loading ? 'Enregistrement...' : (editingGrade ? 'Modifier' : 'Ajouter')}
+                            {loading ? t('common.saving') : (editingGrade ? t('common.edit') : t('common.add'))}
                         </Button>
                     </div>
                 </form>

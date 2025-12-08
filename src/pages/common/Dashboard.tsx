@@ -364,23 +364,23 @@ const Dashboard = () => {
                 </Card>
 
                 <Card className="p-6">
-                    <h3 className="font-bold text-lg mb-4 text-gray-900">{t('dashboard.dailySummary.title')}</h3>
+                    <h3 className="font-bold text-lg mb-4 text-gray-900 dark:text-white">{t('dashboard.dailySummary.title')}</h3>
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                            <AlertCircle className="text-blue-600" size={20} />
-                            <p className="text-sm text-gray-700">
+                        <div className="flex items-center gap-3 p-3 bg-blue-500/20 dark:bg-blue-500/30 rounded-lg">
+                            <AlertCircle className="text-blue-600 dark:text-blue-400" size={20} />
+                            <p className="text-sm text-gray-700 dark:text-slate-200">
                                 <span className="font-semibold">{presentCount}/{students.length}</span> {t('dashboard.dailySummary.studentsPresent')}
                             </p>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                            <BookOpen className="text-green-600" size={20} />
-                            <p className="text-sm text-gray-700">
+                        <div className="flex items-center gap-3 p-3 bg-green-500/20 dark:bg-green-500/30 rounded-lg">
+                            <BookOpen className="text-green-600 dark:text-green-400" size={20} />
+                            <p className="text-sm text-gray-700 dark:text-slate-200">
                                 <span className="font-semibold">{allGrades.length}</span> {t('dashboard.dailySummary.gradesRecorded')}
                             </p>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
-                            <MessageSquare className="text-orange-600" size={20} />
-                            <p className="text-sm text-gray-700">
+                        <div className="flex items-center gap-3 p-3 bg-orange-500/20 dark:bg-orange-500/30 rounded-lg">
+                            <MessageSquare className="text-orange-600 dark:text-orange-400" size={20} />
+                            <p className="text-sm text-gray-700 dark:text-slate-200">
                                 <span className="font-semibold">{unreadMessages}</span> {t('dashboard.dailySummary.unreadMessages')}
                             </p>
                         </div>

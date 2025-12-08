@@ -1,16 +1,19 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
-import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import type { User, Role, Parent } from '../../types';
-import { read, utils } from 'xlsx';
+import { read, utils, writeFile } from 'xlsx';
 import { toast } from 'react-hot-toast';
 
 const UserManagement = () => {
+    const { t, i18n } = useTranslation();
     const { user: currentUser } = useAuth();
     const { users, addUser, updateUser, deleteUser } = useData();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const isRTL = i18n.language === 'ar';
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -64,7 +67,7 @@ const UserManagement = () => {
 
     const handleSave = () => {
         if (!name || !email) {
-            toast.error('Veuillez remplir les champs obligatoires');
+            toast.error(t('users.fillRequired'));
             return;
         }
 
@@ -84,7 +87,7 @@ const UserManagement = () => {
 
         if (editingUser) {
             updateUser(editingUser.id, userData);
-            toast.success('Utilisateur mis à jour');
+            toast.success(t('users.userUpdated'));
         } else {
             const newUser: User = {
                 id: `u${Date.now()}`,
@@ -93,7 +96,7 @@ const UserManagement = () => {
             addUser(newUser);
 
             // Simulate sending password via email
-            toast.success(`Utilisateur créé ! Un email pour configurer le mot de passe a été envoyé à ${email}`, {
+            toast.success(t('users.userCreatedEmail', { email }), {
                 duration: 5000,
                 icon: '📧'
             });
@@ -102,10 +105,29 @@ const UserManagement = () => {
     };
 
     const handleDelete = (userId: string) => {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+        if (confirm(t('users.confirmDelete'))) {
             deleteUser(userId);
-            toast.success('Utilisateur supprimé');
+            toast.success(t('users.userDeleted'));
         }
+    };
+
+    const handleDownloadTemplate = () => {
+        const headers = [['name', 'email', 'role', 'phone', 'birthDate', 'studentEmail']];
+        const ws = utils.aoa_to_sheet(headers);
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, "Template");
+
+        // Add some example data
+        utils.sheet_add_json(ws, [
+            { name: "Jean Dupont", email: "jean@school.ma", role: "student", phone: "", birthDate: "2010-01-01", studentEmail: "" },
+            { name: "Prof. Alami", email: "alami@school.ma", role: "teacher", phone: "0611111111", birthDate: "", studentEmail: "" },
+            { name: "Karim Tazi", email: "karim@school.ma", role: "parent", phone: "0600000000", birthDate: "", studentEmail: "jean@school.ma" }
+        ], { skipHeader: true, origin: "A2" });
+
+        // Adjust column widths
+        ws['!cols'] = [{ wch: 20 }, { wch: 25 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 25 }];
+
+        writeFile(wb, "smartschool_users_template.xlsx");
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,9 +136,13 @@ const UserManagement = () => {
 
         try {
             const data = await file.arrayBuffer();
-            const workbook = read(data);
+            // enable cellDates to correctly parse dates
+            const workbook = read(data, { cellDates: true });
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = utils.sheet_to_json(worksheet);
+            const jsonData = utils.sheet_to_json(worksheet, {
+                raw: false,
+                dateNF: 'yyyy-mm-dd' // Normalize date format
+            });
 
             let importedCount = 0;
 
@@ -126,9 +152,9 @@ const UserManagement = () => {
                         id: `u${Date.now() + Math.random()}`,
                         name: row.name,
                         email: row.email,
-                        role: row.role.toLowerCase(),
+                        role: row.role.toLowerCase().trim(),
                         phone: row.phone,
-                        birthDate: row.birthDate,
+                        birthDate: row.birthDate, // Should be formatted correctly now
                         avatar: row.name.charAt(0).toUpperCase()
                     };
 
@@ -145,11 +171,11 @@ const UserManagement = () => {
                 }
             }
 
-            toast.success(`${importedCount} utilisateurs importés avec succès`);
+            toast.success(t('users.importSuccess', { count: importedCount }));
             if (fileInputRef.current) fileInputRef.current.value = '';
         } catch (error) {
             console.error('Error importing file:', error);
-            toast.error('Erreur lors de l\'importation du fichier');
+            toast.error(t('users.importError'));
         }
     };
 
@@ -178,21 +204,26 @@ const UserManagement = () => {
         superadmin: 'bg-red-100 text-red-700'
     };
 
+    const getRoleLabel = (r: Role | 'all') => {
+        if (r === 'all') return t('users.total');
+        return t(`roles.${r}`);
+    };
+
     if (currentUser?.role !== 'director' && currentUser?.role !== 'superadmin') {
         return (
             <div className="flex items-center justify-center h-96">
                 <Card className="p-8 text-center">
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Accès restreint</h2>
-                    <p className="text-gray-600">Cette page est réservée aux directeurs et super-administrateurs.</p>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">{t('users.restrictedAccess')}</h2>
+                    <p className="text-gray-600">{t('users.restrictedAccessDesc')}</p>
                 </Card>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
                 <div className="flex gap-2">
                     <input
                         type="file"
@@ -201,11 +232,14 @@ const UserManagement = () => {
                         accept=".xlsx,.xls,.csv"
                         className="hidden"
                     />
+                    <Button variant="secondary" icon={FileDown} onClick={handleDownloadTemplate}>
+                        {t('users.downloadTemplate')}
+                    </Button>
                     <Button variant="secondary" icon={FileSpreadsheet} onClick={() => fileInputRef.current?.click()}>
-                        Importer Excel
+                        {t('users.importExcel')}
                     </Button>
                     <Button variant="primary" icon={Plus} onClick={handleOpenNew}>
-                        Nouvel utilisateur
+                        {t('users.newUser')}
                     </Button>
                 </div>
             </div>
@@ -219,8 +253,8 @@ const UserManagement = () => {
                             }`}
                         onClick={() => setFilterRole(roleFilter)}
                     >
-                        <p className="text-xs text-gray-500 font-medium mb-1 capitalize">
-                            {roleFilter === 'all' ? 'Total' : roleFilter}
+                        <p className="text-xs text-gray-500 font-medium mb-1">
+                            {getRoleLabel(roleFilter)}
                         </p>
                         <p className="text-2xl font-bold text-gray-900">{roleCounts[roleFilter]}</p>
                     </Card>
@@ -230,13 +264,13 @@ const UserManagement = () => {
             {/* Search Bar */}
             <Card className="p-4">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400`} size={20} />
                     <input
                         type="text"
-                        placeholder="Rechercher par nom ou email..."
+                        placeholder={t('users.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none`}
                     />
                 </div>
             </Card>
@@ -247,11 +281,11 @@ const UserManagement = () => {
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-gray-200">
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Utilisateur</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Rôle</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Info</th>
-                                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
+                                <th className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'} text-sm font-semibold text-gray-700`}>{t('users.user')}</th>
+                                <th className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'} text-sm font-semibold text-gray-700`}>{t('users.email')}</th>
+                                <th className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'} text-sm font-semibold text-gray-700`}>{t('users.role')}</th>
+                                <th className={`px-6 py-4 ${isRTL ? 'text-right' : 'text-left'} text-sm font-semibold text-gray-700`}>{t('users.info')}</th>
+                                <th className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'} text-sm font-semibold text-gray-700`}>{t('users.actions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -268,7 +302,7 @@ const UserManagement = () => {
                                     <td className="px-6 py-4 text-gray-600">{user.email}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${roleColors[user.role]}`}>
-                                            {user.role}
+                                            {t(`roles.${user.role}`)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
@@ -276,7 +310,7 @@ const UserManagement = () => {
                                         {user.birthDate && <div>🎂 {user.birthDate}</div>}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex justify-end gap-2">
+                                        <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} gap-2`}>
                                             <button
                                                 onClick={() => handleEdit(user)}
                                                 className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
@@ -304,7 +338,7 @@ const UserManagement = () => {
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">
-                            {editingUser ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
+                            {editingUser ? t('users.editUser') : t('users.newUser')}
                         </h2>
                         <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                             <X size={24} />
@@ -313,30 +347,30 @@ const UserManagement = () => {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('users.role')}</label>
                             <select
                                 value={role}
                                 onChange={(e) => setRole(e.target.value as Role)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                                 disabled={!!editingUser}
                             >
-                                <option value="student">Étudiant</option>
-                                <option value="teacher">Enseignant</option>
-                                <option value="parent">Parent</option>
-                                <option value="director">Directeur</option>
-                                {currentUser?.role === 'superadmin' && <option value="superadmin">Super Admin</option>}
+                                <option value="student">{t('roles.student')}</option>
+                                <option value="teacher">{t('roles.teacher')}</option>
+                                <option value="parent">{t('roles.parent')}</option>
+                                <option value="director">{t('roles.director')}</option>
+                                {currentUser?.role === 'superadmin' && <option value="superadmin">{t('roles.superadmin')}</option>}
                             </select>
                         </div>
 
                         <Input
-                            label="Nom complet"
+                            label={t('users.fullName')}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Jean Dupont"
                         />
 
                         <Input
-                            label="Email"
+                            label={t('users.email')}
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -345,7 +379,7 @@ const UserManagement = () => {
 
                         {(role === 'teacher' || role === 'parent') && (
                             <Input
-                                label="Numéro de téléphone"
+                                label={t('users.phone')}
                                 type="tel"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
@@ -355,7 +389,7 @@ const UserManagement = () => {
 
                         {role === 'student' && (
                             <Input
-                                label="Date de naissance"
+                                label={t('users.birthDate')}
                                 type="date"
                                 value={birthDate}
                                 onChange={(e) => setBirthDate(e.target.value)}
@@ -364,13 +398,13 @@ const UserManagement = () => {
 
                         {role === 'parent' && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Enfant associé</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('users.linkedChild')}</label>
                                 <select
                                     value={selectedStudentId}
                                     onChange={(e) => setSelectedStudentId(e.target.value)}
                                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                                 >
-                                    <option value="">Sélectionner un élève...</option>
+                                    <option value="">{t('users.selectStudent')}</option>
                                     {students.map(student => (
                                         <option key={student.id} value={student.id}>
                                             {student.name} ({student.email})
@@ -378,17 +412,17 @@ const UserManagement = () => {
                                     ))}
                                 </select>
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Sélectionnez l'élève dont ce parent est responsable.
+                                    {t('users.selectStudentHelp')}
                                 </p>
                             </div>
                         )}
 
                         <div className="flex justify-end gap-3 pt-4">
                             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
-                                Annuler
+                                {t('common.cancel')}
                             </Button>
                             <Button variant="primary" onClick={handleSave}>
-                                {editingUser ? 'Enregistrer' : 'Créer'}
+                                {editingUser ? t('common.save') : t('users.create')}
                             </Button>
                         </div>
                     </div>

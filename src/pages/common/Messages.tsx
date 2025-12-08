@@ -289,13 +289,13 @@ const Messages = () => {
         <div className="h-[calc(100vh-6rem)] flex flex-col">
             <Card className="flex-1 flex overflow-hidden !p-0 border-0 shadow-xl">
                 {/* Left Sidebar - Folders */}
-                <div className="w-64 bg-white border-r border-gray-100 flex flex-col">
+                <div className="w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col">
                     <div className="p-4">
                         <div className="flex items-center gap-3 mb-6 px-2">
-                            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600">
+                            <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center text-orange-600 dark:text-orange-400">
                                 <Inbox size={18} />
                             </div>
-                            <span className="font-bold text-gray-800">SmartMadrasa</span>
+                            <span className="font-bold text-gray-800 dark:text-white">SmartMadrasa</span>
                         </div>
                         <Button className="w-full justify-start mb-6" icon={PenSquare} onClick={handleComposeNew}>
                             {t('messages.newMessage')}
@@ -307,7 +307,7 @@ const Messages = () => {
                                     onClick={() => setSelectedFolder(folder.id)}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedFolder === folder.id
                                         ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     <folder.icon size={18} />
@@ -319,24 +319,24 @@ const Messages = () => {
                 </div>
 
                 {/* Middle Column - Message List */}
-                <div className="w-80 bg-gray-50/50 border-r border-gray-100 flex flex-col">
-                    <div className="p-4 border-b border-gray-100 bg-white">
-                        <h2 className="font-bold text-lg text-gray-800 mb-1">
+                <div className="w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col">
+                    <div className="p-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+                        <h2 className="font-bold text-lg text-gray-800 dark:text-white mb-1">
                             {folders.find(f => f.id === selectedFolder)?.label}
                         </h2>
-                        <p className="text-xs text-gray-500 mb-4">{filteredMessages.length} {t('messages.message').toLowerCase()}{filteredMessages.length !== 1 ? 's' : ''}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">{filteredMessages.length} {t('messages.message').toLowerCase()}{filteredMessages.length !== 1 ? 's' : ''}</p>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" size={16} />
                                 <input
                                     type="text"
                                     placeholder={t('messages.searchPlaceholder')}
-                                    className="w-full pl-9 pr-4 py-2 bg-gray-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-orange-200 outline-none"
+                                    className="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-slate-700 border-none rounded-lg text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900/30 outline-none"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg">
+                            <button className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
                                 <Filter size={18} />
                             </button>
                         </div>
@@ -384,11 +384,11 @@ const Messages = () => {
                 </div>
 
                 {/* Right Column - Message Detail */}
-                <div className="flex-1 bg-white flex flex-col">
+                <div className="flex-1 bg-white dark:bg-slate-800 flex flex-col">
                     {selectedMessage ? (
                         <>
                             {/* Toolbar */}
-                            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                            <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
                                 <div className="flex gap-2">
                                     <button
                                         className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
@@ -432,18 +432,18 @@ const Messages = () => {
                                             {selectedMessage.senderName.charAt(0)}
                                         </div>
                                         <div>
-                                            <h2 className="text-lg font-bold text-gray-900">{selectedMessage.senderName}</h2>
-                                            <p className="text-sm text-gray-500">{selectedMessage.senderRole}@smartmadrassa.com</p>
+                                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{selectedMessage.senderName}</h2>
+                                            <p className="text-sm text-gray-500 dark:text-slate-400">{selectedMessage.senderRole}@smartmadrassa.com</p>
                                         </div>
                                     </div>
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-sm text-gray-500 dark:text-slate-400">
                                         {new Date(selectedMessage.timestamp).toLocaleString(i18n.language)}
                                     </span>
                                 </div>
 
-                                <h1 className="text-2xl font-bold text-gray-900 mb-6">{selectedMessage.subject}</h1>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{selectedMessage.subject}</h1>
 
-                                <div className="prose prose-orange max-w-none text-gray-600 leading-relaxed whitespace-pre-wrap mb-8">
+                                <div className="prose prose-orange max-w-none text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap mb-8">
                                     {selectedMessage.content}
                                 </div>
 
@@ -480,7 +480,7 @@ const Messages = () => {
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+                        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-slate-500">
                             <Inbox size={48} className="mb-4 opacity-20" />
                             <p>{t('messages.selectMessage')}</p>
                         </div>

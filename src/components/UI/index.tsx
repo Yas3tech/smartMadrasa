@@ -11,7 +11,7 @@ export const Card = ({ children, className = '', onClick, id }: CardProps) => (
     <div
         id={id}
         onClick={onClick}
-        className={`bg-white rounded-2xl border border-gray-100 shadow-soft ${onClick ? 'cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5' : ''} ${className}`}
+        className={`bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-soft ${onClick ? 'cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5' : ''} ${className}`}
     >
         {children}
     </div>
@@ -34,10 +34,10 @@ export const Button = ({
     const baseStyles = "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
 
     const variants = {
-        primary: "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg",
-        secondary: "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-sm",
-        danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-transparent",
-        ghost: "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50"
+        primary: "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-200 dark:shadow-orange-900/30 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg",
+        secondary: "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-gray-300 shadow-sm",
+        danger: "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 border border-transparent",
+        ghost: "text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100/50 dark:hover:bg-slate-800"
     };
 
     const sizes = {
@@ -87,15 +87,15 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = ({ label, error, icon: Icon, className = '', ...props }: InputProps) => (
     <div className="w-full">
-        {label && <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>}
+        {label && <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">{label}</label>}
         <div className="relative">
             {Icon && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
                     <Icon size={18} />
                 </div>
             )}
             <input
-                className={`w-full ${Icon ? 'pl-10' : 'px-4'} py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 placeholder:text-gray-400 ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''} ${className}`}
+                className={`w-full ${Icon ? 'pl-10' : 'px-4'} py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-slate-500 ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''} ${className}`}
                 {...props}
             />
         </div>
@@ -116,16 +116,16 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
-                className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
+            <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
                 {title && (
-                    <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                        <h3 className="font-bold text-lg text-gray-800">{title}</h3>
+                    <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
+                        <h3 className="font-bold text-lg text-gray-800 dark:text-slate-100">{title}</h3>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+                            className="text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
                         >
                             &times;
                         </button>

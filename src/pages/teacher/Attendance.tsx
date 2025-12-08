@@ -1,24 +1,36 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button } from '../../components/UI';
 import { Check, X, Clock, Users as UsersIcon, Calendar, BookOpen, AlertCircle } from 'lucide-react';
 
 const Attendance = () => {
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const { students, attendance, markAttendance, updateAttendance, courses, classes } = useData();
+    const isRTL = i18n.language === 'ar';
 
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedCourseId, setSelectedCourseId] = useState<string>('');
     const [justificationMap, setJustificationMap] = useState<Record<string, string>>({});
 
-    // Filter courses for the current teacher
+    // Filter courses for the current teacher and selected date
     const teacherCourses = useMemo(() => {
+        const date = new Date(selectedDate);
+        const day = date.getUTCDay(); // 0=Sun, 1=Mon...
+        const dayOfWeek = day === 0 ? 7 : day;
+
+        let filtered = courses;
+
+        // Filter by role
         if (user?.role === 'teacher') {
-            return courses.filter(c => c.teacherId === user.id);
+            filtered = filtered.filter(c => c.teacherId === user.id);
         }
-        return courses; // Admin sees all
-    }, [courses, user]);
+
+        // Filter by day of week
+        return filtered.filter(c => c.dayOfWeek === dayOfWeek);
+    }, [courses, user, selectedDate]);
 
     const selectedCourse = teacherCourses.find(c => c.id === selectedCourseId);
 
@@ -29,13 +41,10 @@ const Attendance = () => {
     }, [selectedCourse, students]);
 
     const getAttendanceRecord = (studentId: string) => {
-        // Filter by date AND courseId (if we track by course)
-        // For now, assuming we track by date and student, but ideally we should filter by courseId too if multiple courses per day
-        // Updated logic: Check if there's an attendance record for this student, this date, and this course
         return attendance.find(a =>
             a.studentId === studentId &&
             a.date === selectedDate &&
-            (a.courseId === selectedCourseId || !a.courseId) // Fallback for legacy data
+            (a.courseId === selectedCourseId || !a.courseId)
         );
     };
 
@@ -83,45 +92,45 @@ const Attendance = () => {
             <div className="flex items-center justify-center h-96">
                 <Card className="p-8 text-center">
                     <UsersIcon size={48} className="mx-auto mb-4 text-gray-300" />
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Accès restreint</h2>
-                    <p className="text-gray-600">Cette page est réservée aux enseignants et directeurs.</p>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">{t('attendance.restrictedAccess')}</h2>
+                    <p className="text-gray-600">{t('attendance.restrictedAccessDesc')}</p>
                 </Card>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Gestion des Présences</h1>
-                    <p className="text-gray-600">Marquer la présence par cours</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('attendance.title')}</h1>
+                    <p className="text-gray-600 dark:text-slate-400">{t('attendance.subtitle')}</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <Calendar className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500`} size={18} />
                         <input
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                            className={`${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 outline-none`}
                         />
                     </div>
 
                     <div className="relative min-w-[200px]">
-                        <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <BookOpen className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500`} size={18} />
                         <select
                             value={selectedCourseId}
                             onChange={(e) => setSelectedCourseId(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none appearance-none bg-white"
+                            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 rounded-xl border border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 outline-none appearance-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white`}
                         >
-                            <option value="">Sélectionner un cours</option>
+                            <option value="">{t('attendance.selectCourse')}</option>
                             {teacherCourses.map(course => {
                                 const classGroup = classes.find(c => c.id === course.classId);
                                 return (
                                     <option key={course.id} value={course.id}>
-                                        {course.subject} - {classGroup?.name || 'Classe inconnue'} ({course.startTime})
+                                        {course.subject} - {classGroup?.name || t('attendance.unknownClass')} ({course.startTime})
                                     </option>
                                 );
                             })}
@@ -132,68 +141,68 @@ const Attendance = () => {
 
             {!selectedCourse ? (
                 <Card className="p-12 text-center border-dashed border-2">
-                    <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-orange-500/20 dark:bg-orange-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
                         <BookOpen className="text-orange-500" size={32} />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Aucun cours sélectionné</h3>
-                    <p className="text-gray-500 max-w-md mx-auto">
-                        Veuillez sélectionner un cours et une date pour commencer à marquer la présence.
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{t('attendance.noCourseSelected')}</h3>
+                    <p className="text-gray-500 dark:text-slate-400 max-w-md mx-auto">
+                        {t('attendance.noCourseSelectedDesc')}
                     </p>
                 </Card>
             ) : (
                 <>
                     {/* Stats Cards */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <Card className="p-4 border-l-4 border-l-green-500">
+                        <Card className={`p-4 ${isRTL ? 'border-r-4 border-r-green-500' : 'border-l-4 border-l-green-500'}`}>
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-50 rounded-lg">
-                                    <Check className="text-green-600" size={20} />
+                                <div className="p-2 bg-green-500/20 dark:bg-green-500/30 rounded-lg">
+                                    <Check className="text-green-600 dark:text-green-400" size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Présents</p>
-                                    <p className="text-2xl font-bold text-gray-900">{stats.present}</p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">{t('attendance.present')}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.present}</p>
                                 </div>
                             </div>
                         </Card>
-                        <Card className="p-4 border-l-4 border-l-red-500">
+                        <Card className={`p-4 ${isRTL ? 'border-r-4 border-r-red-500' : 'border-l-4 border-l-red-500'}`}>
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-red-50 rounded-lg">
-                                    <X className="text-red-600" size={20} />
+                                <div className="p-2 bg-red-500/20 dark:bg-red-500/30 rounded-lg">
+                                    <X className="text-red-600 dark:text-red-400" size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Absents</p>
-                                    <p className="text-2xl font-bold text-gray-900">{stats.absent}</p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">{t('attendance.absent')}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.absent}</p>
                                 </div>
                             </div>
                         </Card>
-                        <Card className="p-4 border-l-4 border-l-yellow-500">
+                        <Card className={`p-4 ${isRTL ? 'border-r-4 border-r-yellow-500' : 'border-l-4 border-l-yellow-500'}`}>
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-yellow-50 rounded-lg">
-                                    <Clock className="text-yellow-600" size={20} />
+                                <div className="p-2 bg-yellow-500/20 dark:bg-yellow-500/30 rounded-lg">
+                                    <Clock className="text-yellow-600 dark:text-yellow-400" size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Retard</p>
-                                    <p className="text-2xl font-bold text-gray-900">{stats.late}</p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">{t('attendance.late')}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.late}</p>
                                 </div>
                             </div>
                         </Card>
-                        <Card className="p-4 border-l-4 border-l-gray-300">
+                        <Card className={`p-4 ${isRTL ? 'border-r-4 border-r-gray-400' : 'border-l-4 border-l-gray-400'}`}>
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-50 rounded-lg">
-                                    <UsersIcon className="text-gray-400" size={20} />
+                                <div className="p-2 bg-gray-500/20 dark:bg-gray-500/30 rounded-lg">
+                                    <UsersIcon className="text-gray-500 dark:text-gray-400" size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-gray-500">Non marqués</p>
-                                    <p className="text-2xl font-bold text-gray-900">{stats.unmarked}</p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">{t('attendance.unmarked')}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.unmarked}</p>
                                 </div>
                             </div>
                         </Card>
                     </div>
 
                     <Card>
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-gray-900">Liste des élèves</h2>
-                            <span className="text-sm text-gray-500">{courseStudents.length} élèves</span>
+                        <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('attendance.studentList')}</h2>
+                            <span className="text-sm text-gray-500 dark:text-slate-400">{courseStudents.length} {t('attendance.students')}</span>
                         </div>
                         <div className="divide-y divide-gray-100">
                             {courseStudents.map(student => {
@@ -212,12 +221,12 @@ const Attendance = () => {
                                                 <p className="text-sm text-gray-500">{student.email}</p>
                                                 {record?.isJustified && (
                                                     <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium mt-1">
-                                                        <Check size={12} /> Justifié: {record.justification}
+                                                        <Check size={12} /> {t('attendance.justified')}: {record.justification}
                                                     </span>
                                                 )}
                                                 {isAbsent && !record?.isJustified && (
                                                     <span className="inline-flex items-center gap-1 text-xs text-red-600 font-medium mt-1">
-                                                        <AlertCircle size={12} /> Non justifié
+                                                        <AlertCircle size={12} /> {t('attendance.notJustified')}
                                                     </span>
                                                 )}
                                             </div>
@@ -232,7 +241,7 @@ const Attendance = () => {
                                                     onClick={() => handleMarkAttendance(student.id, 'present')}
                                                     className={status === 'present' ? 'bg-green-600 hover:bg-green-700 border-green-600' : ''}
                                                 >
-                                                    Présent
+                                                    {t('attendance.presentBtn')}
                                                 </Button>
                                                 <Button
                                                     variant={status === 'late' ? 'primary' : 'secondary'}
@@ -241,7 +250,7 @@ const Attendance = () => {
                                                     onClick={() => handleMarkAttendance(student.id, 'late')}
                                                     className={status === 'late' ? 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-white' : ''}
                                                 >
-                                                    Retard
+                                                    {t('attendance.lateBtn')}
                                                 </Button>
                                                 <Button
                                                     variant={status === 'absent' ? 'primary' : 'secondary'}
@@ -250,7 +259,7 @@ const Attendance = () => {
                                                     onClick={() => handleMarkAttendance(student.id, 'absent')}
                                                     className={status === 'absent' ? 'bg-red-600 hover:bg-red-700 border-red-600' : ''}
                                                 >
-                                                    Absent
+                                                    {t('attendance.absentBtn')}
                                                 </Button>
                                             </div>
 
@@ -259,11 +268,11 @@ const Attendance = () => {
                                                 <div className="flex gap-2 animate-fadeIn mt-2">
                                                     <input
                                                         type="text"
-                                                        placeholder={isAbsent ? "Motif d'absence (optionnel)" : "Motif de retard (optionnel)"}
+                                                        placeholder={isAbsent ? t('attendance.absenceReason') : t('attendance.lateReason')}
                                                         className="flex-1 text-sm px-3 py-1.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 outline-none"
                                                         value={justificationMap[student.id] || record?.justification || ''}
                                                         onChange={(e) => handleJustificationChange(student.id, e.target.value)}
-                                                        onBlur={() => handleMarkAttendance(student.id, status)} // Save on blur
+                                                        onBlur={() => handleMarkAttendance(student.id, status)}
                                                     />
                                                 </div>
                                             )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeToTeacherCommentsByPeriod } from '../../services/teacherComments';
@@ -8,17 +9,19 @@ import type { TeacherComment } from '../../types/bulletin';
 import ClassBulletinListModal from '../../components/bulletin/ClassBulletinListModal';
 
 const BulletinDashboard: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const { academicPeriods, classes, publishPeriodBulletins, students, courses, grades } = useData();
     const { user } = useAuth();
     const [selectedPeriod, setSelectedPeriod] = useState<string>('');
     const [periodComments, setPeriodComments] = useState<TeacherComment[]>([]);
     const [viewingClassId, setViewingClassId] = useState<string | null>(null);
+    const isRTL = i18n.language === 'ar';
 
     // Only directors can access this page
     if (user?.role !== 'director' && user?.role !== 'superadmin') {
         return (
             <div className="text-center py-12">
-                <p className="text-gray-500">Accès réservé aux directeurs</p>
+                <p className="text-gray-500">{t('bulletinDashboard.restrictedAccess')}</p>
             </div>
         );
     }
@@ -89,16 +92,16 @@ const BulletinDashboard: React.FC = () => {
 
     const handlePublishBulletins = async () => {
         if (!selectedPeriod) {
-            toast.error('Veuillez sélectionner une période');
+            toast.error(t('bulletinDashboard.selectPeriodError'));
             return;
         }
 
-        if (window.confirm('Êtes-vous sûr de vouloir publier les bulletins pour cette période ? Les élèves et parents pourront y accéder immédiatement.')) {
+        if (window.confirm(t('bulletinDashboard.confirmPublishAll'))) {
             try {
                 await publishPeriodBulletins(selectedPeriod);
-                toast.success('Bulletins publiés avec succès');
+                toast.success(t('bulletinDashboard.publishSuccess'));
             } catch (error) {
-                toast.error('Erreur lors de la publication');
+                toast.error(t('bulletinDashboard.publishError'));
                 console.error(error);
             }
         }
@@ -107,14 +110,14 @@ const BulletinDashboard: React.FC = () => {
     const handlePublishClass = async (_classId: string) => {
         if (!selectedPeriod || !user) return;
 
-        if (window.confirm('Confirmer la publication des bulletins pour cette classe ?')) {
+        if (window.confirm(t('bulletinDashboard.confirmPublishClass'))) {
             try {
                 // Mark the period as published so students can see it
                 await publishPeriodBulletins(selectedPeriod);
 
-                toast.success('Bulletins de la classe publiés');
+                toast.success(t('bulletinDashboard.classPublishSuccess'));
             } catch (error) {
-                toast.error('Erreur lors de la publication');
+                toast.error(t('bulletinDashboard.publishError'));
                 console.error(error);
             }
         }
@@ -127,23 +130,23 @@ const BulletinDashboard: React.FC = () => {
     const canPublishAll = validationStats.validatedClasses === validationStats.totalClasses;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div>
-                <h1 className="text-3xl font-bold text-gray-800">Tableau de Bord Bulletins</h1>
-                <p className="text-gray-600 mt-2">Vue d'ensemble et publication des bulletins scolaires</p>
+                <h1 className="text-3xl font-bold text-gray-800">{t('bulletinDashboard.title')}</h1>
+                <p className="text-gray-600 mt-2">{t('bulletinDashboard.subtitle')}</p>
             </div>
 
             {/* Period Selector */}
             <div className="bg-white rounded-lg shadow-md p-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sélectionner une période
+                    {t('bulletinDashboard.selectPeriod')}
                 </label>
                 <select
                     value={selectedPeriod}
                     onChange={(e) => setSelectedPeriod(e.target.value)}
                     className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
-                    <option value="">-- Choisir une période --</option>
+                    <option value="">{t('bulletinDashboard.choosePeriod')}</option>
                     {academicPeriods.map((period) => (
                         <option key={period.id} value={period.id}>
                             {period.name} ({period.academicYear})
@@ -159,7 +162,7 @@ const BulletinDashboard: React.FC = () => {
                         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-blue-100 text-sm">Classes Totales</p>
+                                    <p className="text-blue-100 text-sm">{t('bulletinDashboard.totalClasses')}</p>
                                     <p className="text-3xl font-bold mt-1">{validationStats.totalClasses}</p>
                                 </div>
                                 <Users size={40} className="text-blue-200" />
@@ -168,7 +171,7 @@ const BulletinDashboard: React.FC = () => {
                         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-green-100 text-sm">Classes Validées</p>
+                                    <p className="text-green-100 text-sm">{t('bulletinDashboard.validatedClasses')}</p>
                                     <p className="text-3xl font-bold mt-1">{validationStats.validatedClasses}</p>
                                 </div>
                                 <CheckCircle size={40} className="text-green-200" />
@@ -177,7 +180,7 @@ const BulletinDashboard: React.FC = () => {
                         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-orange-100 text-sm">Classes en Attente</p>
+                                    <p className="text-orange-100 text-sm">{t('bulletinDashboard.pendingClasses')}</p>
                                     <p className="text-3xl font-bold mt-1">{validationStats.pendingClasses}</p>
                                 </div>
                                 <Clock size={40} className="text-orange-200" />
@@ -189,7 +192,7 @@ const BulletinDashboard: React.FC = () => {
                     <div className="bg-white rounded-lg shadow-md p-6">
                         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                             <FileText size={24} />
-                            État de Validation par Classe
+                            {t('bulletinDashboard.validationStatusByClass')}
                         </h2>
                         <div className="space-y-3">
                             {classes.map((classItem) => {
@@ -213,7 +216,7 @@ const BulletinDashboard: React.FC = () => {
                                             <div>
                                                 <p className="font-medium text-gray-800">{classItem.name}</p>
                                                 <p className="text-sm text-gray-500">
-                                                    {students.filter(s => (s as any).classId === classItem.id).length} élèves • {progress}% validé
+                                                    {students.filter(s => (s as any).classId === classItem.id).length} {t('bulletinDashboard.students')} • {progress}% {t('bulletinDashboard.validated')}
                                                 </p>
                                             </div>
                                         </div>
@@ -221,7 +224,7 @@ const BulletinDashboard: React.FC = () => {
                                             <button
                                                 onClick={() => handleViewBulletin(classItem.id)}
                                                 className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
-                                                title="Voir les bulletins"
+                                                title={t('bulletinDashboard.viewBulletins')}
                                             >
                                                 <Eye size={20} />
                                             </button>
@@ -232,11 +235,11 @@ const BulletinDashboard: React.FC = () => {
                                                     className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1"
                                                 >
                                                     <Send size={14} />
-                                                    Publier
+                                                    {t('bulletinDashboard.publish')}
                                                 </button>
                                             ) : (
                                                 <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                                                    En attente
+                                                    {t('bulletinDashboard.pending')}
                                                 </span>
                                             )}
                                         </div>
@@ -248,12 +251,12 @@ const BulletinDashboard: React.FC = () => {
 
                     {/* Global Publication Actions */}
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold mb-4">Publication Globale</h2>
+                        <h2 className="text-xl font-semibold mb-4">{t('bulletinDashboard.globalPublication')}</h2>
                         {!canPublishAll && (
                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-                                <p className="text-orange-800 font-medium">⚠️ Attention</p>
+                                <p className="text-orange-800 font-medium">⚠️ {t('bulletinDashboard.warning')}</p>
                                 <p className="text-orange-700 text-sm mt-1">
-                                    {validationStats.pendingClasses} classe(s) n'ont pas encore validé leurs notes.
+                                    {t('bulletinDashboard.pendingClassesWarning', { count: validationStats.pendingClasses })}
                                 </p>
                             </div>
                         )}
@@ -266,7 +269,7 @@ const BulletinDashboard: React.FC = () => {
                                 }`}
                         >
                             <Send size={20} />
-                            Publier TOUS les Bulletins
+                            {t('bulletinDashboard.publishAllBulletins')}
                         </button>
                     </div>
                 </>
@@ -275,7 +278,7 @@ const BulletinDashboard: React.FC = () => {
             {!selectedPeriod && (
                 <div className="bg-white rounded-lg shadow-md p-12 text-center">
                     <Calendar size={64} className="mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-500 text-lg">Sélectionnez une période pour voir le tableau de bord</p>
+                    <p className="text-gray-500 text-lg">{t('bulletinDashboard.selectPeriodPrompt')}</p>
                 </div>
             )}
 

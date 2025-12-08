@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button } from '../../components/UI';
 import {
@@ -6,39 +7,125 @@ import {
     Globe,
     Moon,
     Sun,
-    Shield,
     Monitor,
     Mail,
     MessageSquare,
     Calendar,
     GraduationCap,
-    Save,
-    Settings as SettingsIcon
+    Save
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+// Settings interface
+interface UserSettings {
+    notifications: {
+        email: boolean;
+        push: boolean;
+        messages: boolean;
+        grades: boolean;
+        attendance: boolean;
+        events: boolean;
+    };
+    display: {
+        language: string;
+        theme: 'light' | 'dark' | 'auto';
+        compactView: boolean;
+    };
+}
+
+const defaultSettings: UserSettings = {
+    notifications: {
+        email: true,
+        push: true,
+        messages: true,
+        grades: true,
+        attendance: true,
+        events: true
+    },
+    display: {
+        language: 'fr',
+        theme: 'light',
+        compactView: false
+    }
+};
+
+// Load settings from localStorage
+const loadSettings = (): UserSettings => {
+    try {
+        const saved = localStorage.getItem('smartschool_settings');
+        if (saved) {
+            return { ...defaultSettings, ...JSON.parse(saved) };
+        }
+    } catch (e) {
+        console.error('Error loading settings:', e);
+    }
+    return defaultSettings;
+};
+
+// Apply theme to document
+const applyTheme = (theme: 'light' | 'dark' | 'auto') => {
+    const root = document.documentElement;
+
+    if (theme === 'dark') {
+        root.classList.add('dark');
+    } else if (theme === 'light') {
+        root.classList.remove('dark');
+    } else {
+        // Auto - check system preference
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            root.classList.add('dark');
+        } else {
+            root.classList.remove('dark');
+        }
+    }
+};
 
 const Settings = () => {
-    const { user } = useAuth();
+    const { t, i18n } = useTranslation();
+    useAuth();
+
+    // Load saved settings
+    const savedSettings = loadSettings();
 
     // Notification Settings
-    const [emailNotifications, setEmailNotifications] = useState(true);
-    const [pushNotifications, setPushNotifications] = useState(true);
-    const [messageNotifications, setMessageNotifications] = useState(true);
-    const [gradeNotifications, setGradeNotifications] = useState(true);
-    const [attendanceNotifications, setAttendanceNotifications] = useState(true);
-    const [eventNotifications, setEventNotifications] = useState(true);
+    const [emailNotifications, setEmailNotifications] = useState(savedSettings.notifications.email);
+    const [pushNotifications, setPushNotifications] = useState(savedSettings.notifications.push);
+    const [messageNotifications, setMessageNotifications] = useState(savedSettings.notifications.messages);
+    const [gradeNotifications, setGradeNotifications] = useState(savedSettings.notifications.grades);
+    const [attendanceNotifications, setAttendanceNotifications] = useState(savedSettings.notifications.attendance);
+    const [eventNotifications, setEventNotifications] = useState(savedSettings.notifications.events);
 
     // Display Settings
-    const [language, setLanguage] = useState('fr');
-    const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('light');
-    const [compactView, setCompactView] = useState(false);
+    const [language, setLanguage] = useState(i18n.language || savedSettings.display.language);
+    const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>(savedSettings.display.theme);
+    const [compactView, setCompactView] = useState(savedSettings.display.compactView);
 
-    // Privacy Settings
-    const [profileVisibility, setProfileVisibility] = useState('public');
-    const [showEmail, setShowEmail] = useState(false);
+    // Apply theme on mount and when theme changes
+    useEffect(() => {
+        applyTheme(theme);
+    }, [theme]);
+
+    // Apply compact view
+    useEffect(() => {
+        if (compactView) {
+            document.body.classList.add('compact-view');
+        } else {
+            document.body.classList.remove('compact-view');
+        }
+    }, [compactView]);
+
+    const handleLanguageChange = (newLang: string) => {
+        setLanguage(newLang);
+        i18n.changeLanguage(newLang);
+    };
+
+    const handleThemeChange = (newTheme: 'light' | 'dark' | 'auto') => {
+        setTheme(newTheme);
+        applyTheme(newTheme);
+    };
 
     const handleSaveSettings = () => {
-        // In real app, would save to Firebase
-        const settings = {
+        const settings: UserSettings = {
             notifications: {
                 email: emailNotifications,
                 push: pushNotifications,
@@ -51,24 +138,26 @@ const Settings = () => {
                 language,
                 theme,
                 compactView
-            },
-            privacy: {
-                profileVisibility,
-                showEmail
             }
         };
-        console.log('Saving settings:', settings);
-        alert('Paramètres enregistrés avec succès!');
+
+        // Save to localStorage
+        localStorage.setItem('smartschool_settings', JSON.stringify(settings));
+
+        // Apply changes
+        applyTheme(theme);
+
+        toast.success(t('settings.settingsSaved'));
     };
 
-    const isAdmin = user?.role === 'director' || user?.role === 'superadmin';
+    const isRTL = i18n.language === 'ar';
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h1>
                 <Button variant="primary" icon={Save} onClick={handleSaveSettings}>
-                    Enregistrer les modifications
+                    {t('settings.saveSettings')}
                 </Button>
             </div>
 
@@ -77,24 +166,14 @@ const Settings = () => {
                 <div className="lg:col-span-1">
                     <Card className="p-4">
                         <nav className="space-y-1">
-                            <a href="#notifications" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-50 text-orange-600 font-medium">
+                            <a href="#notifications" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium">
                                 <Bell size={20} />
-                                Notifications
+                                {t('settings.notifications_settings')}
                             </a>
-                            <a href="#display" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+                            <a href="#display" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                                 <Monitor size={20} />
-                                Affichage
+                                {t('settings.appearance')}
                             </a>
-                            <a href="#privacy" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                                <Shield size={20} />
-                                Confidentialité
-                            </a>
-                            {isAdmin && (
-                                <a href="#system" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                                    <SettingsIcon size={20} />
-                                    Système
-                                </a>
-                            )}
                         </nav>
                     </Card>
                 </div>
@@ -104,23 +183,23 @@ const Settings = () => {
                     {/* Notifications */}
                     <Card className="p-6" id="notifications">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-orange-100 rounded-lg">
-                                <Bell className="text-orange-600" size={24} />
+                            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                                <Bell className="text-orange-600 dark:text-orange-400" size={24} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
-                                <p className="text-sm text-gray-500">Gérez vos préférences de notification</p>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('settings.notifications_settings')}</h2>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">{t('settings.notificationsSubtitle')}</p>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             {/* Email Notifications */}
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
                                 <div className="flex items-center gap-3">
-                                    <Mail className="text-gray-600" size={20} />
+                                    <Mail className="text-gray-600 dark:text-slate-400" size={20} />
                                     <div>
-                                        <p className="font-semibold text-gray-900">Notifications par email</p>
-                                        <p className="text-sm text-gray-500">Recevoir des notifications par email</p>
+                                        <p className="font-semibold text-gray-900 dark:text-white">{t('settings.emailNotifications')}</p>
+                                        <p className="text-sm text-gray-500 dark:text-slate-400">{t('settings.emailNotificationsDesc')}</p>
                                     </div>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
@@ -135,12 +214,12 @@ const Settings = () => {
                             </div>
 
                             {/* Push Notifications */}
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
                                 <div className="flex items-center gap-3">
                                     <Bell className="text-gray-600" size={20} />
                                     <div>
-                                        <p className="font-semibold text-gray-900">Notifications push</p>
-                                        <p className="text-sm text-gray-500">Recevoir des notifications dans l'app</p>
+                                        <p className="font-semibold text-gray-900">{t('settings.pushNotifications')}</p>
+                                        <p className="text-sm text-gray-500">{t('settings.pushNotificationsDesc')}</p>
                                     </div>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
@@ -155,13 +234,13 @@ const Settings = () => {
                             </div>
 
                             {/* Specific Notification Types */}
-                            <div className="border-t pt-4 mt-4">
-                                <p className="text-sm font-semibold text-gray-700 mb-3">Types de notifications</p>
+                            <div className={`border-t pt-4 mt-4 ${isRTL ? 'border-r-0' : 'border-l-0'}`}>
+                                <p className="text-sm font-semibold text-gray-700 mb-3">{t('settings.notificationTypes')}</p>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <MessageSquare className="text-gray-500" size={16} />
-                                            <span className="text-sm text-gray-700">Messages</span>
+                                            <span className="text-sm text-gray-700">{t('common.messages')}</span>
                                         </div>
                                         <input
                                             type="checkbox"
@@ -173,7 +252,7 @@ const Settings = () => {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <GraduationCap className="text-gray-500" size={16} />
-                                            <span className="text-sm text-gray-700">Notes</span>
+                                            <span className="text-sm text-gray-700">{t('sidebar.grades')}</span>
                                         </div>
                                         <input
                                             type="checkbox"
@@ -185,7 +264,7 @@ const Settings = () => {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Bell className="text-gray-500" size={16} />
-                                            <span className="text-sm text-gray-700">Présence</span>
+                                            <span className="text-sm text-gray-700">{t('sidebar.attendance')}</span>
                                         </div>
                                         <input
                                             type="checkbox"
@@ -197,7 +276,7 @@ const Settings = () => {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <Calendar className="text-gray-500" size={16} />
-                                            <span className="text-sm text-gray-700">Événements</span>
+                                            <span className="text-sm text-gray-700">{t('calendar.event')}</span>
                                         </div>
                                         <input
                                             type="checkbox"
@@ -214,79 +293,78 @@ const Settings = () => {
                     {/* Display Settings */}
                     <Card className="p-6" id="display">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <Monitor className="text-blue-600" size={24} />
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                <Monitor className="text-blue-600 dark:text-blue-400" size={24} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Affichage</h2>
-                                <p className="text-sm text-gray-500">Personnalisez l'apparence de l'application</p>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('settings.appearance')}</h2>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">{t('settings.appearanceSubtitle')}</p>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             {/* Language */}
-                            <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <Globe className="text-gray-600" size={20} />
-                                    <label className="font-semibold text-gray-900">Langue</label>
+                                    <Globe className="text-gray-600 dark:text-slate-400" size={20} />
+                                    <label className="font-semibold text-gray-900 dark:text-white">{t('settings.language')}</label>
                                 </div>
                                 <select
                                     value={language}
-                                    onChange={(e) => setLanguage(e.target.value)}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                                    onChange={(e) => handleLanguageChange(e.target.value)}
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 outline-none"
                                 >
                                     <option value="fr">Français</option>
                                     <option value="nl">Nederlands</option>
                                     <option value="ar">العربية</option>
-                                    <option value="en">English</option>
                                 </select>
                             </div>
 
                             {/* Theme */}
-                            <div className="p-4 bg-gray-50 rounded-xl">
+                            <div className="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <Sun className="text-gray-600" size={20} />
-                                    <label className="font-semibold text-gray-900">Thème</label>
+                                    <Sun className="text-gray-600 dark:text-slate-400" size={20} />
+                                    <label className="font-semibold text-gray-900 dark:text-white">{t('settings.theme')}</label>
                                 </div>
                                 <div className="grid grid-cols-3 gap-3">
                                     <button
-                                        onClick={() => setTheme('light')}
+                                        onClick={() => handleThemeChange('light')}
                                         className={`p-4 rounded-lg border-2 transition-colors ${theme === 'light'
-                                            ? 'border-orange-500 bg-orange-50'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
+                                            : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                                             }`}
                                     >
-                                        <Sun className="mx-auto mb-2 text-gray-600" size={24} />
-                                        <p className="text-sm font-medium text-gray-900">Clair</p>
+                                        <Sun className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.light')}</p>
                                     </button>
                                     <button
-                                        onClick={() => setTheme('dark')}
+                                        onClick={() => handleThemeChange('dark')}
                                         className={`p-4 rounded-lg border-2 transition-colors ${theme === 'dark'
-                                            ? 'border-orange-500 bg-orange-50'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
+                                            : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                                             }`}
                                     >
-                                        <Moon className="mx-auto mb-2 text-gray-600" size={24} />
-                                        <p className="text-sm font-medium text-gray-900">Sombre</p>
+                                        <Moon className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.dark')}</p>
                                     </button>
                                     <button
-                                        onClick={() => setTheme('auto')}
+                                        onClick={() => handleThemeChange('auto')}
                                         className={`p-4 rounded-lg border-2 transition-colors ${theme === 'auto'
-                                            ? 'border-orange-500 bg-orange-50'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
+                                            : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                                             }`}
                                     >
-                                        <Monitor className="mx-auto mb-2 text-gray-600" size={24} />
-                                        <p className="text-sm font-medium text-gray-900">Auto</p>
+                                        <Monitor className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.auto')}</p>
                                     </button>
                                 </div>
                             </div>
 
                             {/* Compact View */}
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
                                 <div>
-                                    <p className="font-semibold text-gray-900">Mode compact</p>
-                                    <p className="text-sm text-gray-500">Affichage plus dense</p>
+                                    <p className="font-semibold text-gray-900 dark:text-white">{t('settings.compactMode')}</p>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400">{t('settings.compactModeDesc')}</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
@@ -295,85 +373,11 @@ const Settings = () => {
                                         onChange={(e) => setCompactView(e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                    <div className="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-100 dark:peer-focus:ring-orange-900/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-slate-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                                 </label>
                             </div>
                         </div>
                     </Card>
-
-                    {/* Privacy Settings */}
-                    <Card className="p-6" id="privacy">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-green-100 rounded-lg">
-                                <Shield className="text-green-600" size={24} />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900">Confidentialité</h2>
-                                <p className="text-sm text-gray-500">Contrôlez vos informations personnelles</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="p-4 bg-gray-50 rounded-xl">
-                                <label className="font-semibold text-gray-900 mb-3 block">Visibilité du profil</label>
-                                <select
-                                    value={profileVisibility}
-                                    onChange={(e) => setProfileVisibility(e.target.value)}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                                >
-                                    <option value="public">Public (tous les utilisateurs)</option>
-                                    <option value="school">École (enseignants et admin)</option>
-                                    <option value="private">Privé (seulement moi)</option>
-                                </select>
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div>
-                                    <p className="font-semibold text-gray-900">Afficher l'email</p>
-                                    <p className="text-sm text-gray-500">Rendre votre email visible aux autres</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={showEmail}
-                                        onChange={(e) => setShowEmail(e.target.checked)}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
-                                </label>
-                            </div>
-                        </div>
-                    </Card>
-
-                    {/* System Settings (Admin Only) */}
-                    {isAdmin && (
-                        <Card className="p-6" id="system">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-2 bg-purple-100 rounded-lg">
-                                    <SettingsIcon className="text-purple-600" size={24} />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-900">Paramètres système</h2>
-                                    <p className="text-sm text-gray-500">Configuration de l'école</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <Button variant="secondary" className="w-full justify-start">
-                                    Gérer l'année académique
-                                </Button>
-                                <Button variant="secondary" className="w-full justify-start">
-                                    Configuration des notes
-                                </Button>
-                                <Button variant="secondary" className="w-full justify-start">
-                                    Politiques de présence
-                                </Button>
-                                <Button variant="secondary" className="w-full justify-start">
-                                    Intégrations
-                                </Button>
-                            </div>
-                        </Card>
-                    )}
                 </div>
             </div>
         </div>

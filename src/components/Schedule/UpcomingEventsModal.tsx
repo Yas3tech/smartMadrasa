@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../UI';
 import { X, Calendar, Clock, BookOpen, FileText, GraduationCap } from 'lucide-react';
 import type { Event, Homework } from '../../types';
@@ -14,6 +15,8 @@ type UpcomingItem =
     | { type: 'homework'; data: Homework; date: Date };
 
 const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEventsModalProps) => {
+    const { t, i18n } = useTranslation();
+
     // Combine events and homeworks
     const upcomingItems: UpcomingItem[] = [
         ...events
@@ -25,14 +28,15 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
     ].sort((a, b) => a.date.getTime() - b.date.getTime());
 
     const eventTypeConfig = {
-        lesson: { icon: BookOpen, color: 'bg-blue-100 text-blue-700 border-blue-300', label: 'Cours' },
-        homework: { icon: FileText, color: 'bg-green-100 text-green-700 border-green-300', label: 'Devoir' },
-        exam: { icon: GraduationCap, color: 'bg-red-100 text-red-700 border-red-300', label: 'Examen' },
-        event: { icon: Calendar, color: 'bg-purple-100 text-purple-700 border-purple-300', label: 'Événement' }
+        lesson: { icon: BookOpen, color: 'bg-blue-100 text-blue-700 border-blue-300', label: t('calendar.lesson') },
+        homework: { icon: FileText, color: 'bg-green-100 text-green-700 border-green-300', label: t('calendar.homework') },
+        exam: { icon: GraduationCap, color: 'bg-red-100 text-red-700 border-red-300', label: t('calendar.exam') },
+        event: { icon: Calendar, color: 'bg-purple-100 text-purple-700 border-purple-300', label: t('calendar.event') },
+        evaluation: { icon: GraduationCap, color: 'bg-orange-100 text-orange-700 border-orange-300', label: t('grades.evaluation') }
     };
 
     const formatDate = (date: Date) => {
-        return date.toLocaleDateString('fr-FR', {
+        return date.toLocaleDateString(i18n.language, {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -41,7 +45,7 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
     };
 
     const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' });
     };
 
     return (
@@ -50,7 +54,7 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
                 <div className="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 border-b">
                     <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Calendar className="text-orange-600" size={28} />
-                        À venir
+                        {t('calendar.upcoming')}
                     </h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X size={24} />
@@ -60,14 +64,14 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
                 {upcomingItems.length === 0 ? (
                     <div className="text-center py-12">
                         <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
-                        <p className="text-gray-500">Aucun événement à venir</p>
+                        <p className="text-gray-500">{t('calendar.noUpcomingEvents')}</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         {upcomingItems.map((item) => {
                             if (item.type === 'event') {
                                 const event = item.data;
-                                const config = eventTypeConfig[event.type];
+                                const config = eventTypeConfig[event.type] || eventTypeConfig.event;
                                 const Icon = config.icon;
 
                                 return (
@@ -134,7 +138,7 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
                                                 <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
                                                     <span className="flex items-center gap-1">
                                                         <Calendar size={14} />
-                                                        À rendre : {formatDate(item.date)}
+                                                        {t('homework.dueFor')} : {formatDate(item.date)}
                                                     </span>
                                                     {homework.maxGrade && (
                                                         <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
@@ -153,7 +157,7 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
 
                 <div className="mt-6 pt-4 border-t flex justify-end">
                     <Button variant="secondary" onClick={onClose}>
-                        Fermer
+                        {t('common.close')}
                     </Button>
                 </div>
             </div>
