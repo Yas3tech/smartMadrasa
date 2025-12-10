@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { Upload, X, File as FileIcon, Loader } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFileWithProgress } from '../../services/storage';
@@ -35,7 +36,7 @@ export const FileUpload = ({
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (file.size > maxSizeBytes) {
-                alert(t('fileUpload.error.fileTooBig', { name: file.name, size: maxSizeMB }));
+                toast.error(t('fileUpload.error.fileTooBig', { name: file.name, size: maxSizeMB }));
                 continue;
             }
             validFiles.push(file);
@@ -72,7 +73,7 @@ export const FileUpload = ({
             onFilesUploaded(uploadedUrls);
         } catch (error) {
             console.error('Error uploading files:', error);
-            alert(t('fileUpload.error.uploadFailed'));
+            toast.error(t('fileUpload.error.uploadFailed'));
         } finally {
             setUploading(false);
             if (fileInputRef.current) {

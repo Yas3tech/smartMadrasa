@@ -17,7 +17,6 @@ const Profile = lazy(() => import('./pages/common/Profile'));
 const Settings = lazy(() => import('./pages/common/Settings'));
 const Homework = lazy(() => import('./pages/common/Homework'));
 const Schedule = lazy(() => import('./pages/common/Schedule'));
-const Calendar = lazy(() => import('./pages/common/Calendar'));
 const Announcements = lazy(() => import('./pages/common/Announcements'));
 const Resources = lazy(() => import('./pages/common/Resources'));
 const UserManagement = lazy(() => import('./pages/admin/Users'));
@@ -106,11 +105,6 @@ function App() {
                 <Route path="/schedule" element={
                   <ProtectedRoute>
                     <Schedule />
-                  </ProtectedRoute>
-                } />
-                <Route path="/calendar" element={
-                  <ProtectedRoute>
-                    <Calendar />
                   </ProtectedRoute>
                 } />
                 <Route path="/announcements" element={

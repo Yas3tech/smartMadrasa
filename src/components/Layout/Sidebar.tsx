@@ -46,12 +46,14 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
                 { to: '/schedule', icon: ClockIcon, label: t('sidebar.schedule') },
                 { to: '/homework', icon: BookOpen, label: t('sidebar.homework') },
                 { to: '/grades', icon: GraduationCap, label: t('sidebar.grades') },
+                { to: '/attendance', icon: ClipboardCheck, label: t('sidebar.attendance') },
                 { to: '/bulletins/view', icon: FileText, label: t('sidebar.bulletins') }
             );
         }
 
         if (role === 'parent') {
             links.push(
+                { to: '/schedule', icon: ClockIcon, label: t('sidebar.schedule') },
                 { to: '/grades', icon: GraduationCap, label: t('sidebar.grades') },
                 { to: '/attendance', icon: ClipboardCheck, label: t('sidebar.attendance') },
                 { to: '/homework', icon: BookOpen, label: t('sidebar.homework') },
@@ -151,11 +153,9 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
 
             <div className="p-4 border-t border-gray-100 dark:border-slate-700">
                 <div className={`flex items-center gap-3 mb-6 ${isCollapsed ? 'justify-center' : ''}`}>
-                    <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 border-2 border-white dark:border-slate-600 shadow-sm"
-                    />
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-slate-600 shadow-sm">
+                        {user.name.charAt(0).toUpperCase()}
+                    </div>
                     {!isCollapsed && (
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.name}</p>

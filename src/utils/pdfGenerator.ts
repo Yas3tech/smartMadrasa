@@ -39,31 +39,40 @@ export const generateClassBulletinPDF = (
 const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
     const { student, period, courses, grades, comments, absences, className } = data;
 
-    // Calculate averages
-    const courseData = courses
-        .map(course => {
-            const courseGrades = grades.filter(g => g.courseId === course.id);
-            const periodGrades = courseGrades.filter(g => {
+    // Calculate averages - group by subject to avoid duplicates
+    const coursesBySubject = courses.reduce((acc, course) => {
+        if (!acc[course.subject]) {
+            acc[course.subject] = [];
+        }
+        acc[course.subject].push(course);
+        return acc;
+    }, {} as Record<string, typeof courses>);
+
+    const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
+        // Get all grades for this student across all courses with this subject
+        const allPeriodGrades = subjectCourses.flatMap(course => {
+            const courseGrades = grades.filter(g => g.studentId === student.id && g.courseId === course.id);
+            return courseGrades.filter(g => {
                 const d = new Date(g.date);
                 return d >= new Date(period.startDate) && d <= new Date(period.endDate);
             });
+        });
 
-            const average =
-                periodGrades.length > 0
-                    ? periodGrades.reduce((acc, g) => acc + g.score, 0) / periodGrades.length
-                    : null;
+        const average = allPeriodGrades.length > 0
+            ? allPeriodGrades.reduce((acc, g) => acc + g.score, 0) / allPeriodGrades.length
+            : null;
 
-            const comment = comments.find(
-                c => c.courseId === course.id && c.periodId === period.id
-            );
+        // Get comment for any course with this subject
+        const comment = subjectCourses
+            .map(course => comments.find(c => c.courseId === course.id && c.periodId === period.id && c.studentId === student.id))
+            .find(c => c)?.comment || '';
 
-            return {
-                course,
-                average,
-                comment: comment?.comment || ''
-            };
-        })
-        .filter(c => c.average !== null || c.comment !== '');
+        return {
+            course: { ...subjectCourses[0], subject },
+            average,
+            comment
+        };
+    });
 
     const overallAverage =
         courseData.length > 0

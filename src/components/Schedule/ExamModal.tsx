@@ -92,7 +92,7 @@ const ExamModal = ({ isOpen, onClose, onSave, editingEvent, classId: propClassId
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                         {editingEvent ? t('schedule.editEvent') : t('schedule.addEvent')}
                     </h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -103,7 +103,7 @@ const ExamModal = ({ isOpen, onClose, onSave, editingEvent, classId: propClassId
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="flex gap-4">
                         <div className="w-1/3">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')}</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.type')}</label>
                             <select
                                 value={type}
                                 onChange={(e) => setType(e.target.value as 'exam' | 'evaluation')}
@@ -127,7 +127,7 @@ const ExamModal = ({ isOpen, onClose, onSave, editingEvent, classId: propClassId
                     {/* Class Selection */}
                     {!propClassId && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.class')} *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.class')} *</label>
                             <select
                                 value={classId}
                                 onChange={(e) => setClassId(e.target.value)}

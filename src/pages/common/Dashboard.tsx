@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Card, Button, Badge } from '../../components/UI';
+import { Card, Button, Badge, Modal } from '../../components/UI';
 import {
     Users,
     GraduationCap,
@@ -15,7 +16,9 @@ import {
     Calendar as CalendarIcon,
     ArrowUpRight,
     ArrowDownRight,
-    BarChart3
+    BarChart3,
+    FileText,
+    X
 } from 'lucide-react';
 import {
     LineChart,
@@ -36,10 +39,14 @@ import {
 const Dashboard = () => {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
-    const { students, users, grades, attendance, messages, events } = useData();
+    const { students, users, grades, attendance, messages, events, homeworks } = useData();
     const navigate = useNavigate();
 
     if (!user) return null;
+
+    // State for homework detail modal
+    const [selectedHomework, setSelectedHomework] = useState<typeof homeworks[0] | null>(null);
+    const [showHomeworkModal, setShowHomeworkModal] = useState(false);
 
     // Calculate real stats
     const teachers = users.filter(u => u.role === 'teacher');
@@ -308,8 +315,8 @@ const Dashboard = () => {
                 <Card className="p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-gray-900">{t('dashboard.events.upcoming')}</h2>
-                        <Button variant="ghost" size="sm" onClick={() => navigate('/calendar')}>
-                            {t('dashboard.events.viewCalendar')}
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/schedule')}>
+                            {t('schedule.title')}
                         </Button>
                     </div>
                     <div className="space-y-4">
@@ -317,7 +324,7 @@ const Dashboard = () => {
                             <div
                                 key={event.id}
                                 className="flex items-center p-4 bg-gradient-to-r from-gray-50 to-orange-50 rounded-xl hover:shadow-md transition-all border border-gray-100 cursor-pointer"
-                                onClick={() => navigate('/calendar')}
+                                onClick={() => navigate('/schedule')}
                             >
                                 <div className="w-20 font-bold text-gray-900 text-sm">
                                     {new Date(event.start).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
@@ -353,8 +360,8 @@ const Dashboard = () => {
                         <Button className="w-full justify-start" variant="secondary" icon={MessageSquare} onClick={() => navigate('/messages')}>
                             <span>{t('dashboard.actions.sendMessage')}</span>
                         </Button>
-                        <Button className="w-full justify-start" variant="secondary" icon={CalendarIcon} onClick={() => navigate('/calendar')}>
-                            <span>{t('dashboard.actions.addEvent')}</span>
+                        <Button className="w-full justify-start" variant="secondary" icon={CalendarIcon} onClick={() => navigate('/schedule')}>
+                            {t('schedule.title')}
                         </Button>
                     </div>
                 </Card>
@@ -415,6 +422,19 @@ const Dashboard = () => {
             };
         });
 
+        // Get upcoming homeworks for the student
+        // @ts-ignore - We know students have classId
+        const studentClassId = user.classId;
+        const pendingHomeworks = homeworks
+            .filter(hw => {
+                // Filter by class
+                if (hw.classId !== studentClassId) return false;
+                // Only pending (future due date)
+                return new Date(hw.dueDate) >= new Date();
+            })
+            .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+            .slice(0, 5);
+
         return (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-6">
@@ -462,11 +482,54 @@ const Dashboard = () => {
                         </div>
                     </Card>
 
+                    {/* Pending Homeworks */}
+                    <Card className="p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">{t('homework.title')}</h2>
+                            <Button variant="ghost" size="sm" onClick={() => navigate('/homework')}>
+                                {t('dashboard.student.viewAll')}
+                            </Button>
+                        </div>
+                        <div className="space-y-3">
+                            {pendingHomeworks.length > 0 ? pendingHomeworks.map(hw => {
+                                const dueDate = new Date(hw.dueDate);
+                                const daysLeft = Math.ceil((dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                                const isUrgent = daysLeft <= 2;
+                                return (
+                                    <div
+                                        key={hw.id}
+                                        className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all hover:shadow-md ${isUrgent ? 'bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-400' : 'bg-gradient-to-r from-gray-50 to-orange-50'}`}
+                                        onClick={() => {
+                                            setSelectedHomework(hw);
+                                            setShowHomeworkModal(true);
+                                        }}
+                                    >
+                                        <FileText className={`flex-shrink-0 ${isUrgent ? 'text-red-500' : 'text-orange-500'}`} size={20} />
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-semibold text-gray-900 truncate">{hw.title}</h4>
+                                            <p className="text-xs text-gray-500">{hw.subject}</p>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <Badge variant={isUrgent ? 'error' : 'warning'}>
+                                                {daysLeft === 0 ? t('homework.dueToday') : t('homework.daysRemaining', { count: daysLeft })}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                );
+                            }) : (
+                                <div className="text-center py-8">
+                                    <FileText size={40} className="mx-auto mb-3 text-gray-300" />
+                                    <p className="text-gray-500">{t('homework.noHomework')}</p>
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+
                     <Card className="p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-gray-900">{t('dashboard.events.upcoming')}</h2>
-                            <Button variant="ghost" size="sm" onClick={() => navigate('/calendar')}>
-                                {t('dashboard.events.viewCalendar')}
+                            <Button variant="ghost" size="sm" onClick={() => navigate('/schedule')}>
+                                {t('schedule.title')}
                             </Button>
                         </div>
                         <div className="space-y-3">
@@ -474,7 +537,7 @@ const Dashboard = () => {
                                 <div
                                     key={event.id}
                                     className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-orange-50 rounded-lg hover:shadow-md transition-all cursor-pointer"
-                                    onClick={() => navigate('/calendar')}
+                                    onClick={() => navigate('/schedule')}
                                 >
                                     <CalendarIcon className="text-orange-500 flex-shrink-0" size={18} />
                                     <div className="flex-1 min-w-0">
@@ -490,7 +553,7 @@ const Dashboard = () => {
                             ))}
                         </div>
                     </Card>
-                </div>
+                </div >
 
                 <div className="space-y-6">
                     <Card className="p-6 bg-gradient-to-br from-orange-50 via-orange-100 to-orange-50 border-orange-200 relative overflow-hidden">
@@ -535,7 +598,7 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-500 mt-2">- Robert Collier</p>
                     </Card>
                 </div>
-            </div>
+            </div >
         );
     };
 
@@ -557,6 +620,60 @@ const Dashboard = () => {
             {(user.role === 'director' || user.role === 'superadmin') && renderDirectorStats()}
             {user.role === 'teacher' && renderTeacherView()}
             {(user.role === 'student' || user.role === 'parent') && renderStudentView()}
+
+            {/* Homework Detail Modal */}
+            <Modal isOpen={showHomeworkModal} onClose={() => { setShowHomeworkModal(false); setSelectedHomework(null); }}>
+                {selectedHomework && (
+                    <div className="p-6">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">{selectedHomework.title}</h2>
+                                <p className="text-gray-500">{selectedHomework.subject}</p>
+                            </div>
+                            <button onClick={() => { setShowHomeworkModal(false); setSelectedHomework(null); }} className="text-gray-400 hover:text-gray-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                                <CalendarIcon className="text-orange-500" size={20} />
+                                <div>
+                                    <p className="text-sm text-gray-500">{t('homework.dueDate')}</p>
+                                    <p className="font-semibold text-gray-900">
+                                        {new Date(selectedHomework.dueDate).toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-500 mb-2">{t('homework.description')}</p>
+                                <p className="text-gray-800 whitespace-pre-wrap">{selectedHomework.description || t('homework.noDescription')}</p>
+                            </div>
+
+                            {selectedHomework.assignedBy && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <GraduationCap size={16} />
+                                    <span>{t('homework.assignedBy')}: {selectedHomework.assignedBy}</span>
+                                </div>
+                            )}
+
+                            {selectedHomework.maxGrade && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <TrendingUp size={16} />
+                                    <span>{t('homework.maxGrade')}: {selectedHomework.maxGrade} pts</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t">
+                            <Button variant="primary" className="w-full" onClick={() => { setShowHomeworkModal(false); navigate('/homework'); }}>
+                                {t('homework.submit')}
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };

@@ -83,7 +83,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableS
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                         {editingGrade ? t('grades.editGrade') : t('grades.addGrade')}
                     </h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -94,7 +94,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableS
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Student */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.student')} *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.student')} *</label>
                         <select
                             value={studentId}
                             onChange={(e) => setStudentId(e.target.value)}
@@ -112,7 +112,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableS
 
                     {/* Subject */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.subject')} *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.subject')} *</label>
                         <select
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
@@ -129,7 +129,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableS
                     {/* Type */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')} *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.type')} *</label>
                             <select
                                 value={type}
                                 onChange={(e) => setType(e.target.value as 'exam' | 'homework' | 'participation' | 'evaluation')}
@@ -183,7 +183,7 @@ const GradeModal = ({ isOpen, onClose, onSave, editingGrade, classId, availableS
 
                     {/* Feedback */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('grades.comment')} (optionnel)</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('grades.comment')} (optionnel)</label>
                         <textarea
                             value={feedback}
                             onChange={(e) => setFeedback(e.target.value)}

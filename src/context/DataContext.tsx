@@ -1,5 +1,5 @@
 ﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-// import { useAuth } from './AuthContext';
+import { useAuth } from './AuthContext';
 import type {
     User,
     Student,
@@ -9,7 +9,9 @@ import type {
     Grade,
     Attendance,
     Course,
-    Homework
+    Homework,
+    Parent,
+
 } from '../types';
 import { isFirebaseConfigured } from '../config/firebase';
 import {
@@ -33,17 +35,20 @@ import {
 } from '../services/messages';
 import {
     subscribeToEvents,
+    subscribeToEventsByClassIds, // [NEW]
     createEvent as fbCreateEvent,
     updateEvent as fbUpdateEvent,
     deleteEvent as fbDeleteEvent
 } from '../services/events';
 import {
     subscribeToCourseGrades,
+    subscribeToCourseGradesByStudentIds, // [NEW]
     createCourseGrade as fbCreateCourseGrade,
     updateCourseGrade as fbUpdateCourseGrade
 } from '../services/courseGrades';
 import {
     subscribeToAttendance,
+    subscribeToAttendanceByStudentIds, // [NEW]
     createAttendance as fbCreateAttendance,
     updateAttendance as fbUpdateAttendance
 } from '../services/attendance';
@@ -55,6 +60,7 @@ import {
 } from '../services/courses';
 import {
     subscribeToHomeworks,
+    subscribeToHomeworksByClassIds,
     createHomework as fbCreateHomework,
     updateHomework as fbUpdateHomework,
     deleteHomework as fbDeleteHomework
@@ -248,7 +254,7 @@ const generateMockHomeworks = (): Homework[] => [
 ];
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-    // const { user } = useAuth(); // Unused
+    const { user } = useAuth();
     const useFirebase = isFirebaseConfigured;
     const [isLoading, setIsLoading] = useState(true);
 
@@ -275,31 +281,80 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             const unsubUsers = subscribeToUsers(setUsers);
             const unsubClasses = subscribeToClasses(setClasses);
             const unsubMessages = subscribeToMessages(setMessages);
-            const unsubEvents = subscribeToEvents(setEvents);
-            const unsubGrades = subscribeToCourseGrades((courseGrades) => {
-                // Convert CourseGrade to Grade format for compatibility
-                const grades = courseGrades.map(cg => ({
-                    id: cg.id,
-                    studentId: cg.studentId,
-                    studentName: cg.studentName,
-                    subject: cg.courseName || 'Unknown',
-                    score: cg.score,
-                    maxScore: cg.maxScore,
-                    type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
-                    date: cg.date,
-                    feedback: cg.comment,
-                    courseId: cg.courseId, // ✅ CRITICAL FIX: Include courseId for filtering
-                    className: undefined
-                }));
-                setGrades(grades as any);
-            });
-            const unsubAttendance = subscribeToAttendance(setAttendance);
-            const unsubCourses = subscribeToCourses(setCourses);
-            const unsubHomeworks = subscribeToHomeworks(setHomeworks);
-
             // Subscribe to bulletin system collections
             const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
             const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
+
+            // Role-based subscriptions
+            let unsubGrades = () => { };
+            let unsubAttendance = () => { };
+            let unsubEvents = () => { };
+            let unsubHomeworks = () => { };
+            let unsubCourses = () => { };
+
+            if (user?.role === 'parent') {
+                const parentUser = user as Parent;
+                const childIds = parentUser.childrenIds || [];
+                // Collect class IDs for all children to fetch relevant Events and Homework
+                // We need to look up children objects to get their classId. 
+                // Since user object might not have full children details denormalized, 
+                // we might need to rely on 'children' array if populated, or we fetch users.
+                // Assuming 'children' prop is populated on login (denormalized).
+                const childrenData = parentUser.children || [];
+                const classIds = childrenData.map(c => c.classId).filter(Boolean);
+
+                if (childIds.length > 0) {
+                    unsubGrades = subscribeToCourseGradesByStudentIds(childIds, (courseGrades) => {
+                        const grades = courseGrades.map(cg => ({
+                            id: cg.id,
+                            studentId: cg.studentId,
+                            studentName: cg.studentName,
+                            subject: cg.courseName || 'Unknown',
+                            score: cg.score,
+                            maxScore: cg.maxScore,
+                            type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
+                            date: cg.date,
+                            feedback: cg.comment,
+                            courseId: cg.courseId,
+                            className: undefined
+                        }));
+                        setGrades(grades as any);
+                    });
+                    unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
+                }
+
+                if (classIds.length > 0) {
+                    unsubEvents = subscribeToEventsByClassIds(classIds, setEvents);
+                    unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
+                    // Subscribe to all courses - filtering by classId is done in Schedule.tsx
+                    unsubCourses = subscribeToCourses(setCourses);
+                }
+
+            } else {
+                // Default / Admin / Teacher behavior (Fetch All)
+                // Note: For students we could also optimize, but prioritization is Parent now.
+                // Teachers might need specific filtering too later.
+                unsubEvents = subscribeToEvents(setEvents);
+                unsubGrades = subscribeToCourseGrades((courseGrades) => {
+                    const grades = courseGrades.map(cg => ({
+                        id: cg.id,
+                        studentId: cg.studentId,
+                        studentName: cg.studentName,
+                        subject: cg.courseName || 'Unknown',
+                        score: cg.score,
+                        maxScore: cg.maxScore,
+                        type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
+                        date: cg.date,
+                        feedback: cg.comment,
+                        courseId: cg.courseId,
+                        className: undefined
+                    }));
+                    setGrades(grades as any);
+                });
+                unsubAttendance = subscribeToAttendance(setAttendance);
+                unsubHomeworks = subscribeToHomeworks(setHomeworks);
+                unsubCourses = subscribeToCourses(setCourses);
+            }
 
             // Role-based subscriptions could be added here if needed
             // e.g. if (user?.role === 'teacher') ...
@@ -333,7 +388,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             setHomeworks(generateMockHomeworks());
             setIsLoading(false);
         }
-    }, [useFirebase]);
+    }, [useFirebase, user]); // Added user dependency to re-subscribe on login/role switch
 
     // User actions
     const addUser = async (user: User) => {
@@ -452,24 +507,48 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     // Grade actions
     const addGrade = async (grade: Omit<Grade, 'id'>) => {
         if (useFirebase) {
-            // Convert Grade to CourseGrade format
-            const courseGrade = {
-                studentId: grade.studentId,
-                studentName: grade.studentName,
-                courseId: grade.courseId || 'unknown', // Use provided courseId
-                courseName: grade.subject,
-                periodId: academicPeriods[0]?.id || 'unknown', // Use first period as default
-                categoryId: 'cat-homework', // Default category
-                categoryName: 'Devoir',
-                title: `${grade.subject} - ${grade.type}`,
-                score: grade.score,
-                maxScore: grade.maxScore,
-                date: grade.date,
-                weight: 1,
-                teacherId: grade.teacherId || 'unknown',
-                comment: grade.feedback
-            };
-            await fbCreateCourseGrade(courseGrade);
+            try {
+                // Find the student name if not provided
+                const studentName = grade.studentName || students.find(s => s.id === grade.studentId)?.name || 'Unknown';
+
+                // Find the correct period based on grade date
+                const gradeDate = new Date(grade.date);
+                const matchingPeriod = academicPeriods.find(period => {
+                    const startDate = new Date(period.startDate);
+                    const endDate = new Date(period.endDate);
+                    return gradeDate >= startDate && gradeDate <= endDate;
+                });
+
+                // If no matching period found, use the most recent period or throw error
+                const periodId = matchingPeriod?.id;
+                if (!periodId) {
+                    console.warn('No matching period found for grade date:', grade.date);
+                    throw new Error('Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.');
+                }
+
+                // Convert Grade to CourseGrade format
+                const courseGrade = {
+                    studentId: grade.studentId,
+                    studentName: studentName,
+                    courseId: grade.courseId || grade.classId || 'general', // Use courseId, classId, or 'general'
+                    courseName: grade.subject,
+                    periodId: periodId,
+                    categoryId: grade.type === 'exam' ? 'cat-exam' : grade.type === 'homework' ? 'cat-homework' : 'cat-eval', // Map type to category
+                    categoryName: grade.type === 'exam' ? 'Examen' : grade.type === 'homework' ? 'Devoir' : 'Évaluation',
+                    title: grade.title || `${grade.subject} - ${grade.type}`,
+                    score: grade.score,
+                    maxScore: grade.maxScore,
+                    date: grade.date,
+                    weight: 1,
+                    teacherId: grade.teacherId || user?.id || 'unknown',
+                    comment: grade.feedback || ''
+                };
+                console.log('Creating course grade:', courseGrade);
+                await fbCreateCourseGrade(courseGrade);
+            } catch (error) {
+                console.error('Error creating grade in Firebase:', error);
+                throw error; // Re-throw to trigger toast error
+            }
         } else {
             const newGrade: Grade = { ...grade, id: `g${Date.now()}` };
             setGrades(prev => [...prev, newGrade]);

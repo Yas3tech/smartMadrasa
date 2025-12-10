@@ -64,6 +64,25 @@ export const subscribeToHomeworks = (callback: (homeworks: Homework[]) => void) 
     });
 };
 
+export const subscribeToHomeworksByClassIds = (classIds: string[], callback: (homeworks: Homework[]) => void) => {
+    if (!db || classIds.length === 0) return () => { };
+
+    // Note: We cannot use orderBy with 'in' query without a composite index.
+    // We will sort client-side.
+    const q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
+
+    return onSnapshot(q, snapshot => {
+        const homeworks = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+            dueDate: doc.data().dueDate?.toDate?.()?.toISOString() || doc.data().dueDate
+        } as Homework));
+        // Client-side sort
+        homeworks.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+        callback(homeworks);
+    });
+};
+
 // Submissions
 
 export const getSubmissions = async (homeworkId: string): Promise<Submission[]> => {

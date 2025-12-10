@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 import { useData } from '../../context/DataContext';
 import { X, Plus } from 'lucide-react';
@@ -14,17 +15,11 @@ interface CourseModalProps {
     teacherId: string;
 }
 
-const DAYS = [
-    { value: 1, label: 'Lundi' },
-    { value: 2, label: 'Mardi' },
-    { value: 3, label: 'Mercredi' },
-    { value: 4, label: 'Jeudi' },
-    { value: 5, label: 'Vendredi' },
-    { value: 6, label: 'Samedi' },
-    { value: 7, label: 'Dimanche' }
-];
+// Day keys for translations
+const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClassId, teacherId }: CourseModalProps) => {
+    const { t } = useTranslation();
     const { classes, courses } = useData();
     const [loading, setLoading] = useState(false);
 
@@ -85,19 +80,19 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!subject || !startTime || !endTime || !classId) {
-            toast.error('Veuillez remplir tous les champs obligatoires');
+            toast.error(t('schedule.fillRequiredFields'));
             return;
         }
 
         // Validation for specific date
         if (!isRecurring && !specificDate) {
-            toast.error('Veuillez sélectionner une date');
+            toast.error(t('schedule.selectDateError'));
             return;
         }
 
         // Validation for custom recurrence
         if (isRecurring && recurrenceType === 'custom_period' && (!recurrenceStart || !recurrenceEnd)) {
-            toast.error('Veuillez définir la période de récurrence');
+            toast.error(t('schedule.definePeriodError'));
             return;
         }
 
@@ -130,11 +125,11 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
             if (notes) courseData.notes = notes;
 
             await onSave(courseData);
-            toast.success(editingCourse ? 'Cours modifié avec succès' : 'Cours ajouté avec succès');
+            toast.success(editingCourse ? t('schedule.courseUpdated') : t('schedule.courseAdded'));
             onClose();
         } catch (error) {
             console.error('Error saving course:', error);
-            toast.error("Erreur lors de l'enregistrement du cours");
+            toast.error(t('schedule.courseSaveError'));
         } finally {
             setLoading(false);
         }
@@ -144,8 +139,8 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">
-                        {editingCourse ? 'Modifier le cours' : 'Ajouter un cours'}
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {editingCourse ? t('schedule.editCourseTitle') : t('schedule.addCourse')}
                     </h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X size={24} />
@@ -156,14 +151,14 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                     {/* Class Selection (if not provided) */}
                     {!propClassId && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Classe *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.classes')} *</label>
                             <select
                                 value={classId}
                                 onChange={(e) => setClassId(e.target.value)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                                 required
                             >
-                                <option value="">Sélectionner une classe</option>
+                                <option value="">{t('schedule.selectClass')}</option>
                                 {classes
                                     .filter(c => c.teacherId === teacherId)
                                     .map(c => (
@@ -175,14 +170,14 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
 
                     {/* Subject */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Matière *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('schedule.subject')} *</label>
                         <input
                             list="subjects-list"
                             type="text"
                             value={subject}
                             onChange={(e) => setSubject(e.target.value)}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                            placeholder="Sélectionner ou saisir une matière"
+                            placeholder={t('schedule.subjectPlaceholder')}
                             required
                         />
                         <datalist id="subjects-list">
@@ -199,7 +194,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                     </div>
 
                     {/* Scheduling Type */}
-                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="radio"
@@ -207,7 +202,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                                 onChange={() => setIsRecurring(true)}
                                 className="text-orange-600 focus:ring-orange-500"
                             />
-                            <span className="text-sm font-medium text-gray-700">Hebdomadaire</span>
+                            <span className="text-sm font-medium text-gray-800 dark:text-white">{t('schedule.weekly')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
@@ -216,7 +211,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                                 onChange={() => setIsRecurring(false)}
                                 className="text-orange-600 focus:ring-orange-500"
                             />
-                            <span className="text-sm font-medium text-gray-700">Ponctuel (une seule fois)</span>
+                            <span className="text-sm font-medium text-gray-800 dark:text-white">{t('schedule.oneTime')}</span>
                         </label>
                     </div>
 
@@ -248,7 +243,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                                         onChange={() => setRecurrenceType('all_year')}
                                         className="text-orange-600 focus:ring-orange-500"
                                     />
-                                    <span className="text-sm text-gray-700">Toute l'année</span>
+                                    <span className="text-sm text-gray-700 dark:text-white">{t('schedule.allYear')}</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -257,21 +252,21 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                                         onChange={() => setRecurrenceType('custom_period')}
                                         className="text-orange-600 focus:ring-orange-500"
                                     />
-                                    <span className="text-sm text-gray-700">Période personnalisée</span>
+                                    <span className="text-sm text-gray-700 dark:text-white">{t('schedule.customPeriod')}</span>
                                 </label>
                             </div>
 
                             {recurrenceType === 'custom_period' && (
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
-                                        label="Du *"
+                                        label={`${t('schedule.from')} *`}
                                         type="date"
                                         value={recurrenceStart}
                                         onChange={(e) => setRecurrenceStart(e.target.value)}
                                         required
                                     />
                                     <Input
-                                        label="Au *"
+                                        label={`${t('schedule.to')} *`}
                                         type="date"
                                         value={recurrenceEnd}
                                         onChange={(e) => setRecurrenceEnd(e.target.value)}
@@ -285,15 +280,15 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                     {/* Day of Week (Only show if recurring, otherwise auto-set by date) */}
                     {isRecurring && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Jour *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('schedule.day')} *</label>
                             <select
                                 value={dayOfWeek}
                                 onChange={(e) => setDayOfWeek(Number(e.target.value) as 1 | 2 | 3 | 4 | 5 | 6 | 7)}
                                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                                 required
                             >
-                                {DAYS.map(day => (
-                                    <option key={day.value} value={day.value}>{day.label}</option>
+                                {DAY_KEYS.map((dayKey, index) => (
+                                    <option key={index + 1} value={index + 1}>{t(`schedule.${dayKey}`)}</option>
                                 ))}
                             </select>
                         </div>
@@ -302,14 +297,14 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
                     {/* Time */}
                     <div className="grid grid-cols-2 gap-4">
                         <Input
-                            label="Heure de début *"
+                            label={`${t('schedule.startTime')} *`}
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
                             required
                         />
                         <Input
-                            label="Heure de fin *"
+                            label={`${t('schedule.endTime')} *`}
                             type="time"
                             value={endTime}
                             onChange={(e) => setEndTime(e.target.value)}
@@ -321,7 +316,7 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
 
                     {/* Room */}
                     <Input
-                        label="Salle (optionnel)"
+                        label={t('schedule.roomOptional')}
                         type="text"
                         value={room}
                         onChange={(e) => setRoom(e.target.value)}
@@ -330,23 +325,23 @@ const CourseModal = ({ isOpen, onClose, onSave, editingCourse, classId: propClas
 
                     {/* Notes */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Notes (optionnel)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('schedule.notesOptional')}</label>
                         <textarea
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             rows={3}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                            placeholder="Informations supplémentaires..."
+                            placeholder={t('schedule.notesPlaceholder')}
                         />
                     </div>
 
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-4">
                         <Button variant="secondary" onClick={onClose} type="button">
-                            Annuler
+                            {t('common.cancel')}
                         </Button>
                         <Button variant="primary" type="submit" disabled={loading} icon={Plus}>
-                            {loading ? 'Enregistrement...' : (editingCourse ? 'Modifier' : 'Ajouter')}
+                            {loading ? t('schedule.saving') : (editingCourse ? t('common.edit') : t('schedule.add'))}
                         </Button>
                     </div>
                 </form>

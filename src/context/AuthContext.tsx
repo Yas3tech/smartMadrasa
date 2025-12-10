@@ -38,7 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                             email: firebaseUser.email || '',
                             name: userData.name || 'Utilisateur',
                             role: userData.role as Role,
-                            avatar: userData.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`
+                            avatar: userData.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
+                            // Include role-specific fields (classId for students, childrenIds for parents, etc.)
+                            ...userData
                         });
                     } else {
                         // Fallback if user document doesn't exist (shouldn't happen with seeded data)

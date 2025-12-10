@@ -143,3 +143,30 @@ export const subscribeToCourseGrades = (
         callback(grades);
     });
 };
+
+/**
+ * Subscribe to course grades for multiple students
+ */
+export const subscribeToCourseGradesByStudentIds = (
+    studentIds: string[],
+    callback: (grades: CourseGrade[]) => void
+): (() => void) => {
+    if (studentIds.length === 0) return () => { };
+
+    // Note: We cannot use orderBy with 'in' query without a composite index.
+    // We will sort client-side.
+    const q = query(
+        collection(getDb(), COLLECTION_NAME),
+        where('studentId', 'in', studentIds)
+    );
+
+    return onSnapshot(q, (snapshot) => {
+        const grades: CourseGrade[] = [];
+        snapshot.forEach((doc) => {
+            grades.push({ id: doc.id, ...doc.data() } as CourseGrade);
+        });
+        // Client-side sort by date descending
+        grades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        callback(grades);
+    });
+};

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button } from '../../components/UI';
@@ -37,7 +38,7 @@ const AdminSettings = () => {
 
     const handleSaveSettings = () => {
         // In real app, would save to Firebase
-        alert(t('adminSettings.saveSuccess'));
+        toast.success(t('adminSettings.saveSuccess'));
     };
 
     const locale = i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'nl' ? 'nl-NL' : 'fr-FR';

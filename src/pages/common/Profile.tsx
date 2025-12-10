@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Input } from '../../components/UI';
-import { User as UserIcon, Mail, Lock, Camera, Save, Edit2 } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, Save, Edit2 } from 'lucide-react';
 import type { Student, Parent } from '../../types';
 
 const Profile = () => {
@@ -49,15 +50,15 @@ const Profile = () => {
 
     const handleChangePassword = () => {
         if (newPassword !== confirmPassword) {
-            alert(t('profile.passwordMismatch'));
+            toast.error(t('profile.passwordMismatch'));
             return;
         }
         if (newPassword.length < 6) {
-            alert(t('profile.passwordTooShort'));
+            toast.error(t('profile.passwordTooShort'));
             return;
         }
         // In real app, would call Firebase auth
-        alert(t('profile.passwordChanged'));
+        toast.success(t('profile.passwordChanged'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -180,17 +181,10 @@ const Profile = () => {
                 <div className="space-y-6">
                     <Card className="p-6">
                         <div className="flex flex-col items-center">
-                            <div className="relative mb-4">
-                                <img
-                                    src={user.avatar}
-                                    alt={user.name}
-                                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg"
-                                />
-                                {isEditing && (
-                                    <button className="absolute bottom-0 right-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center hover:bg-orange-600 transition-colors shadow-lg">
-                                        <Camera size={20} />
-                                    </button>
-                                )}
+                            <div className="mb-4">
+                                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-5xl font-bold shadow-lg border-4 border-white">
+                                    {user.name.charAt(0).toUpperCase()}
+                                </div>
                             </div>
                             <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
                             <p className="text-sm text-gray-500 capitalize">{getRoleLabel(user.role)}</p>

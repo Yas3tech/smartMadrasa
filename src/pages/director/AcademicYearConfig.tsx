@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Calendar, Plus, Edit2, Trash2, Check, Save, X } from 'lucide-react';
@@ -6,6 +7,7 @@ import toast from 'react-hot-toast';
 import type { AcademicPeriod } from '../../types/bulletin';
 
 const AcademicYearConfig: React.FC = () => {
+    const { t } = useTranslation();
     const { academicPeriods, addAcademicPeriod, updateAcademicPeriod, deleteAcademicPeriod } = useData();
     const { user } = useAuth();
     const [isAdding, setIsAdding] = useState(false);
@@ -36,16 +38,16 @@ const AcademicYearConfig: React.FC = () => {
         try {
             if (editingId) {
                 await updateAcademicPeriod(editingId, formData);
-                toast.success('Période mise à jour');
+                toast.success(t('academicYearConfig.periodUpdated'));
                 setEditingId(null);
             } else {
                 await addAcademicPeriod(formData);
-                toast.success('Période ajoutée');
+                toast.success(t('academicYearConfig.periodAdded'));
                 setIsAdding(false);
             }
             resetForm();
         } catch (error) {
-            toast.error('Erreur lors de l\'enregistrement');
+            toast.error(t('academicYearConfig.saveError'));
             console.error(error);
         }
     };
@@ -70,9 +72,9 @@ const AcademicYearConfig: React.FC = () => {
         if (window.confirm('Êtes-vous sûr de vouloir supprimer cette période ?')) {
             try {
                 await deleteAcademicPeriod(id);
-                toast.success('Période supprimée');
+                toast.success(t('academicYearConfig.periodDeleted'));
             } catch (error) {
-                toast.error('Erreur lors de la suppression');
+                toast.error(t('academicYearConfig.deleteError'));
                 console.error(error);
             }
         }

@@ -110,7 +110,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6 max-w-4xl w-full mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">{t('grades.bulkEntryTitle')}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('grades.bulkEntryTitle')}</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                         <X size={24} />
                     </button>
@@ -118,16 +118,16 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
 
                 <div className="space-y-6">
                     {/* Configuration Section */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
                         <div>
-                            <p className="block text-sm font-medium text-gray-700 mb-1">{t('common.class')}</p>
-                            <p className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-900">
+                            <p className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.class')}</p>
+                            <p className="px-4 py-2 rounded-xl bg-white dark:bg-slate-600 border border-gray-200 dark:border-slate-500 text-gray-900 dark:text-white">
                                 {className}
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.subject')} *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.subject')} *</label>
                             <select
                                 value={subject}
                                 onChange={(e) => setSubject(e.target.value)}
@@ -141,7 +141,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('grades.gradeTitle')} (Optionnel)</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('grades.gradeTitle')} (Optionnel)</label>
                             <input
                                 type="text"
                                 value={title}
@@ -152,7 +152,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')} *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.type')} *</label>
                             <select
                                 value={type}
                                 onChange={(e) => setType(e.target.value as typeof type)}
@@ -166,7 +166,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.date')} *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common.date')} *</label>
                             <input
                                 type="date"
                                 value={date}
@@ -176,7 +176,7 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('grades.maxScore')} *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('grades.maxScore')} *</label>
                             <input
                                 type="number"
                                 value={maxScore}
@@ -189,21 +189,21 @@ const BulkGradeModal = ({ isOpen, onClose, onSave, className, students, availabl
 
                     {/* Students List */}
                     {students.length > 0 && (
-                        <div className="border rounded-xl overflow-hidden">
+                        <div className="border dark:border-slate-600 rounded-xl overflow-hidden">
                             <table className="w-full">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-gray-50 dark:bg-slate-700">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">{t('common.student')}</th>
-                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 w-32">{t('grades.scoreArg', { max: maxScore })}</th>
-                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 w-24">{t('status.absent')}</th>
-                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">{t('grades.comment')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">{t('common.student')}</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-300 w-32">{t('grades.scoreArg', { max: maxScore })}</th>
+                                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-300 w-24">{t('status.absent')}</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">{t('grades.comment')}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="divide-y divide-gray-200 dark:divide-slate-600">
                                     {students.map(student => (
-                                        <tr key={student.id} className="hover:bg-gray-50">
+                                        <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
                                             <td className="px-4 py-3">
-                                                <div className="font-medium text-gray-900">{student.name}</div>
+                                                <div className="font-medium text-gray-900 dark:text-white">{student.name}</div>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <input

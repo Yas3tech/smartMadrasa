@@ -8,6 +8,7 @@ import CourseModal from '../../components/Schedule/CourseModal';
 import ExamModal from '../../components/Schedule/ExamModal';
 import UpcomingEventsModal from '../../components/Schedule/UpcomingEventsModal';
 import HomeworkDetailModal from '../../components/Schedule/HomeworkDetailModal';
+import StudentSelector from '../../components/Common/StudentSelector';
 import type { Course, Event, Homework } from '../../types';
 
 interface ScheduleSlot {
@@ -48,6 +49,28 @@ const Schedule = () => {
     const [editingExam, setEditingExam] = useState<Event | null>(null);
     const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
 
+    // Delete menu state
+    const [deleteMenu, setDeleteMenu] = useState<{ courseId: string; date: string; x: number; y: number } | null>(null);
+
+    // Parent state
+    const [selectedChild, setSelectedChild] = useState<{ id: string; name: string; classId: string } | null>(null);
+
+    // Mobile state
+    const [mobileDate, setMobileDate] = useState(new Date());
+    const [isFabOpen, setIsFabOpen] = useState(false);
+
+    const handlePrevDay = () => {
+        const newDate = new Date(mobileDate);
+        newDate.setDate(mobileDate.getDate() - 1);
+        setMobileDate(newDate);
+    };
+
+    const handleNextDay = () => {
+        const newDate = new Date(mobileDate);
+        newDate.setDate(mobileDate.getDate() + 1);
+        setMobileDate(newDate);
+    };
+
     // Calculate the start of the week (Monday) based on offset
     const getWeekStart = (offset: number) => {
         const today = new Date();
@@ -75,11 +98,14 @@ const Schedule = () => {
 
     const isCurrentWeek = weekOffset === 0;
 
-    // Get user's class ID (for students) or classes (for teachers)
+    // Get user's classId (for students) or selected child's classId (for parents)
     const getUserClassId = () => {
         if (user?.role === 'student') {
             // @ts-ignore - We know students have classId
             return user.classId;
+        }
+        if (user?.role === 'parent') {
+            return selectedChild?.classId;
         }
         return null;
     };
@@ -87,7 +113,8 @@ const Schedule = () => {
     const classId = getUserClassId();
     // Filter courses for the current user
     const userCourses = useMemo(() => {
-        if (user?.role === 'student' && classId) {
+        // Fix: Use generic condition for student OR parent (since classId is derived)
+        if ((user?.role === 'student' || user?.role === 'parent') && classId) {
             return courses.filter(c => c.classId === classId);
         } else if (user?.role === 'teacher') {
             return courses.filter(c => c.teacherId === user.id);
@@ -97,13 +124,12 @@ const Schedule = () => {
         return [];
     }, [courses, user, classId]);
 
-    // Filter exams for the current user
     const userExams = useMemo(() => {
         return events.filter(e => {
             if (e.type !== 'exam' && e.type !== 'evaluation') return false;
 
-            // Élève : seulement les examens de sa classe
-            if (user?.role === 'student' && classId) {
+            // Student OR Parent: exams for the specific class
+            if ((user?.role === 'student' || user?.role === 'parent') && classId) {
                 return e.classId === classId;
             }
 
@@ -128,7 +154,7 @@ const Schedule = () => {
     // Filter homeworks for the current user
     const userHomeworks = useMemo(() => {
         return homeworks.filter(h =>
-            (user?.role === 'student' && h.classId === classId) ||
+            ((user?.role === 'student' || user?.role === 'parent') && h.classId === classId) ||
             (user?.role === 'teacher' && h.assignedBy === user.name) || // assignedBy is name, not ID. Ideally ID.
             (user?.role === 'director' || user?.role === 'superadmin')
         );
@@ -181,6 +207,53 @@ const Schedule = () => {
             return dueDate >= weekStartTimestamp && dueDate < weekEndTimestamp;
         });
     }, [userHomeworks, weekStart]);
+
+    // Mobile View Data
+    const mobileCourses = useMemo(() => {
+        const dayIndex = mobileDate.getDay() || 7;
+        const dateTimestamp = mobileDate.getTime();
+        const currentDateStr = mobileDate.toISOString().split('T')[0];
+
+        return userCourses.filter(course => {
+            if (course.dayOfWeek !== dayIndex) return false;
+
+            // Check if this specific date is excluded
+            if (course.excludedDates?.includes(currentDateStr)) return false;
+
+            if (course.isRecurring) {
+                if (course.recurrenceStart) {
+                    const recStart = new Date(course.recurrenceStart).getTime();
+                    if (recStart > dateTimestamp) return false;
+                }
+                if (course.recurrenceEnd) {
+                    const recEnd = new Date(course.recurrenceEnd).getTime();
+                    if (recEnd < dateTimestamp) return false;
+                }
+                return true;
+            }
+            if (course.specificDate) {
+                const courseDate = new Date(course.specificDate);
+                // Check if same day
+                return courseDate.toDateString() === mobileDate.toDateString();
+            }
+            return false;
+        }).sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }, [userCourses, mobileDate]);
+
+    const mobileExams = useMemo(() => {
+        return userExams.filter(exam => {
+            const examDate = new Date(exam.start);
+            return examDate.toDateString() === mobileDate.toDateString();
+        }).sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+    }, [userExams, mobileDate]);
+
+    // Filter homeworks due on the selected mobile date
+    const mobileHomeworks = useMemo(() => {
+        return userHomeworks.filter(hw => {
+            const dueDate = new Date(hw.dueDate);
+            return dueDate.toDateString() === mobileDate.toDateString();
+        });
+    }, [userHomeworks, mobileDate]);
 
     // Build schedule slots
     const scheduleSlots: ScheduleSlot[] = useMemo(() => {
@@ -295,11 +368,41 @@ const Schedule = () => {
         }
     };
 
-    const handleDeleteCourse = async (courseId: string) => {
-        if (!canEdit) return;
-        if (confirm(t('schedule.confirmDeleteCourse'))) {
-            await deleteCourse(courseId);
-        }
+    // Show delete menu for a course
+    const showDeleteMenu = (e: React.MouseEvent, courseId: string, specificDate: string) => {
+        e.stopPropagation();
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
+        setDeleteMenu({
+            courseId,
+            date: specificDate,
+            x: rect.left,
+            y: rect.bottom + 5
+        });
+    };
+
+    // Close delete menu
+    const closeDeleteMenu = () => {
+        setDeleteMenu(null);
+    };
+
+    // Delete only this occurrence (exclude date)
+    const handleDeleteThisOccurrence = async () => {
+        if (!deleteMenu) return;
+        const course = courses.find(c => c.id === deleteMenu.courseId);
+        if (!course) return;
+
+        const currentExcluded = course.excludedDates || [];
+        await updateCourse(deleteMenu.courseId, {
+            excludedDates: [...currentExcluded, deleteMenu.date]
+        });
+        closeDeleteMenu();
+    };
+
+    // Delete the entire course
+    const handleDeleteEntireCourse = async () => {
+        if (!deleteMenu) return;
+        await deleteCourse(deleteMenu.courseId);
+        closeDeleteMenu();
     };
 
     const handleDeleteExam = async (eventId: string) => {
@@ -319,6 +422,13 @@ const Schedule = () => {
         });
     };
 
+    // Helper to get the date string for a specific day in the current week
+    const getDateForDayIndex = (dayIndex: number): string => {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + (dayIndex - 1)); // dayIndex 1=Monday, so offset is dayIndex-1
+        return date.toISOString().split('T')[0];
+    };
+
     const days = [
         t('schedule.monday'),
         t('schedule.tuesday'),
@@ -331,7 +441,196 @@ const Schedule = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            {/* Parent Student Selector */}
+            {user?.role === 'parent' && (
+                <div className="lg:mb-0 mb-4 px-4 pt-4 lg:px-0 lg:pt-0">
+                    <StudentSelector
+                        onSelect={setSelectedChild}
+                        selectedStudentId={selectedChild?.id}
+                    />
+                </div>
+            )}
+
+            {/* Mobile View - Day Schedule */}
+            <div className="lg:hidden -mx-4 -mt-4 md:-mx-6 md:-mt-6 bg-gray-50 dark:bg-slate-950 min-h-[calc(100vh-4rem)]">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-b-[2rem] shadow-lg mb-6 relative overflow-hidden">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex items-center gap-2 text-white/80">
+                            {/* Placeholder for menu toggle if needed, or just padding */}
+                        </div>
+                        <div className="flex gap-2">
+                            <button className="text-white/80 hover:text-white p-2" onClick={() => setShowUpcomingModal(true)}>
+                                <CalendarIcon size={24} />
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <div className="flex items-end justify-between">
+                        <div>
+                            <h1 className="text-3xl font-bold text-white mb-1 flex items-center gap-2 capitalize">
+                                {mobileDate.toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}
+                            </h1>
+                            <p className="text-orange-100 font-medium text-lg">{t('schedule.mySchedule')}</p>
+                        </div>
+
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md mb-1 border border-white/30">
+                            {user?.name.substring(0, 2).toUpperCase()}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Navigation Bar */}
+                <div className="flex items-center justify-between px-6 mb-6">
+                    <button onClick={handlePrevDay} className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <span className="font-bold text-gray-500 dark:text-slate-400">
+                        {mobileDate.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
+                    </span>
+                    <button onClick={handleNextDay} className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600">
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
+
+                {/* Timeline */}
+                <div className="px-4 space-y-4 pb-24">
+                    {mobileExams.length > 0 && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">{t('schedule.examEval')}</h3>
+                            <div className="space-y-3">
+                                {mobileExams.map(exam => (
+                                    <div key={exam.id} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border-l-4 border-red-500 flex gap-4" onClick={() => canEdit && handleEditExam(exam)}>
+                                        <div className="flex flex-col items-center justify-center min-w-[3rem] text-red-500 font-bold">
+                                            <span>{new Date(exam.start).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-gray-900 dark:text-white">{exam.title}</h4>
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                                <GraduationCap size={12} />
+                                                <span>Examen</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mb-6">
+                        {mobileCourses.length > 0 ? (
+                            <div className="space-y-3">
+                                {mobileCourses.map(course => (
+                                    <div
+                                        key={course.id}
+                                        className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm flex gap-4 relative overflow-hidden group"
+                                        onClick={() => canEdit && handleEditCourse(course)}
+                                    >
+                                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${subjectColors[course.subject]?.split(' ')[0] || 'bg-gray-500'}`}></div>
+
+                                        <div className="flex flex-col min-w-[3rem]">
+                                            <span className="font-bold text-gray-900 dark:text-white text-lg">
+                                                {course.startTime.split(' - ')[0]}
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                {course.startTime.split(' - ')[1]}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex-1 pl-2">
+                                            <h4 className="font-bold text-gray-900 dark:text-white text-lg">{course.subject}</h4>
+                                            <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-500">
+                                                {course.room && <span className="bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-md text-gray-600 dark:text-slate-300">{course.room}</span>}
+                                                {course.className && <span className="bg-orange-50 dark:bg-orange-900/20 px-2 py-0.5 rounded-md text-orange-600 dark:text-orange-400">{course.className}</span>}
+                                            </div>
+                                        </div>
+
+                                        {canEdit && (
+                                            <button
+                                                className="absolute right-2 top-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                                                onClick={(e) => showDeleteMenu(e, course.id, mobileDate.toISOString().split('T')[0])}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-gray-400">
+                                <p>{t('schedule.noCourse') || "Aucun cours prévu"}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Mobile Homework Section */}
+                    {mobileHomeworks.length > 0 && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                                {t('schedule.homeworkDue') || 'Devoirs à rendre'}
+                            </h3>
+                            <div className="space-y-3">
+                                {mobileHomeworks.map(hw => (
+                                    <div
+                                        key={hw.id}
+                                        className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border-l-4 border-orange-500 flex gap-4 cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                                        onClick={() => { setSelectedHomework(hw); setShowHomeworkDetail(true); }}
+                                    >
+                                        <div className="flex flex-col items-center justify-center min-w-[3rem] text-orange-500 font-bold">
+                                            <BookOpen size={24} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-gray-900 dark:text-white">{hw.title}</h4>
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                                <span className="bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-md text-orange-600 dark:text-orange-400">{hw.subject}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Mobile FAB */}
+                {canEdit && (
+                    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 items-end">
+                        {isFabOpen && (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        handleAddExam();
+                                        setIsFabOpen(false);
+                                    }}
+                                    className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-full shadow-lg transform transition-all hover:bg-red-700 animate-in slide-in-from-bottom-5 fade-in duration-200"
+                                >
+                                    <span className="font-semibold text-sm">Examen</span>
+                                    <GraduationCap size={20} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleAddCourse();
+                                        setIsFabOpen(false);
+                                    }}
+                                    className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-full shadow-lg transform transition-all hover:bg-orange-700 animate-in slide-in-from-bottom-2 fade-in duration-200"
+                                >
+                                    <span className="font-semibold text-sm">Cours</span>
+                                    <BookOpen size={20} />
+                                </button>
+                            </>
+                        )}
+                        <button
+                            onClick={() => setIsFabOpen(!isFabOpen)}
+                            className={`w-14 h-14 ${isFabOpen ? 'bg-gray-800' : 'bg-orange-600'} text-white rounded-full shadow-lg flex items-center justify-center hover:opacity-90 transform transition-all duration-200`}
+                        >
+                            <Plus size={28} className={`transform transition-transform duration-200 ${isFabOpen ? 'rotate-45' : 'rotate-0'}`} />
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <div className="hidden lg:flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('schedule.mySchedule')}</h1>
                     <p className="text-gray-600 dark:text-slate-400">{t('schedule.academicYear', { year: '2024-2025' })}</p>
@@ -416,13 +715,13 @@ const Schedule = () => {
                                         return (
                                             <th
                                                 key={day}
-                                                className={`px-4 py-4 text-center text-sm font-bold border-r border-orange-200 dark:border-slate-600 ${currentDay === dayIndex ? 'bg-orange-200 dark:bg-orange-900/50 text-orange-900 dark:text-orange-200' : 'text-gray-900 dark:text-white'
+                                                className={`px-4 py-4 text-center text-sm font-bold border-r border-orange-200 dark:border-slate-600 ${currentDay === dayIndex ? 'bg-orange-300 dark:bg-orange-700 text-orange-900 dark:text-white' : 'text-gray-900 dark:text-white'
                                                     }`}
                                             >
                                                 <div className="flex flex-col items-center">
-                                                    <span>{day}</span>
+                                                    <span className="drop-shadow-sm">{day}</span>
                                                     {currentDay === dayIndex && (
-                                                        <span className="text-xs font-normal text-orange-700 dark:text-orange-300">{t('schedule.today')}</span>
+                                                        <span className="text-xs font-semibold text-white bg-orange-600 dark:bg-orange-500 px-2 py-0.5 rounded-full mt-1 shadow-sm">{t('schedule.today')}</span>
                                                     )}
                                                     {homeworkCount > 0 && (
                                                         <Badge variant="warning" className="mt-1 text-xs">
@@ -500,10 +799,7 @@ const Schedule = () => {
                                                                 {canEdit && (
                                                                     <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                         <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                handleDeleteCourse(course.id);
-                                                                            }}
+                                                                            onClick={(e) => showDeleteMenu(e, course.id, getDateForDayIndex(dayIndex))}
                                                                             className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                                                                         >
                                                                             <Trash2 size={12} />
@@ -529,7 +825,7 @@ const Schedule = () => {
                                             <td key={dayIndex} className="px-4 py-4 border-r border-gray-200 dark:border-slate-700 text-center align-top">
                                                 <div className="space-y-2">
                                                     {homeworks.map(hw => (
-                                                        <div key={hw.id} className="text-xs p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg shadow-sm text-left">
+                                                        <div key={hw.id} className="text-xs p-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg shadow-sm text-left cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/30 hover:border-orange-300 transition-colors" onClick={() => { setSelectedHomework(hw); setShowHomeworkDetail(true); }}>
                                                             <div className="font-bold text-gray-800 dark:text-white flex items-center gap-1">
                                                                 <BookOpen size={12} className="text-orange-500" />
                                                                 {hw.subject}
@@ -548,105 +844,7 @@ const Schedule = () => {
                 </Card>
             </div>
 
-            {/* Mobile View - Today's Schedule */}
-            <div className="lg:hidden">
-                <Card className="p-6">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <Clock size={20} className="text-orange-500" />
-                        {t('schedule.today')}
-                    </h2>
-                    <div className="space-y-3">
-                        {/* Exams Today */}
-                        {weekExams.filter(e => {
-                            const d = new Date(e.start);
-                            return d.getDay() === (currentDay === 7 ? 0 : currentDay);
-                        }).map(exam => (
-                            <div
-                                key={exam.id}
-                                className="p-4 rounded-xl border-2 bg-red-500 text-white border-red-600"
-                                onClick={() => canEdit && handleEditExam(exam)}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <GraduationCap size={16} className="text-white" />
-                                            <p className="font-bold text-sm text-white">{exam.title}</p>
-                                        </div>
-                                        <p className="text-xs text-red-100">
-                                            {new Date(exam.start).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })} -
-                                            {new Date(exam.end).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
-                                        </p>
-                                    </div>
-                                    {canEdit && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteExam(exam.id);
-                                            }}
-                                            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
 
-                        {/* Courses Today */}
-                        {scheduleSlots.map((slot, index) => {
-                            const dayKey = currentDay as 1 | 2 | 3 | 4 | 5 | 6 | 7;
-                            const course = slot.courses[dayKey];
-
-                            if (!course) return null;
-
-                            return (
-                                <div
-                                    key={index}
-                                    className={`p-4 rounded-xl border-2 ${subjectColors[course.subject] || 'bg-gray-500 text-white border-gray-600'}`}
-                                    onClick={() => canEdit && handleEditCourse(course)}
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <p className="font-bold text-sm mb-1">{course.subject}</p>
-                                            <p className="text-xs opacity-75">{slot.time}</p>
-                                            {course.room && <p className="text-xs opacity-75 mt-1">{course.room}</p>}
-                                        </div>
-                                        {canEdit && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteCourse(course.id);
-                                                }}
-                                                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {/* Homeworks Today */}
-                        {getHomeworksForDay(currentDay).length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
-                                <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                                    <BookOpen size={16} className="text-orange-500" />
-                                    {t('schedule.homeworkDue')}
-                                </h3>
-                                <div className="space-y-2">
-                                    {getHomeworksForDay(currentDay).map(hw => (
-                                        <div key={hw.id} className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
-                                            <p className="font-bold text-sm text-gray-800 dark:text-white">{hw.subject}</p>
-                                            <p className="text-xs text-gray-600 dark:text-slate-400">{hw.title}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </Card>
-            </div>
 
             {/* Modals */}
             {canEdit && (
@@ -690,6 +888,45 @@ const Schedule = () => {
                 }}
                 homework={selectedHomework}
             />
+
+            {/* Delete Course Menu */}
+            {deleteMenu && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 z-40"
+                        onClick={closeDeleteMenu}
+                    />
+                    {/* Menu */}
+                    <div
+                        className="fixed z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 py-2 min-w-[200px]"
+                        style={{ left: deleteMenu.x, top: deleteMenu.y }}
+                    >
+                        <button
+                            onClick={handleDeleteThisOccurrence}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 flex items-center gap-2"
+                        >
+                            <span className="text-orange-500">📅</span>
+                            {t('schedule.deleteThisOnly') || 'Supprimer que ce cours'}
+                        </button>
+                        <button
+                            onClick={handleDeleteEntireCourse}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 text-red-600 dark:text-red-400 flex items-center gap-2"
+                        >
+                            <span>🗑️</span>
+                            {t('schedule.deleteAll') || 'Supprimer tout'}
+                        </button>
+                        <hr className="my-1 border-gray-200 dark:border-slate-600" />
+                        <button
+                            onClick={closeDeleteMenu}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 flex items-center gap-2"
+                        >
+                            <span>❌</span>
+                            {t('common.cancel') || 'Annuler'}
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

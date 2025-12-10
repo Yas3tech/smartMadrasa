@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Bell, MessageSquare, GraduationCap, Calendar, Users, X } from 'lucide-react';
@@ -16,9 +17,11 @@ interface Notification {
 }
 
 const NotificationBell = () => {
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const { messages, grades, events, markMessageAsRead } = useData();
     const navigate = useNavigate();
+    const isRTL = i18n.language === 'ar';
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [readNotificationIds, setReadNotificationIds] = useState<string[]>(() => {
@@ -42,7 +45,7 @@ const NotificationBell = () => {
                 id: `msg-${msg.id}`,
                 originalId: msg.id,
                 type: 'message',
-                title: 'Nouveau message',
+                title: t('notificationCenter.newMessage'),
                 message: `${msg.senderName}: ${msg.subject}`,
                 timestamp: msg.timestamp,
                 read: false,
@@ -64,7 +67,7 @@ const NotificationBell = () => {
                         id: notifId,
                         originalId: grade.id,
                         type: 'grade',
-                        title: 'Nouvelle note',
+                        title: t('notificationCenter.newGrade'),
                         message: `${grade.subject}: ${grade.score}/${grade.maxScore}`,
                         timestamp: grade.date,
                         read: false,
@@ -87,7 +90,7 @@ const NotificationBell = () => {
                     id: notifId,
                     originalId: event.id,
                     type: 'event',
-                    title: 'Événement à venir',
+                    title: t('notificationCenter.upcomingEvent'),
                     message: `${event.title} - ${new Date(event.start).toLocaleDateString('fr-FR')}`,
                     timestamp: event.start,
                     read: false,
@@ -170,11 +173,11 @@ const NotificationBell = () => {
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
 
-        if (diffMins < 1) return "À l'instant";
-        if (diffMins < 60) return `Il y a ${diffMins} min`;
-        if (diffHours < 24) return `Il y a ${diffHours}h`;
-        if (diffDays < 7) return `Il y a ${diffDays}j`;
-        return date.toLocaleDateString('fr-FR');
+        if (diffMins < 1) return t('notificationCenter.justNow');
+        if (diffMins < 60) return t('notificationCenter.minutesAgo', { count: diffMins });
+        if (diffHours < 24) return t('notificationCenter.hoursAgo', { count: diffHours });
+        if (diffDays < 7) return t('notificationCenter.daysAgo', { count: diffDays });
+        return date.toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'nl' ? 'nl-NL' : 'fr-FR');
     };
 
     return (
@@ -194,13 +197,13 @@ const NotificationBell = () => {
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-50 max-h-[500px] overflow-hidden flex flex-col">
+                <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-80 md:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-50 max-h-[500px] overflow-hidden flex flex-col`} dir={isRTL ? 'rtl' : 'ltr'}>
                     {/* Header */}
                     <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30">
                         <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white">Notifications</h3>
+                            <h3 className="font-bold text-gray-900 dark:text-white">{t('notificationCenter.title')}</h3>
                             <p className="text-xs text-gray-600 dark:text-slate-400">
-                                {unreadCount > 0 ? `${unreadCount} non lue(s)` : 'Tout est lu'}
+                                {unreadCount > 0 ? t('notificationCenter.unreadCount', { count: unreadCount }) : t('notificationCenter.allRead')}
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -209,7 +212,7 @@ const NotificationBell = () => {
                                     onClick={handleMarkAllAsRead}
                                     className="text-xs font-medium text-orange-600 hover:text-orange-700 underline"
                                 >
-                                    Tout marquer comme lu
+                                    {t('notificationCenter.markAllRead')}
                                 </button>
                             )}
                             <button
@@ -254,7 +257,7 @@ const NotificationBell = () => {
                         ) : (
                             <div className="p-8 text-center">
                                 <Bell size={40} className="mx-auto mb-3 text-gray-300 dark:text-slate-600" />
-                                <p className="text-sm text-gray-500 dark:text-slate-400">Aucune nouvelle notification</p>
+                                <p className="text-sm text-gray-500 dark:text-slate-400">{t('notificationCenter.noNotifications')}</p>
                             </div>
                         )}
                     </div>

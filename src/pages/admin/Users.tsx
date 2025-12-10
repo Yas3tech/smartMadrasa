@@ -7,11 +7,12 @@ import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucid
 import type { User, Role, Parent } from '../../types';
 import { read, utils, writeFile } from 'xlsx';
 import { toast } from 'react-hot-toast';
+import { deleteUserWithAllData, previewUserDeletion } from '../../services/users';
 
 const UserManagement = () => {
     const { t, i18n } = useTranslation();
     const { user: currentUser } = useAuth();
-    const { users, addUser, updateUser, deleteUser } = useData();
+    const { users, addUser, updateUser } = useData();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isRTL = i18n.language === 'ar';
 
@@ -104,10 +105,45 @@ const UserManagement = () => {
         setIsModalOpen(false);
     };
 
-    const handleDelete = (userId: string) => {
-        if (confirm(t('users.confirmDelete'))) {
-            deleteUser(userId);
-            toast.success(t('users.userDeleted'));
+    const handleDelete = async (userId: string, userRole: Role) => {
+        const userToDelete = users.find(u => u.id === userId);
+        if (!userToDelete) return;
+
+        // Prévisualiser les données qui seront supprimées
+        const preview = await previewUserDeletion(userId, userRole);
+
+        // Construire le message de confirmation
+        let confirmMessage = `${t('users.confirmDeleteComplete', { name: userToDelete.name })}\n\n`;
+
+        if (preview.collections.length > 0) {
+            confirmMessage += `${t('users.dataToDelete')}:\n`;
+            preview.collections.forEach(col => {
+                confirmMessage += `- ${col.name}: ${col.count} ${t('users.documents')}\n`;
+            });
+        }
+
+        confirmMessage += `\n${t('users.actionIrreversible')}`;
+
+        if (confirm(confirmMessage)) {
+            try {
+                const result = await deleteUserWithAllData(userId, userRole);
+
+                if (result.success) {
+                    // Calculer le total des éléments supprimés
+                    const counts = result.deletedCounts as Record<string, number>;
+                    const totalDeleted = Object.values(counts).reduce((a, b) => a + b, 0);
+                    toast.success(t('users.userDeletedComplete', { count: totalDeleted }), {
+                        duration: 5000,
+                        icon: '🗑️'
+                    });
+                } else {
+                    toast.error(t('users.deleteError'));
+                    console.error('Delete errors:', result.errors);
+                }
+            } catch (error) {
+                toast.error(t('users.deleteError'));
+                console.error('Delete error:', error);
+            }
         }
     };
 
@@ -318,7 +354,7 @@ const UserManagement = () => {
                                                 <Edit2 size={18} />
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(user.id)}
+                                                onClick={() => handleDelete(user.id, user.role)}
                                                 className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                 disabled={user.id === currentUser?.id}
                                             >

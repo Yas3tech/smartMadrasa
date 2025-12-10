@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
@@ -16,7 +16,8 @@ import {
     Filter,
     X,
     Paperclip,
-    File
+    File,
+    ChevronLeft
 } from 'lucide-react';
 import type { Message } from '../../types';
 
@@ -30,6 +31,18 @@ const Messages = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isComposeOpen, setIsComposeOpen] = useState(false);
     const [composeMode, setComposeMode] = useState<'new' | 'reply' | 'forward'>('new');
+
+    // Mobile state
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024); // lg breakpoint
+    const [mobileView, setMobileView] = useState<'folders' | 'list' | 'detail'>('folders');
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Compose form state
     const [recipient, setRecipient] = useState('');
@@ -277,6 +290,9 @@ const Messages = () => {
         if (!msg.read && selectedFolder === 'inbox') {
             markMessageAsRead(msg.id);
         }
+        if (isMobile) {
+            setMobileView('detail');
+        }
     };
 
     const handleDeleteMessage = (msgId: string | number) => {
@@ -290,7 +306,10 @@ const Messages = () => {
         <div className="h-[calc(100vh-6rem)] flex flex-col">
             <Card className="flex-1 flex overflow-hidden !p-0 border-0 shadow-xl">
                 {/* Left Sidebar - Folders */}
-                <div className="w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col">
+                <div className={`${isMobile
+                    ? (mobileView === 'folders' ? 'flex-1 w-full bg-white dark:bg-slate-800' : 'hidden')
+                    : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+                    }`}>
                     <div className="p-4">
                         <div className="flex items-center gap-3 mb-6 px-2">
                             <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center text-orange-600 dark:text-orange-400">
@@ -305,7 +324,10 @@ const Messages = () => {
                             {folders.map((folder) => (
                                 <button
                                     key={folder.id}
-                                    onClick={() => setSelectedFolder(folder.id)}
+                                    onClick={() => {
+                                        setSelectedFolder(folder.id);
+                                        if (isMobile) setMobileView('list');
+                                    }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedFolder === folder.id
                                         ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
                                         : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
@@ -320,12 +342,24 @@ const Messages = () => {
                 </div>
 
                 {/* Middle Column - Message List */}
-                <div className="w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col">
+                <div className={`${isMobile
+                    ? (mobileView === 'list' ? 'flex-1 w-full bg-white dark:bg-slate-900' : 'hidden')
+                    : 'w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+                    }`}>
                     <div className="p-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800">
-                        <h2 className="font-bold text-lg text-gray-800 dark:text-white mb-1">
-                            {folders.find(f => f.id === selectedFolder)?.label}
-                        </h2>
-                        <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">{filteredMessages.length} {t('messages.message').toLowerCase()}{filteredMessages.length !== 1 ? 's' : ''}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                            {isMobile && (
+                                <button onClick={() => setMobileView('folders')} className="p-1 mr-2 -ml-2 text-gray-500">
+                                    <ChevronLeft size={24} />
+                                </button>
+                            )}
+                            <div>
+                                <h2 className="font-bold text-lg text-gray-800 dark:text-white">
+                                    {folders.find(f => f.id === selectedFolder)?.label}
+                                </h2>
+                                <p className="text-xs text-gray-500 dark:text-slate-400">{filteredMessages.length} {t('messages.message').toLowerCase()}{filteredMessages.length !== 1 ? 's' : ''}</p>
+                            </div>
+                        </div>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" size={16} />
@@ -385,43 +419,53 @@ const Messages = () => {
                 </div>
 
                 {/* Right Column - Message Detail */}
-                <div className="flex-1 bg-white dark:bg-slate-800 flex flex-col">
+                <div className={`${isMobile
+                    ? (mobileView === 'detail' ? 'flex-1 w-full bg-white dark:bg-slate-800 flex flex-col' : 'hidden')
+                    : 'flex-1 bg-white dark:bg-slate-800 flex flex-col'
+                    }`}>
                     {selectedMessage ? (
                         <>
                             {/* Toolbar */}
                             <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
-                                <div className="flex gap-2">
-                                    <button
-                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                                        onClick={() => handleReply(selectedMessage)}
-                                        title={t('messages.reply')}
-                                    >
-                                        <ReplyIcon size={18} />
-                                    </button>
-                                    <button
-                                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                                        onClick={() => handleForward(selectedMessage)}
-                                        title={t('messages.forward')}
-                                    >
-                                        <ForwardIcon size={18} />
-                                    </button>
-                                    <button
-                                        className={`p-2 transition-colors rounded-lg ${selectedMessage.archived
-                                            ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
-                                            : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
-                                            }`}
-                                        onClick={() => handleArchiveMessage(selectedMessage.id)}
-                                        title={selectedMessage.archived ? "Désarchiver" : t('messages.archive')}
-                                    >
-                                        <Archive size={18} />
-                                    </button>
-                                    <button
-                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        onClick={() => handleDeleteMessage(selectedMessage.id)}
-                                        title={t('common.delete')}
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
+                                <div className="flex items-center gap-2">
+                                    {isMobile && (
+                                        <button onClick={() => setMobileView('list')} className="p-2 mr-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+                                            <ChevronLeft size={24} />
+                                        </button>
+                                    )}
+                                    <div className="flex gap-2">
+                                        <button
+                                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                            onClick={() => handleReply(selectedMessage)}
+                                            title={t('messages.reply')}
+                                        >
+                                            <ReplyIcon size={18} />
+                                        </button>
+                                        <button
+                                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                                            onClick={() => handleForward(selectedMessage)}
+                                            title={t('messages.forward')}
+                                        >
+                                            <ForwardIcon size={18} />
+                                        </button>
+                                        <button
+                                            className={`p-2 transition-colors rounded-lg ${selectedMessage.archived
+                                                ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
+                                                : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
+                                                }`}
+                                            onClick={() => handleArchiveMessage(selectedMessage.id)}
+                                            title={selectedMessage.archived ? "Désarchiver" : t('messages.archive')}
+                                        >
+                                            <Archive size={18} />
+                                        </button>
+                                        <button
+                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            onClick={() => handleDeleteMessage(selectedMessage.id)}
+                                            title={t('common.delete')}
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -493,7 +537,7 @@ const Messages = () => {
             <Modal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)}>
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                             {composeMode === 'reply' ? t('messages.reply') : composeMode === 'forward' ? t('messages.forward') : t('messages.newMessage')}
                         </h2>
                         <button onClick={() => setIsComposeOpen(false)} className="text-gray-400 hover:text-gray-600">
@@ -503,7 +547,7 @@ const Messages = () => {
 
                     <div className="space-y-4">
                         <div className="relative">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('messages.recipient')}</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('messages.recipient')}</label>
                             <div className="relative">
                                 <input
                                     type="text"
@@ -519,7 +563,7 @@ const Messages = () => {
                                     disabled={composeMode === 'reply'}
                                 />
                                 {showRecipientDropdown && !recipient && filteredRecipients.length > 0 && (
-                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                                         {filteredRecipients.map((item) => (
                                             <button
                                                 key={item.id}
@@ -529,9 +573,9 @@ const Messages = () => {
                                                     setRecipientSearch('');
                                                     setShowRecipientDropdown(false);
                                                 }}
-                                                className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors flex items-center gap-2 border-b border-gray-100 last:border-0"
+                                                className="w-full px-4 py-3 text-left hover:bg-orange-50 dark:hover:bg-slate-600 transition-colors flex items-center gap-2 border-b border-gray-100 dark:border-slate-600 last:border-0"
                                             >
-                                                <span className="text-sm">{item.label}</span>
+                                                <span className="text-sm text-gray-900 dark:text-white">{item.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -547,7 +591,7 @@ const Messages = () => {
                         />
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('messages.message')}</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('messages.message')}</label>
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
@@ -560,7 +604,7 @@ const Messages = () => {
                         {/* Attachments Section */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-medium text-gray-700">{t('messages.attachments')}</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('messages.attachments')}</label>
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
                                     className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
@@ -580,11 +624,11 @@ const Messages = () => {
                             {attachments.length > 0 && (
                                 <div className="space-y-2">
                                     {attachments.map((file, index) => (
-                                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
                                             <div className="flex items-center gap-2 overflow-hidden">
                                                 <File size={16} className="text-gray-500 flex-shrink-0" />
-                                                <span className="text-sm text-gray-700 truncate">{file.name}</span>
-                                                <span className="text-xs text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
+                                                <span className="text-sm text-gray-700 dark:text-gray-200 truncate">{file.name}</span>
+                                                <span className="text-xs text-gray-400 dark:text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
                                             </div>
                                             <button
                                                 onClick={() => removeAttachment(index)}

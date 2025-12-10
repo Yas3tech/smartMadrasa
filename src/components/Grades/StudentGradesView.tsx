@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Button } from '../UI';
+import { Card } from '../UI';
 import {
-    Download,
     FileText,
     BarChart3,
     GraduationCap,
@@ -10,15 +9,15 @@ import {
 } from 'lucide-react';
 import GradeCard from './GradeCard';
 import { useGradeStats } from '../../hooks/useGradeStats';
-import { generateGradeReport } from '../../utils/gradeReports';
+
 import type { Grade } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 
 const StudentGradesView = () => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const { user } = useAuth();
-    const { grades, courses, users, students } = useData();
+    const { grades, courses, users } = useData();
     const { calculateStudentStats } = useGradeStats();
 
     const [selectedSubject, setSelectedSubject] = useState('all');
@@ -47,23 +46,13 @@ const StudentGradesView = () => {
         return course?.teacherName;
     };
 
-    const handleDownload = () => {
-        const student = students.find(s => s.id === user.id);
-        if (student) {
-            generateGradeReport(student, grades, stats, t, i18n.language);
-        }
-    };
-
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{t('grades.myReport')}</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{t('grades.myGrades')}</h1>
                     <p className="text-gray-600">{t('grades.academicReport')}</p>
                 </div>
-                <Button variant="primary" icon={Download} onClick={handleDownload}>
-                    {t('grades.downloadPDF')}
-                </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -116,8 +105,8 @@ const StudentGradesView = () => {
                 <button
                     onClick={() => setSelectedSubject('all')}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${selectedSubject === 'all'
-                            ? 'bg-orange-500 text-white'
-                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                         }`}
                 >
                     {t('common.all')}
@@ -127,11 +116,11 @@ const StudentGradesView = () => {
                         key={subject}
                         onClick={() => setSelectedSubject(subject)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${selectedSubject === subject
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                             }`}
                     >
-                        {subject}
+                        {t(`subjects.${subject}`, subject)}
                     </button>
                 ))}
             </div>

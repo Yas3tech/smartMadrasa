@@ -93,8 +93,8 @@ const DatabaseAdmin = () => {
                     <Database size={20} />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Administration Base de Données</h1>
-                    <p className="text-sm text-gray-500">Gérer les données Firebase</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Administration Base de Données</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Gérer les données Firebase</p>
                 </div>
             </div>
 
@@ -117,8 +117,8 @@ const DatabaseAdmin = () => {
             <Card>
                 <div className="space-y-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">🔄 Réinitialiser la Base de Données</h2>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">🔄 Réinitialiser la Base de Données</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                             Supprime toutes les données existantes et crée de nouvelles données de test avec des relations parent-étudiant correctes.
                         </p>
                         <Button
@@ -131,9 +131,9 @@ const DatabaseAdmin = () => {
                         </Button>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">➕ Ajouter des Données de Test</h2>
-                        <p className="text-sm text-gray-600 mb-4">
+                    <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">➕ Ajouter des Données de Test</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                             Ajoute uniquement les données de test sans supprimer les données existantes.
                         </p>
                         <Button
@@ -146,9 +146,9 @@ const DatabaseAdmin = () => {
                         </Button>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">🗑️ Supprimer Toutes les Données</h2>
-                        <p className="text-sm text-gray-600 mb-4">
+                    <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">🗑️ Supprimer Toutes les Données</h2>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                             Supprime toutes les données sans les réinitialiser. ⚠️ Action irréversible !
                         </p>
                         <Button
@@ -161,9 +161,9 @@ const DatabaseAdmin = () => {
                         </Button>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-6 bg-blue-50 p-4 rounded-lg">
-                        <h3 className="font-semibold text-gray-900 mb-2">📊 Données qui seront créées :</h3>
-                        <ul className="text-sm text-gray-700 space-y-1">
+                    <div className="border-t border-gray-200 dark:border-slate-600 pt-6 bg-blue-50 dark:bg-slate-700/50 p-4 rounded-lg">
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">📊 Données qui seront créées :</h3>
+                        <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                             <li>• 1 Super Admin</li>
                             <li>• 1 Directeur</li>
                             <li>• 3 Professeurs</li>
@@ -171,7 +171,7 @@ const DatabaseAdmin = () => {
                             <li>• 7 Parents (avec relations correctes vers leurs enfants)</li>
                             <li>• 4 Classes (6ème A, 5ème B, 4ème C, 3ème A)</li>
                         </ul>
-                        <p className="text-xs text-gray-500 mt-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
                             👨‍👩‍👧‍👦 Note: Un parent peut avoir plusieurs enfants (ex: Mr. & Mrs. Student ont Alice et George)
                         </p>
                     </div>
@@ -181,12 +181,12 @@ const DatabaseAdmin = () => {
             {/* Confirmation Modal */}
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
                         <div className="flex items-center gap-3 text-orange-600 mb-4">
                             <AlertCircle size={28} />
-                            <h3 className="text-xl font-bold">Confirmation Requise</h3>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Confirmation Requise</h3>
                         </div>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 dark:text-gray-300 mb-6">
                             Êtes-vous sûr de vouloir réinitialiser la base de données ?
                             <br /><br />
                             ⚠️ <strong>Toutes les données actuelles seront définitivement supprimées</strong> et remplacées par les données de test.

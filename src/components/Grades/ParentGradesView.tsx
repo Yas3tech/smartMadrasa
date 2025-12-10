@@ -10,73 +10,80 @@ import GradeCard from './GradeCard';
 import { useGradeStats } from '../../hooks/useGradeStats';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
+import StudentSelector from '../Common/StudentSelector';
+
 
 const ParentGradesView = () => {
     const { t } = useTranslation();
     const { user } = useAuth();
-    const { students, grades } = useData();
+    const { grades } = useData();
     const { calculateStudentStats } = useGradeStats();
 
     const [selectedChildId, setSelectedChildId] = useState('');
 
-    if (!user) return null;
+    if (!user || user.role !== 'parent') return null;
 
-    const children = students.filter(s => s.parentId === user.id);
-    const activeChildId = selectedChildId || (children.length > 0 ? children[0].id : '');
-    const activeChild = children.find(c => c.id === activeChildId);
-    const stats = activeChild ? calculateStudentStats(activeChild.id) : null;
+    const stats = selectedChildId ? calculateStudentStats(selectedChildId) : null;
+
+    // Filter grades for the selected child
+    const childGrades = grades
+        .filter(g => g.studentId === selectedChildId)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">{t('grades.schoolReports')}</h1>
-                {children.length > 1 && (
-                    <select
-                        value={activeChildId}
-                        onChange={(e) => setSelectedChildId(e.target.value)}
-                        className="px-4 py-2 rounded-xl border border-gray-200 outline-none"
-                    >
-                        {children.map(child => (
-                            <option key={child.id} value={child.id}>{child.name}</option>
-                        ))}
-                    </select>
-                )}
+            <div className="flex justify-between items-center flex-wrap gap-4">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('grades.schoolReports')}</h1>
+                <div className="min-w-[200px]">
+                    <StudentSelector
+                        onSelect={(student) => setSelectedChildId(student.id)}
+                        selectedStudentId={selectedChildId}
+                    />
+                </div>
             </div>
 
-            {stats && activeChild && (
+            {stats && (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Card className="p-6">
                             <div className="flex items-center gap-3 mb-2">
                                 <GraduationCap className="text-orange-600" />
-                                <h3 className="font-bold text-gray-900">{t('grades.generalAverage')}</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-white">{t('grades.generalAverage')}</h3>
                             </div>
-                            <p className="text-3xl font-bold text-gray-900">{stats.avgGrade}%</p>
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.avgGrade}%</p>
+                            <div className="mt-2 text-sm text-gray-500">
+                                {stats.avgGrade >= 80 ? <span className="text-green-600">{t('grades.excellent')}</span> :
+                                    stats.avgGrade >= 60 ? <span className="text-blue-600">{t('grades.good')}</span> :
+                                        <span className="text-orange-600">{t('grades.needsImprovement')}</span>}
+                            </div>
                         </Card>
                         <Card className="p-6">
                             <div className="flex items-center gap-3 mb-2">
                                 <Clock className="text-blue-600" />
-                                <h3 className="font-bold text-gray-900">{t('grades.attendanceRate')}</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-white">{t('grades.attendanceRate')}</h3>
                             </div>
-                            <p className="text-3xl font-bold text-gray-900">{stats.attendanceRate}%</p>
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.attendanceRate}%</p>
                         </Card>
                         <Card className="p-6">
                             <div className="flex items-center gap-3 mb-2">
                                 <FileText className="text-green-600" />
-                                <h3 className="font-bold text-gray-900">{t('grades.totalGrades')}</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-white">{t('grades.totalGrades')}</h3>
                             </div>
-                            <p className="text-3xl font-bold text-gray-900">{stats.totalGrades}</p>
+                            <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalGrades}</p>
                         </Card>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {grades
-                            .filter(g => g.studentId === activeChildId)
-                            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                            .map(grade => (
+                        {childGrades.length > 0 ? (
+                            childGrades.map(grade => (
                                 <GradeCard key={grade.id} grade={grade} />
                             ))
-                        }
+                        ) : (
+                            <div className="col-span-full text-center py-12 text-gray-500 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700">
+                                <FileText size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                                <p>{t('grades.noGradesYet')}</p>
+                            </div>
+                        )}
                     </div>
                 </>
             )}

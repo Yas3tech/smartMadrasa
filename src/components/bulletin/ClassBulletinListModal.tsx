@@ -4,6 +4,7 @@ import type { Student, AcademicPeriod, Course, Grade, TeacherComment } from '../
 import BulletinPreview from './BulletinPreview';
 import { generateClassBulletinPDF } from '../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
+import { useData } from '../../context/DataContext';
 
 interface ClassBulletinListModalProps {
     classId: string;
@@ -25,13 +26,30 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
     comments,
     onClose
 }) => {
+    const { attendance } = useData();
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+    // Helper function to calculate absences for a student during the period
+    const getStudentAbsences = (studentId: string) => {
+        const periodStart = new Date(period.startDate);
+        const periodEnd = new Date(period.endDate);
+
+        const studentAttendance = attendance.filter(a => {
+            if (a.studentId !== studentId) return false;
+            const recordDate = new Date(a.date);
+            return recordDate >= periodStart && recordDate <= periodEnd;
+        });
+
+        const justified = studentAttendance.filter(a => a.status === 'absent' && a.isJustified === true).length;
+        const unjustified = studentAttendance.filter(a => a.status === 'absent' && a.isJustified !== true).length;
+        const late = studentAttendance.filter(a => a.status === 'late').length;
+
+        return { justified, unjustified, late };
+    };
 
     const handlePrintAll = () => {
         const bulletinDataList = students.map(student => {
-            // Mock absences for now as they are not yet in context
-            // In real app, fetch from Attendance or ReportCard
-            const absences = { justified: 0, unjustified: 0, late: 0 };
+            const absences = getStudentAbsences(student.id);
 
             return {
                 student,
@@ -108,7 +126,7 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
                     courses={courses}
                     grades={grades}
                     comments={comments}
-                    absences={{ justified: 0, unjustified: 0, late: 0 }} // Mock for now
+                    absences={getStudentAbsences(selectedStudent.id)}
                     onClose={() => setSelectedStudent(null)}
                 />
             )}
@@ -117,3 +135,4 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
 };
 
 export default ClassBulletinListModal;
+

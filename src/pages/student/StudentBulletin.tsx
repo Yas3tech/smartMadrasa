@@ -94,7 +94,7 @@ const StudentBulletin: React.FC = () => {
         });
 
         doc.save(`Bulletin_${studentData.name}_${selectedPeriodData.name}.pdf`);
-        toast.success('Bulletin téléchargé');
+        toast.success(t('studentBulletin.downloadSuccess'));
     };
 
     // Role check - must be after all hooks

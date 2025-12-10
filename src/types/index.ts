@@ -120,6 +120,7 @@ export interface Course {
     weekOffset?: number;
     specificDate?: string;
     notes?: string;
+    excludedDates?: string[]; // Dates to exclude from recurring course (ISO date strings)
 
     // Bulletin-related fields
     defaultCategories?: string[]; // IDs of default grade categories for this course

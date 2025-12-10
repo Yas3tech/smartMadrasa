@@ -86,6 +86,31 @@ export const updateUser = async (id: string, updates: Partial<User>): Promise<vo
     await updateDoc(docRef, updates);
 };
 
+import { deleteAllUserData, previewUserDataDeletion } from './deleteUserData';
+
+/**
+ * Supprime un utilisateur et TOUTES ses données associées (conformité RGPD)
+ * @param id - L'ID de l'utilisateur à supprimer
+ * @param role - Le rôle de l'utilisateur (student, parent, teacher, etc.)
+ * @returns Le résultat de la suppression avec le détail des données supprimées
+ */
+export const deleteUserWithAllData = async (id: string, role: string) => {
+    if (!db) throw new Error('Firebase not configured');
+    return await deleteAllUserData(id, role);
+};
+
+/**
+ * Prévisualise les données qui seront supprimées (sans les supprimer)
+ * Utile pour afficher une confirmation à l'utilisateur
+ */
+export const previewUserDeletion = async (id: string, role: string) => {
+    return await previewUserDataDeletion(id, role);
+};
+
+/**
+ * Supprime uniquement le document utilisateur (ancienne méthode)
+ * @deprecated Utiliser deleteUserWithAllData pour la conformité RGPD
+ */
 export const deleteUser = async (id: string): Promise<void> => {
     if (!db) throw new Error('Firebase not configured');
     await deleteDoc(doc(db, COLLECTION_NAME, id));

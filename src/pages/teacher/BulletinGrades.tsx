@@ -434,26 +434,29 @@ const TeacherBulletinGrades: React.FC = () => {
             {selectedPeriod && selectedClassId && !selectedStudent && (
                 <div className="space-y-6">
                     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setSelectedClassId('')} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-700 dark:text-slate-300">
+                                <button onClick={() => setSelectedClassId('')} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-700 dark:text-slate-300 flex-shrink-0">
                                     <ArrowLeft size={20} />
                                 </button>
-                                <div>
-                                    <h2 className="text-xl font-semibold dark:text-white">{selectedClassData?.name} - {t('bulletinGrades.overview')}</h2>
-                                    <p className="text-sm text-gray-500 dark:text-slate-400">{selectedPeriodData?.name}</p>
+                                <div className="min-w-0">
+                                    <h2 className="text-xl font-semibold dark:text-white truncate">{selectedClassData?.name} - {t('bulletinGrades.overview')}</h2>
+                                    <p className="text-sm text-gray-500 dark:text-slate-400 truncate">{selectedPeriodData?.name}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <div className="text-right">
-                                    <p className="text-sm text-gray-500">{t('bulletinGrades.validationProgress')}</p>
-                                    <p className="font-bold text-indigo-600">
-                                        {classValidationStats.validated} / {classValidationStats.total}
-                                    </p>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                                <div className="bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-lg flex justify-between items-center sm:block text-right">
+                                    <span className="text-sm text-gray-500 sm:hidden">{t('bulletinGrades.validationProgress')}</span>
+                                    <div>
+                                        <p className="text-xs text-gray-500 hidden sm:block">{t('bulletinGrades.validationProgress')}</p>
+                                        <p className="font-bold text-indigo-600">
+                                            {classValidationStats.validated} / {classValidationStats.total}
+                                        </p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={handleValidateAll}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                                 >
                                     <CheckSquare size={18} />
                                     {t('bulletinGrades.validateAll')}
@@ -524,27 +527,31 @@ const TeacherBulletinGrades: React.FC = () => {
             {selectedPeriod && selectedStudent && (
                 <>
                     {/* Header with student info */}
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                        <div className="flex items-center justify-between">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => setSelectedStudent('')}
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0"
                                 >
-                                    <ArrowLeft size={20} />
+                                    <ArrowLeft size={20} className="text-gray-700 dark:text-slate-300" />
                                 </button>
-                                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
                                     {selectedStudentData?.name.charAt(0)}
                                 </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-800">{selectedStudentData?.name}</h2>
-                                    <p className="text-gray-600">{selectedPeriodData?.name} - {selectedPeriodData?.academicYear}</p>
+                                <div className="min-w-0">
+                                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white truncate">{selectedStudentData?.name}</h2>
+                                    <p className="text-gray-600 dark:text-slate-400 truncate">{selectedPeriodData?.name} - {selectedPeriodData?.academicYear}</p>
                                 </div>
                             </div>
-                            <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-6 text-white">
-                                <p className="text-indigo-100 text-sm">{t('bulletinGrades.generalAverage')}</p>
-                                <p className="text-4xl font-bold">{overallAverage.toFixed(2)}</p>
-                                <p className="text-indigo-100 text-sm">/ 20</p>
+                            <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-6 text-white w-full lg:w-auto">
+                                <div className="flex items-center justify-between lg:block">
+                                    <span className="text-indigo-100 text-sm lg:mb-1 block">{t('bulletinGrades.generalAverage')}</span>
+                                    <div className="flex items-baseline gap-1 lg:block">
+                                        <span className="text-4xl font-bold">{overallAverage.toFixed(2)}</span>
+                                        <span className="text-indigo-100 text-sm">/ 20</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -552,40 +559,42 @@ const TeacherBulletinGrades: React.FC = () => {
                     {/* Course Averages and Comments */}
                     <div className="space-y-4">
                         {studentCourseAverages.length === 0 ? (
-                            <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-12 text-center">
                                 <BookOpen size={48} className="mx-auto text-gray-400 mb-4" />
-                                <p className="text-gray-500">{t('bulletinGrades.noGradesForPeriod')}</p>
+                                <p className="text-gray-500 dark:text-slate-400">{t('bulletinGrades.noGradesForPeriod')}</p>
                             </div>
                         ) : (
                             studentCourseAverages.map(({ course, gradeCount, average, existingComment }) => (
-                                <div key={course.id} className="bg-white rounded-lg shadow-md p-6">
-                                    <div className="flex items-center justify-between mb-4">
+                                <div key={course.id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                                         <div className="flex items-center gap-4">
-                                            <BookOpen size={24} className="text-indigo-600" />
+                                            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                                <BookOpen size={24} />
+                                            </div>
                                             <div>
-                                                <h3 className="text-lg font-semibold text-gray-800">{course.subject}</h3>
-                                                <p className="text-sm text-gray-500">{gradeCount} {gradeCount > 1 ? t('bulletinGrades.grades') : t('bulletinGrades.grade')}</p>
+                                                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{course.subject}</h3>
+                                                <p className="text-sm text-gray-500 dark:text-slate-400">{gradeCount} {gradeCount > 1 ? t('bulletinGrades.grades') : t('bulletinGrades.grade')}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 bg-gradient-to-br from-green-50 to-green-100 px-6 py-3 rounded-lg">
-                                            <TrendingUp className="text-green-600" size={20} />
+                                        <div className="flex items-center justify-between sm:justify-end gap-2 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 px-6 py-3 rounded-lg">
+                                            <TrendingUp className="text-green-600 dark:text-green-400" size={20} />
                                             <div className="text-right">
-                                                <p className="text-2xl font-bold text-green-700">{average.toFixed(2)}</p>
-                                                <p className="text-xs text-green-600">/ 20</p>
+                                                <p className="text-2xl font-bold text-green-700 dark:text-green-400">{average.toFixed(2)}</p>
+                                                <p className="text-xs text-green-600 dark:text-green-500">/ 20</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Existing comment (validated) or Edit Form */}
                                     {existingComment && existingComment.isValidated ? (
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-lg p-4">
                                             <div className="flex justify-between items-start mb-2">
-                                                <p className="text-sm font-medium text-green-800">
+                                                <p className="text-sm font-medium text-green-800 dark:text-green-400">
                                                     {t('bulletinGrades.commentValidated')} ✓
                                                 </p>
                                             </div>
-                                            <p className="text-gray-700">{existingComment.comment}</p>
-                                            <p className="text-xs text-gray-500 mt-2">
+                                            <p className="text-gray-700 dark:text-gray-300">{existingComment.comment}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                                 {t('bulletinGrades.validatedOn', { date: new Date(existingComment.validationDate!).toLocaleDateString(locale) })}
                                             </p>
                                         </div>

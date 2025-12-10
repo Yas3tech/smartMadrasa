@@ -51,8 +51,8 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6 max-h-[80vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 border-b">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <div className="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-slate-800 pb-4 border-b dark:border-slate-700">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <Calendar className="text-orange-600" size={28} />
                         {t('calendar.upcoming')}
                     </h2>
@@ -77,7 +77,7 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
                                 return (
                                     <div
                                         key={`event-${event.id}`}
-                                        className="p-4 rounded-xl border-2 hover:shadow-md transition-shadow bg-white"
+                                        className="p-4 rounded-xl border-2 hover:shadow-md transition-shadow bg-white dark:bg-slate-700 dark:border-slate-600"
                                     >
                                         <div className="flex items-start gap-4">
                                             {/* Type Badge */}
@@ -88,9 +88,9 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
 
                                             {/* Content */}
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-gray-900 text-lg mb-1">{event.title}</h3>
+                                                <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">{event.title}</h3>
                                                 {event.description && (
-                                                    <p className="text-sm text-gray-600 mb-3">{event.description}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{event.description}</p>
                                                 )}
 
                                                 {/* Date and Time */}
@@ -117,7 +117,7 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
                                 return (
                                     <div
                                         key={`homework-${homework.id}`}
-                                        className="p-4 rounded-xl border-2 hover:shadow-md transition-shadow bg-white"
+                                        className="p-4 rounded-xl border-2 hover:shadow-md transition-shadow bg-white dark:bg-slate-700 dark:border-slate-600"
                                     >
                                         <div className="flex items-start gap-4">
                                             {/* Type Badge */}
@@ -128,10 +128,10 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
 
                                             {/* Content */}
                                             <div className="flex-1">
-                                                <h3 className="font-bold text-gray-900 text-lg mb-1">{homework.title}</h3>
-                                                <p className="text-xs text-gray-500 mb-2">{homework.subject}</p>
+                                                <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">{homework.title}</h3>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{homework.subject}</p>
                                                 {homework.description && (
-                                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{homework.description}</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{homework.description}</p>
                                                 )}
 
                                                 {/* Date */}

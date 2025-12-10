@@ -5,7 +5,9 @@ import {
     addDoc,
     updateDoc,
     collectionGroup,
-    onSnapshot
+    onSnapshot,
+    query,
+    where
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Attendance } from '../types';
@@ -43,6 +45,23 @@ export const subscribeToAttendance = (callback: (attendance: Attendance[]) => vo
     if (!db) return () => { };
     // Use collectionGroup to listen to ALL attendance records
     return onSnapshot(collectionGroup(db, COLLECTION_NAME), snapshot => {
+        const attendance = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Attendance));
+        callback(attendance);
+    });
+};
+
+export const subscribeToAttendanceByStudentIds = (studentIds: string[], callback: (attendance: Attendance[]) => void) => {
+    if (!db || studentIds.length === 0) return () => { };
+
+    // Note: collectionGroup queries with 'in' might need an index if other filters are applied.
+    // But basic 'where' should be okay or prompt for index creation.
+    // For safety with 'in' on collectionGroup, we might need to issue separate queries if array is large,
+    // but for a parent's children (max 5-10), 'in' is fine.
+    // However, attendance is likely subcollection of users.
+    // If we want to query by studentId field on the document itself:
+    const q = query(collectionGroup(db, COLLECTION_NAME), where('studentId', 'in', studentIds));
+
+    return onSnapshot(q, snapshot => {
         const attendance = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Attendance));
         callback(attendance);
     });

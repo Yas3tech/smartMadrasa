@@ -6,7 +6,9 @@ import {
     updateDoc,
     deleteDoc,
     Timestamp,
-    onSnapshot
+    onSnapshot,
+    query,
+    where
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import type { Event } from '../types';
@@ -57,6 +59,22 @@ export const deleteEvent = async (id: string): Promise<void> => {
 export const subscribeToEvents = (callback: (events: Event[]) => void) => {
     if (!db) return () => { };
     return onSnapshot(collection(db, COLLECTION_NAME), snapshot => {
+        const events = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+            start: doc.data().start?.toDate?.()?.toISOString() || doc.data().start,
+            end: doc.data().end?.toDate?.()?.toISOString() || doc.data().end
+        } as Event));
+        callback(events);
+    });
+};
+
+export const subscribeToEventsByClassIds = (classIds: string[], callback: (events: Event[]) => void) => {
+    if (!db || classIds.length === 0) return () => { };
+
+    const q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
+
+    return onSnapshot(q, snapshot => {
         const events = snapshot.docs.map(doc => ({
             ...doc.data(),
             id: doc.id,
