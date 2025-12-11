@@ -1,0 +1,172 @@
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
+import type { User, Grade, Homework, Event } from '../types';
+
+export interface UseDashboardReturn {
+    // Parent child selection
+    selectedChildId: string | null;
+    setSelectedChildId: (id: string | null) => void;
+    selectedChild: User | null;
+    parentChildren: User[];
+    effectiveSelectedChildId: string | null;
+
+    // Homework modal
+    selectedHomework: Homework | null;
+    setSelectedHomework: (hw: Homework | null) => void;
+    showHomeworkModal: boolean;
+    setShowHomeworkModal: (show: boolean) => void;
+    handleOpenHomework: (homework: Homework) => void;
+
+    // General Stats
+    students: User[];
+    teachers: User[];
+    attendanceRate: string | number;
+    avgGrade: string | number;
+    unreadMessages: number;
+    upcomingEvents: Event[];
+    presentCount: number;
+    allGrades: Grade[];
+
+    // Student specific
+    myGrades: Grade[];
+    myAvg: string | number;
+    mySubjectPerformance: { subject: string; average: number }[];
+    pendingHomeworks: Homework[];
+    childClass?: { name: string };
+
+    // Chart data generators
+    getWeeklyAttendanceData: () => { name: string; présents: number; absents: number }[];
+    getGradeDistributionData: () => { name: string; value: number; color: string }[];
+    getSubjectPerformanceData: () => { subject: string; moyenne: number }[];
+}
+
+export function useDashboard(): UseDashboardReturn {
+    const { user } = useAuth();
+    const { students, users, grades, attendance, messages, events, homeworks, classes } = useData();
+
+    // State
+    const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+    const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
+    const [showHomeworkModal, setShowHomeworkModal] = useState(false);
+
+    // Parent children
+    const parentChildren = user?.role === 'parent'
+        ? students.filter(s => s.parentId === user.id)
+        : [];
+    const effectiveSelectedChildId = selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
+    const selectedChild = parentChildren.find(c => c.id === effectiveSelectedChildId) || (parentChildren.length > 0 ? parentChildren[0] : null);
+
+    // General Stats Calculations
+    const teachers = users.filter(u => u.role === 'teacher');
+    const todayDate = new Date().toISOString().split('T')[0];
+    const todayAttendance = attendance.filter(a => a.date === todayDate);
+    const presentCount = todayAttendance.filter(a => a.status === 'present').length;
+    const attendanceRate = students.length > 0 ? ((presentCount / students.length) * 100).toFixed(0) : 0;
+
+    const allGrades = grades.filter(g => g.score > 0);
+    const avgGrade = allGrades.length > 0
+        ? (allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length).toFixed(1)
+        : 0;
+
+    const unreadMessages = messages.filter(m => m.receiverId === user?.id && !m.read).length;
+
+    const upcomingEvents = events
+        .filter(e => new Date(e.start) >= new Date())
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+        .slice(0, 3);
+
+    // Student Specific Calculations
+    const targetStudentId = (user?.role === 'parent' && selectedChild) ? selectedChild.id : user?.id;
+    // @ts-ignore
+    const targetClassId = (user?.role === 'parent' && selectedChild) ? selectedChild.classId : user?.classId;
+
+    const myGrades = grades.filter(g => g.studentId === targetStudentId);
+    const myAvg = myGrades.length > 0
+        ? (myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length).toFixed(1)
+        : 0;
+
+    const mySubjectPerformance = [...new Set(myGrades.map(g => g.subject))].map(subject => {
+        const subjectGrades = myGrades.filter(g => g.subject === subject);
+        const avg = subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / subjectGrades.length;
+        return {
+            subject,
+            average: parseFloat(avg.toFixed(1))
+        };
+    });
+
+    const pendingHomeworks = homeworks
+        .filter(hw => {
+            if (hw.classId !== targetClassId) return false;
+            return new Date(hw.dueDate) >= new Date();
+        })
+        .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+        .slice(0, 5);
+
+    const childClass = classes.find(c => c.id === targetClassId);
+
+    // Handlers
+    const handleOpenHomework = (homework: Homework) => {
+        setSelectedHomework(homework);
+        setShowHomeworkModal(true);
+    };
+
+    // Chart data generators
+    const getWeeklyAttendanceData = () => {
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (6 - i));
+            return date.toISOString().split('T')[0];
+        });
+
+        return last7Days.map(date => {
+            const dayAttendance = attendance.filter(a => a.date === date);
+            const present = dayAttendance.filter(a => a.status === 'present').length;
+            const absent = dayAttendance.filter(a => a.status === 'absent').length;
+            return {
+                name: new Date(date).toLocaleDateString('fr-FR', { weekday: 'short' }),
+                présents: present,
+                absents: absent
+            };
+        });
+    };
+
+    const getGradeDistributionData = () => {
+        const ranges = [
+            { name: 'Excellent (90-100)', min: 90, max: 100, color: '#10B981' },
+            { name: 'Bien (70-89)', min: 70, max: 89, color: '#3B82F6' },
+            { name: 'Moyen (50-69)', min: 50, max: 69, color: '#F59E0B' },
+            { name: 'Faible (<50)', min: 0, max: 49, color: '#EF4444' }
+        ];
+
+        return ranges.map(range => ({
+            name: range.name,
+            value: grades.filter(g => {
+                const percentage = (g.score / g.maxScore) * 100;
+                return percentage >= range.min && percentage <= range.max;
+            }).length,
+            color: range.color
+        }));
+    };
+
+    const getSubjectPerformanceData = () => {
+        const subjects = [...new Set(grades.map(g => g.subject))];
+        return subjects.map(subject => {
+            const subjectGrades = grades.filter(g => g.subject === subject);
+            const avg = subjectGrades.length > 0
+                ? subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / subjectGrades.length
+                : 0;
+            return { subject, moyenne: Math.round(avg) };
+        });
+    };
+
+    return {
+        selectedChildId, setSelectedChildId,
+        selectedChild, parentChildren, effectiveSelectedChildId,
+        selectedHomework, setSelectedHomework,
+        showHomeworkModal, setShowHomeworkModal, handleOpenHomework,
+        students, teachers, attendanceRate, avgGrade, unreadMessages, upcomingEvents, presentCount, allGrades,
+        myGrades, myAvg, mySubjectPerformance, pendingHomeworks, childClass,
+        getWeeklyAttendanceData, getGradeDistributionData, getSubjectPerformanceData
+    };
+}

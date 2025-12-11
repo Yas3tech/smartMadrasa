@@ -151,23 +151,6 @@
             "averageScoreBySubject": "Score moyen par matière",
             "average": "Moyenne"
         },
-        "events": {
-            "upcoming": "À venir",
-            "viewCalendar": "Voir le calendrier",
-            "other": "Autre",
-            "noEvents": "Aucun événement à venir"
-        },
-        "actions": {
-            "title": "Actions rapides",
-            "addStudent": "Ajouter un élève",
-            "addTeacher": "Ajouter un enseignant",
-            "createClass": "Créer une classe",
-            "viewReports": "Voir les rapports",
-            "takeAttendance": "Marquer la présence",
-            "enterGrades": "Saisir les notes",
-            "sendMessage": "Envoyer un message",
-            "addEvent": "Ajouter un événement"
-        },
         "dailySummary": {
             "title": "Résumé quotidien",
             "studentsPresent": "élèves présents",
@@ -175,8 +158,12 @@
             "unreadMessages": "messages non lus"
         },
         "studyTip": {
-            "title": "Conseil d'étude",
-            "quote": "Le succès est la somme de petits efforts répétés jour après jour"
+            "title": "Hadith",
+            "quote": "Lorsque le fils d'Adam meurt, toutes ses œuvres s'arrêtent hormis trois : une aumône courante, un savoir utile et un enfant pieux qui invoque Allah en sa faveur",
+            "source": "Rapporté par Muslim"
+        },
+        "parent": {
+            "selectChild": "Sélectionner un enfant"
         }
     },
     "homework": {
@@ -199,12 +186,14 @@
         "attachFiles": "Joindre des fichiers",
         "maxFileSize": "Taille max 10MB",
         "viewSubmissions": "Voir les soumissions",
+        "submissionsFor": "Soumissions pour {{title}}",
         "grade": "Noter",
         "feedback": "Commentaires",
         "noHomework": "Aucun devoir",
         "daysRemaining": "{{count}} jour(s) restant(s)",
         "submittedOn": "Soumis le",
         "allowOnlineSubmission": "Autoriser la soumission en ligne",
+        "isGraded": "Sur point (noté)",
         "classroomOnly": "En classe uniquement",
         "class": "Classe",
         "pastHomework": "Devoirs passés",
@@ -284,6 +273,8 @@
         "directorSignature": "Le Directeur"
     },
     "schedule": {
+        "timeLabel": "Heure",
+        "homeworkDue": "Devoirs à rendre",
         "title": "Emploi du temps",
         "mySchedule": "Mon emploi du temps",
         "classSchedule": "Emploi du temps de la classe",
@@ -528,6 +519,11 @@
         "serverError": "Erreur serveur"
     },
     "calendar": {
+        "lesson": "Cours",
+        "homework": "Devoir",
+        "exam": "Examen",
+        "event": "Événement",
+        "noUpcomingEvents": "Aucun événement prévu",
         "title": "Agenda & Calendrier",
         "month": "Mois",
         "upcoming": "À venir",
@@ -597,7 +593,11 @@
         "subjectsTaught": "Matières enseignées",
         "noSubjectsAssigned": "Aucune matière assignée",
         "assignedClasses": "Classes assignées",
-        "noClassesAssigned": "Aucune classe assignée"
+        "noClassesAssigned": "Aucune classe assignée",
+        "resetPasswordDesc": "Cliquez sur le bouton ci-dessous pour recevoir un email de réinitialisation de mot de passe.",
+        "sendResetEmail": "Envoyer un email de réinitialisation",
+        "resetEmailSent": "Email de réinitialisation envoyé ! Vérifiez votre boîte de réception.",
+        "resetEmailError": "Erreur lors de l'envoi de l'email. Veuillez réessayer."
     },
     "resources": {
         "title": "Bibliothèque de ressources",
@@ -968,5 +968,22 @@
     },
     "studentBulletin": {
         "downloadSuccess": "Bulletin téléchargé"
+    },
+    "events": {
+        "upcoming": "À venir",
+        "viewCalendar": "Voir le calendrier",
+        "other": "Autre",
+        "noEvents": "Aucun événement ou devoir à venir"
+    },
+    "actions": {
+        "title": "Actions rapides",
+        "addStudent": "Ajouter un élève",
+        "addTeacher": "Ajouter un enseignant",
+        "createClass": "Créer une classe",
+        "viewReports": "Voir les rapports",
+        "takeAttendance": "Marquer la présence",
+        "enterGrades": "Saisir les notes",
+        "sendMessage": "Envoyer un message",
+        "addEvent": "Ajouter un événement"
     }
 }

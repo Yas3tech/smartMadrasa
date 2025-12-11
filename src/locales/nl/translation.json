@@ -160,8 +160,12 @@
             "unreadMessages": "ongelezen berichten"
         },
         "studyTip": {
-            "title": "Studietip",
-            "quote": "Succes is de som van kleine inspanningen die dag na dag worden herhaald"
+            "title": "Hadith",
+            "quote": "Als de zoon van Adam komt te overlijden, stoppen al zijn goede daden behalve drie: doorlopende liefdadigheid, baatvolle kennis en een rechtschapen zoon die voor hem bidt",
+            "source": "Sahih Muslim - 1631"
+        },
+        "parent": {
+            "selectChild": "Selecteer een kind"
         }
     },
     "homework": {
@@ -184,12 +188,14 @@
         "attachFiles": "Bestanden bijvoegen",
         "maxFileSize": "Max grootte 10MB",
         "viewSubmissions": "Inleveringen bekijken",
+        "submissionsFor": "Inleveringen voor {{title}}",
         "grade": "Beoordelen",
         "feedback": "Feedback",
         "noHomework": "Geen huiswerk",
         "daysRemaining": "{{count}} dag(en) resterend",
         "submittedOn": "Ingeleverd op",
         "allowOnlineSubmission": "Online inleveren toestaan",
+        "isGraded": "Op punten (beoordeeld)",
         "classroomOnly": "Alleen in de klas",
         "class": "Klas",
         "pastHomework": "Vorige huiswerken",
@@ -567,7 +573,11 @@
         "subjectsTaught": "Gegeven vakken",
         "noSubjectsAssigned": "Geen vakken toegewezen",
         "assignedClasses": "Toegewezen klassen",
-        "noClassesAssigned": "Geen klassen toegewezen"
+        "noClassesAssigned": "Geen klassen toegewezen",
+        "resetPasswordDesc": "Klik op de onderstaande knop om een e-mail voor wachtwoordherstel te ontvangen.",
+        "sendResetEmail": "Herstel-e-mail verzenden",
+        "resetEmailSent": "Herstel-e-mail verzonden! Controleer uw inbox.",
+        "resetEmailError": "Fout bij het verzenden van de e-mail. Probeer het opnieuw."
     },
     "resources": {
         "title": "Bronnenbibliotheek",

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { Card, Button, Input } from '../../components/UI';
-import { User as UserIcon, Mail, Lock, Save, Edit2 } from 'lucide-react';
+import { User as UserIcon, Mail, Save, Edit2 } from 'lucide-react';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import type { Student, Parent } from '../../types';
 
 const Profile = () => {
@@ -16,9 +18,6 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
 
     // Get teacher's courses, subjects and classes from courses collection
     // MOVED BEFORE EARLY RETURN to satisfy hooks rules
@@ -48,20 +47,18 @@ const Profile = () => {
         setIsEditing(false);
     };
 
-    const handleChangePassword = () => {
-        if (newPassword !== confirmPassword) {
-            toast.error(t('profile.passwordMismatch'));
+    const handleSendPasswordReset = async () => {
+        if (!auth) {
+            toast.error(t('profile.resetEmailError'));
             return;
         }
-        if (newPassword.length < 6) {
-            toast.error(t('profile.passwordTooShort'));
-            return;
+        try {
+            await sendPasswordResetEmail(auth, user.email);
+            toast.success(t('profile.resetEmailSent'));
+        } catch (error) {
+            console.error('Password reset error:', error);
+            toast.error(t('profile.resetEmailError'));
         }
-        // In real app, would call Firebase auth
-        toast.success(t('profile.passwordChanged'));
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
     };
 
     const getRoleLabel = (role: string) => {
@@ -246,46 +243,16 @@ const Profile = () => {
 
                     {/* Change Password */}
                     <Card className="p-6">
-                        <h3 className="text-lg font-bold text-gray-900 mb-6">{t('profile.changePassword')}</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.changePassword')}</h3>
+                        <p className="text-sm text-gray-600 mb-6">{t('profile.resetPasswordDesc')}</p>
 
-                        <div className="space-y-4">
-                            <Input
-                                label={t('profile.currentPassword')}
-                                type="password"
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                icon={Lock}
-                                placeholder="••••••••"
-                            />
-
-                            <Input
-                                label={t('profile.newPassword')}
-                                type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                icon={Lock}
-                                placeholder="••••••••"
-                            />
-
-                            <Input
-                                label={t('profile.confirmPassword')}
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                icon={Lock}
-                                placeholder="••••••••"
-                            />
-
-                            <div className="flex justify-end pt-4 border-t">
-                                <Button
-                                    variant="primary"
-                                    onClick={handleChangePassword}
-                                    disabled={!currentPassword || !newPassword || !confirmPassword}
-                                >
-                                    {t('profile.changePasswordBtn')}
-                                </Button>
-                            </div>
-                        </div>
+                        <Button
+                            variant="primary"
+                            icon={Mail}
+                            onClick={handleSendPasswordReset}
+                        >
+                            {t('profile.sendResetEmail')}
+                        </Button>
                     </Card>
                 </div>
             </div>

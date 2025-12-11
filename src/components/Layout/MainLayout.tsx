@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Sidebar from './Sidebar';
 import NotificationBell from './NotificationBell';
@@ -92,9 +92,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                                 <X size={20} className="text-orange-600" />
                             )}
                         </button>
-                        <Link to="/" className="text-xl font-bold text-gray-900 hidden md:block hover:text-orange-600 transition-colors">
-                            SmartSchool
-                        </Link>
                     </div>
                     <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         {/* Language Switcher */}

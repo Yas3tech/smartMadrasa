@@ -503,7 +503,7 @@ export const initializeFirebaseData = async () => {
                 senderName: 'Super Admin',
                 senderRole: 'superadmin',
                 receiverId: 'all',
-                subject: 'Welcome to SmartSchool',
+                subject: 'Welcome to SmartMadrassa',
                 content: 'Welcome to the new school year! Please check your schedule.',
                 read: false,
                 timestamp: new Date().toISOString(),

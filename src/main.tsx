@@ -9,7 +9,7 @@ import './services/seedDatabase'; // Expose seedDatabase to console
 // This prevents flash of wrong theme
 const initializeTheme = () => {
   try {
-    const savedSettings = localStorage.getItem('smartschool_settings');
+    const savedSettings = localStorage.getItem('smartmadrassa_settings');
     if (savedSettings) {
       const settings = JSON.parse(savedSettings);
       const theme = settings?.display?.theme || 'light';

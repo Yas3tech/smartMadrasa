@@ -108,6 +108,12 @@ export const gradeSubmission = async (homeworkId: string, submissionId: string, 
     await updateDoc(docRef, { grade, feedback });
 };
 
+export const updateSubmission = async (homeworkId: string, submissionId: string, updates: Partial<Submission>): Promise<void> => {
+    if (!db) throw new Error('Firebase not configured');
+    const docRef = doc(db, COLLECTION_NAME, homeworkId, SUBMISSIONS_COLLECTION, submissionId);
+    await updateDoc(docRef, updates);
+};
+
 export const subscribeToSubmissions = (homeworkId: string, callback: (submissions: Submission[]) => void) => {
     if (!db) return () => { };
     const q = query(collection(db, COLLECTION_NAME, homeworkId, SUBMISSIONS_COLLECTION));

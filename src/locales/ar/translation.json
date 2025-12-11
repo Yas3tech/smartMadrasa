@@ -175,8 +175,12 @@
             "unreadMessages": "رسائل غير مقروءة"
         },
         "studyTip": {
-            "title": "نصيحة دراسية",
-            "quote": "النجاح هو مجموع الجهود الصغيرة المتكررة يوماً بعد يوم"
+            "title": "حديث",
+            "quote": "إذا مات الأنسان انقطع عمله إلا من ثلاث‏:‏ صدقة جارية، أو علم ينتفع به، أو ولد صالح يدعو له",
+            "source": "رواه مسلم"
+        },
+        "parent": {
+            "selectChild": "اختر طفلاً"
         }
     },
     "homework": {
@@ -199,12 +203,14 @@
         "attachFiles": "إرفاق ملفات",
         "maxFileSize": "الحجم الأقصى 10 ميغابايت",
         "viewSubmissions": "عرض المسلمات",
+        "submissionsFor": "التسليمات لـ {{title}}",
         "grade": "تقييم",
         "feedback": "ملاحظات",
         "noHomework": "لا توجد واجبات",
         "daysRemaining": "{{count}} يوم (أيام) متبقية",
         "submittedOn": "تم التسليم في",
         "allowOnlineSubmission": "السماح بالتسليم عبر الإنترنت",
+        "isGraded": "مع نقاط (مُقَيَّم)",
         "classroomOnly": "التسليم في الفصل فقط",
         "class": "الفصل",
         "pastHomework": "الواجبات السابقة",
@@ -584,7 +590,11 @@
         "subjectsTaught": "المواد المُدرَّسة",
         "noSubjectsAssigned": "لا توجد مواد مخصصة",
         "assignedClasses": "الفصول المخصصة",
-        "noClassesAssigned": "لا توجد فصول مخصصة"
+        "noClassesAssigned": "لا توجد فصول مخصصة",
+        "resetPasswordDesc": "انقر على الزر أدناه لتلقي بريد إلكتروني لإعادة تعيين كلمة المرور.",
+        "sendResetEmail": "إرسال بريد إعادة التعيين",
+        "resetEmailSent": "تم إرسال بريد إعادة التعيين! تحقق من صندوق الوارد.",
+        "resetEmailError": "خطأ في إرسال البريد. يرجى المحاولة مرة أخرى."
     },
     "resources": {
         "title": "مكتبة الموارد",

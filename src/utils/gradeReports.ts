@@ -20,7 +20,7 @@ export const generateGradeReport = (
     // Header
     doc.setFontSize(20);
     doc.setTextColor(234, 88, 12); // Orange
-    doc.text('SmartSchool', 20, 20);
+    doc.text('SmartMadrassa', 20, 20);
 
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0);

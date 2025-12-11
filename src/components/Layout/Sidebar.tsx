@@ -101,13 +101,13 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
                 }`}
         >
             {/* Header */}
-            <Link to="/" className="p-6 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors rounded-xl mx-2 mt-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-200 dark:shadow-none">
-                    S
-                </div>
-                {!isCollapsed && (
-                    <span className="font-bold text-xl text-gray-900 dark:text-white tracking-tight">SmartMadrassa</span>
-                )}
+            <Link to="/" className="p-4 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors rounded-xl mx-2 mt-2">
+                <img
+                    src="/logo.png"
+                    alt="SmartMadrassa"
+                    className={`object-contain transition-all duration-300 ${isCollapsed ? 'h-12 w-12' : ''}`}
+                    style={isCollapsed ? {} : { height: '80px' }}
+                />
             </Link>
 
             {/* Navigation */}

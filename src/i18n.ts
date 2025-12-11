@@ -41,4 +41,8 @@ const initialDir = currentLang === 'ar' ? 'rtl' : 'ltr';
 document.documentElement.dir = initialDir;
 document.documentElement.lang = currentLang;
 
+
 export default i18n;
+
+// Translations updated
+

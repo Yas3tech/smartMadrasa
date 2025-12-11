@@ -18,7 +18,7 @@ const AdminSettings = () => {
     const { user } = useAuth();
     const isRTL = i18n.language === 'ar';
 
-    const [schoolName, setSchoolName] = useState('École Smartschool');
+    const [schoolName, setSchoolName] = useState('SmartMadrassa');
     const [academicYear, setAcademicYear] = useState('2024-2025');
     const [maxGrade, setMaxGrade] = useState(100);
     const [passingGrade, setPassingGrade] = useState(50);
@@ -100,7 +100,7 @@ const AdminSettings = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">{t('adminSettings.email')}</label>
                         <input
                             type="email"
-                            defaultValue="contact@smartschool.ma"
+                            defaultValue="contact@smartmadrassa.ma"
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                         />
                     </div>

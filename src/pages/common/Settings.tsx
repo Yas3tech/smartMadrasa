@@ -29,7 +29,6 @@ interface UserSettings {
     display: {
         language: string;
         theme: 'light' | 'dark' | 'auto';
-        compactView: boolean;
     };
 }
 
@@ -44,15 +43,14 @@ const defaultSettings: UserSettings = {
     },
     display: {
         language: 'fr',
-        theme: 'light',
-        compactView: false
+        theme: 'light'
     }
 };
 
 // Load settings from localStorage
 const loadSettings = (): UserSettings => {
     try {
-        const saved = localStorage.getItem('smartschool_settings');
+        const saved = localStorage.getItem('smartmadrassa_settings');
         if (saved) {
             return { ...defaultSettings, ...JSON.parse(saved) };
         }
@@ -98,21 +96,13 @@ const Settings = () => {
     // Display Settings
     const [language, setLanguage] = useState(i18n.language || savedSettings.display.language);
     const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>(savedSettings.display.theme);
-    const [compactView, setCompactView] = useState(savedSettings.display.compactView);
 
     // Apply theme on mount and when theme changes
     useEffect(() => {
         applyTheme(theme);
     }, [theme]);
 
-    // Apply compact view
-    useEffect(() => {
-        if (compactView) {
-            document.body.classList.add('compact-view');
-        } else {
-            document.body.classList.remove('compact-view');
-        }
-    }, [compactView]);
+
 
     const handleLanguageChange = (newLang: string) => {
         setLanguage(newLang);
@@ -136,13 +126,12 @@ const Settings = () => {
             },
             display: {
                 language,
-                theme,
-                compactView
+                theme
             }
         };
 
         // Save to localStorage
-        localStorage.setItem('smartschool_settings', JSON.stringify(settings));
+        localStorage.setItem('smartmadrassa_settings', JSON.stringify(settings));
 
         // Apply changes
         applyTheme(theme);
@@ -360,22 +349,6 @@ const Settings = () => {
                                 </div>
                             </div>
 
-                            {/* Compact View */}
-                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
-                                <div>
-                                    <p className="font-semibold text-gray-900 dark:text-white">{t('settings.compactMode')}</p>
-                                    <p className="text-sm text-gray-500 dark:text-slate-400">{t('settings.compactModeDesc')}</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={compactView}
-                                        onChange={(e) => setCompactView(e.target.checked)}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-100 dark:peer-focus:ring-orange-900/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-slate-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
-                                </label>
-                            </div>
                         </div>
                     </Card>
                 </div>
