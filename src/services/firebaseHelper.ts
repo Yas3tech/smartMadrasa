@@ -6,8 +6,8 @@ import type { Firestore } from 'firebase/firestore';
  * Throws an error if Firebase is not configured
  */
 export const getDb = (): Firestore => {
-    if (!db) {
-        throw new Error('Firebase not initialized. Please configure Firebase credentials.');
-    }
-    return db;
+  if (!db) {
+    throw new Error('Firebase not initialized. Please configure Firebase credentials.');
+  }
+  return db;
 };

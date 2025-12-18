@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isTeacher() { return isRole('teacher'); }
+    function isDirector() { return isRole('director'); }
+    function isParent() { return isRole('parent'); }
+    function isStudent() { return isRole('student'); }
+    function isSuperAdmin() { return isRole('superadmin'); }
+
+    // --- Collection Rules ---
+
+    // Users:
+    // - Read: Authenticated users can read basic info (for search/lists).
+    // - Write: Users can update their own phone/avatar. Directors/Admins can manage all.
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isDirector() || isSuperAdmin();
+      allow update: if isDirector() || isSuperAdmin() || isOwner(userId);
+    }
+
+    // Grades:
+    // - Read: User sees their own. Parents see their children's. Teachers see grades they gave or for their classes.
+    // - Write: Teachers can add/edit grades.
+    match /grades/{gradeId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid || 
+        (isParent() && resource.data.studentId in getUserData().childrenIds) ||
+        isTeacher() || 
+        isDirector()
+      );
+      allow write: if isTeacher() || isDirector();
+    }
+
+    // Attendance:
+    // - Similar to Grades.
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid || 
+        (isParent() && resource.data.studentId in getUserData().childrenIds) ||
+        isTeacher() || 
+        isDirector()
+      );
+      allow write: if isTeacher() || isDirector(); // Teachers modify attendance
+    }
+
+    // Homework:
+    // - Read: Students in key class, Parents of students in key class, Teachers.
+    // - Write: Teachers.
+    match /homeworks/{homeworkId} {
+      allow read: if isAuthenticated(); // Simplified: Visible to logged-in users (filtering done in UI for now)
+      allow write: if isTeacher() || isDirector();
+    }
+
+    // Courses/Schedule:
+    // - Read: All authenticated.
+    // - Write: Director sets schedule.
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow write: if isDirector() || isSuperAdmin();
+    }
+
+    // Classes:
+    // - Read: All.
+    // - Write: Director.
+    match /classes/{classId} {
+      allow read: if isAuthenticated();
+      allow write: if isDirector() || isSuperAdmin();
+    }
+
+    // Messages:
+    // - Read: Sender or Receiver.
+    // - Write: Sender must be auth user and match senderId.
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && (
+        resource.data.senderId == request.auth.uid || 
+        resource.data.receiverId == request.auth.uid ||
+        resource.data.receiverId == 'all' // Public announcements
+      );
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+    }
+    
+    // Events:
+    // - Read: Authenticated.
+    // - Write: Teachers/Directors.
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher() || isDirector();
+    }
+  }
+}

@@ -20,8 +20,6 @@ const Schedule = lazy(() => import('./pages/common/Schedule'));
 const Announcements = lazy(() => import('./pages/common/Announcements'));
 const Resources = lazy(() => import('./pages/common/Resources'));
 const UserManagement = lazy(() => import('./pages/admin/Users'));
-const Analytics = lazy(() => import('./pages/admin/Analytics'));
-const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const DatabaseAdmin = lazy(() => import('./pages/admin/DatabaseAdmin'));
 const AcademicYearConfig = lazy(() => import('./pages/director/AcademicYearConfig'));
 const BulletinDashboard = lazy(() => import('./pages/director/BulletinDashboard'));
@@ -62,103 +60,144 @@ function App() {
                 <Route path="/login" element={<Login />} />
 
                 {/* Protected Routes */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } />
-                <Route path="/settings" element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/messages" element={
-                  <ProtectedRoute>
-                    <Messages />
-                  </ProtectedRoute>
-                } />
-                <Route path="/classes" element={
-                  <ProtectedRoute>
-                    <Classes />
-                  </ProtectedRoute>
-                } />
-                <Route path="/grades" element={
-                  <ProtectedRoute>
-                    <Grades />
-                  </ProtectedRoute>
-                } />
-                <Route path="/attendance" element={
-                  <ProtectedRoute>
-                    <Attendance />
-                  </ProtectedRoute>
-                } />
-                <Route path="/homework" element={
-                  <ProtectedRoute>
-                    <Homework />
-                  </ProtectedRoute>
-                } />
-                <Route path="/schedule" element={
-                  <ProtectedRoute>
-                    <Schedule />
-                  </ProtectedRoute>
-                } />
-                <Route path="/announcements" element={
-                  <ProtectedRoute>
-                    <Announcements />
-                  </ProtectedRoute>
-                } />
-                <Route path="/resources" element={
-                  <ProtectedRoute>
-                    <Resources />
-                  </ProtectedRoute>
-                } />
-                <Route path="/users" element={
-                  <ProtectedRoute>
-                    <UserManagement />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/analytics" element={
-                  <ProtectedRoute>
-                    <Analytics />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/settings" element={
-                  <ProtectedRoute>
-                    <AdminSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/database" element={
-                  <ProtectedRoute>
-                    <DatabaseAdmin />
-                  </ProtectedRoute>
-                } />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute>
+                      <Messages />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/classes"
+                  element={
+                    <ProtectedRoute>
+                      <Classes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/grades"
+                  element={
+                    <ProtectedRoute>
+                      <Grades />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/attendance"
+                  element={
+                    <ProtectedRoute>
+                      <Attendance />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/homework"
+                  element={
+                    <ProtectedRoute>
+                      <Homework />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/schedule"
+                  element={
+                    <ProtectedRoute>
+                      <Schedule />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/announcements"
+                  element={
+                    <ProtectedRoute>
+                      <Announcements />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/resources"
+                  element={
+                    <ProtectedRoute>
+                      <Resources />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/users"
+                  element={
+                    <ProtectedRoute>
+                      <UserManagement />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/database"
+                  element={
+                    <ProtectedRoute>
+                      <DatabaseAdmin />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Bulletin System Routes */}
-                <Route path="/bulletins/config" element={
-                  <ProtectedRoute>
-                    <AcademicYearConfig />
-                  </ProtectedRoute>
-                } />
-                <Route path="/bulletins/dashboard" element={
-                  <ProtectedRoute>
-                    <BulletinDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/bulletins/grades" element={
-                  <ProtectedRoute>
-                    <TeacherBulletinGrades />
-                  </ProtectedRoute>
-                } />
-                <Route path="/bulletins/view" element={
-                  <ProtectedRoute>
-                    <StudentBulletin />
-                  </ProtectedRoute>
-                } />
+                <Route
+                  path="/bulletins/config"
+                  element={
+                    <ProtectedRoute>
+                      <AcademicYearConfig />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulletins/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <BulletinDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulletins/grades"
+                  element={
+                    <ProtectedRoute>
+                      <TeacherBulletinGrades />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bulletins/view"
+                  element={
+                    <ProtectedRoute>
+                      <StudentBulletin />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

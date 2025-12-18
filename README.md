@@ -21,42 +21,45 @@
 
 SmartMadrasa est une plateforme complète de gestion scolaire offrant :
 
-| Fonctionnalité | Description |
-|----------------|-------------|
-| **Multi-rôles** | Étudiant, Parent, Enseignant, Directeur, SuperAdmin |
-| **Multilingue** | Français, Néerlandais, Arabe (avec support RTL) |
-| **Temps réel** | Synchronisation instantanée via Firebase |
-| **Bulletins PDF** | Génération automatique des bulletins scolaires |
-| **Mode sombre** | Thème adaptatif clair/sombre |
+| Fonctionnalité    | Description                                         |
+| ----------------- | --------------------------------------------------- |
+| **Multi-rôles**   | Étudiant, Parent, Enseignant, Directeur, SuperAdmin |
+| **Multilingue**   | Français, Néerlandais, Arabe (avec support RTL)     |
+| **Temps réel**    | Synchronisation instantanée via Firebase            |
+| **Bulletins PDF** | Génération automatique des bulletins scolaires      |
+| **Mode sombre**   | Thème adaptatif clair/sombre                        |
 
 ---
 
 ## 2. Technologies
 
 ### Frontend
-| Package | Usage |
-|---------|-------|
-| React 19 | Framework UI |
-| TypeScript | Typage statique |
+
+| Package      | Usage                |
+| ------------ | -------------------- |
+| React 19     | Framework UI         |
+| TypeScript   | Typage statique      |
 | Tailwind CSS | Styles utility-first |
-| Vite | Build tool |
+| Vite         | Build tool           |
 
 ### Backend (Firebase)
-| Service | Usage |
-|---------|-------|
-| Auth | Authentification |
-| Firestore | Base de données |
-| Storage | Fichiers |
+
+| Service   | Usage            |
+| --------- | ---------------- |
+| Auth      | Authentification |
+| Firestore | Base de données  |
+| Storage   | Fichiers         |
 
 ### Librairies
-| Package | Usage |
-|---------|-------|
-| react-router-dom | Navigation |
-| i18next | Internationalisation |
-| jspdf | Génération PDF |
-| recharts | Graphiques |
-| lucide-react | Icônes |
-| xlsx | Export Excel |
+
+| Package          | Usage                |
+| ---------------- | -------------------- |
+| react-router-dom | Navigation           |
+| i18next          | Internationalisation |
+| jspdf            | Génération PDF       |
+| recharts         | Graphiques           |
+| lucide-react     | Icônes               |
+| xlsx             | Export Excel         |
 
 ---
 
@@ -72,25 +75,25 @@ flowchart TB
         Components["Components (20)"]
         Hooks["Hooks"]
     end
-    
+
     subgraph Context["State Management"]
         Auth["AuthContext"]
         Data["DataContext"]
     end
-    
+
     subgraph Services["Services Layer"]
         UserSvc["users.ts"]
         GradeSvc["grades.ts"]
         ClassSvc["classes.ts"]
         MsgSvc["messages.ts"]
     end
-    
+
     subgraph Firebase["Firebase Backend"]
         FBAuth["Authentication"]
         Firestore["Firestore DB"]
         Storage["Storage"]
     end
-    
+
     App --> Context
     Context --> Services
     Services --> Firebase
@@ -107,7 +110,7 @@ sequenceDiagram
     participant AC as AuthContext
     participant FB as Firebase Auth
     participant FS as Firestore
-    
+
     U->>L: Saisit email/password
     L->>FB: signInWithEmailAndPassword()
     FB-->>AC: onAuthStateChanged()
@@ -127,18 +130,18 @@ flowchart LR
         Grades[(grades)]
         Messages[(messages)]
     end
-    
+
     subgraph DataContext
         State["État Local"]
         Actions["Actions CRUD"]
     end
-    
+
     subgraph Components
         Dashboard
         GradesPage["Grades"]
         MessagesPage["Messages"]
     end
-    
+
     Firestore -->|"onSnapshot()"| State
     Actions -->|"addDoc/updateDoc"| Firestore
     State --> Components
@@ -268,13 +271,13 @@ flowchart TD
 
 ### 7.2 Gestion des Notes
 
-| Composant | Rôle |
-|-----------|------|
+| Composant           | Rôle                              |
+| ------------------- | --------------------------------- |
 | `TeacherGradesView` | Saisie des notes par l'enseignant |
-| `StudentGradesView` | Consultation par l'élève |
-| `ParentGradesView` | Consultation par le parent |
-| `BulkGradeModal` | Saisie en masse par classe |
-| `GradeCard` | Affichage d'une note |
+| `StudentGradesView` | Consultation par l'élève          |
+| `ParentGradesView`  | Consultation par le parent        |
+| `BulkGradeModal`    | Saisie en masse par classe        |
+| `GradeCard`         | Affichage d'une note              |
 
 ### 7.3 Bulletins Scolaires
 
@@ -290,12 +293,12 @@ flowchart LR
 
 ### 7.4 Emploi du Temps
 
-| Type | Description |
-|------|-------------|
-| `lesson` | Cours régulier |
-| `exam` | Examen |
-| `homework` | Devoir à rendre |
-| `event` | Événement spécial |
+| Type       | Description       |
+| ---------- | ----------------- |
+| `lesson`   | Cours régulier    |
+| `exam`     | Examen            |
+| `homework` | Devoir à rendre   |
+| `event`    | Événement spécial |
 
 ### 7.5 Messagerie
 
@@ -313,11 +316,13 @@ flowchart LR
 **Fichier:** `context/AuthContext.tsx`
 
 **Responsabilités:**
+
 - Observer l'état d'authentification Firebase
 - Charger le profil utilisateur depuis Firestore
 - Fournir le hook `useAuth()`
 
 **Hooks exposés:**
+
 ```typescript
 const { user, loading, logout } = useAuth();
 ```
@@ -327,19 +332,33 @@ const { user, loading, logout } = useAuth();
 **Fichier:** `context/DataContext.tsx`
 
 **Responsabilités:**
+
 - Gérer l'état global de toutes les entités
 - S'abonner aux collections Firestore en temps réel
 - Fallback vers données mock si Firebase non configuré
 
 **Hooks exposés:**
+
 ```typescript
 const {
-  users, students, classes, messages,
-  events, grades, attendance, courses,
-  homeworks, academicPeriods, gradeCategories,
+  users,
+  students,
+  classes,
+  messages,
+  events,
+  grades,
+  attendance,
+  courses,
+  homeworks,
+  academicPeriods,
+  gradeCategories,
   // Actions CRUD
-  addUser, updateUser, deleteUser,
-  addClass, updateClass, deleteClass,
+  addUser,
+  updateUser,
+  deleteUser,
+  addClass,
+  updateClass,
+  deleteClass,
   // ...
 } = useData();
 ```
@@ -422,6 +441,7 @@ generateClassBulletinPDF(dataList: BulletinData[], className: string): jsPDF
 ```
 
 Structure du PDF généré:
+
 1. En-tête avec nom de l'école
 2. Informations élève et période
 3. Tableau des notes par matière
@@ -434,11 +454,13 @@ Structure du PDF généré:
 **Fichier:** `i18n.ts`
 
 Langues supportées:
+
 - 🇫🇷 Français (défaut)
 - 🇳🇱 Néerlandais
 - 🇸🇦 Arabe (RTL)
 
 Usage dans les composants:
+
 ```typescript
 const { t } = useTranslation();
 <h1>{t('dashboard.title')}</h1>
@@ -446,13 +468,13 @@ const { t } = useTranslation();
 
 ### 8.7 Composants UI
 
-| Composant | Props | Description |
-|-----------|-------|-------------|
-| `Card` | children, className, onClick | Conteneur avec ombre |
-| `Button` | variant, size, icon | Bouton stylisé |
-| `Badge` | variant, children | Étiquette colorée |
-| `Input` | label, error, icon | Champ de saisie |
-| `Modal` | isOpen, onClose, title | Fenêtre modale |
+| Composant | Props                        | Description          |
+| --------- | ---------------------------- | -------------------- |
+| `Card`    | children, className, onClick | Conteneur avec ombre |
+| `Button`  | variant, size, icon          | Bouton stylisé       |
+| `Badge`   | variant, children            | Étiquette colorée    |
+| `Input`   | label, error, icon           | Champ de saisie      |
+| `Modal`   | isOpen, onClose, title       | Fenêtre modale       |
 
 Variantes Button: `primary`, `secondary`, `danger`, `ghost`
 Variantes Badge: `success`, `warning`, `error`, `info`, `neutral`
