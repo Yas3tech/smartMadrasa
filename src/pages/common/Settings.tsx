@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Settings interface
+
 interface UserSettings {
   notifications: {
     email: boolean;
@@ -47,7 +47,7 @@ const defaultSettings: UserSettings = {
   },
 };
 
-// Load settings from localStorage
+
 const loadSettings = (): UserSettings => {
   try {
     const saved = localStorage.getItem('smartmadrassa_settings');
@@ -55,12 +55,11 @@ const loadSettings = (): UserSettings => {
       return { ...defaultSettings, ...JSON.parse(saved) };
     }
   } catch (e) {
-    console.error('Error loading settings:', e);
   }
   return defaultSettings;
 };
 
-// Apply theme to document
+
 const applyTheme = (theme: 'light' | 'dark' | 'auto') => {
   const root = document.documentElement;
 
@@ -69,7 +68,7 @@ const applyTheme = (theme: 'light' | 'dark' | 'auto') => {
   } else if (theme === 'light') {
     root.classList.remove('dark');
   } else {
-    // Auto - check system preference
+
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       root.classList.add('dark');
     } else {
@@ -82,10 +81,10 @@ const Settings = () => {
   const { t, i18n } = useTranslation();
   useAuth();
 
-  // Load saved settings
+
   const savedSettings = loadSettings();
 
-  // Notification Settings
+
   const [emailNotifications, setEmailNotifications] = useState(savedSettings.notifications.email);
   const [pushNotifications, setPushNotifications] = useState(savedSettings.notifications.push);
   const [messageNotifications, setMessageNotifications] = useState(
@@ -97,11 +96,11 @@ const Settings = () => {
   );
   const [eventNotifications, setEventNotifications] = useState(savedSettings.notifications.events);
 
-  // Display Settings
+
   const [language, setLanguage] = useState(i18n.language || savedSettings.display.language);
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>(savedSettings.display.theme);
 
-  // Apply theme on mount and when theme changes
+
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
@@ -132,10 +131,10 @@ const Settings = () => {
       },
     };
 
-    // Save to localStorage
+
     localStorage.setItem('smartmadrassa_settings', JSON.stringify(settings));
 
-    // Apply changes
+
     applyTheme(theme);
 
     toast.success(t('settings.settingsSaved'));
@@ -344,11 +343,10 @@ const Settings = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={() => handleThemeChange('light')}
-                    className={`p-4 rounded-lg border-2 transition-colors ${
-                      theme === 'light'
+                    className={`p-4 rounded-lg border-2 transition-colors ${theme === 'light'
                         ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
                         : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
-                    }`}
+                      }`}
                   >
                     <Sun className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -357,11 +355,10 @@ const Settings = () => {
                   </button>
                   <button
                     onClick={() => handleThemeChange('dark')}
-                    className={`p-4 rounded-lg border-2 transition-colors ${
-                      theme === 'dark'
+                    className={`p-4 rounded-lg border-2 transition-colors ${theme === 'dark'
                         ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
                         : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
-                    }`}
+                      }`}
                   >
                     <Moon className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -370,11 +367,10 @@ const Settings = () => {
                   </button>
                   <button
                     onClick={() => handleThemeChange('auto')}
-                    className={`p-4 rounded-lg border-2 transition-colors ${
-                      theme === 'auto'
+                    className={`p-4 rounded-lg border-2 transition-colors ${theme === 'auto'
                         ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
                         : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
-                    }`}
+                      }`}
                   >
                     <Monitor className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
                     <p className="text-sm font-medium text-gray-900 dark:text-white">

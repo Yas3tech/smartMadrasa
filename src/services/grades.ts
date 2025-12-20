@@ -8,7 +8,7 @@ import {
   Timestamp,
   onSnapshot,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Grade } from '../types';
 
 const COLLECTION_NAME = 'grades';
@@ -64,7 +64,7 @@ export const updateGrade = async (
 };
 
 export const subscribeToGrades = (callback: (grades: Grade[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   // Use collectionGroup to listen to ALL grades across all users
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     const grades = snapshot.docs.map(

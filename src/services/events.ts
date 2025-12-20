@@ -10,7 +10,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Event } from '../types';
 
 const COLLECTION_NAME = 'events';
@@ -60,7 +60,7 @@ export const deleteEvent = async (id: string): Promise<void> => {
 };
 
 export const subscribeToEvents = (callback: (events: Event[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
     const events = snapshot.docs.map(
       (doc) =>
@@ -79,7 +79,7 @@ export const subscribeToEventsByClassIds = (
   classIds: string[],
   callback: (events: Event[]) => void
 ) => {
-  if (!db || classIds.length === 0) return () => {};
+  if (!db || classIds.length === 0) return () => { };
 
   const q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
 

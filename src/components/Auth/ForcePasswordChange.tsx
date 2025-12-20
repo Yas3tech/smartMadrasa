@@ -55,7 +55,6 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
       toast.success(t('auth.passwordChanged'));
       onSuccess();
     } catch (err: any) {
-      console.error('Error changing password:', err);
       if (err.code === 'auth/requires-recent-login') {
         setError(t('auth.requiresRecentLogin'));
       } else {
@@ -67,7 +66,7 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={() => {}}>
+    <Modal isOpen={isOpen} onClose={() => { }}>
       <div className="p-6 max-w-md mx-auto">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">

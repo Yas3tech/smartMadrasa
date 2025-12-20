@@ -63,7 +63,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
   const [teacherComments, setTeacherComments] = useState<TeacherComment[]>([]);
   const [classComments, setClassComments] = useState<TeacherComment[]>([]);
 
-  // Subscribe to teacher comments for selected student (Detail View)
+
   useEffect(() => {
     if (selectedStudent) {
       const unsubscribe = subscribeToTeacherCommentsByStudent(
@@ -78,7 +78,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     }
   }, [selectedStudent]);
 
-  // Subscribe to teacher comments for selected class (Overview View)
+
   useEffect(() => {
     if (selectedPeriod && user?.id) {
       const unsubscribe = subscribeToTeacherCommentsByTeacher(
@@ -112,7 +112,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     return students.filter((s) => (s as Student).classId === selectedClassId);
   }, [selectedClassId, students]);
 
-  // Calculate validation status for the class
+
   const classValidationStats = useMemo(() => {
     if (!selectedClassId || !user?.id || !selectedPeriodData) return { total: 0, validated: 0 };
 
@@ -162,7 +162,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     grades,
   ]);
 
-  // Calculate course averages for selected student
+
   const studentCourseAverages = useMemo(() => {
     if (!selectedStudent || !selectedPeriod || !selectedPeriodData || !user) return [];
 
@@ -272,7 +272,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
       }
     } catch (error) {
       toast.error(t('bulletinGrades.saveError'));
-      console.error(error);
     }
   };
 
@@ -341,7 +340,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
         toast.success(t('bulletinGrades.batchValidationSuccess'));
       } catch (error) {
         toast.error(t('bulletinGrades.batchValidationError'));
-        console.error(error);
       }
     }
   };
@@ -406,7 +404,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
         toast.success(t('bulletinGrades.bulletinValidated'));
       } catch (error) {
         toast.error(t('bulletinGrades.validationError'));
-        console.error(error);
       }
     }
   };

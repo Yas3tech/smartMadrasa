@@ -8,7 +8,7 @@ import {
   type UploadMetadata,
   type UploadTask,
 } from 'firebase/storage';
-import { storage } from '../config/firebase';
+import { storage } from '../config/db';
 
 /**
  * Upload a file to Firebase Storage

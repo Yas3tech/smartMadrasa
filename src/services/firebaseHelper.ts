@@ -1,4 +1,4 @@
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Firestore } from 'firebase/firestore';
 
 /**

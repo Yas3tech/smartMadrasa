@@ -9,7 +9,7 @@ import {
   orderBy,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 
 export interface Announcement {
   id: string;
@@ -27,7 +27,7 @@ export interface Announcement {
 const COLLECTION_NAME = 'announcements';
 
 export const subscribeToAnnouncements = (callback: (announcements: Announcement[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
 
   const q = query(collection(db, COLLECTION_NAME), orderBy('date', 'desc'));
 

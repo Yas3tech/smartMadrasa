@@ -79,15 +79,6 @@ import {
 } from '../services/gradeCategories';
 
 import type { AcademicPeriod, GradeCategory } from '../types/bulletin';
-import {
-  generateMockUsers,
-  generateMockClasses,
-  generateMockMessages,
-  generateMockEvents,
-  generateMockGrades,
-  generateMockAttendance,
-  generateMockHomeworks,
-} from '../utils/mockData';
 
 interface DataContextType {
   // State
@@ -176,7 +167,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // Initialize data: Firebase listeners OR mock data
   useEffect(() => {
     if (useFirebase) {
-      console.log('🔥 Using Firebase for data management');
+
 
       // Subscribe to Firebase collections
       const unsubUsers = subscribeToUsers(setUsers);
@@ -187,11 +178,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
 
       // Role-based subscriptions
-      let unsubGrades = () => {};
-      let unsubAttendance = () => {};
-      let unsubEvents = () => {};
-      let unsubHomeworks = () => {};
-      let unsubCourses = () => {};
+      let unsubGrades = () => { };
+      let unsubAttendance = () => { };
+      let unsubEvents = () => { };
+      let unsubHomeworks = () => { };
+      let unsubCourses = () => { };
 
       if (user?.role === 'parent') {
         const parentUser = user as Parent;
@@ -275,17 +266,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         unsubGradeCategories();
       };
     } else {
-      console.log('⚠️ Using mock data (Firebase not configured)');
-
-      // Load mock data
-      setUsers(generateMockUsers());
-      setClasses(generateMockClasses());
-      setMessages(generateMockMessages());
-      setEvents(generateMockEvents());
-      setGrades(generateMockGrades());
-      setAttendance(generateMockAttendance());
-      setCourses([]);
-      setHomeworks(generateMockHomeworks());
       setIsLoading(false);
     }
   }, [useFirebase, user]); // Added user dependency to re-subscribe on login/role switch
@@ -294,24 +274,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const addUser = async (user: User) => {
     if (useFirebase) {
       await fbCreateUser(user);
-    } else {
-      setUsers((prev) => [...prev, user]);
     }
   };
 
   const updateUser = async (id: string, updates: Partial<User>) => {
     if (useFirebase) {
       await fbUpdateUser(id, updates);
-    } else {
-      setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...updates } : u)));
     }
   };
 
   const deleteUser = async (id: string) => {
     if (useFirebase) {
       await fbDeleteUser(id);
-    } else {
-      setUsers((prev) => prev.filter((u) => u.id !== id));
     }
   };
 
@@ -319,24 +293,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const addClass = async (classGroup: ClassGroup) => {
     if (useFirebase) {
       await fbCreateClass(classGroup);
-    } else {
-      setClasses((prev) => [...prev, classGroup]);
     }
   };
 
   const updateClass = async (id: string, updates: Partial<ClassGroup>) => {
     if (useFirebase) {
       await fbUpdateClass(id, updates);
-    } else {
-      setClasses((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
     }
   };
 
   const deleteClass = async (id: string) => {
     if (useFirebase) {
       await fbDeleteClass(id);
-    } else {
-      setClasses((prev) => prev.filter((c) => c.id !== id));
     }
   };
 
@@ -344,37 +312,24 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const sendMessage = async (message: Omit<Message, 'id' | 'timestamp'>) => {
     if (useFirebase) {
       await fbSendMessage(message);
-    } else {
-      const newMessage: Message = {
-        ...message,
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [newMessage, ...prev]);
     }
   };
 
   const deleteMessage = async (id: string | number) => {
     if (useFirebase) {
       await fbDeleteMessage(String(id));
-    } else {
-      setMessages((prev) => prev.filter((m) => m.id !== id));
     }
   };
 
   const markMessageAsRead = async (id: string | number) => {
     if (useFirebase) {
       await fbMarkMessageAsRead(String(id));
-    } else {
-      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, read: true } : m)));
     }
   };
 
   const updateMessage = async (id: string | number, updates: Partial<Message>) => {
     if (useFirebase) {
       await fbUpdateMessage(String(id), updates);
-    } else {
-      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
     }
   };
 
@@ -382,25 +337,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const addEvent = async (event: Omit<Event, 'id'>) => {
     if (useFirebase) {
       await fbCreateEvent(event);
-    } else {
-      const newEvent: Event = { ...event, id: `e${Date.now()}` };
-      setEvents((prev) => [...prev, newEvent]);
     }
   };
 
   const updateEvent = async (id: string, updates: Partial<Event>) => {
     if (useFirebase) {
       await fbUpdateEvent(id, updates);
-    } else {
-      setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)));
     }
   };
 
   const deleteEvent = async (id: string) => {
     if (useFirebase) {
       await fbDeleteEvent(id);
-    } else {
-      setEvents((prev) => prev.filter((e) => e.id !== id));
     }
   };
 
@@ -423,7 +371,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         // If no matching period found, use the most recent period or throw error
         const periodId = matchingPeriod?.id;
         if (!periodId) {
-          console.warn('No matching period found for grade date:', grade.date);
           throw new Error(
             'Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.'
           );
@@ -452,15 +399,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
         };
-        console.log('Creating course grade:', courseGrade);
+
         await fbCreateCourseGrade(courseGrade);
       } catch (error) {
-        console.error('Error creating grade in Firebase:', error);
-        throw error; // Re-throw to trigger toast error
+        throw error;
       }
-    } else {
-      const newGrade: Grade = { ...grade, id: `g${Date.now()}` };
-      setGrades((prev) => [...prev, newGrade]);
     }
   };
 
@@ -474,19 +417,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (updates.subject !== undefined) courseGradeUpdates.courseName = updates.subject;
 
       await fbUpdateCourseGrade(id, courseGradeUpdates);
-    } else {
-      setGrades((prev) => prev.map((g) => (g.id === id ? { ...g, ...updates } : g)));
     }
   };
 
   // Attendance actions
   const markAttendance = async (record: Omit<Attendance, 'id'>) => {
     if (useFirebase) {
-      // If courseId is present, we might want to store it differently or just in the same collection
       await fbCreateAttendance(record.studentId, record);
-    } else {
-      const newRecord: Attendance = { ...record, id: `a${Date.now()}` };
-      setAttendance((prev) => [...prev, newRecord]);
     }
   };
 
@@ -498,16 +435,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (useFirebase) {
       const record = attendance.find((a) => a.id === id);
       if (record) {
-        // We need to update the service to accept justification too, but for now let's pass it if possible or update the object
-        // Assuming fbUpdateAttendance might need refactoring or we use a generic update
         await fbUpdateAttendance(record.studentId, id, status, justification);
       }
-    } else {
-      setAttendance((prev) =>
-        prev.map((a) =>
-          a.id === id ? { ...a, status, justification, isJustified: !!justification } : a
-        )
-      );
     }
   };
 
@@ -515,9 +444,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const addCourse = async (course: Omit<Course, 'id'>) => {
     if (useFirebase) {
       await fbCreateCourse(course.classId, course);
-    } else {
-      const newCourse: Course = { ...course, id: `course${Date.now()}` };
-      setCourses((prev) => [...prev, newCourse]);
     }
   };
 
@@ -527,8 +453,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (course) {
         await fbUpdateCourse(course.classId, id, updates);
       }
-    } else {
-      setCourses((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
     }
   };
 
@@ -538,8 +462,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (course) {
         await fbDeleteCourse(course.classId, id);
       }
-    } else {
-      setCourses((prev) => prev.filter((c) => c.id !== id));
     }
   };
 
@@ -547,25 +469,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const addHomework = async (homework: Omit<Homework, 'id'>) => {
     if (useFirebase) {
       await fbCreateHomework(homework);
-    } else {
-      const newHomework: Homework = { ...homework, id: `h${Date.now()}` };
-      setHomeworks((prev) => [...prev, newHomework]);
     }
   };
 
   const updateHomework = async (id: string, updates: Partial<Homework>) => {
     if (useFirebase) {
       await fbUpdateHomework(id, updates);
-    } else {
-      setHomeworks((prev) => prev.map((h) => (h.id === id ? { ...h, ...updates } : h)));
     }
   };
 
   const deleteHomework = async (id: string) => {
     if (useFirebase) {
       await fbDeleteHomework(id);
-    } else {
-      setHomeworks((prev) => prev.filter((h) => h.id !== id));
     }
   };
 

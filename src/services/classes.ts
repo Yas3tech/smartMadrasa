@@ -7,7 +7,7 @@ import {
   deleteDoc,
   onSnapshot,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { ClassGroup } from '../types';
 
 const COLLECTION_NAME = 'classes';
@@ -36,7 +36,7 @@ export const deleteClass = async (id: string): Promise<void> => {
 };
 
 export const subscribeToClasses = (callback: (classes: ClassGroup[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
     const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
     callback(classes);

@@ -49,7 +49,6 @@ const AcademicYearConfig: React.FC = () => {
       resetForm();
     } catch (error) {
       toast.error(t('academicYearConfig.saveError'));
-      console.error(error);
     }
   };
 
@@ -76,7 +75,6 @@ const AcademicYearConfig: React.FC = () => {
         toast.success(t('academicYearConfig.periodDeleted'));
       } catch (error) {
         toast.error(t('academicYearConfig.deleteError'));
-        console.error(error);
       }
     }
   };

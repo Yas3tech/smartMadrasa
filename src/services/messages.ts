@@ -11,7 +11,7 @@ import {
   Timestamp,
   onSnapshot,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Message } from '../types';
 
 const COLLECTION_NAME = 'messages';
@@ -68,7 +68,7 @@ export const deleteMessage = async (id: string): Promise<void> => {
 };
 
 export const subscribeToMessages = (callback: (messages: Message[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME), orderBy('timestamp', 'desc'));
   return onSnapshot(q, (snapshot) => {
     const messages = snapshot.docs.map(

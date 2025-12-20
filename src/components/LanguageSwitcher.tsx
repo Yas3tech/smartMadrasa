@@ -24,6 +24,7 @@ const LanguageSwitcher = () => {
         <select
           value={i18n.language}
           onChange={(e) => handleLanguageChange(e.target.value)}
+          aria-label="Select Language"
           className="px-3 py-1.5 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent hover:border-gray-300 dark:hover:border-slate-500 transition-colors cursor-pointer"
         >
           {languages.map((lang) => (

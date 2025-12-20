@@ -1,4 +1,4 @@
-import { db, storage } from '../config/firebase';
+import { db, storage } from '../config/db';
 import { collection, query, where, getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { deleteUser, type User } from 'firebase/auth';

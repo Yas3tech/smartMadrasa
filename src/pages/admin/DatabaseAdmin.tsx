@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Card, Button } from '../../components/UI';
 import { Database, Trash2, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import {
-  resetFirebaseData,
   clearAllData,
-  initializeFirebaseData,
+  seedSystemBasics,
 } from '../../services/initFirebase';
 
 const DatabaseAdmin = () => {
@@ -18,32 +17,27 @@ const DatabaseAdmin = () => {
 
   const handleConfirmReset = async () => {
     setShowConfirmModal(false);
-    console.log('🔄 Starting reset process...');
     setLoading(true);
     setMessage(null);
 
     try {
-      console.log('📞 Calling resetFirebaseData...');
-      await resetFirebaseData();
-      console.log('✅ resetFirebaseData returned success');
+      await seedSystemBasics();
       setMessage({
         type: 'success',
-        text: '✅ Base de données réinitialisée avec succès ! Les utilisateurs, classes et relations parent-étudiant ont été créés.',
+        text: '✅ Base de données initialisée avec succès !',
       });
     } catch (error) {
-      console.error('❌ Error during reset:', error);
       setMessage({
         type: 'error',
         text: `❌ Erreur: ${error}`,
       });
     } finally {
       setLoading(false);
-      console.log('🏁 Reset process finished');
     }
   };
 
   const handleClear = async () => {
-    if (!confirm('⚠️ Ceci va supprimer TOUTES les données sans les réinitialiser. Continuer ?')) {
+    if (!confirm('⚠️ Ceci va supprimer TOUTES les données. Continuer ?')) {
       return;
     }
 
@@ -66,30 +60,6 @@ const DatabaseAdmin = () => {
     }
   };
 
-  const handleInitialize = async () => {
-    if (!confirm('➕ Ceci va ajouter les données de test. Continuer ?')) {
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      await initializeFirebaseData();
-      setMessage({
-        type: 'success',
-        text: '✅ Données de test ajoutées avec succès !',
-      });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: `❌ Erreur: ${error}`,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -100,15 +70,14 @@ const DatabaseAdmin = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Administration Base de Données
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Gérer les données Firebase</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Gérer les données de la plateforme</p>
         </div>
       </div>
 
       {message && (
         <div
-          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
-            message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-          }`}
+          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            }`}
         >
           {message.type === 'success' ? (
             <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
@@ -125,11 +94,10 @@ const DatabaseAdmin = () => {
         <div className="space-y-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              🔄 Réinitialiser la Base de Données
+              🔄 Initialiser les Paramètres
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Supprime toutes les données existantes et crée de nouvelles données de test avec des
-              relations parent-étudiant correctes.
+              Configure les périodes académiques et les catégories de notes par défaut.
             </p>
             <Button
               onClick={handleResetClick}
@@ -137,24 +105,7 @@ const DatabaseAdmin = () => {
               icon={RefreshCw}
               className="bg-gradient-to-r from-orange-500 to-orange-600"
             >
-              {loading ? 'Réinitialisation...' : 'Réinitialiser Tout'}
-            </Button>
-          </div>
-
-          <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              ➕ Ajouter des Données de Test
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Ajoute uniquement les données de test sans supprimer les données existantes.
-            </p>
-            <Button
-              onClick={handleInitialize}
-              disabled={loading}
-              icon={Database}
-              variant="secondary"
-            >
-              {loading ? 'Ajout en cours...' : 'Ajouter Données'}
+              {loading ? 'Initialisation...' : 'Initialiser'}
             </Button>
           </div>
 
@@ -163,7 +114,7 @@ const DatabaseAdmin = () => {
               🗑️ Supprimer Toutes les Données
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Supprime toutes les données sans les réinitialiser. ⚠️ Action irréversible !
+              Supprime toutes les collections Firestore. ⚠️ Action irréversible !
             </p>
             <Button
               onClick={handleClear}
@@ -173,24 +124,6 @@ const DatabaseAdmin = () => {
             >
               {loading ? 'Suppression...' : 'Supprimer Tout'}
             </Button>
-          </div>
-
-          <div className="border-t border-gray-200 dark:border-slate-600 pt-6 bg-blue-50 dark:bg-slate-700/50 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-              📊 Données qui seront créées :
-            </h3>
-            <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-              <li>• 1 Super Admin</li>
-              <li>• 1 Directeur</li>
-              <li>• 3 Professeurs</li>
-              <li>• 8 Étudiants (répartis dans 4 classes)</li>
-              <li>• 7 Parents (avec relations correctes vers leurs enfants)</li>
-              <li>• 4 Classes (6ème A, 5ème B, 4ème C, 3ème A)</li>
-            </ul>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-              👨‍👩‍👧‍👦 Note: Un parent peut avoir plusieurs enfants (ex: Mr. & Mrs. Student ont Alice et
-              George)
-            </p>
           </div>
         </div>
       </Card>
@@ -206,11 +139,10 @@ const DatabaseAdmin = () => {
               </h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Êtes-vous sûr de vouloir réinitialiser la base de données ?
+              Êtes-vous sûr de vouloir initialiser la base de données ?
               <br />
               <br />
-              ⚠️ <strong>Toutes les données actuelles seront définitivement supprimées</strong> et
-              remplacées par les données de test.
+              ⚠️ Les paramètres par défaut seront recréés.
             </p>
             <div className="flex justify-end gap-3">
               <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
@@ -220,7 +152,7 @@ const DatabaseAdmin = () => {
                 onClick={handleConfirmReset}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
-                Oui, Réinitialiser
+                Oui, Initialiser
               </Button>
             </div>
           </div>

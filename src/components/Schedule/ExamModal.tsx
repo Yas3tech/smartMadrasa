@@ -40,7 +40,7 @@ const ExamModal = ({
     if (editingEvent) {
       setTitle(editingEvent.title);
       setDescription(editingEvent.description);
-      // Default to exam if type is something else (unlikely given filters)
+
       setType(editingEvent.type === 'evaluation' ? 'evaluation' : 'exam');
       setClassId(editingEvent.classId || '');
 
@@ -51,7 +51,7 @@ const ExamModal = ({
       setStartTime(startDate.toTimeString().slice(0, 5));
       setEndTime(endDate.toTimeString().slice(0, 5));
     } else {
-      // Reset form
+
       setTitle('');
       setDescription('');
       setType('exam');
@@ -88,7 +88,6 @@ const ExamModal = ({
       toast.success(editingEvent ? t('schedule.eventUpdated') : t('schedule.eventAdded'));
       onClose();
     } catch (error) {
-      console.error('Error saving exam:', error);
       toast.error(t('schedule.eventSaveError'));
     } finally {
       setLoading(false);
@@ -133,7 +132,7 @@ const ExamModal = ({
             </div>
           </div>
 
-          {/* Class Selection */}
+
           {!propClassId && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

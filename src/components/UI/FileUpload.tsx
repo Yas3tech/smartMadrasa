@@ -32,7 +32,7 @@ export const FileUpload = ({
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     const validFiles: File[] = [];
 
-    // Validate files
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > maxSizeBytes) {
@@ -58,7 +58,7 @@ export const FileUpload = ({
         uploadedUrls.push(url);
         setUploadedFiles((prev) => [...prev, { name: file.name, url }]);
 
-        // Remove progress for this file after completion
+
         setUploadProgress((prev) => {
           const newProgress = { ...prev };
           delete newProgress[file.name];
@@ -68,7 +68,6 @@ export const FileUpload = ({
 
       onFilesUploaded(uploadedUrls);
     } catch (error) {
-      console.error('Error uploading files:', error);
       toast.error(t('fileUpload.error.uploadFailed'));
     } finally {
       setUploading(false);
@@ -90,9 +89,8 @@ export const FileUpload = ({
         </label>
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed border-gray-300 rounded-xl p-6 text-center ${
-            uploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-500'
-          } transition-colors`}
+          className={`border-2 border-dashed border-gray-300 rounded-xl p-6 text-center ${uploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-500'
+            } transition-colors`}
         >
           <input
             ref={fileInputRef}
@@ -111,7 +109,7 @@ export const FileUpload = ({
         </div>
       </div>
 
-      {/* Upload Progress */}
+
       {Object.keys(uploadProgress).length > 0 && (
         <div className="space-y-2">
           {Object.entries(uploadProgress).map(([fileName, progress]) => (
@@ -134,7 +132,7 @@ export const FileUpload = ({
         </div>
       )}
 
-      {/* Uploaded Files */}
+
       {uploadedFiles.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-gray-700">{t('fileUpload.uploadedFiles')}</p>

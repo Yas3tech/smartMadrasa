@@ -8,7 +8,7 @@ import {
   collectionGroup,
   onSnapshot,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Course } from '../types';
 
 const COLLECTION_NAME = 'courses';
@@ -53,7 +53,7 @@ export const deleteCourse = async (classId: string, courseId: string): Promise<v
 };
 
 export const subscribeToCourses = (callback: (courses: Course[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   // Use collectionGroup to listen to ALL courses across all classes
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     const courses = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Course);

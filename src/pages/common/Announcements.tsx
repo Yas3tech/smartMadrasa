@@ -27,7 +27,7 @@ const Announcements = () => {
   const [type, setType] = useState<Announcement['type']>('general');
   const [target, setTarget] = useState<Announcement['target']>('all');
 
-  // Subscribe to announcements from Firebase
+
   useEffect(() => {
     const unsubscribe = subscribeToAnnouncements((data) => {
       setAnnouncements(data);
@@ -55,7 +55,6 @@ const Announcements = () => {
       setIsModalOpen(false);
       resetForm();
     } catch (error) {
-      console.error('Error creating announcement:', error);
       toast.error(t('announcements.createError'));
     }
   };
@@ -71,7 +70,6 @@ const Announcements = () => {
     try {
       await updateAnnouncementService(id, { pinned: !currentPinned });
     } catch (error) {
-      console.error('Error toggling pin:', error);
       toast.error(t('common.error'));
     }
   };
@@ -82,7 +80,6 @@ const Announcements = () => {
         await deleteAnnouncementService(id);
         toast.success(t('announcements.deleted'));
       } catch (error) {
-        console.error('Error deleting announcement:', error);
         toast.error(t('common.error'));
       }
     }
@@ -114,7 +111,7 @@ const Announcements = () => {
     }
   };
 
-  // Map user role to announcement target
+
   const getRoleTarget = (role: string | undefined): string => {
     switch (role) {
       case 'student':
@@ -130,9 +127,7 @@ const Announcements = () => {
 
   const userTarget = getRoleTarget(user?.role);
   const canSeeAnnouncement = (a: Announcement) => {
-    // Directors and superadmins see all announcements
     if (user?.role === 'director' || user?.role === 'superadmin') return true;
-    // Others see announcements targeted to 'all' or their specific role
     return a.target === 'all' || a.target === userTarget;
   };
 
@@ -143,7 +138,7 @@ const Announcements = () => {
       // Pinned first
       if (a.pinned && !b.pinned) return -1;
       if (!a.pinned && b.pinned) return 1;
-      // Newest first (at top)
+
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
 
@@ -230,9 +225,8 @@ const Announcements = () => {
         {filteredAnnouncements.map((announcement) => (
           <Card
             key={announcement.id}
-            className={`p-6 border-2 ${getTypeColor(announcement.type)} ${
-              !announcement.read ? 'shadow-lg' : ''
-            }`}
+            className={`p-6 border-2 ${getTypeColor(announcement.type)} ${!announcement.read ? 'shadow-lg' : ''
+              }`}
           >
             <div className="flex items-start gap-4">
               {/* Icon */}
@@ -254,11 +248,10 @@ const Announcements = () => {
                     <div className="flex gap-1">
                       <button
                         onClick={() => togglePin(announcement.id, announcement.pinned)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          announcement.pinned
-                            ? 'text-orange-600 bg-orange-100'
-                            : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${announcement.pinned
+                          ? 'text-orange-600 bg-orange-100'
+                          : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
+                          }`}
                         title={
                           announcement.pinned
                             ? t('announcements.actions.unpin')

@@ -19,8 +19,7 @@ const Profile = () => {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
 
-  // Get teacher's courses, subjects and classes from courses collection
-  // MOVED BEFORE EARLY RETURN to satisfy hooks rules
+
   const teacherData = useMemo(() => {
     if (!user || user.role !== 'teacher') return { subjects: [], teacherClasses: [] };
 
@@ -56,7 +55,6 @@ const Profile = () => {
       await sendPasswordResetEmail(auth, user.email);
       toast.success(t('profile.resetEmailSent'));
     } catch (error) {
-      console.error('Password reset error:', error);
       toast.error(t('profile.resetEmailError'));
     }
   };
@@ -65,7 +63,7 @@ const Profile = () => {
     return t(`roles.${role}`);
   };
 
-  // Get additional info based on role
+
   const getStudentInfo = () => {
     if (user.role !== 'student') return null;
     const studentData = students.find((s) => s.id === user.id) as Student;
@@ -194,7 +192,7 @@ const Profile = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Profile Picture and Basic Info */}
+
         <div className="space-y-6">
           <Card className="p-6">
             <div className="flex flex-col items-center">
@@ -211,15 +209,15 @@ const Profile = () => {
             </div>
           </Card>
 
-          {/* Role-specific info */}
+
           {getStudentInfo()}
           {getParentInfo()}
           {getTeacherInfo()}
         </div>
 
-        {/* Right Column - Editable Information */}
+
         <div className="lg:col-span-2 space-y-6">
-          {/* Personal Information */}
+
           <Card className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-gray-900">{t('profile.personalInfo')}</h3>
@@ -263,7 +261,7 @@ const Profile = () => {
             </div>
           </Card>
 
-          {/* Change Password */}
+
           <Card className="p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.changePassword')}</h3>
             <p className="text-sm text-gray-600 mb-6">{t('profile.resetPasswordDesc')}</p>

@@ -13,7 +13,7 @@ export interface UseUsersReturn {
   setIsModalOpen: (open: boolean) => void;
   editingUser: User | null;
 
-  // Search/filter
+
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filterRole: Role | 'all';
@@ -269,12 +269,11 @@ export function useUsers(): UseUsersReturn {
       toast.success(t('users.importSuccess', { count: importedCount }));
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
-      console.error('Import error:', error);
       toast.error(t('users.importError'));
     }
   };
 
-  // Hide superadmin users from non-superadmin users
+
   const isSuperadmin = currentUser?.role === 'superadmin';
   const visibleUsers = isSuperadmin ? users : users.filter((u) => u.role !== 'superadmin');
 

@@ -82,18 +82,15 @@ const Classes = () => {
       await updateUser(studentId, { classId: managingClass.id } as Partial<Student>);
       toast.success(t('classes.studentAdded'));
     } catch (error) {
-      console.error('Error adding student to class:', error);
       toast.error(t('classes.studentAddError'));
     }
   };
 
   const handleRemoveStudentFromClass = async (studentId: string) => {
     try {
-      // classId is specific to Student type, so we cast the update
       await updateUser(studentId, { classId: '' } as Partial<Student>);
       toast.success(t('classes.studentRemoved'));
     } catch (error) {
-      console.error('Error removing student from class:', error);
       toast.error(t('classes.studentRemoveError'));
     }
   };

@@ -9,7 +9,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Attendance } from '../types';
 
 const COLLECTION_NAME = 'attendance';
@@ -50,7 +50,7 @@ export const updateAttendance = async (
 };
 
 export const subscribeToAttendance = (callback: (attendance: Attendance[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   // Use collectionGroup to listen to ALL attendance records
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     const attendance = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Attendance);
@@ -62,7 +62,7 @@ export const subscribeToAttendanceByStudentIds = (
   studentIds: string[],
   callback: (attendance: Attendance[]) => void
 ) => {
-  if (!db || studentIds.length === 0) return () => {};
+  if (!db || studentIds.length === 0) return () => { };
 
   // Note: collectionGroup queries with 'in' might need an index if other filters are applied.
   // But basic 'where' should be okay or prompt for index creation.

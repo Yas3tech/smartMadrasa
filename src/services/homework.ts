@@ -10,7 +10,7 @@ import {
   orderBy,
   onSnapshot,
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/db';
 import type { Homework, Submission } from '../types';
 
 const COLLECTION_NAME = 'homeworks';
@@ -59,7 +59,7 @@ export const deleteHomework = async (id: string): Promise<void> => {
 };
 
 export const subscribeToHomeworks = (callback: (homeworks: Homework[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME), orderBy('dueDate', 'asc'));
   return onSnapshot(q, (snapshot) => {
     const homeworks = snapshot.docs.map(
@@ -78,7 +78,7 @@ export const subscribeToHomeworksByClassIds = (
   classIds: string[],
   callback: (homeworks: Homework[]) => void
 ) => {
-  if (!db || classIds.length === 0) return () => {};
+  if (!db || classIds.length === 0) return () => { };
 
   // Note: We cannot use orderBy with 'in' query without a composite index.
   // We will sort client-side.
@@ -152,7 +152,7 @@ export const subscribeToSubmissions = (
   homeworkId: string,
   callback: (submissions: Submission[]) => void
 ) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME, homeworkId, SUBMISSIONS_COLLECTION));
   return onSnapshot(q, (snapshot) => {
     const submissions = snapshot.docs.map(

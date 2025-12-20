@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { auth, db } from '../config/firebase';
+import { auth } from '../config/firebase';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import type { User, Role } from '../types';
 
 interface AuthContextType {
@@ -17,40 +16,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth || !db) {
-      console.error('Firebase auth or db not initialized');
+    if (!auth) {
       setLoading(false);
       return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        // Set loading to true while we fetch the user profile
         setLoading(true);
         try {
-          // Fetch user details from Firestore
-          const userDoc = await getDoc(doc(db!, 'users', firebaseUser.uid));
+          // Dynamic import firestore only when needed
+          const { doc, getDoc } = await import('firebase/firestore');
+          const { db: firestoreDb } = await import('../config/db');
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              name: userData.name || 'Utilisateur',
-              role: userData.role as Role,
-              avatar:
-                userData.avatar ||
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.uid}`,
-              // Include role-specific fields (classId for students, childrenIds for parents, etc.)
-              ...userData,
-            });
-          } else {
-            // Fallback if user document doesn't exist (shouldn't happen with seeded data)
-            console.warn('User document not found in Firestore');
-            setUser(null);
+          if (firestoreDb) {
+            let userDoc = await getDoc(doc(firestoreDb, 'users', firebaseUser.uid));
+            let userData = userDoc.exists() ? userDoc.data() : null;
+
+            // Fallback: If no doc found by UID, try searching by email
+            if (!userData && firebaseUser.email) {
+              const { getUserByEmail } = await import('../services/users');
+              const userByEmail = await getUserByEmail(firebaseUser.email);
+              if (userByEmail) {
+                userData = userByEmail;
+              }
+            }
+
+            if (userData) {
+              setUser({
+                id: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                name: userData.name || 'Utilisateur',
+                role: userData.role as Role,
+                ...userData,
+              });
+            } else {
+              setUser(null);
+            }
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
           setUser(null);
         }
       } else {
@@ -67,13 +71,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error('Error signing out:', error);
     }
   };
 
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

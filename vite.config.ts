@@ -7,6 +7,11 @@ import autoprefixer from 'autoprefixer';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
@@ -24,10 +29,10 @@ export default defineConfig({
       output: {
         // Manual chunking strategy for better caching
         manualChunks: {
-          // Vendor chunks - grouped by update frequency
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-          'vendor-ui': ['lucide-react', 'react-hot-toast'],
+          'vendor-firebase-auth': ['firebase/app', 'firebase/auth'],
+          'vendor-firebase-db': ['firebase/firestore', 'firebase/storage'],
+          'vendor-icons': ['lucide-react'],
           'vendor-utils': ['jspdf', 'jspdf-autotable', 'i18next', 'react-i18next'],
         },
       },

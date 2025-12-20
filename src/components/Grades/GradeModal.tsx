@@ -34,6 +34,7 @@ const GradeModal = ({
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
 
+
   // Filter students by class if classId is provided
   const classStudents = classId
     ? students.filter((s) => (s as Student).classId === classId)
@@ -50,7 +51,6 @@ const GradeModal = ({
       setDate(new Date(editingGrade.date).toISOString().split('T')[0]);
       setFeedback(editingGrade.feedback || '');
     } else {
-      // Reset form
       setStudentId('');
       setSubject('');
       setType('exam');
@@ -80,7 +80,7 @@ const GradeModal = ({
       });
       onClose();
     } catch (error) {
-      console.error('Error saving grade:', error);
+      // Error handled by caller
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ const GradeModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Student */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('common.student')} *
@@ -119,7 +119,7 @@ const GradeModal = ({
             </select>
           </div>
 
-          {/* Subject */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('common.subject')} *
@@ -139,7 +139,7 @@ const GradeModal = ({
             </select>
           </div>
 
-          {/* Type */}
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -167,7 +167,7 @@ const GradeModal = ({
             />
           </div>
 
-          {/* Score and Max Score */}
+
           <div className="grid grid-cols-2 gap-4">
             <Input
               label={`${t('grades.score')} *`}
@@ -189,7 +189,7 @@ const GradeModal = ({
             />
           </div>
 
-          {/* Date */}
+
           <Input
             label={`${t('common.date')} *`}
             type="date"
@@ -198,7 +198,7 @@ const GradeModal = ({
             required
           />
 
-          {/* Feedback */}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('grades.comment')} (optionnel)
@@ -212,7 +212,7 @@ const GradeModal = ({
             />
           </div>
 
-          {/* Actions */}
+
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={onClose} type="button">
               {t('common.cancel')}
