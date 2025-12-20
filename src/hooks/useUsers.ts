@@ -107,7 +107,7 @@ export function useUsers(): UseUsersReturn {
     }
     const userData: Omit<User, 'id'> & { childrenIds?: string[] } = {
       name,
-      email,
+      email: email.toLowerCase().trim(),
       role,
       phone: role === 'teacher' || role === 'parent' ? phone : undefined,
       birthDate: role === 'student' ? birthDate : undefined,
@@ -216,7 +216,7 @@ export function useUsers(): UseUsersReturn {
             const newUser: any = {
               id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
               name: row.name,
-              email: row.email,
+              email: row.email.toLowerCase().trim(),
               role: roleNormalized,
               phone: row.phone || '',
               birthDate: row.birthDate || '',
@@ -237,7 +237,7 @@ export function useUsers(): UseUsersReturn {
             const newUser: any = {
               id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
               name: row.name,
-              email: row.email,
+              email: row.email.toLowerCase().trim(),
               role: 'parent',
               phone: row.phone || '',
               birthDate: row.birthDate || '',

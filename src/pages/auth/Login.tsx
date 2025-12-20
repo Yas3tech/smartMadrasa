@@ -76,13 +76,6 @@ const Login = () => {
     }
   };
 
-  // Handle case where user is authenticated but no profile doc exists
-  useEffect(() => {
-    if (!authLoading && auth?.currentUser && !user && loading) {
-      setLoading(false);
-      setError(t('auth.errors.profileNotFound', 'Profil utilisateur introuvable. Veuillez contacter l\'administrateur.'));
-    }
-  }, [authLoading, user, loading, t]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();

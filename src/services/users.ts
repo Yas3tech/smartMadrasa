@@ -46,7 +46,7 @@ export const createUser = async (user: Omit<User, 'id'>): Promise<string> => {
   // 1. Create Auth User (if email is provided)
   if (user.email) {
     try {
-      uid = await createAuthUser(user.email);
+      uid = await createAuthUser(user.email.toLowerCase().trim());
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         // If user exists in Auth but not in Firestore with correct ID,
@@ -111,7 +111,8 @@ const createAuthUser = async (email: string): Promise<string> => {
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   if (!db) return null;
   const { query, where, limit } = await import('firebase/firestore');
-  const q = query(collection(db, COLLECTION_NAME), where('email', '==', email), limit(1));
+  const normalizedEmail = email.toLowerCase().trim();
+  const q = query(collection(db, COLLECTION_NAME), where('email', '==', normalizedEmail), limit(1));
   const snapshot = await getDocs(q);
   if (snapshot.empty) return null;
   const doc = snapshot.docs[0];
