@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Grade } from '../types';
+import { formatFirestoreTimestamp } from '../utils/dateUtils';
 
 const COLLECTION_NAME = 'grades';
 const USERS_COLLECTION = 'users';
@@ -32,7 +33,7 @@ export const getGrades = async (studentId?: string): Promise<Grade[]> => {
       ({
         ...doc.data(),
         id: doc.id,
-        date: doc.data().date?.toDate?.()?.toISOString() || doc.data().date,
+        date: formatFirestoreTimestamp(doc.data().date),
       }) as Grade
   );
 };
@@ -72,7 +73,7 @@ export const subscribeToGrades = (callback: (grades: Grade[]) => void) => {
         ({
           ...doc.data(),
           id: doc.id,
-          date: doc.data().date?.toDate?.()?.toISOString() || doc.data().date,
+          date: formatFirestoreTimestamp(doc.data().date),
         }) as Grade
     );
     callback(grades);
