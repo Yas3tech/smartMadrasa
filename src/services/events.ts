@@ -42,13 +42,22 @@ export const createEvent = async (event: Omit<Event, 'id'>): Promise<string> => 
 export const updateEvent = async (id: string, updates: Partial<Event>): Promise<void> => {
   if (!db) throw new Error('Firebase not configured');
   const docRef = doc(db, COLLECTION_NAME, id);
-  const processedUpdates: any = { ...updates };
 
-  if (updates.start) {
-    processedUpdates.start = Timestamp.fromDate(new Date(updates.start));
+  const { start, end, ...otherUpdates } = updates;
+
+  // Define a type for Firestore updates where dates are Timestamps
+  type FirestoreEventUpdate = Omit<Partial<Event>, 'start' | 'end'> & {
+    start?: Timestamp;
+    end?: Timestamp;
+  };
+
+  const processedUpdates: FirestoreEventUpdate = { ...otherUpdates };
+
+  if (start) {
+    processedUpdates.start = Timestamp.fromDate(new Date(start));
   }
-  if (updates.end) {
-    processedUpdates.end = Timestamp.fromDate(new Date(updates.end));
+  if (end) {
+    processedUpdates.end = Timestamp.fromDate(new Date(end));
   }
 
   await updateDoc(docRef, processedUpdates);
