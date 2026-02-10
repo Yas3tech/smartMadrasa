@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { type LucideIcon } from 'lucide-react';
 
 // Skeleton Loader Components
 export const SkeletonCard = () => (
@@ -104,7 +105,7 @@ export const EmptyState = ({
   description,
   action,
 }: {
-  icon?: any;
+  icon?: LucideIcon;
   title: string;
   description?: string;
   action?: ReactNode;
