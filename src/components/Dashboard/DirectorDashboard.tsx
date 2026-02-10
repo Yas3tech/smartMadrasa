@@ -22,15 +22,16 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import type { Student, Teacher } from '../../types';
 
 interface DirectorDashboardProps {
-  students: any[];
-  teachers: any[];
+  students: Student[];
+  teachers: Teacher[];
   attendanceRate: string | number;
   avgGrade: string | number;
-  getWeeklyAttendanceData: () => any[];
-  getGradeDistributionData: () => any[];
-  getSubjectPerformanceData: () => any[];
+  getWeeklyAttendanceData: () => { name: string; présents: number; absents: number }[];
+  getGradeDistributionData: () => { name: string; value: number; color: string }[];
+  getSubjectPerformanceData: () => { subject: string; moyenne: number }[];
 }
 
 export function DirectorDashboard({

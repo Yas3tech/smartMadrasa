@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import type { User, Grade, Homework, Event } from '../types';
+import type { User, Grade, Homework, Event, Student, Teacher } from '../types';
 
 export interface UseDashboardReturn {
   // Parent child selection
@@ -19,8 +19,8 @@ export interface UseDashboardReturn {
   handleOpenHomework: (homework: Homework) => void;
 
   // General Stats
-  students: User[];
-  teachers: User[];
+  students: Student[];
+  teachers: Teacher[];
   attendanceRate: string | number;
   avgGrade: string | number;
   unreadMessages: number;
@@ -60,7 +60,7 @@ export function useDashboard(): UseDashboardReturn {
     (parentChildren.length > 0 ? parentChildren[0] : null);
 
   // General Stats Calculations
-  const teachers = users.filter((u) => u.role === 'teacher');
+  const teachers = users.filter((u): u is Teacher => u.role === 'teacher');
   const todayDate = new Date().toISOString().split('T')[0];
   const todayAttendance = attendance.filter((a) => a.date === todayDate);
   const presentCount = todayAttendance.filter((a) => a.status === 'present').length;
