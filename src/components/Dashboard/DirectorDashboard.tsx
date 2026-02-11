@@ -26,17 +26,13 @@ import {
 interface DirectorDashboardProps {
   students: any[];
   teachers: any[];
-  attendanceRate: string | number;
-  avgGrade: string | number;
-  getWeeklyAttendanceData: () => any[];
-  getGradeDistributionData: () => any[];
-  getSubjectPerformanceData: () => any[];
+  weeklyAttendanceData: any[];
 }
 
 export function DirectorDashboard({
   students,
   teachers,
-  getWeeklyAttendanceData,
+  weeklyAttendanceData,
 }: DirectorDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -115,7 +111,7 @@ export function DirectorDashboard({
             <p className="text-sm text-gray-500">{t('dashboard.charts.attendanceTrends')}</p>
           </div>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={getWeeklyAttendanceData()}>
+            <LineChart data={weeklyAttendanceData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
               <YAxis stroke="#6b7280" fontSize={12} />
