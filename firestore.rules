@@ -34,7 +34,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, delete: if isDirector() || isSuperAdmin();
-      allow update: if isDirector() || isSuperAdmin() || isOwner(userId);
+      allow update: if isDirector() || isSuperAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'phone', 'avatar', 'mustChangePassword'])
+      );
     }
 
     // Grades:
