@@ -107,7 +107,7 @@ export function useUsers(): UseUsersReturn {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
+    const handleSave = async () => {
     if (!name || !email) {
       toast.error(t('users.fillRequired'));
       return;
@@ -127,8 +127,20 @@ export function useUsers(): UseUsersReturn {
       updateUser(editingUser.id, userData);
       toast.success(t('users.userUpdated'));
     } else {
-      addUser({ id: `u${Date.now()}`, ...userData });
-      toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
+      const result = await addUser({ id: `u${Date.now()}`, ...userData });
+
+      // Check if result has emailSent property
+      if (result && typeof result === 'object' && 'emailSent' in result) {
+        if (result.emailSent) {
+          toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
+        } else if (result.password) {
+          toast(`Email failed. Temporary password: ${result.password}`, { duration: 20000, icon: '⚠️' });
+        } else {
+          toast.success(t('users.userCreated'));
+        }
+      } else {
+        toast.success(t('users.userCreated'));
+      }
     }
     setIsModalOpen(false);
   };

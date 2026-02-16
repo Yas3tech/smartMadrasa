@@ -97,7 +97,7 @@ interface DataContextType {
   useFirebase: boolean;
 
   // Actions
-  addUser: (user: User) => Promise<void>;
+  addUser: (user: User) => Promise<{ uid: string; password?: string; emailSent: boolean } | string | void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
@@ -305,7 +305,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // User actions
   const addUser = async (user: User) => {
     if (useFirebase) {
-      await fbCreateUser(user);
+      return await fbCreateUser(user);
     }
   };
 
