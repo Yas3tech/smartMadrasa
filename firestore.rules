@@ -20,6 +20,13 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper to ensure user only updates their own non-sensitive fields
+    function isOwnerSafeUpdate(userId) {
+      return isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['role', 'classId', 'childrenIds', 'subjects', 'classIds', 'parentId']);
+    }
+
     function isTeacher() { return isRole('teacher'); }
     function isDirector() { return isRole('director'); }
     function isParent() { return isRole('parent'); }
