@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { processNonParentUsers, processParentUsers, ImportedUserSummary, parseUserFile, UserImportRow } from './userImport';
-import { User } from '../types';
+import { User, Parent } from '../types';
 import * as xlsx from 'xlsx';
 
 // Mock xlsx
@@ -19,7 +19,7 @@ describe('userImport', () => {
   describe('parseUserFile', () => {
     it('should parse file correctly', async () => {
       const mockFile = new File([''], 'test.xlsx');
-      const mockData = [{ name: 'Test' }];
+      const mockData = [{ name: 'Test', email: 'test@example.com', role: 'student' }];
 
       // Mock arrayBuffer
       mockFile.arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(8));
@@ -75,7 +75,7 @@ describe('userImport', () => {
       expect(addUser).toHaveBeenCalledTimes(1);
       expect(count).toBe(1);
 
-      const addedUser = addUser.mock.calls[0][0] as Record<string, unknown>;
+      const addedUser = addUser.mock.calls[0][0] as Parent;
       expect(addedUser.role).toBe('parent');
       expect(addedUser.childrenIds).toEqual(['u1']);
     });
@@ -95,7 +95,7 @@ describe('userImport', () => {
       expect(addUser).toHaveBeenCalledTimes(1);
       expect(count).toBe(1);
 
-      const addedUser = addUser.mock.calls[0][0] as Record<string, unknown>;
+      const addedUser = addUser.mock.calls[0][0] as Parent;
       expect(addedUser.role).toBe('parent');
       expect(addedUser.childrenIds).toEqual(['u2']);
     });
