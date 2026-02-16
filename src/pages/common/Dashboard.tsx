@@ -44,6 +44,11 @@ const Dashboard = () => {
           students={dash.students}
           teachers={dash.teachers}
           weeklyAttendanceData={dash.weeklyAttendanceData}
+          attendanceRate={dash.attendanceRate}
+          avgGrade={dash.avgGrade}
+          weeklyAttendanceData={dash.weeklyAttendanceData}
+          gradeDistributionData={dash.gradeDistributionData}
+          subjectPerformanceData={dash.subjectPerformanceData}
         />
       )}
 

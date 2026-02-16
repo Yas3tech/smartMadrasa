@@ -30,11 +30,34 @@ service cloud.firestore {
 
     // Users:
     // - Read: Authenticated users can read basic info (for search/lists).
-    // - Write: Users can update their own phone/avatar. Directors/Admins can manage all.
+    // - Write: Users can update their own phone/avatar/name. Directors/Admins can manage all.
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, delete: if isDirector() || isSuperAdmin();
-      allow update: if isDirector() || isSuperAdmin() || isOwner(userId);
+      allow update: if isDirector() || isSuperAdmin() || (
+        isOwner(userId) &&
+        // 🛡️ SECURITY: Prevent Privilege Escalation
+        // Only allow users to update their own profile fields.
+        // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'])
+      // Security: Restrict self-update to specific fields to prevent privilege escalation (e.g. changing role)
+      allow update: if isDirector() || isSuperAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+          ['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword']
+        )
+    // - Write: Users can update their own basic info (name, email, etc) but NOT role. Directors/Admins can manage all.
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isDirector() || isSuperAdmin();
+      allow update: if isDirector() || isSuperAdmin() ||
+        (isOwner(userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'phone', 'avatar', 'mustChangePassword']));
+      allow update: if isDirector() || isSuperAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'phone', 'avatar', 'mustChangePassword'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'])
+      );
     }
 
     // Grades:
