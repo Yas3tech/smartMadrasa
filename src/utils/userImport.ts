@@ -1,5 +1,5 @@
 import { read, utils } from 'xlsx';
-import { User, Role } from '../types';
+import { User, Role, Parent } from '../types';
 
 export interface ImportedUserSummary {
   id: string;
@@ -25,7 +25,7 @@ export const parseUserFile = async (file: File): Promise<UserImportRow[]> => {
 
 export const processNonParentUsers = async (
   data: UserImportRow[],
-  addUser: (user: Partial<User>) => Promise<unknown>
+  addUser: (user: User) => Promise<unknown>
 ): Promise<{ importedUsers: ImportedUserSummary[]; count: number }> => {
   const importedUsers: ImportedUserSummary[] = [];
   let importedCount = 0;
@@ -34,7 +34,7 @@ export const processNonParentUsers = async (
     if (row.name && row.email && row.role) {
       const roleNormalized = row.role.toLowerCase().trim() as Role;
       if (roleNormalized !== 'parent') {
-        const newUser: Partial<User> & { id: string } = {
+        const newUser: User = {
           id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: row.name,
           email: row.email.toLowerCase().trim(),
@@ -44,7 +44,7 @@ export const processNonParentUsers = async (
           avatar: row.name.charAt(0).toUpperCase(),
         };
         await addUser(newUser);
-        importedUsers.push({ id: newUser.id, email: newUser.email!, role: newUser.role! });
+        importedUsers.push({ id: newUser.id, email: newUser.email, role: newUser.role });
         importedCount++;
       }
     }
@@ -56,7 +56,7 @@ export const processParentUsers = async (
   data: UserImportRow[],
   users: User[],
   importedUsers: ImportedUserSummary[],
-  addUser: (user: Partial<User>) => Promise<unknown>
+  addUser: (user: User) => Promise<unknown>
 ): Promise<number> => {
   let importedCount = 0;
 
@@ -64,15 +64,7 @@ export const processParentUsers = async (
     if (row.name && row.email && row.role) {
       const roleNormalized = row.role.toLowerCase().trim();
       if (roleNormalized === 'parent') {
-        const newUser: Partial<User> & { id: string; childrenIds?: string[] } = {
-          id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: row.name,
-          email: row.email.toLowerCase().trim(),
-          role: 'parent',
-          phone: row.phone || '',
-          birthDate: row.birthDate || '',
-          avatar: row.name.charAt(0).toUpperCase(),
-        };
+        const childrenIds: string[] = [];
 
         if (row.studentEmail) {
           // Check existing users first
@@ -83,12 +75,23 @@ export const processParentUsers = async (
               (u) => u.email === row.studentEmail && u.role === 'student'
             );
             if (imported) {
-              newUser.childrenIds = [imported.id];
+              childrenIds.push(imported.id);
             }
           } else {
-            newUser.childrenIds = [student.id];
+            childrenIds.push(student.id);
           }
         }
+
+        const newUser: Parent = {
+          id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: row.name,
+          email: row.email.toLowerCase().trim(),
+          role: 'parent',
+          phone: row.phone || '',
+          birthDate: row.birthDate || '',
+          avatar: row.name.charAt(0).toUpperCase(),
+          childrenIds,
+        };
 
         await addUser(newUser);
         importedCount++;
