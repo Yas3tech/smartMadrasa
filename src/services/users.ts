@@ -7,6 +7,8 @@ import {
   updateDoc,
   deleteDoc,
   onSnapshot,
+  query,
+  where,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { User } from '../types';
@@ -155,10 +157,63 @@ export const deleteUser = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
 
-export const subscribeToUsers = (callback: (users: User[]) => void) => {
+export interface UserQueryFilters {
+  role?: string | string[];
+  classId?: string | string[];
+}
+
+export const subscribeToUsers = (
+  callback: (users: User[]) => void,
+  queries: UserQueryFilters[] = []
+) => {
   if (!db) return () => { };
-  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
-    const users = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as User);
-    callback(users);
+
+  // If no queries provided, fallback to default (fetch all)
+  if (!queries || queries.length === 0) {
+    return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+      const users = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as User);
+      callback(users);
+    });
+  }
+
+  // Handle multiple queries
+  const unsubscribes: (() => void)[] = [];
+  const results = new Map<number, User[]>(); // Map query index to results
+
+  queries.forEach((filter, index) => {
+    let q = query(collection(db, COLLECTION_NAME));
+
+    if (filter.role) {
+      const roles = Array.isArray(filter.role) ? filter.role : [filter.role];
+      if (roles.length > 0) {
+        q = query(q, where('role', 'in', roles));
+      }
+    }
+
+    if (filter.classId) {
+      const classIds = Array.isArray(filter.classId) ? filter.classId : [filter.classId];
+      if (classIds.length > 0) {
+        q = query(q, where('classId', 'in', classIds));
+      }
+    }
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const users = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as User);
+      results.set(index, users);
+
+      // Merge results
+      const allUsersMap = new Map<string, User>();
+      results.forEach((userList) => {
+        userList.forEach((u) => allUsersMap.set(u.id, u));
+      });
+
+      callback(Array.from(allUsersMap.values()));
+    });
+
+    unsubscribes.push(unsub);
   });
+
+  return () => {
+    unsubscribes.forEach((unsub) => unsub());
+  };
 };

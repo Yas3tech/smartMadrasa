@@ -1,0 +1,58 @@
+<<<<<<< SEARCH
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+} from 'firebase/firestore';
+=======
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  query,
+  where,
+  documentId,
+} from 'firebase/firestore';
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+export const subscribeToClasses = (callback: (classes: ClassGroup[]) => void) => {
+  if (!db) return () => { };
+  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+    const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
+    callback(classes);
+  });
+};
+=======
+export const subscribeToClasses = (
+  callback: (classes: ClassGroup[]) => void,
+  classIds?: string[]
+) => {
+  if (!db) return () => { };
+
+  if (classIds) {
+    if (classIds.length === 0) {
+      callback([]);
+      return () => { };
+    }
+
+    const q = query(collection(db, COLLECTION_NAME), where(documentId(), 'in', classIds));
+    return onSnapshot(q, (snapshot) => {
+      const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
+      callback(classes);
+    });
+  }
+
+  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+    const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
+    callback(classes);
+  });
+};
+>>>>>>> REPLACE

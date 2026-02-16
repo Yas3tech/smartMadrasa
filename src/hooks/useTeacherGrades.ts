@@ -151,18 +151,20 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
 
   const handleBulkSave = async (gradesData: Omit<Grade, 'id'>[]) => {
     try {
-      // Sequential save to avoid race conditions or overload if API doesn't support bulk
-      for (const grade of gradesData) {
-        await addGrade({
-          ...grade,
-          teacherId: user?.id || '',
-          classId: selectedClassId,
-          courseId: courses.find(
-            (c) => c.subject === grade.subject && c.classId === selectedClassId
-          )?.id,
-        });
-      }
-      toast.success(t('grades.gradesSaved'));
+      // Parallel save for performance
+      await Promise.all(
+        gradesData.map((grade) =>
+          addGrade({
+            ...grade,
+            teacherId: user?.id || "",
+            classId: selectedClassId,
+            courseId: courses.find(
+              (c) => c.subject === grade.subject && c.classId === selectedClassId
+            )?.id,
+          })
+        )
+      );
+      toast.success(t("grades.gradesSaved"));
       setIsBulkModalOpen(false);
     } catch {
       toast.error(t('grades.saveError'));
