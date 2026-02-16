@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Grade } from '../types';
+import { formatFirestoreTimestamp } from '../utils/dateUtils';
 import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'grades';
