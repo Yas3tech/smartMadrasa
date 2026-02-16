@@ -1,6 +1,6 @@
-import { normalizeDate } from './date';
-import { Timestamp } from 'firebase/firestore';
 import { describe, it, expect } from 'vitest';
+import { normalizeDate, formatFirestoreDate, formatFirestoreTimestamp } from './date';
+import { Timestamp } from 'firebase/firestore';
 
 describe('normalizeDate', () => {
   it('should return ISO string for Firestore Timestamp', () => {
@@ -36,8 +36,6 @@ describe('normalizeDate', () => {
   });
 });
 
-import { formatFirestoreDate } from './date';
-
 describe('formatFirestoreDate', () => {
   it('should format Firestore Timestamp to ISO string', () => {
     const mockTimestamp = {
@@ -65,8 +63,6 @@ describe('formatFirestoreDate', () => {
   });
 });
 
-import { formatFirestoreTimestamp } from './date';
-
 describe('formatFirestoreTimestamp', () => {
   it('should format a Firestore Timestamp-like object', () => {
     const mockTimestamp = {
@@ -89,7 +85,7 @@ describe('formatFirestoreTimestamp', () => {
   });
 
   it('should handle objects without toDate method', () => {
-      const obj = { foo: 'bar' };
-      expect(formatFirestoreTimestamp(obj)).toBe(obj);
+    const obj = { foo: 'bar' };
+    expect(formatFirestoreTimestamp(obj)).toBe(obj);
   });
 });

@@ -66,7 +66,7 @@ export function useDashboard(): UseDashboardReturn {
   }, [parentChildren, effectiveSelectedChildId]);
 
   // Memoized General Stats Calculations
-  const teachers = useMemo(() => users.filter((u) => u.role === 'teacher'), [users]);
+  const teachers = useMemo(() => users.filter((u): u is Teacher => u.role === 'teacher'), [users]);
 
   const { presentCount, attendanceRate } = useMemo(() => {
     const todayDate = new Date().toISOString().split('T')[0];
