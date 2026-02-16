@@ -33,13 +33,41 @@ service cloud.firestore {
     function isStudent() { return isRole('student'); }
     function isSuperAdmin() { return isRole('superadmin'); }
 
+    // New Helper: Check if score is valid (0 <= score <= maxScore)
+    function isValidGrade() {
+      let score = request.resource.data.score;
+      let max = request.resource.data.maxScore;
+      return score >= 0 && score <= max;
+    }
+
+    // New Helper: Check if user can read another user's profile
+    // Allow reading if:
+    // 1. It's my own profile
+    // 2. I'm a teacher/director/admin (staff)
+    // 3. We are in the same class (for students)
+    function canReadUserProfile(targetUserData) {
+       return isOwner(targetUserData.id) ||
+              isTeacher() ||
+              isDirector() ||
+              isSuperAdmin() ||
+              (isStudent() && getUserData().classId == targetUserData.classId);
+    }
+
     // --- Collection Rules ---
 
     // Users:
-    // - Read: Authenticated users can read basic info (for search/lists).
+    // - Read: Restricted to own profile, staff, or classmates.
     // - Write: Users can update their own phone/avatar/name (whitelisted fields). Directors/Admins can manage all.
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      // Improved Read Rule:
+      allow read: if isAuthenticated() && (
+        isOwner(userId) ||
+        isTeacher() ||
+        isDirector() ||
+        isSuperAdmin() ||
+        (isStudent() && getUserData().classId == resource.data.classId)
+      );
+
       allow create, delete: if isDirector() || isSuperAdmin();
 
       // 🛡️ SECURITY: Prevent Privilege Escalation
@@ -48,7 +76,7 @@ service cloud.firestore {
       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
     }
 
-    // Grades:
+    // Grades (Legacy Collection Group):
     // - Read: User sees their own. Parents see their children's. Teachers see grades they gave or for their classes.
     // - Write: Teachers can add/edit grades.
     match /grades/{gradeId} {
@@ -58,7 +86,20 @@ service cloud.firestore {
         isTeacher() || 
         isDirector()
       );
-      allow write: if isTeacher() || isDirector();
+      // Improved Write Rule: Validate Score Range
+      allow write: if (isTeacher() || isDirector()) && isValidGrade();
+    }
+
+    // CourseGrades (New Collection):
+    match /courseGrades/{gradeId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        (isParent() && resource.data.studentId in getUserData().childrenIds) ||
+        isTeacher() ||
+        isDirector()
+      );
+      // Improved Write Rule: Validate Score Range
+      allow write: if (isTeacher() || isDirector()) && isValidGrade();
     }
 
     // Attendance:
@@ -122,6 +163,16 @@ service cloud.firestore {
     match /events/{eventId} {
       allow read: if isAuthenticated();
       allow write: if isTeacher() || isDirector();
+    }
+
+    // Academic Periods & Categories (Bulletin System)
+    match /academicPeriods/{periodId} {
+      allow read: if isAuthenticated();
+      allow write: if isDirector() || isSuperAdmin();
+    }
+    match /gradeCategories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isDirector() || isSuperAdmin();
     }
   }
 }

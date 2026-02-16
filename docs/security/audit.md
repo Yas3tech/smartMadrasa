@@ -4,7 +4,8 @@ Ce document présente une analyse de la posture de sécurité de l'application S
 
 ## 🛡️ Résumé
 
-L'application suit de bonnes pratiques générales (RBAC, Firestore Rules, Authentication) mais présente des vulnérabilités liées à la confiance excessive accordée au client (Frontend).
+L'application suit de bonnes pratiques générales (RBAC, Firestore Rules, Authentication).
+Suite à l'audit initial, plusieurs vulnérabilités critiques ont été **corrigées**.
 
 ## ✅ Points Forts
 
@@ -15,45 +16,35 @@ L'application suit de bonnes pratiques générales (RBAC, Firestore Rules, Authe
     *   La fonction `isOwnerSafeUpdate` dans les règles Firestore limite strictement les champs modifiables par l'utilisateur (nom, avatar), empêchant l'escalade de privilèges (modification du `role`).
 3.  **Mots de Passe** :
     *   Les nouveaux utilisateurs sont créés avec un mot de passe aléatoire robuste (`generateSecurePassword` dans `users.ts`).
+4.  **Validation des Données (Nouveau)** :
+    *   Les notes sont désormais validées côté serveur (`0 <= score <= maxScore`).
 
-## ⚠️ Vulnérabilités & Risques
+## ⚠️ Vulnérabilités & Risques (Mise à Jour)
 
-### 1. Validation des Données Manquante (Critique)
-Les règles de sécurité vérifient **QUI** fait l'action, mais pas **CE QUE** contient l'action.
-*   **Risque** : Un enseignant malveillant (ou un compte compromis) peut envoyer une note de `9999/20` ou une date dans le futur lointain.
-*   **Correction** : Ajouter des validateurs de schéma dans `firestore.rules`.
-    ```javascript
-    allow create: if isTeacher()
-      && request.resource.data.score >= 0
-      && request.resource.data.score <= request.resource.data.maxScore;
-    ```
+### 1. Validation des Données Manquante
+*   **Statut : CORRIGÉ** ✅
+*   Les règles `firestore.rules` incluent maintenant la fonction `isValidGrade()` qui rejette toute écriture de note invalide.
 
 ### 2. Lecture Excessive des Utilisateurs
-*   **Observation** : Tout utilisateur authentifié peut lire la collection `users` entière.
-    ```javascript
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-    }
-    ```
-*   **Risque** : Un élève peut scrapper la liste complète des emails et noms de toute l'école.
-*   **Correction** : Restreindre la lecture aux utilisateurs partageant la même classe ou aux professeurs.
+*   **Statut : CORRIGÉ** ✅
+*   Les règles de lecture sur `users/{userId}` ont été durcies. Un utilisateur ne peut voir que :
+    *   Son propre profil.
+    *   Les membres du personnel (Teachers, Directors).
+    *   Ses camarades de classe (si c'est un élève).
 
 ### 3. Gestion des Secrets (.env)
-*   **Observation** : Le fichier `.env.example` contient des clés d'API réelles et utilise une syntaxe JavaScript invalide pour un fichier d'environnement.
-*   **Risque** : Exposition de configuration sensible.
-*   **Correction** : Nettoyer `.env.example` et utiliser le format standard `VITE_KEY=VALUE`.
+*   **Statut : CORRIGÉ** ✅
+*   Le fichier `.env.example` a été nettoyé de toute clé réelle.
 
 ### 4. Performance & DoS
-*   **Observation** : `DataContext` charge beaucoup de données au démarrage.
-*   **Risque** : Avec 1000+ élèves, la connexion d'un Directeur pourrait télécharger plusieurs Mo de données, ralentissant l'application et augmentant les coûts Firestore.
-*   **Correction** : Implémenter la pagination et le chargement à la demande (Lazy Loading) pour les listes d'utilisateurs et d'historique.
+*   **Statut : EN COURS** ⚠️
+*   `DataContext` charge encore beaucoup de données au démarrage.
+*   **Correction Recommandée** : Implémenter la pagination et le chargement à la demande (Lazy Loading).
 
 ## 📋 Recommandations
 
 ### Court Terme
-1.  **Corriger `.env.example`** pour ne contenir que des clés vides.
-2.  **Renforcer `firestore.rules`** avec des validations de type et de plage (schema validation).
-3.  **Auditer les paquets npm** : Mettre à jour `jspdf` (vulnérabilité connue).
+1.  **Auditer les paquets npm** : Mettre à jour `jspdf` (vulnérabilité connue).
 
 ### Moyen Terme
 1.  **Backend (Cloud Functions)** : Déplacer la logique critique (création d'utilisateur, calcul de moyenne) vers un backend sécurisé.
