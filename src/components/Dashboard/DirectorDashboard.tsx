@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../UI';
 import { StatCard } from './StatCard';
+import { User } from '../../types';
 import {
   Users,
   GraduationCap,
