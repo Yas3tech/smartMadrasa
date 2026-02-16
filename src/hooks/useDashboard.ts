@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import type { User, Grade, Homework, Event } from '../types';
@@ -35,7 +35,7 @@ export interface UseDashboardReturn {
   pendingHomeworks: Homework[];
   childClass?: { name: string };
 
-  // Chart data generators
+  // Chart data
   weeklyAttendanceData: { name: string; présents: number; absents: number }[];
   gradeDistributionData: { name: string; value: number; color: string }[];
   subjectPerformanceData: { subject: string; moyenne: number }[];
