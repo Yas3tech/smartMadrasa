@@ -51,6 +51,27 @@ export function useDashboard(): UseDashboardReturn {
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
   const [showHomeworkModal, setShowHomeworkModal] = useState(false);
 
+  // Memoized Parent children
+  const parentChildren = useMemo(() => {
+    return user?.role === 'parent' ? students.filter((s) => s.parentId === user.id) : [];
+  }, [user?.role, user?.id, students]);
+
+  const effectiveSelectedChildId =
+    selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
+
+  const selectedChild = useMemo(() => {
+    return (
+      parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
+      (parentChildren.length > 0 ? parentChildren[0] : null)
+    );
+  }, [parentChildren, effectiveSelectedChildId]);
+
+  // Memoized General Stats Calculations
+  const teachers = useMemo(() => users.filter((u) => u.role === 'teacher'), [users]);
+
+  const { presentCount, attendanceRate } = useMemo(() => {
+    const todayDate = new Date().toISOString().split('T')[0];
+    const todayAttendance = attendance.filter((a) => a.date === todayDate);
   // Parent children
   const parentChildren = useMemo(() =>
     user?.role === 'parent' ? students.filter((s) => s.parentId === user.id) : [],
@@ -101,6 +122,25 @@ export function useDashboard(): UseDashboardReturn {
 
   const allGrades = useMemo(() => grades.filter((g) => g.score > 0), [grades]);
 
+  const avgGrade = useMemo(() => {
+    return allGrades.length > 0
+      ? (
+          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
+        ).toFixed(1)
+      : 0;
+  }, [allGrades]);
+
+  const unreadMessages = useMemo(
+    () => messages.filter((m) => m.receiverId === user?.id && !m.read).length,
+    [messages, user?.id]
+  );
+
+  const upcomingEvents = useMemo(() => {
+    return events
+      .filter((e) => new Date(e.start) >= new Date())
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      .slice(0, 3);
+  }, [events]);
   const avgGrade = useMemo(() =>
     allGrades.length > 0
       ? (
@@ -133,7 +173,7 @@ export function useDashboard(): UseDashboardReturn {
     [events]
   );
 
-  // Student Specific Calculations
+  // Memoized Student Specific Calculations
   const targetStudentId = user?.role === 'parent' && selectedChild ? selectedChild.id : user?.id;
 
   const targetClassId = useMemo(() =>
@@ -150,6 +190,18 @@ export function useDashboard(): UseDashboardReturn {
     [grades, targetStudentId]
   );
 
+  const myGrades = useMemo(
+    () => grades.filter((g) => g.studentId === targetStudentId),
+    [grades, targetStudentId]
+  );
+
+  const myAvg = useMemo(() => {
+    return myGrades.length > 0
+      ? (
+          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
+        ).toFixed(1)
+      : 0;
+  }, [myGrades]);
   const myAvg = useMemo(() =>
     myGrades.length > 0
       ? (
@@ -174,6 +226,8 @@ export function useDashboard(): UseDashboardReturn {
     });
   }, [myGrades]);
 
+  const pendingHomeworks = useMemo(() => {
+    return homeworks
   const pendingHomeworks = useMemo(() => homeworks
     .filter((hw) => {
       if (hw.classId !== targetClassId) return false;
@@ -191,6 +245,11 @@ export function useDashboard(): UseDashboardReturn {
         return new Date(hw.dueDate) >= new Date();
       })
       .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+      .slice(0, 5);
+  }, [homeworks, targetClassId]);
+
+  const childClass = useMemo(
+    () => classes.find((c) => c.id === targetClassId),
       .slice(0, 5),
     [homeworks, targetClassId]
   );
@@ -207,6 +266,8 @@ export function useDashboard(): UseDashboardReturn {
     setShowHomeworkModal(true);
   }, []);
 
+  // Memoized Chart data generators
+  const weeklyAttendanceData = useMemo(() => {
   // Chart data generators
   const weeklyAttendanceData = useMemo(() => {
     const today = new Date(todayDate);
@@ -260,6 +321,11 @@ export function useDashboard(): UseDashboardReturn {
     });
   }, [grades]);
 
+  // Helper functions returning memoized data
+  const getWeeklyAttendanceData = () => weeklyAttendanceData;
+  const getGradeDistributionData = () => gradeDistributionData;
+  const getSubjectPerformanceData = () => subjectPerformanceData;
+
   return {
     selectedChildId,
     setSelectedChildId,
@@ -287,5 +353,8 @@ export function useDashboard(): UseDashboardReturn {
     weeklyAttendanceData,
     gradeDistributionData,
     subjectPerformanceData,
+    getWeeklyAttendanceData,
+    getGradeDistributionData,
+    getSubjectPerformanceData,
   };
 }

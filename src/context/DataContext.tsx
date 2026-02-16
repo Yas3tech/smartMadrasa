@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import type {
   User,
@@ -493,7 +493,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const students = users.filter((u): u is Student => u.role === 'student');
+  const students = useMemo(
+    () => users.filter((u): u is Student => u.role === 'student'),
+    [users]
+  );
 
   // Bulletin CRUD operations (mock implementation for now, will be enhanced later)
   const addAcademicPeriod = async (period: Omit<AcademicPeriod, 'id'>) => {
