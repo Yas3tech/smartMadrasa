@@ -65,88 +65,16 @@ SmartMadrasa est une plateforme complète de gestion scolaire offrant :
 
 ## 3. Architecture
 
-### Vue d'ensemble
+Une documentation architecturale détaillée est disponible dans le dossier `docs/`.
 
-```mermaid
-flowchart TB
-    subgraph Frontend["Frontend React"]
-        App["App.tsx"]
-        Pages["Pages (21)"]
-        Components["Components (20)"]
-        Hooks["Hooks"]
-    end
+👉 **[Consulter la Vue d'ensemble de l'Architecture](docs/architecture/overview.md)**
 
-    subgraph Context["State Management"]
-        Auth["AuthContext"]
-        Data["DataContext"]
-    end
+### Points clés
 
-    subgraph Services["Services Layer"]
-        UserSvc["users.ts"]
-        GradeSvc["grades.ts"]
-        ClassSvc["classes.ts"]
-        MsgSvc["messages.ts"]
-    end
-
-    subgraph Firebase["Firebase Backend"]
-        FBAuth["Authentication"]
-        Firestore["Firestore DB"]
-        Storage["Storage"]
-    end
-
-    App --> Context
-    Context --> Services
-    Services --> Firebase
-    Pages --> Context
-    Components --> Context
-```
-
-### Flux d'authentification
-
-```mermaid
-sequenceDiagram
-    participant U as Utilisateur
-    participant L as Login.tsx
-    participant AC as AuthContext
-    participant FB as Firebase Auth
-    participant FS as Firestore
-
-    U->>L: Saisit email/password
-    L->>FB: signInWithEmailAndPassword()
-    FB-->>AC: onAuthStateChanged()
-    AC->>FS: getDoc(users/{uid})
-    FS-->>AC: Données utilisateur
-    AC-->>L: user + role
-    L->>U: Redirection Dashboard
-```
-
-### Flux de données
-
-```mermaid
-flowchart LR
-    subgraph Firestore
-        Users[(users)]
-        Classes[(classes)]
-        Grades[(grades)]
-        Messages[(messages)]
-    end
-
-    subgraph DataContext
-        State["État Local"]
-        Actions["Actions CRUD"]
-    end
-
-    subgraph Components
-        Dashboard
-        GradesPage["Grades"]
-        MessagesPage["Messages"]
-    end
-
-    Firestore -->|"onSnapshot()"| State
-    Actions -->|"addDoc/updateDoc"| Firestore
-    State --> Components
-    Components -->|"useData()"| State
-```
+*   **SPA (Single Page Application)** : React + Vite.
+*   **State Management** : Context API (`AuthContext`, `DataContext`) agissant comme un "Hub de Données".
+*   **Service Layer** : Abstraction complète des appels Firebase dans `src/services/`.
+*   **Real-time** : Utilisation intensive de `onSnapshot` pour la synchronisation.
 
 ---
 
@@ -232,252 +160,42 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=xxx
 VITE_FIREBASE_APP_ID=xxx
 ```
 
-### Configuration Firebase (firebase.ts)
-
-```typescript
-// Lecture des variables d'environnement
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  // ...
-};
-
-// Vérification et initialisation
-if (isFirebaseConfigured) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
-}
-```
-
 ---
 
 ## 7. Modules Fonctionnels
 
+Pour plus de détails sur les flux métiers, consultez :
+👉 **[Flux Critiques et Workflows](docs/flows/critical_paths.md)**
+
 ### 7.1 Authentification
 
-```mermaid
-flowchart TD
-    Login["Page Login"] --> Check{"Firebase configuré?"}
-    Check -->|Oui| FBAuth["Firebase Auth"]
-    Check -->|Non| Mock["Mode Demo"]
-    FBAuth --> Roles{"Rôle?"}
-    Roles -->|student| SDash["Dashboard Étudiant"]
-    Roles -->|teacher| TDash["Dashboard Enseignant"]
-    Roles -->|director| DDash["Dashboard Directeur"]
-    Roles -->|admin| ADash["Dashboard Admin"]
-```
+Supporte les rôles multiples (Student, Teacher, Director, Admin) avec redirection automatique vers le dashboard approprié.
 
 ### 7.2 Gestion des Notes
 
-| Composant           | Rôle                              |
-| ------------------- | --------------------------------- |
-| `TeacherGradesView` | Saisie des notes par l'enseignant |
-| `StudentGradesView` | Consultation par l'élève          |
-| `ParentGradesView`  | Consultation par le parent        |
-| `BulkGradeModal`    | Saisie en masse par classe        |
-| `GradeCard`         | Affichage d'une note              |
+Système complet de saisie de notes, consultation par élèves/parents, et génération de bulletins.
 
-### 7.3 Bulletins Scolaires
+### 7.3 Emploi du Temps
 
-```mermaid
-flowchart LR
-    Config["Configuration Périodes"] --> Entry["Saisie Notes"]
-    Entry --> Comments["Appréciations"]
-    Comments --> Validate["Validation Enseignant"]
-    Validate --> Publish["Publication Directeur"]
-    Publish --> PDF["Génération PDF"]
-    PDF --> Download["Téléchargement"]
-```
-
-### 7.4 Emploi du Temps
-
-| Type       | Description       |
-| ---------- | ----------------- |
-| `lesson`   | Cours régulier    |
-| `exam`     | Examen            |
-| `homework` | Devoir à rendre   |
-| `event`    | Événement spécial |
-
-### 7.5 Messagerie
-
-- Messages individuels entre utilisateurs
-- Broadcast à une classe
-- Pièces jointes via Firebase Storage
-- Marquage lu/non-lu
+Gestion des cours, examens, et événements spéciaux.
 
 ---
 
 ## 8. Documentation Technique
 
-### 8.1 AuthContext
+La documentation complète est disponible dans le dossier `docs/`.
 
-**Fichier:** `context/AuthContext.tsx`
+📚 **[Accéder à la Documentation Technique Complète](docs/README.md)**
 
-**Responsabilités:**
+### Sections Disponibles :
 
-- Observer l'état d'authentification Firebase
-- Charger le profil utilisateur depuis Firestore
-- Fournir le hook `useAuth()`
-
-**Hooks exposés:**
-
-```typescript
-const { user, loading, logout } = useAuth();
-```
-
-### 8.2 DataContext
-
-**Fichier:** `context/DataContext.tsx`
-
-**Responsabilités:**
-
-- Gérer l'état global de toutes les entités
-- S'abonner aux collections Firestore en temps réel
-- Fallback vers données mock si Firebase non configuré
-
-**Hooks exposés:**
-
-```typescript
-const {
-  users,
-  students,
-  classes,
-  messages,
-  events,
-  grades,
-  attendance,
-  courses,
-  homeworks,
-  academicPeriods,
-  gradeCategories,
-  // Actions CRUD
-  addUser,
-  updateUser,
-  deleteUser,
-  addClass,
-  updateClass,
-  deleteClass,
-  // ...
-} = useData();
-```
-
-### 8.3 Types Principaux
-
-```typescript
-// Rôles utilisateur
-type Role = 'student' | 'parent' | 'teacher' | 'director' | 'superadmin';
-
-// Utilisateur de base
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  avatar?: string;
-}
-
-// Étudiant (hérite de User)
-interface Student extends User {
-  role: 'student';
-  classId: string;
-  parentId: string;
-}
-
-// Note
-interface Grade {
-  id: string;
-  studentId: string;
-  subject: string;
-  score: number;
-  maxScore: number;
-  type: 'exam' | 'homework' | 'participation';
-  date: string;
-  feedback?: string;
-}
-
-// Présence
-interface Attendance {
-  id: string;
-  date: string;
-  studentId: string;
-  status: 'present' | 'absent' | 'late';
-  classId: string;
-  justification?: string;
-}
-```
-
-### 8.4 Services Firebase
-
-Chaque service suit le même pattern :
-
-```typescript
-// Exemple: services/users.ts
-
-// Lecture
-export const getUsers = async (): Promise<User[]>
-export const getUserById = async (id: string): Promise<User | null>
-
-// Écriture
-export const createUser = async (user: Omit<User, 'id'>): Promise<string>
-export const updateUser = async (id: string, updates: Partial<User>): Promise<void>
-export const deleteUser = async (id: string): Promise<void>
-
-// Temps réel
-export const subscribeToUsers = (callback: (users: User[]) => void) => Unsubscribe
-```
-
-### 8.5 Génération PDF
-
-**Fichier:** `utils/pdfGenerator.ts`
-
-```typescript
-// Bulletin individuel
-generateStudentBulletinPDF(data: BulletinData): jsPDF
-
-// Bulletins de toute la classe
-generateClassBulletinPDF(dataList: BulletinData[], className: string): jsPDF
-```
-
-Structure du PDF généré:
-
-1. En-tête avec nom de l'école
-2. Informations élève et période
-3. Tableau des notes par matière
-4. Moyenne générale
-5. Statistiques d'assiduité
-6. Zones de signatures
-
-### 8.6 Internationalisation
-
-**Fichier:** `i18n.ts`
-
-Langues supportées:
-
-- 🇫🇷 Français (défaut)
-- 🇳🇱 Néerlandais
-- 🇸🇦 Arabe (RTL)
-
-Usage dans les composants:
-
-```typescript
-const { t } = useTranslation();
-<h1>{t('dashboard.title')}</h1>
-```
-
-### 8.7 Composants UI
-
-| Composant | Props                        | Description          |
-| --------- | ---------------------------- | -------------------- |
-| `Card`    | children, className, onClick | Conteneur avec ombre |
-| `Button`  | variant, size, icon          | Bouton stylisé       |
-| `Badge`   | variant, children            | Étiquette colorée    |
-| `Input`   | label, error, icon           | Champ de saisie      |
-| `Modal`   | isOpen, onClose, title       | Fenêtre modale       |
-
-Variantes Button: `primary`, `secondary`, `danger`, `ghost`
-Variantes Badge: `success`, `warning`, `error`, `info`, `neutral`
+*   **[Architecture](docs/architecture/overview.md)** : Vue d'ensemble, stack technique, diagrammes de flux.
+*   **[Base de Données](docs/database/schema.md)** : Schéma Firestore, collections, relations.
+*   **[Sécurité](docs/database/security.md)** : Règles Firestore, rôles et permissions.
+*   **[Services](docs/services/overview.md)** : Couche d'accès aux données.
+*   **[Contexts](docs/contexts/data.md)** : Gestion d'état global.
+*   **[Flux de Données](docs/flows/data_lifecycle.md)** : Comprendre le cycle de vie des données.
+*   **[Audit de Sécurité](docs/security/audit.md)** : Analyse des risques et correctifs appliqués.
 
 ---
 
@@ -488,6 +206,7 @@ npm run dev      # Développement
 npm run build    # Production
 npm run preview  # Aperçu build
 npm run lint     # Vérification code
+npm run test     # Tests unitaires
 ```
 
 ---
