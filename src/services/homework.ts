@@ -11,6 +11,7 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/db';
+import { formatFirestoreDate } from '../utils/date';
 import type { Homework, Submission } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
 import { formatFirestoreTimestamp } from '../utils/date';
