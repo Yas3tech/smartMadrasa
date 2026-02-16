@@ -18,7 +18,8 @@ import {
   subscribeToUsers,
   createUser as fbCreateUser,
   updateUser as fbUpdateUser,
-  deleteUser as fbDeleteUser,
+  deleteUserWithAllData,
+  getUserById,
 } from '../services/users';
 import {
   subscribeToClasses,
@@ -323,9 +324,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteUser = useCallback(async (id: string) => {
     if (useFirebase) {
-      await fbDeleteUser(id);
+      const user = users.find((u) => u.id === id);
+      if (user) {
+        await deleteUserWithAllData(id, user.role);
+      } else {
+        const fetchedUser = await getUserById(id);
+        if (fetchedUser) {
+          await deleteUserWithAllData(id, fetchedUser.role);
+        }
+      }
     }
-  }, [useFirebase]);
+  }, [useFirebase, users]);
 
   // Class actions
   const addClass = useCallback(async (classGroup: ClassGroup) => {
