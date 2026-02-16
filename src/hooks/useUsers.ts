@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import type { User, Role, Parent } from '../types';
-import { read, utils, writeFile } from 'xlsx';
+import { utils, writeFile } from 'xlsx';
+import { parseUserFile, processNonParentUsers, processParentUsers } from '../utils/userImport';
 import toast from 'react-hot-toast';
 import { deleteUserWithAllData, previewUserDeletion } from '../services/users';
 
@@ -219,73 +220,17 @@ export function useUsers(): UseUsersReturn {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const data = await file.arrayBuffer();
-      const workbook = read(data, { cellDates: true });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = utils.sheet_to_json(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' });
+      const jsonData = await parseUserFile(file);
 
       // First pass: import all non-parent users and track them
-      const importedUsers: { id: string; email: string; role: string }[] = [];
-      let importedCount = 0;
-
-      for (const row of jsonData as any[]) {
-        if (row.name && row.email && row.role) {
-          const roleNormalized = row.role.toLowerCase().trim();
-          if (roleNormalized !== 'parent') {
-            const newUser: any = {
-              id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              name: row.name,
-              email: row.email.toLowerCase().trim(),
-              role: roleNormalized,
-              phone: row.phone || '',
-              birthDate: row.birthDate || '',
-              avatar: row.name.charAt(0).toUpperCase(),
-            };
-            await addUser(newUser);
-            importedUsers.push({ id: newUser.id, email: newUser.email, role: newUser.role });
-            importedCount++;
-          }
-        }
-      }
+      const { importedUsers, count: countNonParents } = await processNonParentUsers(jsonData, addUser);
 
       // Second pass: import parents and link to students (including just-imported ones)
-      for (const row of jsonData as any[]) {
-        if (row.name && row.email && row.role) {
-          const roleNormalized = row.role.toLowerCase().trim();
-          if (roleNormalized === 'parent') {
-            const newUser: any = {
-              id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              name: row.name,
-              email: row.email.toLowerCase().trim(),
-              role: 'parent',
-              phone: row.phone || '',
-              birthDate: row.birthDate || '',
-              avatar: row.name.charAt(0).toUpperCase(),
-            };
+      const countParents = await processParentUsers(jsonData, users, importedUsers, addUser);
 
-            if (row.studentEmail) {
-              // Check existing users first
-              let student = users.find((u) => u.email === row.studentEmail && u.role === 'student');
-              // Then check just-imported users
-              if (!student) {
-                const imported = importedUsers.find(
-                  (u) => u.email === row.studentEmail && u.role === 'student'
-                );
-                if (imported) {
-                  newUser.childrenIds = [imported.id];
-                }
-              } else {
-                newUser.childrenIds = [student.id];
-              }
-            }
+      const totalImported = countNonParents + countParents;
 
-            await addUser(newUser);
-            importedCount++;
-          }
-        }
-      }
-
-      toast.success(t('users.importSuccess', { count: importedCount }));
+      toast.success(t('users.importSuccess', { count: totalImported }));
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
       toast.error(t('users.importError'));
