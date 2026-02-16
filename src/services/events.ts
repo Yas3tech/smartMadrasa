@@ -9,6 +9,7 @@ import {
   onSnapshot,
   query,
   where,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Event } from '../types';
@@ -59,29 +60,26 @@ export const deleteEvent = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
 
-export const subscribeToEvents = (callback: (events: Event[]) => void) => {
-  if (!db) return () => { };
-  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
-    const events = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          start: doc.data().start?.toDate?.()?.toISOString() || doc.data().start,
-          end: doc.data().end?.toDate?.()?.toISOString() || doc.data().end,
-        }) as Event
-    );
-    callback(events);
-  });
-};
-
-export const subscribeToEventsByClassIds = (
-  classIds: string[],
-  callback: (events: Event[]) => void
+export const subscribeToEvents = (
+  callback: (events: Event[]) => void,
+  classIds?: string[]
 ) => {
-  if (!db || classIds.length === 0) return () => { };
+  if (!db) return () => { };
 
-  const q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
+  let q;
+  if (classIds) {
+    // If classIds is provided but empty, we return an empty subscription
+    if (classIds.length === 0) {
+      callback([]);
+      return () => { };
+    }
+    // Note: If we use 'in' filter and orderBy on a different field, we may need a composite index.
+    // To ensure compatibility, we'll sort client-side after fetching.
+    q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
+  } else {
+    // No filter provided: fetch all events
+    q = query(collection(db, COLLECTION_NAME), orderBy('start', 'asc'));
+  }
 
   return onSnapshot(q, (snapshot) => {
     const events = snapshot.docs.map(
@@ -93,6 +91,18 @@ export const subscribeToEventsByClassIds = (
           end: doc.data().end?.toDate?.()?.toISOString() || doc.data().end,
         }) as Event
     );
+
+    // Ensure events are always sorted by start date
+    events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
     callback(events);
   });
+};
+
+export const subscribeToEventsByClassIds = (
+  classIds: string[],
+  callback: (events: Event[]) => void
+) => {
+  if (!classIds || classIds.length === 0) return () => { };
+  return subscribeToEvents(callback, classIds);
 };

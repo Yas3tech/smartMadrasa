@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import type { User, Grade, Homework, Event } from '../types';
@@ -35,10 +35,10 @@ export interface UseDashboardReturn {
   pendingHomeworks: Homework[];
   childClass?: { name: string };
 
-  // Chart data generators
-  getWeeklyAttendanceData: () => { name: string; présents: number; absents: number }[];
-  getGradeDistributionData: () => { name: string; value: number; color: string }[];
-  getSubjectPerformanceData: () => { subject: string; moyenne: number }[];
+  // Chart data
+  weeklyAttendanceData: { name: string; présents: number; absents: number }[];
+  gradeDistributionData: { name: string; value: number; color: string }[];
+  subjectPerformanceData: { subject: string; moyenne: number }[];
 }
 
 export function useDashboard(): UseDashboardReturn {
@@ -128,7 +128,7 @@ export function useDashboard(): UseDashboardReturn {
   };
 
   // Chart data generators
-  const getWeeklyAttendanceData = () => {
+  const weeklyAttendanceData = useMemo(() => {
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
@@ -145,9 +145,9 @@ export function useDashboard(): UseDashboardReturn {
         absents: absent,
       };
     });
-  };
+  }, [attendance]);
 
-  const getGradeDistributionData = () => {
+  const gradeDistributionData = useMemo(() => {
     const ranges = [
       { name: 'Excellent (90-100)', min: 90, max: 100, color: '#10B981' },
       { name: 'Bien (70-89)', min: 70, max: 89, color: '#3B82F6' },
@@ -163,9 +163,9 @@ export function useDashboard(): UseDashboardReturn {
       }).length,
       color: range.color,
     }));
-  };
+  }, [grades]);
 
-  const getSubjectPerformanceData = () => {
+  const subjectPerformanceData = useMemo(() => {
     const subjects = [...new Set(grades.map((g) => g.subject))];
     return subjects.map((subject) => {
       const subjectGrades = grades.filter((g) => g.subject === subject);
@@ -176,7 +176,7 @@ export function useDashboard(): UseDashboardReturn {
           : 0;
       return { subject, moyenne: Math.round(avg) };
     });
-  };
+  }, [grades]);
 
   return {
     selectedChildId,
@@ -202,8 +202,8 @@ export function useDashboard(): UseDashboardReturn {
     mySubjectPerformance,
     pendingHomeworks,
     childClass,
-    getWeeklyAttendanceData,
-    getGradeDistributionData,
-    getSubjectPerformanceData,
+    weeklyAttendanceData,
+    gradeDistributionData,
+    subjectPerformanceData,
   };
 }

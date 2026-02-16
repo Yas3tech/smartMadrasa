@@ -45,9 +45,9 @@ const Dashboard = () => {
           teachers={dash.teachers}
           attendanceRate={dash.attendanceRate}
           avgGrade={dash.avgGrade}
-          getWeeklyAttendanceData={dash.getWeeklyAttendanceData}
-          getGradeDistributionData={dash.getGradeDistributionData}
-          getSubjectPerformanceData={dash.getSubjectPerformanceData}
+          weeklyAttendanceData={dash.weeklyAttendanceData}
+          gradeDistributionData={dash.gradeDistributionData}
+          subjectPerformanceData={dash.subjectPerformanceData}
         />
       )}
 
