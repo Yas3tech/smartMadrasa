@@ -14,6 +14,7 @@ import {
 import { db } from '../config/db';
 import type { Message } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
+import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'messages';
 

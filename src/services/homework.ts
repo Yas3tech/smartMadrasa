@@ -13,6 +13,7 @@ import {
 import { db } from '../config/db';
 import type { Homework, Submission } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
+import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'homeworks';
 const SUBMISSIONS_COLLECTION = 'submissions';
