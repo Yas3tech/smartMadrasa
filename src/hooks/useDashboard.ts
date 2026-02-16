@@ -35,6 +35,7 @@ export interface UseDashboardReturn {
   pendingHomeworks: Homework[];
   childClass?: { name: string };
 
+  // Chart data generators
   // Chart data
   weeklyAttendanceData: { name: string; présents: number; absents: number }[];
   gradeDistributionData: { name: string; value: number; color: string }[];
@@ -53,7 +54,9 @@ export function useDashboard(): UseDashboardReturn {
   // Parent children
   const parentChildren = useMemo(() =>
     user?.role === 'parent' ? students.filter((s) => s.parentId === user.id) : [],
-  [user, students]);
+    [user?.role, user?.id, students]
+  );
+
 
   const effectiveSelectedChildId =
     selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
@@ -63,9 +66,6 @@ export function useDashboard(): UseDashboardReturn {
   [parentChildren, effectiveSelectedChildId]);
     [user?.role, user?.id, students]
   );
-
-  const effectiveSelectedChildId =
-    selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
 
   const selectedChild = useMemo(() =>
     parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
@@ -80,6 +80,10 @@ export function useDashboard(): UseDashboardReturn {
 
   const { presentCount, attendanceRate } = useMemo(() => {
     const todayAttendance = attendance.filter((a) => a.date === todayDate);
+    const count = todayAttendance.filter((a) => a.status === 'present').length;
+    const rate = students.length > 0 ? ((count / students.length) * 100).toFixed(0) : 0;
+    return { presentCount: count, attendanceRate: rate };
+  }, [attendance, students.length, todayDate]);
     const presentCount = todayAttendance.filter((a) => a.status === 'present').length;
     const attendanceRate =
       students.length > 0 ? ((presentCount / students.length) * 100).toFixed(0) : 0;
@@ -132,10 +136,13 @@ export function useDashboard(): UseDashboardReturn {
   // Student Specific Calculations
   const targetStudentId = user?.role === 'parent' && selectedChild ? selectedChild.id : user?.id;
 
+  const targetClassId = useMemo(() =>
   const targetClassId =
     user?.role === 'parent' && selectedChild
       ? (selectedChild as any).classId
-      : (user as any)?.classId;
+      : (user as any)?.classId,
+    [user, selectedChild]
+  );
 
   const myGrades = useMemo(() => grades.filter((g) => g.studentId === targetStudentId), [grades, targetStudentId]);
   const myGrades = useMemo(() =>
@@ -188,6 +195,7 @@ export function useDashboard(): UseDashboardReturn {
     [homeworks, targetClassId]
   );
 
+  const childClass = useMemo(() => classes.find((c) => c.id === targetClassId), [classes, targetClassId]);
   const childClass = useMemo(() =>
     classes.find((c) => c.id === targetClassId),
     [classes, targetClassId]
