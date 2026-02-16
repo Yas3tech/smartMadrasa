@@ -32,6 +32,7 @@ Logique métier réutilisable.
 ### 6. 🔄 Flux Métier (Flows)
 Séquences d'opérations critiques.
 *   [Flux Critiques](flows/critical_paths.md) : Login, Saisie de Notes, Soumission de Devoirs.
+*   [Cycle de Vie des Données](flows/data_lifecycle.md) : Comprendre comment les données circulent dans l'application.
 
 ### 7. 🔒 Sécurité & Audit
 Analyse des vulnérabilités et recommandations.

@@ -8,55 +8,40 @@ Le projet est une **Single Page Application (SPA)** construite avec **React** et
 
 L'architecture suit une approche **modulaire basée sur les composants**, avec une gestion d'état centralisée via l'API Context de React et une couche de service distincte pour les interactions avec la base de données.
 
-### Diagramme d'Architecture
+### Diagramme d'Architecture (Flux de Données)
 
-```mermaid
-graph TD
-    subgraph Client [Client Browser]
-        Entry[main.tsx] --> App[App.tsx]
-        App --> Providers[Providers Wrapper]
+Ce diagramme illustre les interactions entre l'interface utilisateur (UI), la gestion d'état (State), les services et le backend (Firebase).
 
-        subgraph State [Gestion d'État Global]
-            AuthCtx[AuthContext]
-            DataCtx[DataContext]
-        end
-
-        Providers --> AuthCtx
-        Providers --> DataCtx
-
-        subgraph UI [Interface Utilisateur]
-            Router[React Router]
-            Layout[MainLayout]
-            Pages[Pages (Lazy Loaded)]
-            Components[Composants UI]
-        end
-
-        AuthCtx --> Router
-        DataCtx --> Pages
-        Router --> Layout
-        Layout --> Pages
-        Pages --> Components
-    end
-
-    subgraph ServiceLayer [Couche de Service]
-        AuthSvc[Firebase Auth Services]
-        DataSvc[Firestore Data Services]
-        StorageSvc[Storage Services]
-    end
-
-    DataCtx --> DataSvc
-    AuthCtx --> AuthSvc
-    Components --> StorageSvc
-
-    subgraph Backend [Firebase Cloud]
-        FirebaseAuth[Authentication]
-        Firestore[Firestore NoSQL DB]
-        FireStorage[Cloud Storage]
-    end
-
-    AuthSvc <--> FirebaseAuth
-    DataSvc <--> Firestore
-    StorageSvc <--> FireStorage
+```text
++-----------------------------------------------------------------------------------+
+|                                 CLIENT (Browser)                                  |
+|                                                                                   |
+|  +---------------------+        +---------------------+      +-----------------+  |
+|  |     UI LAYER        | <----- |     STATE LAYER     | <--- |  SERVICE LAYER  |  |
+|  | (Components/Pages)  |        | (React Context API) |      | (API Wrappers)  |  |
+|  +----------+----------+        +----------+----------+      +--------+--------+  |
+|             |                              |                          |           |
+|             |  User Action (Click)         |                          |           |
+|             +----------------------------> |  addGrade()              |           |
+|                                            +------------------------> |           |
+|                                            |                          | create()  |
+|             |  Data Update (Props)         |  State Change            |           |
+|             | <--------------------------- + <----------------------- |           |
+|             |                              |                          |           |
++-------------+------------------------------+--------------------------+-----------+
+              |                              |                          |
+              |                              |                          v
++-------------+------------------------------+--------------------------+-----------+
+|                                 BACKEND (Cloud)                                   |
+|                                                                                   |
+|          +--------------------+                  +-----------------------+        |
+|          |   AUTHENTICATION   | <--------------> |       FIRESTORE       |        |
+|          |  (Identity/Login)  |                  | (NoSQL Database/Rules)|        |
+|          +--------------------+                  +-----------+-----------+        |
+|                                                              |                    |
+|                                                              | Real-time Sync     |
+|                                                              v (WebSocket)        |
++-----------------------------------------------------------------------------------+
 ```
 
 ## 🛠️ Stack Technique

@@ -2,90 +2,98 @@
 
 Ce document décrit les processus les plus importants de l'application.
 
-## 1. 🔐 Authentification & Initialisation
+## 1. 🔐 Authentification & Initialisation (Login Flow)
 
-Le chargement initial est complexe car il dépend de deux sources de vérité : Firebase Auth (identité) et Firestore (rôle/profil).
+Ce diagramme détaille le processus de connexion, de la saisie des identifiants jusqu'au chargement complet du tableau de bord. Il met en évidence la distinction entre l'authentification (Firebase Auth) et la récupération du profil métier (Firestore).
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant App
-    participant AuthContext
-    participant DataContext
-    participant Firestore
-
-    User->>App: Ouvre l'URL
-    App->>AuthContext: Init
-    AuthContext->>AuthContext: Check Firebase Auth State
-
-    alt Non Connecté
-        AuthContext-->>App: user = null
-        App->>User: Affiche Login Page
-    else Connecté
-        AuthContext->>Firestore: Get User Profile (Role)
-        Firestore-->>AuthContext: User Data (Teacher)
-        AuthContext-->>App: user = { ...TeacherData }
-
-        App->>DataContext: Init
-        DataContext->>Firestore: Subscribe(classes, students, grades...)
-        Firestore-->>DataContext: Realtime Updates
-        DataContext-->>App: Data Ready
-        App->>User: Affiche Dashboard Enseignant
-    end
+```text
++---------------------+    +---------------------+    +---------------------+    +---------------------+
+|      USER UI        |    |     AUTH CONTEXT    |    |     DATA CONTEXT    |    |      FIREBASE       |
++----------+----------+    +----------+----------+    +----------+----------+    +----------+----------+
+           |                          |                          |                          |
+           | 1. Submit Credentials    |                          |                          |
+           +------------------------> |                          |                          |
+           |                          | 2. signInWithEmail()     |                          |
+           |                          +---------------------------------------------------> |
+           |                          |                          |                          | 3. Auth Success
+           |                          | <-------------------------------------------------- + (uid, token)
+           |                          |                          |                          |
+           |                          | 4. Fetch User Profile (uid)                         |
+           |                          +---------------------------------------------------> |
+           |                          |                          |                          | 5. Return Role & Name
+           |                          | <-------------------------------------------------- +
+           |                          |                          |                          |
+           | 6. Set User State        |                          |                          |
+           | (role='teacher')         |                          |                          |
+           +------------------------> | 7. Mount DataProvider    |                          |
+                                      +------------------------> |                          |
+                                                                 | 8. Subscribe(role)       |
+                                                                 +------------------------> |
+                                                                 |                          | 9. Realtime Data Stream
+                                                                 | <----------------------- + (snapshot)
+           |                          |                          |                          |
+           | 10. Render Dashboard     |                          |                          |
+           | <-------------------------------------------------- +                          |
+           |                          |                          |                          |
++----------v----------+    +----------v----------+    +----------v----------+    +----------v----------+
 ```
 
 ## 2. 📝 Saisie de Notes (Teacher Workflow)
 
-Ce flux montre comment une note saisie par un professeur arrive instantanément chez l'élève.
+Ce flux illustre comment une note saisie par un professeur est traitée, validée, et propagée en temps réel.
 
-```mermaid
-sequenceDiagram
-    participant Teacher
-    participant TeacherUI
-    participant DataContext
-    participant Firestore
-    participant StudentUI
-    participant Student
-
-    Teacher->>TeacherUI: Saisit une note (15/20)
-    TeacherUI->>DataContext: addGrade(gradeData)
-    DataContext->>DataContext: Validate / Transform
-    DataContext->>Firestore: addDoc('grades', gradeData)
-
-    par Update Teacher UI
-        Firestore-->>DataContext: onSnapshot (Grade Added)
-        DataContext-->>TeacherUI: Affiche succès
-    and Update Student UI
-        Firestore-->>DataContext: onSnapshot (Grade Added)
-        DataContext-->>StudentUI: Mise à jour note
-        StudentUI->>Student: Notification visuelle
-    end
+```text
++---------------------+    +---------------------+    +---------------------+    +---------------------+
+|    TEACHER UI       |    |     DATA CONTEXT    |    |    FIRESTORE DB     |    |     STUDENT UI      |
++----------+----------+    +----------+----------+    +----------+----------+    +----------+----------+
+           |                          |                          |                          |
+           | 1. Enter Grade (15/20)   |                          |                          |
+           +------------------------> |                          |                          |
+           |                          | 2. Validate Data         |                          |
+           |                          | (Check Date/Period)      |                          |
+           |                          |                          |                          |
+           |                          | 3. addDoc('grades')      |                          |
+           |                          +------------------------> |                          |
+           |                          |                          | 4. Write Success         |
+           |                          | <----------------------- +                          |
+           |                          |                          |                          |
+           | 5. Show Toast "Saved"    |                          | 6. Push Update (WebSocket)
+           | <----------------------- +                          +------------------------------------> |
+           |                          |                          |                          |           |
+           |                          |                          |                          | 7. Update Grade List
+           |                          |                          |                          |           |
++----------v----------+    +----------v----------+    +----------v----------+    +----------v----------+
 ```
 
 ## 3. 📂 Soumission de Devoir (Student Workflow)
 
-Processus d'upload de fichier et mise à jour du statut.
+Processus complet d'upload de fichier, suivi de la mise à jour de la base de données.
 
-```mermaid
-sequenceDiagram
-    participant Student
-    participant HomeworkUI
-    participant StorageSvc
-    participant FirebaseStorage
-    participant Firestore
-
-    Student->>HomeworkUI: Sélectionne un fichier (PDF)
-    HomeworkUI->>StorageSvc: uploadFileWithProgress()
-
-    loop Upload Progress
-        StorageSvc->>FirebaseStorage: Upload Chunk
-        FirebaseStorage-->>HomeworkUI: Progress %
-        HomeworkUI-->>Student: Update Progress Bar
-    end
-
-    FirebaseStorage-->>StorageSvc: Download URL
-    StorageSvc-->>HomeworkUI: URL Ready
-
-    HomeworkUI->>Firestore: updateDoc('homeworks', { status: 'submitted', fileUrl })
-    Firestore-->>HomeworkUI: Success
+```text
++---------------------+    +---------------------+    +---------------------+    +---------------------+
+|     STUDENT UI      |    |   STORAGE SERVICE   |    |   FIREBASE STORAGE  |    |    FIRESTORE DB     |
++----------+----------+    +----------+----------+    +----------+----------+    +----------+----------+
+           |                          |                          |                          |
+           | 1. Select File (PDF)     |                          |                          |
+           +------------------------> |                          |                          |
+           |                          | 2. uploadBytesResumable  |                          |
+           |                          +------------------------> |                          |
+           |                          |                          |                          |
+           | 3. Update Progress Bar   | <----------------------- + (Progress Event)     |
+           | <----------------------- |                          |                          |
+           |                          |                          | 4. Upload Complete       |
+           |                          | 5. getDownloadURL()      | <----------------------- |
+           |                          +------------------------> |                          |
+           |                          |                          |                          |
+           |                          | 6. Return URL            |                          |
+           |                          | (https://firebasestorage)|                          |
+           |                          | <----------------------- +                          |
+           |                          |                          |                          |
+           | 7. Submit Homework       |                          |                          |
+           | (URL, Timestamp)         |                          |                          |
+           +--------------------------------------------------------------------------> |
+           |                          |                          |                          |
+           | 8. Show "Submitted"      |                          |                          |
+           | <------------------------------------------------------------------------- +
++----------v----------+    +----------v----------+    +----------v----------+    +----------v----------+
 ```

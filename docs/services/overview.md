@@ -5,24 +5,40 @@ Elle isole toute la logique de base de données, permettant aux composants UI de
 
 ## 🏗️ Patterns Architecturaux
 
-### 1. Fonctions Standalone
-Contrairement à une approche orientée objet (classes), les services sont composés de fonctions exportées individuellement (ex: `getUsers`, `createUser`).
-*   **Pourquoi ?** Meilleur tree-shaking, simplicité de test, et adéquation avec l'API fonctionnelle de Firebase v9+.
+### 1. Structure de Service
+
+Ce diagramme illustre comment les services encapsulent la logique Firebase.
+
+```text
++---------------------+    +---------------------+    +---------------------+
+|      REACT UI       |    |   SERVICE MODULE    |    |   FIREBASE SDK      |
+| (Component/Hook)    |    |  (src/services/*)   |    | (Firestore/Auth)    |
++----------+----------+    +----------+----------+    +----------+----------+
+           |                          |                          |
+           | 1. subscribeToUsers()    |                          |
+           +------------------------> |                          |
+           |                          | 2. collection('users')   |
+           |                          +------------------------> |
+           |                          |                          |
+           |                          | 3. onSnapshot(cb)        |
+           |                          +------------------------> |
+           |                          |                          | 4. Listen
+           |                          |                          +--------+
+           |                          |                          |        |
+           |                          | 5. Transform Data        | <------+
+           |                          | (Timestamp -> Date)      |
+           |                          | (Add ID to Object)       |
+           |                          |                          |
+           | 6. Callback(users[])     |                          |
+           | <----------------------- +                          |
+           |                          |                          |
++----------v----------+    +----------v----------+    +----------v----------+
+```
 
 ### 2. Observable Pattern (Subscriptions)
 La majorité des services exposent une fonction `subscribeTo...` qui utilise `onSnapshot` de Firestore.
 *   **Rôle** : Écouter les changements en temps réel.
 *   **Retour** : Une fonction de nettoyage (`unsubscribe`) à appeler lors du démontage du composant.
-
-```typescript
-// Exemple type
-export const subscribeToItems = (callback) => {
-  return onSnapshot(collection(db, 'items'), (snap) => {
-    const items = snap.docs.map(d => d.data());
-    callback(items);
-  });
-};
-```
 
 ### 3. Gestion des Dates
 Firestore stocke les dates sous forme de `Timestamp`. Les services sont responsables de la conversion :
