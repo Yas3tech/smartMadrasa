@@ -14,7 +14,6 @@ import { db } from '../config/db';
 import { normalizeDate } from '../utils/date';
 import { formatFirestoreDate } from '../utils/date';
 import type { Homework, Submission } from '../types';
-import { formatFirestoreTimestamp } from '../utils/dateUtils';
 import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'homeworks';
