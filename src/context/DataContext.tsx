@@ -188,7 +188,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         unsubUsers = subscribeToUsers(setUsers);
       }
 
-      const unsubClasses = subscribeToClasses(setClasses);
       const unsubMessages = subscribeToMessages(setMessages, user?.id);
       // Subscribe to bulletin system collections
       const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);

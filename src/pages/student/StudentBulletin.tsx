@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Download, Calendar, Clock, Eye } from 'lucide-react';
 import type { TeacherComment } from '../../types/bulletin';
-import type { Student } from '../../types';
+import type { Student, Parent } from '../../types';
 import { subscribeToTeacherCommentsByStudent } from '../../services/teacherComments';
 import { generateStudentBulletinPDF } from '../../utils/pdfGenerator';
 import BulletinPreview from '../../components/bulletin/BulletinPreview';
@@ -18,11 +18,28 @@ const StudentBulletin: React.FC = () => {
   const [teacherComments, setTeacherComments] = useState<TeacherComment[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
+  const [selectedChildId, setSelectedChildId] = useState<string>('');
+
+  // Parent: Get children list
+  const parentChildren = useMemo(() => {
+    if (user?.role !== 'parent') return [];
+    const parentUser = user as unknown as Parent;
+    // Filter students from the global list that match the parent's children IDs
+    return students.filter(s => parentUser.childrenIds?.includes(s.id));
+  }, [user, students]);
+
+  // Auto-select first child for parents
+  useEffect(() => {
+    if (user?.role === 'parent' && !selectedChildId && parentChildren.length > 0) {
+      setSelectedChildId(parentChildren[0].id);
+    }
+  }, [user, parentChildren, selectedChildId]);
+
   // Role check moved to after hooks
   const canAccess = user?.role === 'student' || user?.role === 'parent';
 
   // Get student ID - use optional chaining since user might be null at this point
-  const studentId = user?.role === 'student' ? user?.id : user?.id; // TODO: For parents, add child selection
+  const studentId = user?.role === 'student' ? user?.id : (user?.role === 'parent' ? selectedChildId : null);
   const studentData = students.find((s) => s.id === studentId) as Student | undefined;
 
   // Subscribe to teacher comments for this student
@@ -116,6 +133,26 @@ const StudentBulletin: React.FC = () => {
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">{t('bulletin.subtitle')}</p>
       </div>
+
+      {/* Parent: Child Selector */}
+      {user?.role === 'parent' && parentChildren.length > 1 && (
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t('bulletin.selectChild', 'Select Child')}
+          </label>
+          <select
+            value={selectedChildId}
+            onChange={(e) => setSelectedChildId(e.target.value)}
+            className="w-full md:w-96 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-700 dark:text-white"
+          >
+            {parentChildren.map((child) => (
+              <option key={child.id} value={child.id}>
+                {child.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Period Selector */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
