@@ -34,6 +34,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, delete: if isDirector() || isSuperAdmin();
+      allow update: if isDirector() || isSuperAdmin() || (
+        isOwner(userId) &&
+        // 🛡️ SECURITY: Prevent Privilege Escalation
+        // Only allow users to update their own profile fields.
+        // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'])
       // Security: Restrict self-update to specific fields to prevent privilege escalation (e.g. changing role)
       allow update: if isDirector() || isSuperAdmin() || (
         isOwner(userId) &&

@@ -1,3 +1,10 @@
+# Sentinel Journal 🛡️
+
+## 2024-02-12 - User Privilege Escalation
+
+**Vulnerability:** Users could escalate their privileges by modifying their own `role` field in Firestore (e.g., from 'student' to 'director') via the client-side API, because the `update` rule only checked `isOwner(userId)` without restricting which fields could be updated.
+**Learning:** Firestore's `allow update` applies to the entire document. Granular field-level permissions must be explicitly enforced using `request.resource.data.diff(resource.data).affectedKeys()`.
+**Prevention:** Always use an allowlist for user-editable fields in Firestore rules. Never rely on UI validation alone.
 ## 2024-05-23 - Critical Privilege Escalation in User Profiles
 **Vulnerability:** The Firestore rule `allow update: if isOwner(userId)` permitted users to modify any field in their own document, including sensitive fields like `role` and `classId`. This allowed arbitrary privilege escalation (e.g., a student becoming a superadmin).
 **Learning:** Checking ownership (`isOwner`) is insufficient for authorizing updates on documents containing mixed-sensitivity data. Sensitive fields must be protected even from the document owner.
