@@ -33,6 +33,7 @@ export interface UseTeacherGradesReturn {
   selectedClass: ClassGroup | undefined;
   selectedStudentData: Student | undefined;
   filteredStudents: Student[];
+  studentMap: Map<string, Student>;
   classSubjects: string[];
   studentGrades: Grade[];
   subjectGrades: Grade[];
@@ -89,6 +90,18 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
     );
   }, [selectedClassId, students, searchTerm]);
 
+  // Optimization: Get all students in the class for efficient lookups
+  // independent of search term
+  const classStudents = useMemo(() => {
+    if (!selectedClassId) return [];
+    return students.filter((s) => (s as Student).classId === selectedClassId);
+  }, [selectedClassId, students]);
+
+  // Optimization: Create a map for O(1) student lookups in render loops
+  const studentMap = useMemo(() => {
+    return new Map(classStudents.map((s) => [s.id, s]));
+  }, [classStudents]);
+
   const classSubjects = useMemo(() => {
     if (!selectedClassId) return [];
     const classCourses = courses.filter((c) => c.classId === selectedClassId);
@@ -104,11 +117,14 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
 
   const subjectGrades = useMemo(() => {
     if (!selectedSubject || !selectedClassId) return [];
-    return grades.filter((g) => {
-      const student = students.find((s) => s.id === g.studentId);
-      return g.subject === selectedSubject && (student as Student)?.classId === selectedClassId;
-    });
-  }, [grades, selectedSubject, selectedClassId, students]);
+
+    // Optimization: Use Set for O(1) lookup instead of O(N) find inside loop
+    const classStudentIds = new Set(classStudents.map(s => s.id));
+
+    return grades.filter((g) =>
+      g.subject === selectedSubject && classStudentIds.has(g.studentId)
+    );
+  }, [grades, selectedSubject, selectedClassId, classStudents]);
 
   const subjectGradesByStudent = useMemo(() => {
     const grouped: Record<string, Grade[]> = {};
@@ -228,6 +244,7 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
     selectedClass,
     selectedStudentData,
     filteredStudents,
+    studentMap,
     classSubjects,
     studentGrades,
     subjectGrades,

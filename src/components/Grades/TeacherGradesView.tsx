@@ -370,7 +370,7 @@ const TeacherGradesView = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                     {tg.subjectGrades.map((grade) => {
-                      const student = tg.filteredStudents.find((s) => s.id === grade.studentId);
+                      const student = tg.studentMap.get(grade.studentId);
                       return (
                         <tr
                           key={grade.id}
