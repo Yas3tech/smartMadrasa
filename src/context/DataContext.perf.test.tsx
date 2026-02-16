@@ -13,7 +13,8 @@ vi.mock('../services/users', () => ({
   subscribeToUsers: vi.fn(() => () => {}),
   createUser: vi.fn(),
   updateUser: vi.fn(),
-  deleteUser: vi.fn(),
+  deleteUserWithAllData: vi.fn(),
+  getUserById: vi.fn(),
 }));
 vi.mock('../services/classes', () => ({
   subscribeToClasses: vi.fn(() => () => {}),
