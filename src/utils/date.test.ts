@@ -85,7 +85,7 @@ describe('formatFirestoreTimestamp', () => {
   });
 
   it('should handle objects without toDate method', () => {
-      const obj = { foo: 'bar' };
-      expect(formatFirestoreTimestamp(obj)).toBe(obj);
+    const obj = { foo: 'bar' };
+    expect(formatFirestoreTimestamp(obj)).toBe(obj);
   });
 });
