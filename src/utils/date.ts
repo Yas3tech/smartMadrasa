@@ -6,6 +6,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const normalizeDate = (date: any): any => {
   return date?.toDate?.()?.toISOString() || date;
+};
 export const formatFirestoreDate = (date: unknown): string | unknown => {
   if (
     date &&

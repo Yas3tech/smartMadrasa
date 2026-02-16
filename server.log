@@ -1,12 +1,44 @@
 
 > smartmadrassa@0.0.0 dev
-> vite
+> vite --port 3000
 
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
 
-  VITE v7.2.2  ready in 735 ms
+  VITE v7.2.2  ready in 708 ms
 
-  ➜  Local:   http://localhost:5173/
+  ➜  Local:   http://localhost:3000/
   ➜  Network: use --host to expose
-2:10:50 PM [vite] (client) hmr update /src/context/AuthContext.tsx, /src/index.css
-2:11:15 PM [vite] (client) hmr update /src/context/AuthContext.tsx, /src/index.css
+(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error:   Failed to scan for dependencies from entries:
+  /app/index.html
+
+  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mUnexpected "{"[0m
+
+    src/components/Dashboard/DirectorDashboard.tsx:36:12:
+[37m      36 │ import type [32m{[37m User } from '../../types';
+         ╵             [32m^[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mUnexpected ")"[0m
+
+    src/hooks/useDashboard.ts:88:2:
+[37m      88 │   [32m)[37m;
+         ╵   [32m^[0m
+
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mUnexpected "export"[0m
+
+    src/utils/date.ts:9:0:
+[37m      9 │ [32mexport[37m const formatFirestoreDate = (date: unknown): string | unknow...
+        ╵ [32m~~~~~~[0m
+
+
+    at failureErrorWithLog (/app/node_modules/esbuild/lib/main.js:1467:15)
+    at /app/node_modules/esbuild/lib/main.js:926:25
+    at runOnEndCallbacks (/app/node_modules/esbuild/lib/main.js:1307:45)
+    at buildResponseToResult (/app/node_modules/esbuild/lib/main.js:924:7)
+    at /app/node_modules/esbuild/lib/main.js:936:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (/app/node_modules/esbuild/lib/main.js:935:54)
+    at handleRequest (/app/node_modules/esbuild/lib/main.js:628:17)
+    at handleIncomingPacket (/app/node_modules/esbuild/lib/main.js:653:7)
+    at Socket.readFromStdout (/app/node_modules/esbuild/lib/main.js:581:7)

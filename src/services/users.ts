@@ -33,20 +33,43 @@ export const getUserById = async (id: string): Promise<User | null> => {
 };
 
 import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { firebaseConfig } from '../config/firebase';
 
-// ... existing imports
 
-export const createUser = async (user: Omit<User, 'id'>): Promise<string> => {
+
+/**
+ * Generates a secure random password
+ */
+export const generateSecurePassword = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+  let password = '';
+  // Ensure we have at least one of each type
+  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.floor(Math.random() * 26));
+  password += 'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26));
+  password += '0123456789'.charAt(Math.floor(Math.random() * 10));
+  password += '!@#$%^&*()_+'.charAt(Math.floor(Math.random() * 12));
+
+  // Fill the rest randomly
+  for (let i = 0; i < 8; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  // Shuffle the password
+  return password.split('').sort(() => 0.5 - Math.random()).join('');
+};
+
+export const createUser = async (user: Omit<User, 'id'>): Promise<{ uid: string; password?: string; emailSent: boolean } | string> => {
   if (!db) throw new Error('Firebase not configured');
 
+  let authResult: { uid: string; password?: string; emailSent: boolean } | null = null;
   let uid = '';
 
   // 1. Create Auth User (if email is provided)
   if (user.email) {
     try {
-      uid = await createAuthUser(user.email.toLowerCase().trim());
+      authResult = await createAuthUser(user.email.toLowerCase().trim());
+      uid = authResult.uid;
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         // If user exists in Auth but not in Firestore with correct ID,
@@ -68,7 +91,7 @@ export const createUser = async (user: Omit<User, 'id'>): Promise<string> => {
     // Sync Firestore ID with Auth UID
     const { setDoc } = await import('firebase/firestore');
     await setDoc(doc(db, COLLECTION_NAME, uid), userWithPasswordFlag);
-    return uid;
+    return authResult || uid;
   } else {
     // Fallback to random ID if no Auth UID (e.g. email already in use or not provided)
     const docRef = await addDoc(collection(db, COLLECTION_NAME), userWithPasswordFlag);
@@ -76,28 +99,29 @@ export const createUser = async (user: Omit<User, 'id'>): Promise<string> => {
   }
 };
 
-/**
- * Creates a user in Firebase Auth using a secondary app instance
- * to avoid logging out the current user.
- * Uses a default password that users must change on first login.
- *
- * DEFAULT PASSWORD: School2024!
- */
-export const DEFAULT_PASSWORD = 'School2024!';
-
-const createAuthUser = async (email: string): Promise<string> => {
+const createAuthUser = async (email: string): Promise<{ uid: string; password?: string; emailSent: boolean }> => {
   // Initialize a secondary app
   const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
   const secondaryAuth = getAuth(secondaryApp);
+  const password = generateSecurePassword();
 
   try {
-    // Create user with the default password
-    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, DEFAULT_PASSWORD);
+    // Create user with a secure random password
+    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
     const uid = userCredential.user.uid;
+    let emailSent = false;
+
+    // Attempt to send password reset email
+    try {
+      await sendPasswordResetEmail(secondaryAuth, email);
+      emailSent = true;
+    } catch (emailError) {
+      console.warn('Failed to send password reset email:', emailError);
+    }
 
     // Sign out from secondary auth immediately
     await signOut(secondaryAuth);
-    return uid;
+    return { uid, password, emailSent };
   } finally {
     // Clean up the secondary app
     await deleteApp(secondaryApp);
