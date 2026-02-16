@@ -493,6 +493,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Memoize students to prevent unnecessary re-renders in downstream components
   const students = useMemo(
     () => users.filter((u): u is Student => u.role === 'student'),
     [users]
