@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "verify-rules": "node scripts/verify_rules_mock.js"
   },
   "dependencies": {
     "firebase": "^12.6.0",

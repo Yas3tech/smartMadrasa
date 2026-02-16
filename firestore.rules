@@ -20,6 +20,13 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper to ensure user only updates their own non-sensitive fields
+    function isOwnerSafeUpdate(userId) {
+      return isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['role', 'classId', 'childrenIds', 'subjects', 'classIds', 'parentId']);
+    }
+
     function isTeacher() { return isRole('teacher'); }
     function isDirector() { return isRole('director'); }
     function isParent() { return isRole('parent'); }
@@ -30,11 +37,19 @@ service cloud.firestore {
 
     // Users:
     // - Read: Authenticated users can read basic info (for search/lists).
-    // - Write: Users can update their own phone/avatar. Directors/Admins can manage all.
+    // - Write: Users can update their own phone/avatar/name (whitelisted fields). Directors/Admins can manage all.
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, delete: if isDirector() || isSuperAdmin();
-      allow update: if isDirector() || isSuperAdmin() || isOwner(userId);
+
+      // 🛡️ SECURITY: Prevent Privilege Escalation
+      // Only allow users to update their own profile fields.
+      // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
+      allow update: if isDirector() || isSuperAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'])
+      );
     }
 
     // Grades:
