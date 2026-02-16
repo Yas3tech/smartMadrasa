@@ -299,20 +299,21 @@ export function useHomework(): UseHomeworkReturn {
 
     setUploadingFiles(true);
     try {
-      const uploadedFiles: SubmissionFile[] = [];
-      for (const file of selectedFiles) {
+      const uploadPromises = selectedFiles.map(async (file) => {
         const path = generateHomeworkPath(selectedHomework.id, user.id, file.name);
         const url = await uploadFileWithProgress(file, path, (progress) => {
           setUploadProgress((prev) => ({ ...prev, [file.name]: progress }));
         });
-        uploadedFiles.push({
+        return {
           name: file.name,
           url,
           size: file.size,
           type: file.type,
           uploadedAt: new Date().toISOString(),
-        });
-      }
+        } as SubmissionFile;
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
 
       const allFiles = [...existingFiles, ...uploadedFiles];
       const targetStudentId = user.role === 'parent' && selectedChild ? selectedChild.id : user.id;
