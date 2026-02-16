@@ -10,13 +10,13 @@ import {
   orderBy,
   Timestamp,
   onSnapshot,
+  or,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import { normalizeDate } from '../utils/date';
 import { formatFirestoreDate } from '../utils/date';
 import type { Message } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
-import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'messages';
 
@@ -27,23 +27,26 @@ export const getMessages = async (userId?: string): Promise<Message[]> => {
   if (userId) {
     q = query(
       collection(db, COLLECTION_NAME),
-      where('receiverId', 'in', [userId, 'all']),
-      orderBy('timestamp', 'desc')
+      or(
+        where('senderId', '==', userId),
+        where('receiverId', 'in', [userId, 'all'])
+      )
     );
   } else {
-    q = query(collection(db, COLLECTION_NAME), orderBy('timestamp', 'desc'));
+    q = query(collection(db, COLLECTION_NAME));
   }
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(
+  const messages = snapshot.docs.map(
     (doc) =>
       ({
         ...doc.data(),
         id: doc.id,
-        timestamp: normalizeDate(doc.data().timestamp),
         timestamp: formatFirestoreTimestamp(doc.data().timestamp),
       }) as Message
   );
+
+  return messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
 export const sendMessage = async (message: Omit<Message, 'id' | 'timestamp'>): Promise<string> => {
@@ -72,19 +75,32 @@ export const deleteMessage = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
 
-export const subscribeToMessages = (callback: (messages: Message[]) => void) => {
+export const subscribeToMessages = (callback: (messages: Message[]) => void, userId?: string) => {
   if (!db) return () => { };
-  const q = query(collection(db, COLLECTION_NAME), orderBy('timestamp', 'desc'));
+
+  let q;
+  if (userId) {
+    q = query(
+      collection(db, COLLECTION_NAME),
+      or(
+        where('senderId', '==', userId),
+        where('receiverId', 'in', [userId, 'all'])
+      )
+    );
+  } else {
+    q = query(collection(db, COLLECTION_NAME));
+  }
+
   return onSnapshot(q, (snapshot) => {
     const messages = snapshot.docs.map(
       (doc) =>
         ({
           ...doc.data(),
           id: doc.id,
-          timestamp: normalizeDate(doc.data().timestamp),
           timestamp: formatFirestoreTimestamp(doc.data().timestamp),
         }) as Message
     );
+    messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     callback(messages);
   });
 };
