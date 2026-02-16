@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import toast from 'react-hot-toast';
-import type { Grade, Student } from '../types';
+import type { Grade, Student, ClassGroup } from '../types';
 
 export type ViewMode = 'byStudent' | 'bySubject' | null;
 
@@ -29,9 +29,9 @@ export interface UseTeacherGradesReturn {
   handleBulkSave: (grades: Omit<Grade, 'id'>[]) => Promise<void>;
 
   // Derived Data
-  teacherClasses: any[];
-  selectedClass: any;
-  selectedStudentData: any;
+  teacherClasses: ClassGroup[];
+  selectedClass: ClassGroup | undefined;
+  selectedStudentData: Student | undefined;
   filteredStudents: Student[];
   classSubjects: string[];
   studentGrades: Grade[];
