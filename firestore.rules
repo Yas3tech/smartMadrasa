@@ -36,6 +36,7 @@ service cloud.firestore {
       allow create, delete: if isDirector() || isSuperAdmin();
       allow update: if isDirector() || isSuperAdmin() || (
         isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'phone', 'avatar', 'mustChangePassword'])
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'])
       );
     }
