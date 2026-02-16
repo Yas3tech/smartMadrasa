@@ -22,6 +22,16 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import type { Student, Teacher } from '../../types';
+
+interface DirectorDashboardProps {
+  students: Student[];
+  teachers: Teacher[];
+  attendanceRate: string | number;
+  avgGrade: string | number;
+  getWeeklyAttendanceData: () => { name: string; présents: number; absents: number }[];
+  getGradeDistributionData: () => { name: string; value: number; color: string }[];
+  getSubjectPerformanceData: () => { subject: string; moyenne: number }[];
 import type { User } from '../../types';
 
 interface DirectorDashboardProps {
