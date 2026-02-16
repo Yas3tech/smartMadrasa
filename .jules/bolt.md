@@ -1,3 +1,3 @@
-## 2024-05-23 - React useMemo Dependencies
-**Learning:** The `react-hooks/exhaustive-deps` rule flags "unnecessary dependency" if a variable is in the dependency array but not used in the callback, even if it's there intentionally to force updates (e.g. `todayDate`).
-**Action:** Always use the dependency variable inside the `useMemo` callback to make the dependency explicit and satisfy the linter. For example, pass `todayDate` to `new Date(todayDate)` instead of `new Date()`.
+## 2024-05-22 - [Hooks returning generator functions]
+**Learning:** The `useDashboard` hook was returning functions like `getWeeklyAttendanceData` that calculated data on demand. This caused two issues: 1) The functions were recreated on every render, breaking memoization of child components. 2) The calculation happened during render of child components, potentially multiple times.
+**Action:** In future hooks, calculate derived data using `useMemo` and return the data arrays directly. This stabilizes references and avoids redundant calculations.

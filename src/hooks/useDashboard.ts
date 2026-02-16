@@ -61,6 +61,17 @@ export function useDashboard(): UseDashboardReturn {
     parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
     (parentChildren.length > 0 ? parentChildren[0] : null),
   [parentChildren, effectiveSelectedChildId]);
+    [user?.role, user?.id, students]
+  );
+
+  const effectiveSelectedChildId =
+    selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
+
+  const selectedChild = useMemo(() =>
+    parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
+    (parentChildren.length > 0 ? parentChildren[0] : null),
+    [parentChildren, effectiveSelectedChildId]
+  );
 
   // General Stats Calculations
   const teachers = useMemo(() => users.filter((u) => u.role === 'teacher'), [users]);
@@ -76,6 +87,16 @@ export function useDashboard(): UseDashboardReturn {
   }, [attendance, students, todayDate]);
 
   const allGrades = useMemo(() => grades.filter((g) => g.score > 0), [grades]);
+  const { presentCount, attendanceRate } = useMemo(() => {
+    const todayDate = new Date().toISOString().split('T')[0];
+    const todayAttendance = attendance.filter((a) => a.date === todayDate);
+    const count = todayAttendance.filter((a) => a.status === 'present').length;
+    const rate = students.length > 0 ? ((count / students.length) * 100).toFixed(0) : 0;
+    return { presentCount: count, attendanceRate: rate };
+  }, [attendance, students.length]);
+
+  const allGrades = useMemo(() => grades.filter((g) => g.score > 0), [grades]);
+
   const avgGrade = useMemo(() =>
     allGrades.length > 0
       ? (
@@ -91,6 +112,22 @@ export function useDashboard(): UseDashboardReturn {
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
     .slice(0, 3)
   , [events]);
+      : 0,
+    [allGrades]
+  );
+
+  const unreadMessages = useMemo(() =>
+    messages.filter((m) => m.receiverId === user?.id && !m.read).length,
+    [messages, user?.id]
+  );
+
+  const upcomingEvents = useMemo(() =>
+    events
+      .filter((e) => new Date(e.start) >= new Date())
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      .slice(0, 3),
+    [events]
+  );
 
   // Student Specific Calculations
   const targetStudentId = user?.role === 'parent' && selectedChild ? selectedChild.id : user?.id;
@@ -101,6 +138,10 @@ export function useDashboard(): UseDashboardReturn {
       : (user as any)?.classId;
 
   const myGrades = useMemo(() => grades.filter((g) => g.studentId === targetStudentId), [grades, targetStudentId]);
+  const myGrades = useMemo(() =>
+    grades.filter((g) => g.studentId === targetStudentId),
+    [grades, targetStudentId]
+  );
 
   const myAvg = useMemo(() =>
     myGrades.length > 0
@@ -109,6 +150,9 @@ export function useDashboard(): UseDashboardReturn {
         ).toFixed(1)
       : 0
   , [myGrades]);
+      : 0,
+    [myGrades]
+  );
 
   const mySubjectPerformance = useMemo(() => {
     return [...new Set(myGrades.map((g) => g.subject))].map((subject) => {
@@ -133,6 +177,21 @@ export function useDashboard(): UseDashboardReturn {
   , [homeworks, targetClassId]);
 
   const childClass = useMemo(() => classes.find((c) => c.id === targetClassId), [classes, targetClassId]);
+  const pendingHomeworks = useMemo(() =>
+    homeworks
+      .filter((hw) => {
+        if (hw.classId !== targetClassId) return false;
+        return new Date(hw.dueDate) >= new Date();
+      })
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+      .slice(0, 5),
+    [homeworks, targetClassId]
+  );
+
+  const childClass = useMemo(() =>
+    classes.find((c) => c.id === targetClassId),
+    [classes, targetClassId]
+  );
 
   // Handlers
   const handleOpenHomework = useCallback((homework: Homework) => {
@@ -160,6 +219,7 @@ export function useDashboard(): UseDashboardReturn {
       };
     });
   }, [attendance, todayDate]); // Depends on todayDate so it refreshes daily
+  }, [attendance]);
 
   const gradeDistributionData = useMemo(() => {
     const ranges = [
