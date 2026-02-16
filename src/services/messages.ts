@@ -12,7 +12,11 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/db';
+import { normalizeDate } from '../utils/date';
+import { formatFirestoreDate } from '../utils/date';
 import type { Message } from '../types';
+import { formatFirestoreTimestamp } from '../utils/dateUtils';
+import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'messages';
 
@@ -36,7 +40,8 @@ export const getMessages = async (userId?: string): Promise<Message[]> => {
       ({
         ...doc.data(),
         id: doc.id,
-        timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || doc.data().timestamp,
+        timestamp: normalizeDate(doc.data().timestamp),
+        timestamp: formatFirestoreTimestamp(doc.data().timestamp),
       }) as Message
   );
 };
@@ -76,7 +81,8 @@ export const subscribeToMessages = (callback: (messages: Message[]) => void) => 
         ({
           ...doc.data(),
           id: doc.id,
-          timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || doc.data().timestamp,
+          timestamp: normalizeDate(doc.data().timestamp),
+          timestamp: formatFirestoreTimestamp(doc.data().timestamp),
         }) as Message
     );
     callback(messages);

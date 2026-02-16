@@ -1,4 +1,4 @@
-import { useState, useRef, type ChangeEvent, type RefObject } from 'react';
+import { useState, useRef, type ChangeEvent, type RefObject, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -12,7 +12,6 @@ export interface UseUsersReturn {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
   editingUser: User | null;
-
 
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -50,6 +49,14 @@ export interface UseUsersReturn {
   getRoleLabel: (r: Role | 'all') => string;
 }
 
+const roleColors: Record<Role, string> = {
+  student: 'bg-blue-100 text-blue-700',
+  teacher: 'bg-orange-100 text-orange-700',
+  parent: 'bg-purple-100 text-purple-700',
+  director: 'bg-green-100 text-green-700',
+  superadmin: 'bg-red-100 text-red-700',
+};
+
 export function useUsers(): UseUsersReturn {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
@@ -71,7 +78,7 @@ export function useUsers(): UseUsersReturn {
   const [selectedStudentId, setSelectedStudentId] = useState('');
 
   // Data
-  const students = users.filter((u) => u.role === 'student');
+  const students = useMemo(() => users.filter((u) => u.role === 'student'), [users]);
 
   const handleOpenNew = () => {
     setEditingUser(null);
@@ -275,32 +282,37 @@ export function useUsers(): UseUsersReturn {
 
 
   const isSuperadmin = currentUser?.role === 'superadmin';
-  const visibleUsers = isSuperadmin ? users : users.filter((u) => u.role !== 'superadmin');
+  const visibleUsers = useMemo(() => isSuperadmin ? users : users.filter((u) => u.role !== 'superadmin'), [users, isSuperadmin]);
 
-  const filteredUsers = visibleUsers.filter((u) => {
+  const filteredUsers = useMemo(() => visibleUsers.filter((u) => {
     const matchesSearch =
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = filterRole === 'all' || u.role === filterRole;
     return matchesSearch && matchesRole;
-  });
+  }), [visibleUsers, searchQuery, filterRole]);
 
-  const roleCounts = {
-    all: visibleUsers.length,
-    student: visibleUsers.filter((u) => u.role === 'student').length,
-    teacher: visibleUsers.filter((u) => u.role === 'teacher').length,
-    parent: visibleUsers.filter((u) => u.role === 'parent').length,
-    director: visibleUsers.filter((u) => u.role === 'director').length,
-    superadmin: isSuperadmin ? visibleUsers.filter((u) => u.role === 'superadmin').length : 0,
-  };
+  const roleCounts = useMemo(() => {
+    const counts = {
+      all: 0,
+      student: 0,
+      teacher: 0,
+      parent: 0,
+      director: 0,
+      superadmin: 0,
+    };
 
-  const roleColors: Record<Role, string> = {
-    student: 'bg-blue-100 text-blue-700',
-    teacher: 'bg-orange-100 text-orange-700',
-    parent: 'bg-purple-100 text-purple-700',
-    director: 'bg-green-100 text-green-700',
-    superadmin: 'bg-red-100 text-red-700',
-  };
+    // Base count is all visible users
+    counts.all = visibleUsers.length;
+
+    visibleUsers.forEach((u) => {
+      if (counts[u.role] !== undefined) {
+        counts[u.role]++;
+      }
+    });
+
+    return counts;
+  }, [visibleUsers]);
 
   const getRoleLabel = (r: Role | 'all') => {
     if (r === 'all') return t('users.total');
