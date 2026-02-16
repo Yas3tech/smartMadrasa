@@ -23,8 +23,8 @@ service cloud.firestore {
     // Helper to ensure user only updates their own non-sensitive fields
     function isOwnerSafeUpdate(userId) {
       return isOwner(userId) &&
-        !request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(['role', 'classId', 'childrenIds', 'subjects', 'classIds', 'parentId']);
+        request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword']);
     }
 
     function isTeacher() { return isRole('teacher'); }
@@ -45,11 +45,7 @@ service cloud.firestore {
       // 🛡️ SECURITY: Prevent Privilege Escalation
       // Only allow users to update their own profile fields.
       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
-      allow update: if isDirector() || isSuperAdmin() || (
-        isOwner(userId) &&
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'])
-      );
+      allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
     }
 
     // Grades:
@@ -110,7 +106,13 @@ service cloud.firestore {
         resource.data.receiverId == request.auth.uid ||
         resource.data.receiverId == 'all' // Public announcements
       );
-      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid &&
+        (
+          request.resource.data.receiverId != 'all' ||
+          isDirector() ||
+          isSuperAdmin()
+        );
       allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
     }
     
