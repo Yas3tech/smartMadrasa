@@ -97,7 +97,8 @@ const Login = () => {
     } catch (err) {
       const authError = err as AuthError;
       if (authError.code === 'auth/user-not-found') {
-        setError(t('auth.errors.userNotFound', 'Aucun utilisateur trouvé avec cet email.'));
+        // Prevent username enumeration by showing success message even if user not found
+        setMessage(t('auth.resetEmailSent', 'Un email de réinitialisation a été envoyé.'));
       } else {
         setError(t('auth.errors.generic', 'Une erreur est survenue.'));
       }
