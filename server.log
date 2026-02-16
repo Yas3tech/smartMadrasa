@@ -4,9 +4,9 @@
 
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
 
-  VITE v7.2.2  ready in 641 ms
+  VITE v7.2.2  ready in 735 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-1:58:25 PM [vite] (client) hmr update /src/context/AuthContext.tsx, /src/index.css
-1:58:59 PM [vite] (client) hmr update /src/context/AuthContext.tsx, /src/index.css
+2:10:50 PM [vite] (client) hmr update /src/context/AuthContext.tsx, /src/index.css
+2:11:15 PM [vite] (client) hmr update /src/context/AuthContext.tsx, /src/index.css
