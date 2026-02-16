@@ -59,7 +59,8 @@ export const updateGrade = async (
 ): Promise<void> => {
   if (!db) throw new Error('Firebase not configured');
   const docRef = doc(db, USERS_COLLECTION, studentId, COLLECTION_NAME, gradeId);
-  const processedUpdates: any = { ...updates };
+  type GradeUpdate = Partial<Omit<Grade, 'date'> & { date: string | Timestamp }>;
+  const processedUpdates: GradeUpdate = { ...updates };
 
   if (updates.date) {
     processedUpdates.date = Timestamp.fromDate(new Date(updates.date));
