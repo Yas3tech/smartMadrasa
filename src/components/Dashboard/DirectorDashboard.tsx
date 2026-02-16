@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../UI';
 import { StatCard } from './StatCard';
-import { User } from '../../types';
 import {
   Users,
   GraduationCap,
@@ -23,16 +22,6 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import type { Student, Teacher } from '../../types';
-
-interface DirectorDashboardProps {
-  students: Student[];
-  teachers: Teacher[];
-  attendanceRate: string | number;
-  avgGrade: string | number;
-  getWeeklyAttendanceData: () => { name: string; présents: number; absents: number }[];
-  getGradeDistributionData: () => { name: string; value: number; color: string }[];
-  getSubjectPerformanceData: () => { subject: string; moyenne: number }[];
 import type { User } from '../../types';
 
 interface DirectorDashboardProps {
@@ -43,9 +32,6 @@ interface DirectorDashboardProps {
   weeklyAttendanceData: { name: string; présents: number; absents: number }[];
   gradeDistributionData: { name: string; value: number; color: string }[];
   subjectPerformanceData: { subject: string; moyenne: number }[];
-  weeklyAttendanceData: any[];
-  gradeDistributionData: any[];
-  subjectPerformanceData: any[];
 }
 
 export function DirectorDashboard({

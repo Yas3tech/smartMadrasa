@@ -54,7 +54,7 @@ const Profile = () => {
     try {
       await sendPasswordResetEmail(auth, user.email);
       toast.success(t('profile.resetEmailSent'));
-    } catch (error) {
+    } catch {
       toast.error(t('profile.resetEmailError'));
     }
   };

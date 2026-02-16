@@ -21,7 +21,7 @@ if (isFirebaseConfigured) {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-  } catch (error) {
+  } catch {
     // Silent fail
   }
 }

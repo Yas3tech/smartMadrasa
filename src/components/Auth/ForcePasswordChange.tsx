@@ -54,8 +54,9 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
 
       toast.success(t('auth.passwordChanged'));
       onSuccess();
-    } catch (err: any) {
-      if (err.code === 'auth/requires-recent-login') {
+    } catch (err) {
+      const firebaseErr = err as { code?: string };
+      if (firebaseErr.code === 'auth/requires-recent-login') {
         setError(t('auth.requiresRecentLogin'));
       } else {
         setError(t('auth.passwordChangeError'));

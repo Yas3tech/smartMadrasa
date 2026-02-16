@@ -207,7 +207,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     selectedPeriod,
     selectedPeriodData,
     courses,
-    user?.id,
+    user,
     grades,
     teacherComments,
   ]);
@@ -270,7 +270,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
         await createTeacherComment(comment);
         toast.success(t('bulletinGrades.commentSaved'));
       }
-    } catch (error) {
+    } catch {
       toast.error(t('bulletinGrades.saveError'));
     }
   };
@@ -338,7 +338,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
         await Promise.all(updatePromises);
         await new Promise((resolve) => setTimeout(resolve, 500));
         toast.success(t('bulletinGrades.batchValidationSuccess'));
-      } catch (error) {
+      } catch {
         toast.error(t('bulletinGrades.batchValidationError'));
       }
     }
@@ -402,7 +402,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
         await Promise.all(updatePromises);
         await new Promise((resolve) => setTimeout(resolve, 500));
         toast.success(t('bulletinGrades.bulletinValidated'));
-      } catch (error) {
+      } catch {
         toast.error(t('bulletinGrades.validationError'));
       }
     }

@@ -59,7 +59,7 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 describe('Login Component - Security Vulnerability Check', () => {
   it('prevents username enumeration by showing success message even if user not found', async () => {
     // Setup mock for sendPasswordResetEmail to simulate user not found
-    (sendPasswordResetEmail as any).mockRejectedValue({
+    vi.mocked(sendPasswordResetEmail).mockRejectedValue({
       code: 'auth/user-not-found',
     });
 
@@ -91,7 +91,7 @@ describe('Login Component - Security Vulnerability Check', () => {
 
   it('shows generic error for other errors', async () => {
     // Setup mock for sendPasswordResetEmail to simulate a generic error
-    (sendPasswordResetEmail as any).mockRejectedValue({
+    vi.mocked(sendPasswordResetEmail).mockRejectedValue({
       code: 'auth/network-request-failed',
     });
 

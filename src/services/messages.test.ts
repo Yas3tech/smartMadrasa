@@ -26,12 +26,12 @@ vi.mock('../config/db', () => ({
 }));
 
 vi.mock('../utils/date', () => ({
-  normalizeDate: (d: any) => d,
-  formatFirestoreDate: (d: any) => d,
+  normalizeDate: (d: unknown) => d,
+  formatFirestoreDate: (d: unknown) => d,
 }));
 
 vi.mock('../utils/dateUtils', () => ({
-  formatFirestoreTimestamp: (d: any) => d,
+  formatFirestoreTimestamp: (d: unknown) => d,
 }));
 
 describe('subscribeToMessages Performance & Logic', () => {
@@ -80,8 +80,8 @@ describe('subscribeToMessages Performance & Logic', () => {
       ];
 
       // Pass the mock snapshot
-      snapshotCallback({ docs: mockDocs } as any);
-      return () => {};
+      snapshotCallback({ docs: mockDocs } as unknown as Parameters<typeof snapshotCallback>[0]);
+      return () => { };
     });
 
     subscribeToMessages(callback, userId);

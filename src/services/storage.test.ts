@@ -9,7 +9,7 @@ import {
 
 describe('Storage Path Generators', () => {
   const MOCK_TIMESTAMP = 1715347200000; // 2024-05-10T13:20:00Z
-  let dateSpy: any;
+  let dateSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     dateSpy = vi.spyOn(Date, 'now').mockReturnValue(MOCK_TIMESTAMP);

@@ -72,8 +72,9 @@ export const createUser = async (user: Omit<User, 'id'>): Promise<{ uid: string;
     try {
       authResult = await createAuthUser(user.email.toLowerCase().trim());
       uid = authResult.uid;
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
+    } catch (error) {
+      const firebaseErr = error as { code?: string };
+      if (firebaseErr.code === 'auth/email-already-in-use') {
         // If user exists in Auth but not in Firestore with correct ID,
         // we might not have the UID here easily without Admin SDK.
         // For client side, we'll try to proceed or handle via email lookup later.

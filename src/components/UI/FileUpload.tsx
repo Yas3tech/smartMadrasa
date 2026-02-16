@@ -67,7 +67,7 @@ export const FileUpload = ({
       }
 
       onFilesUploaded(uploadedUrls);
-    } catch (error) {
+    } catch {
       toast.error(t('fileUpload.error.uploadFailed'));
     } finally {
       setUploading(false);

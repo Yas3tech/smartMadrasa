@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import type {
   User,
   Student,
+  Teacher,
   ClassGroup,
   Message,
   Event,
@@ -224,7 +225,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               courseId: cg.courseId,
               className: undefined,
             }));
-            setGrades(grades as any);
+            setGrades(grades as Grade[]);
           });
           unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
         }
@@ -250,7 +251,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               courseId: cg.courseId,
               className: undefined,
             }));
-            setGrades(grades as any);
+            setGrades(grades as Grade[]);
           });
           unsubAttendance = subscribeToAttendance(setAttendance);
           unsubHomeworks = subscribeToHomeworks(setHomeworks);
@@ -386,55 +387,51 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // Grade actions
   const addGrade = async (grade: Omit<Grade, 'id'>) => {
     if (useFirebase) {
-      try {
-        // Find the student name if not provided
-        const studentName =
-          grade.studentName || students.find((s) => s.id === grade.studentId)?.name || 'Unknown';
+      // Find the student name if not provided
+      const studentName =
+        grade.studentName || students.find((s) => s.id === grade.studentId)?.name || 'Unknown';
 
-        // Find the correct period based on grade date
-        const gradeDate = new Date(grade.date);
-        const matchingPeriod = academicPeriods.find((period) => {
-          const startDate = new Date(period.startDate);
-          const endDate = new Date(period.endDate);
-          return gradeDate >= startDate && gradeDate <= endDate;
-        });
+      // Find the correct period based on grade date
+      const gradeDate = new Date(grade.date);
+      const matchingPeriod = academicPeriods.find((period) => {
+        const startDate = new Date(period.startDate);
+        const endDate = new Date(period.endDate);
+        return gradeDate >= startDate && gradeDate <= endDate;
+      });
 
-        // If no matching period found, use the most recent period or throw error
-        const periodId = matchingPeriod?.id;
-        if (!periodId) {
-          throw new Error(
-            'Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.'
-          );
-        }
-
-        // Convert Grade to CourseGrade format
-        const courseGrade = {
-          studentId: grade.studentId,
-          studentName: studentName,
-          courseId: grade.courseId || grade.classId || 'general', // Use courseId, classId, or 'general'
-          courseName: grade.subject,
-          periodId: periodId,
-          categoryId:
-            grade.type === 'exam'
-              ? 'cat-exam'
-              : grade.type === 'homework'
-                ? 'cat-homework'
-                : 'cat-eval', // Map type to category
-          categoryName:
-            grade.type === 'exam' ? 'Examen' : grade.type === 'homework' ? 'Devoir' : 'Évaluation',
-          title: grade.title || `${grade.subject} - ${grade.type}`,
-          score: grade.score,
-          maxScore: grade.maxScore,
-          date: grade.date,
-          weight: 1,
-          teacherId: grade.teacherId || user?.id || 'unknown',
-          comment: grade.feedback || '',
-        };
-
-        await fbCreateCourseGrade(courseGrade);
-      } catch (error) {
-        throw error;
+      // If no matching period found, use the most recent period or throw error
+      const periodId = matchingPeriod?.id;
+      if (!periodId) {
+        throw new Error(
+          'Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.'
+        );
       }
+
+      // Convert Grade to CourseGrade format
+      const courseGrade = {
+        studentId: grade.studentId,
+        studentName: studentName,
+        courseId: grade.courseId || grade.classId || 'general',
+        courseName: grade.subject,
+        periodId: periodId,
+        categoryId:
+          grade.type === 'exam'
+            ? 'cat-exam'
+            : grade.type === 'homework'
+              ? 'cat-homework'
+              : 'cat-eval',
+        categoryName:
+          grade.type === 'exam' ? 'Examen' : grade.type === 'homework' ? 'Devoir' : 'Évaluation',
+        title: grade.title || `${grade.subject} - ${grade.type}`,
+        score: grade.score,
+        maxScore: grade.maxScore,
+        date: grade.date,
+        weight: 1,
+        teacherId: grade.teacherId || user?.id || 'unknown',
+        comment: grade.feedback || '',
+      };
+
+      await fbCreateCourseGrade(courseGrade);
     }
   };
 
@@ -613,6 +610,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {

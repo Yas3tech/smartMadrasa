@@ -81,8 +81,8 @@ export function useDashboard(): UseDashboardReturn {
   const avgGrade = useMemo(() => {
     return allGrades.length > 0
       ? (
-          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
-        ).toFixed(1)
+        allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
+      ).toFixed(1)
       : 0;
   }, [allGrades]);
 
@@ -103,8 +103,8 @@ export function useDashboard(): UseDashboardReturn {
 
   const targetClassId = useMemo(() => {
     return user?.role === 'parent' && selectedChild
-      ? (selectedChild as any).classId
-      : (user as any)?.classId;
+      ? (selectedChild as Student).classId
+      : (user as User & { classId?: string })?.classId;
   }, [user, selectedChild]);
 
   const myGrades = useMemo(() => grades.filter((g) => g.studentId === targetStudentId), [grades, targetStudentId]);
@@ -112,8 +112,8 @@ export function useDashboard(): UseDashboardReturn {
   const myAvg = useMemo(() => {
     return myGrades.length > 0
       ? (
-          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
-        ).toFixed(1)
+        myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
+      ).toFixed(1)
       : 0;
   }, [myGrades]);
 
@@ -195,7 +195,7 @@ export function useDashboard(): UseDashboardReturn {
       const avg =
         subjectGrades.length > 0
           ? subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) /
-            subjectGrades.length
+          subjectGrades.length
           : 0;
       return { subject, moyenne: Math.round(avg) };
     });

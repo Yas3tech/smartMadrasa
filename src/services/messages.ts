@@ -7,14 +7,11 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy,
   Timestamp,
   onSnapshot,
   or,
 } from 'firebase/firestore';
 import { db } from '../config/db';
-import { normalizeDate } from '../utils/date';
-import { formatFirestoreDate } from '../utils/date';
 import type { Message } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
 

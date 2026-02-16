@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { updateEvent, getEvents } from './events';
-import { updateDoc, doc, Timestamp, getDocs, collection } from 'firebase/firestore';
+import { updateDoc, doc, getDocs } from 'firebase/firestore';
 
 vi.mock('firebase/firestore', () => ({
   getFirestore: vi.fn(),
@@ -47,7 +47,7 @@ describe('events service', () => {
 
       vi.mocked(getDocs).mockResolvedValueOnce({
         docs: [mockDoc],
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof getDocs>>);
 
       const events = await getEvents();
 
@@ -68,14 +68,14 @@ describe('events service', () => {
         end: '2023-01-01T11:00:00.000Z',
       };
 
-      await updateEvent(id, updates as any);
+      await updateEvent(id, updates as Parameters<typeof updateEvent>[1]);
 
       expect(doc).toHaveBeenCalledWith(expect.anything(), 'events', id);
 
       // Check that updateDoc was called with the correct arguments
       expect(updateDoc).toHaveBeenCalledTimes(1);
       const updateCallArgs = vi.mocked(updateDoc).mock.calls[0];
-      const updateData = updateCallArgs[1] as any;
+      const updateData = updateCallArgs[1] as Record<string, unknown>;
 
       expect(updateData.title).toBe('New Title');
       // Verify Timestamp structure
@@ -89,11 +89,11 @@ describe('events service', () => {
         title: 'Just Title',
       };
 
-      await updateEvent(id, updates as any);
+      await updateEvent(id, updates as Parameters<typeof updateEvent>[1]);
 
       expect(updateDoc).toHaveBeenCalledTimes(1);
       const updateCallArgs = vi.mocked(updateDoc).mock.calls[0];
-      const updateData = updateCallArgs[1] as any;
+      const updateData = updateCallArgs[1] as Record<string, unknown>;
 
       expect(updateData.title).toBe('Just Title');
       expect(updateData.start).toBeUndefined();

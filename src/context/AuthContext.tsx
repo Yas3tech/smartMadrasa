@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const { db: firestoreDb } = await import('../config/db');
 
           if (firestoreDb) {
-            let userDoc = await getDoc(doc(firestoreDb, 'users', firebaseUser.uid));
+            const userDoc = await getDoc(doc(firestoreDb, 'users', firebaseUser.uid));
             let userData = userDoc.exists() ? userDoc.data() : null;
 
             // Fallback: If no doc found by UID, try searching by email
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
             }
           }
-        } catch (error) {
+        } catch {
           setUser(null);
         }
       } else {
@@ -70,7 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!auth) return;
     try {
       await signOut(auth);
-    } catch (error) {
+    } catch {
+      // Sign-out errors are non-critical; user intent is clear
     }
   };
 
@@ -81,6 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

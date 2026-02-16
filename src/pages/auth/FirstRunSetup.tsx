@@ -60,8 +60,9 @@ const FirstRunSetup: React.FC = () => {
             }
 
             setStep(3); // Go to success step
-        } catch (error: any) {
-            toast.error(error.message || t('auth.errors.generic'));
+        } catch (error) {
+            const errMsg = error instanceof Error ? error.message : t('auth.errors.generic');
+            toast.error(errMsg);
         } finally {
             setLoading(false);
         }

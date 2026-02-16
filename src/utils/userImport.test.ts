@@ -29,8 +29,8 @@ describe('userImport', () => {
         SheetNames: ['Sheet1'],
         Sheets: { Sheet1: {} },
       };
-      vi.mocked(xlsx.read).mockReturnValue(mockWorkbook as any);
-      vi.mocked(xlsx.utils.sheet_to_json).mockReturnValue(mockData as any);
+      vi.mocked(xlsx.read).mockReturnValue(mockWorkbook as ReturnType<typeof xlsx.read>);
+      vi.mocked(xlsx.utils.sheet_to_json).mockReturnValue(mockData as ReturnType<typeof xlsx.utils.sheet_to_json>);
 
       const result = await parseUserFile(mockFile);
 
@@ -75,7 +75,7 @@ describe('userImport', () => {
       expect(addUser).toHaveBeenCalledTimes(1);
       expect(count).toBe(1);
 
-      const addedUser = addUser.mock.calls[0][0] as any;
+      const addedUser = addUser.mock.calls[0][0] as Record<string, unknown>;
       expect(addedUser.role).toBe('parent');
       expect(addedUser.childrenIds).toEqual(['u1']);
     });
@@ -95,7 +95,7 @@ describe('userImport', () => {
       expect(addUser).toHaveBeenCalledTimes(1);
       expect(count).toBe(1);
 
-      const addedUser = addUser.mock.calls[0][0] as any;
+      const addedUser = addUser.mock.calls[0][0] as Record<string, unknown>;
       expect(addedUser.role).toBe('parent');
       expect(addedUser.childrenIds).toEqual(['u2']);
     });

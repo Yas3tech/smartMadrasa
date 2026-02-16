@@ -218,7 +218,7 @@ export function useHomework(): UseHomeworkReturn {
 
       setIsModalOpen(false);
       resetForm();
-    } catch (error) {
+    } catch {
       toast.error(t('homework.toasts.saveError'));
     }
   };
@@ -242,7 +242,8 @@ export function useHomework(): UseHomeworkReturn {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce devoir ?')) {
       try {
         await deleteHomework(id);
-      } catch (error) {
+      } catch {
+        // Deletion errors are handled by Firestore listeners
       }
     }
   };
@@ -268,7 +269,7 @@ export function useHomework(): UseHomeworkReturn {
       setGradingSubmissionId(null);
       setGradeValue(0);
       setFeedbackValue('');
-    } catch (error) {
+    } catch {
       toast.error(t('homework.toasts.gradeError'));
     }
   };
@@ -344,7 +345,7 @@ export function useHomework(): UseHomeworkReturn {
       setUploadProgress({});
       setIsSubmitModalOpen(false);
       toast.success(t('homework.toasts.submitSuccess'));
-    } catch (error) {
+    } catch {
       toast.error(t('homework.toasts.submitError'));
     } finally {
       setUploadingFiles(false);

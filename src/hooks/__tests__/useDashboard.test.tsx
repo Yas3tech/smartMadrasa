@@ -32,8 +32,8 @@ describe('useDashboard', () => {
       { id: 'g2', score: 80, maxScore: 100, subject: 'Math', studentId: 's1' },
     ];
 
-    (useAuth as any).mockReturnValue({ user: mockUser });
-    (useData as any).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as ReturnType<typeof useAuth>);
+    vi.mocked(useData).mockReturnValue({
       students: mockStudents,
       users: [...mockTeachers, ...mockStudents],
       grades: mockGrades,
@@ -46,7 +46,7 @@ describe('useDashboard', () => {
 
     const { result } = renderHook(() => useDashboard());
 
-    const dash = result.current as any;
+    const dash = result.current;
 
     // Verify basic data access
     expect(dash.students).toHaveLength(2);
@@ -64,12 +64,12 @@ describe('useDashboard', () => {
 
     // Check memoization/data structure
     if (typeof dash.getWeeklyAttendanceData === 'function') {
-        const data = dash.getWeeklyAttendanceData();
-        expect(Array.isArray(data)).toBe(true);
-        expect(data).toHaveLength(7);
+      const data = dash.getWeeklyAttendanceData();
+      expect(Array.isArray(data)).toBe(true);
+      expect(data).toHaveLength(7);
     } else {
-        expect(Array.isArray(dash.weeklyAttendanceData)).toBe(true);
-        expect(dash.weeklyAttendanceData).toHaveLength(7);
+      expect(Array.isArray(dash.weeklyAttendanceData)).toBe(true);
+      expect(dash.weeklyAttendanceData).toHaveLength(7);
     }
   });
 });

@@ -10,11 +10,44 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
+import type { Role } from '../../types';
 
 const UserManagement = () => {
   const { t, i18n } = useTranslation();
   const { user: currentUser } = useAuth();
-  const usr = useUsers();
+  const {
+    isModalOpen,
+    setIsModalOpen,
+    editingUser,
+    searchQuery,
+    setSearchQuery,
+    filterRole,
+    setFilterRole,
+    name,
+    setName,
+    email,
+    setEmail,
+    role,
+    setRole,
+    phone,
+    setPhone,
+    birthDate,
+    setBirthDate,
+    selectedStudentId,
+    setSelectedStudentId,
+    students,
+    filteredUsers,
+    roleCounts,
+    roleColors,
+    fileInputRef,
+    handleOpenNew,
+    handleEdit,
+    handleSave,
+    handleDelete,
+    handleDownloadTemplate,
+    handleFileUpload,
+    getRoleLabel,
+  } = useUsers();
   const isRTL = i18n.language === 'ar';
 
   if (currentUser?.role !== 'director' && currentUser?.role !== 'superadmin') {
@@ -35,22 +68,22 @@ const UserManagement = () => {
         <div className="flex gap-2">
           <input
             type="file"
-            ref={usr.fileInputRef}
-            onChange={usr.handleFileUpload}
+            ref={fileInputRef}
+            onChange={handleFileUpload}
             accept=".xlsx,.xls,.csv"
             className="hidden"
           />
-          <Button variant="secondary" icon={FileDown} onClick={usr.handleDownloadTemplate}>
+          <Button variant="secondary" icon={FileDown} onClick={handleDownloadTemplate}>
             {t('users.downloadTemplate')}
           </Button>
           <Button
             variant="secondary"
             icon={FileSpreadsheet}
-            onClick={() => usr.fileInputRef.current?.click()}
+            onClick={() => fileInputRef.current?.click()}
           >
             {t('users.importExcel')}
           </Button>
-          <Button variant="primary" icon={Plus} onClick={usr.handleOpenNew}>
+          <Button variant="primary" icon={Plus} onClick={handleOpenNew}>
             {t('users.newUser')}
           </Button>
         </div>
@@ -60,16 +93,16 @@ const UserManagement = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {(['all', 'student', 'teacher', 'parent', 'director', 'superadmin'] as const)
           .filter((r) => currentUser?.role === 'superadmin' || r !== 'superadmin')
-          .map((roleFilter) => (
+          .map((roleFilterValue) => (
             <Card
-              key={roleFilter}
-              className={`p-4 cursor-pointer transition-all ${usr.filterRole === roleFilter ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:shadow-md'}`}
-              onClick={() => usr.setFilterRole(roleFilter)}
+              key={roleFilterValue}
+              className={`p-4 cursor-pointer transition-all ${filterRole === roleFilterValue ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:shadow-md'}`}
+              onClick={() => setFilterRole(roleFilterValue)}
             >
               <p className="text-xs text-gray-500 font-medium mb-1">
-                {usr.getRoleLabel(roleFilter)}
+                {getRoleLabel(roleFilterValue)}
               </p>
-              <p className="text-2xl font-bold text-gray-900">{usr.roleCounts[roleFilter]}</p>
+              <p className="text-2xl font-bold text-gray-900">{roleCounts[roleFilterValue]}</p>
             </Card>
           ))}
       </div>
@@ -84,8 +117,8 @@ const UserManagement = () => {
           <input
             type="text"
             placeholder={t('users.searchPlaceholder')}
-            value={usr.searchQuery}
-            onChange={(e) => usr.setSearchQuery(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none`}
           />
         </div>
@@ -125,7 +158,7 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {usr.filteredUsers.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -138,7 +171,7 @@ const UserManagement = () => {
                   <td className="px-6 py-4 text-gray-600">{user.email}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${usr.roleColors[user.role]}`}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${roleColors[user.role]}`}
                     >
                       {t(`roles.${user.role}`)}
                     </span>
@@ -150,13 +183,13 @@ const UserManagement = () => {
                   <td className="px-6 py-4">
                     <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} gap-2`}>
                       <button
-                        onClick={() => usr.handleEdit(user)}
+                        onClick={() => handleEdit(user)}
                         className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                       >
                         <Edit2 size={18} />
                       </button>
                       <button
-                        onClick={() => usr.handleDelete(user.id, user.role)}
+                        onClick={() => handleDelete(user.id, user.role)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         disabled={user.id === currentUser?.id}
                       >
@@ -172,14 +205,14 @@ const UserManagement = () => {
       </Card>
 
       {/* Add/Edit Modal */}
-      <Modal isOpen={usr.isModalOpen} onClose={() => usr.setIsModalOpen(false)}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              {usr.editingUser ? t('users.editUser') : t('users.newUser')}
+              {editingUser ? t('users.editUser') : t('users.newUser')}
             </h2>
             <button
-              onClick={() => usr.setIsModalOpen(false)}
+              onClick={() => setIsModalOpen(false)}
               className="text-gray-400 hover:text-gray-600"
             >
               <X size={24} />
@@ -192,10 +225,10 @@ const UserManagement = () => {
                 {t('users.role')}
               </label>
               <select
-                value={usr.role}
-                onChange={(e) => usr.setRole(e.target.value as any)}
+                value={role}
+                onChange={(e) => setRole(e.target.value as Role)}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                disabled={!!usr.editingUser}
+                disabled={!!editingUser}
               >
                 <option value="student">{t('roles.student')}</option>
                 <option value="teacher">{t('roles.teacher')}</option>
@@ -209,49 +242,49 @@ const UserManagement = () => {
 
             <Input
               label={t('users.fullName')}
-              value={usr.name}
-              onChange={(e) => usr.setName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Jean Dupont"
             />
             <Input
               label={t('users.email')}
               type="email"
-              value={usr.email}
-              onChange={(e) => usr.setEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="jean.dupont@school.ma"
             />
 
-            {(usr.role === 'teacher' || usr.role === 'parent') && (
+            {(role === 'teacher' || role === 'parent') && (
               <Input
                 label={t('users.phone')}
                 type="tel"
-                value={usr.phone}
-                onChange={(e) => usr.setPhone(e.target.value)}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="+212 6..."
               />
             )}
 
-            {usr.role === 'student' && (
+            {role === 'student' && (
               <Input
                 label={t('users.birthDate')}
                 type="date"
-                value={usr.birthDate}
-                onChange={(e) => usr.setBirthDate(e.target.value)}
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
               />
             )}
 
-            {usr.role === 'parent' && (
+            {role === 'parent' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('users.linkedChild')}
                 </label>
                 <select
-                  value={usr.selectedStudentId}
-                  onChange={(e) => usr.setSelectedStudentId(e.target.value)}
+                  value={selectedStudentId}
+                  onChange={(e) => setSelectedStudentId(e.target.value)}
                   className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                 >
                   <option value="">{t('users.selectStudent')}</option>
-                  {usr.students.map((student) => (
+                  {students.map((student) => (
                     <option key={student.id} value={student.id}>
                       {student.name} ({student.email})
                     </option>
@@ -262,11 +295,11 @@ const UserManagement = () => {
             )}
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button variant="secondary" onClick={() => usr.setIsModalOpen(false)}>
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button variant="primary" onClick={usr.handleSave}>
-                {usr.editingUser ? t('common.save') : t('users.create')}
+              <Button variant="primary" onClick={handleSave}>
+                {editingUser ? t('common.save') : t('users.create')}
               </Button>
             </div>
           </div>

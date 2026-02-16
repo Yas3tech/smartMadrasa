@@ -81,7 +81,7 @@ const Classes = () => {
       // classId is specific to Student type, so we cast the update
       await updateUser(studentId, { classId: managingClass.id } as Partial<Student>);
       toast.success(t('classes.studentAdded'));
-    } catch (error) {
+    } catch {
       toast.error(t('classes.studentAddError'));
     }
   };
@@ -90,7 +90,7 @@ const Classes = () => {
     try {
       await updateUser(studentId, { classId: '' } as Partial<Student>);
       toast.success(t('classes.studentRemoved'));
-    } catch (error) {
+    } catch {
       toast.error(t('classes.studentRemoveError'));
     }
   };

@@ -54,7 +54,7 @@ const Announcements = () => {
       toast.success(t('announcements.created'));
       setIsModalOpen(false);
       resetForm();
-    } catch (error) {
+    } catch {
       toast.error(t('announcements.createError'));
     }
   };
@@ -69,7 +69,7 @@ const Announcements = () => {
   const togglePin = async (id: string, currentPinned: boolean) => {
     try {
       await updateAnnouncementService(id, { pinned: !currentPinned });
-    } catch (error) {
+    } catch {
       toast.error(t('common.error'));
     }
   };
@@ -79,7 +79,7 @@ const Announcements = () => {
       try {
         await deleteAnnouncementService(id);
         toast.success(t('announcements.deleted'));
-      } catch (error) {
+      } catch {
         toast.error(t('common.error'));
       }
     }

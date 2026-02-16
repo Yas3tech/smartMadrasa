@@ -26,7 +26,43 @@ import {
 
 const Messages = () => {
   const { t, i18n } = useTranslation();
-  const msg = useMessages();
+  const {
+    selectedFolder,
+    setSelectedFolder,
+    filteredMessages,
+    selectedMessage,
+    searchQuery,
+    setSearchQuery,
+    isMobile,
+    mobileView,
+    setMobileView,
+    isComposeOpen,
+    setIsComposeOpen,
+    composeMode,
+    recipient,
+    setRecipient,
+    recipientSearch,
+    setRecipientSearch,
+    showRecipientDropdown,
+    setShowRecipientDropdown,
+    subject,
+    setSubject,
+    content,
+    setContent,
+    attachments,
+    fileInputRef,
+    filteredRecipients,
+    selectedRecipientLabel,
+    handleArchiveMessage,
+    handleComposeNew,
+    handleReply,
+    handleForward,
+    handleFileSelect,
+    removeAttachment,
+    handleSendMessage,
+    handleSelectMessage,
+    handleDeleteMessage,
+  } = useMessages();
 
   const folders = [
     { id: 'inbox' as const, label: t('messages.folders.inbox'), icon: Inbox },
@@ -39,11 +75,11 @@ const Messages = () => {
       <Card className="flex-1 flex overflow-hidden !p-0 border-0 shadow-xl">
         {/* Left Sidebar - Folders */}
         <div
-          className={`${msg.isMobile
-              ? msg.mobileView === 'folders'
-                ? 'flex-1 w-full bg-white dark:bg-slate-800'
-                : 'hidden'
-              : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+          className={`${isMobile
+            ? mobileView === 'folders'
+              ? 'flex-1 w-full bg-white dark:bg-slate-800'
+              : 'hidden'
+            : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
             }`}
         >
           <div className="p-4">
@@ -56,7 +92,7 @@ const Messages = () => {
             <Button
               className="w-full justify-start mb-6"
               icon={PenSquare}
-              onClick={msg.handleComposeNew}
+              onClick={handleComposeNew}
             >
               {t('messages.newMessage')}
             </Button>
@@ -65,12 +101,12 @@ const Messages = () => {
                 <button
                   key={folder.id}
                   onClick={() => {
-                    msg.setSelectedFolder(folder.id);
-                    if (msg.isMobile) msg.setMobileView('list');
+                    setSelectedFolder(folder.id);
+                    if (isMobile) setMobileView('list');
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${msg.selectedFolder === folder.id
-                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedFolder === folder.id
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
                     }`}
                 >
                   <folder.icon size={18} />
@@ -83,18 +119,18 @@ const Messages = () => {
 
         {/* Middle Column - Message List */}
         <div
-          className={`${msg.isMobile
-              ? msg.mobileView === 'list'
-                ? 'flex-1 w-full bg-white dark:bg-slate-900'
-                : 'hidden'
-              : 'w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+          className={`${isMobile
+            ? mobileView === 'list'
+              ? 'flex-1 w-full bg-white dark:bg-slate-900'
+              : 'hidden'
+            : 'w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col'
             }`}
         >
           <div className="p-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800">
             <div className="flex items-center gap-2 mb-2">
-              {msg.isMobile && (
+              {isMobile && (
                 <button
-                  onClick={() => msg.setMobileView('folders')}
+                  onClick={() => setMobileView('folders')}
                   className="p-1 mr-2 -ml-2 text-gray-500"
                 >
                   <ChevronLeft size={24} />
@@ -102,11 +138,11 @@ const Messages = () => {
               )}
               <div>
                 <h2 className="font-bold text-lg text-gray-800 dark:text-white">
-                  {folders.find((f) => f.id === msg.selectedFolder)?.label}
+                  {folders.find((f) => f.id === selectedFolder)?.label}
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-slate-400">
-                  {msg.filteredMessages.length} {t('messages.message').toLowerCase()}
-                  {msg.filteredMessages.length !== 1 ? 's' : ''}
+                  {filteredMessages.length} {t('messages.message').toLowerCase()}
+                  {filteredMessages.length !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -120,8 +156,8 @@ const Messages = () => {
                   type="text"
                   placeholder={t('messages.searchPlaceholder')}
                   className="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-slate-700 border-none rounded-lg text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900/30 outline-none"
-                  value={msg.searchQuery}
-                  onChange={(e) => msg.setSearchQuery(e.target.value)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <button className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
@@ -130,24 +166,24 @@ const Messages = () => {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {msg.filteredMessages.map((message) => (
+            {filteredMessages.map((message) => (
               <div
                 key={message.id}
-                onClick={() => msg.handleSelectMessage(message)}
-                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${msg.selectedMessage?.id === message.id
-                    ? 'bg-orange-50 border-l-4 border-l-orange-500'
-                    : 'hover:bg-white'
+                onClick={() => handleSelectMessage(message)}
+                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${selectedMessage?.id === message.id
+                  ? 'bg-orange-50 border-l-4 border-l-orange-500'
+                  : 'hover:bg-white'
                   }`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-2">
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${msg.selectedMessage?.id === message.id ? 'bg-orange-500' : 'bg-gray-400'}`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${selectedMessage?.id === message.id ? 'bg-orange-500' : 'bg-gray-400'}`}
                     >
                       {message.senderName.charAt(0)}
                     </div>
                     <span
-                      className={`text-sm font-semibold ${msg.selectedMessage?.id === message.id ? 'text-orange-900' : 'text-gray-900'}`}
+                      className={`text-sm font-semibold ${selectedMessage?.id === message.id ? 'text-orange-900' : 'text-gray-900'}`}
                     >
                       {message.senderName}
                     </span>
@@ -177,21 +213,21 @@ const Messages = () => {
 
         {/* Right Column - Message Detail */}
         <div
-          className={`${msg.isMobile
-              ? msg.mobileView === 'detail'
-                ? 'flex-1 w-full bg-white dark:bg-slate-800 flex flex-col'
-                : 'hidden'
-              : 'flex-1 bg-white dark:bg-slate-800 flex flex-col'
+          className={`${isMobile
+            ? mobileView === 'detail'
+              ? 'flex-1 w-full bg-white dark:bg-slate-800 flex flex-col'
+              : 'hidden'
+            : 'flex-1 bg-white dark:bg-slate-800 flex flex-col'
             }`}
         >
-          {msg.selectedMessage ? (
+          {selectedMessage ? (
             <>
               {/* Toolbar */}
               <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  {msg.isMobile && (
+                  {isMobile && (
                     <button
-                      onClick={() => msg.setMobileView('list')}
+                      onClick={() => setMobileView('list')}
                       className="p-2 mr-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
                     >
                       <ChevronLeft size={24} />
@@ -200,28 +236,28 @@ const Messages = () => {
                   <div className="flex gap-2">
                     <button
                       className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg"
-                      onClick={() => msg.handleReply(msg.selectedMessage!)}
+                      onClick={() => handleReply(selectedMessage)}
                       title={t('messages.reply')}
                     >
                       <ReplyIcon size={18} />
                     </button>
                     <button
                       className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg"
-                      onClick={() => msg.handleForward(msg.selectedMessage!)}
+                      onClick={() => handleForward(selectedMessage)}
                       title={t('messages.forward')}
                     >
                       <ForwardIcon size={18} />
                     </button>
                     <button
-                      className={`p-2 transition-colors rounded-lg ${msg.selectedMessage.archived ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'}`}
-                      onClick={() => msg.handleArchiveMessage(msg.selectedMessage!.id)}
-                      title={msg.selectedMessage.archived ? 'Désarchiver' : t('messages.archive')}
+                      className={`p-2 transition-colors rounded-lg ${selectedMessage.archived ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'}`}
+                      onClick={() => handleArchiveMessage(selectedMessage.id)}
+                      title={selectedMessage.archived ? 'Désarchiver' : t('messages.archive')}
                     >
                       <Archive size={18} />
                     </button>
                     <button
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                      onClick={() => msg.handleDeleteMessage(msg.selectedMessage!.id)}
+                      onClick={() => handleDeleteMessage(selectedMessage.id)}
                       title={t('common.delete')}
                     >
                       <Trash2 size={18} />
@@ -235,35 +271,35 @@ const Messages = () => {
                 <div className="flex justify-between items-start mb-8">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
-                      {msg.selectedMessage.senderName.charAt(0)}
+                      {selectedMessage.senderName.charAt(0)}
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {msg.selectedMessage.senderName}
+                        {selectedMessage.senderName}
                       </h2>
                       <p className="text-sm text-gray-500 dark:text-slate-400">
-                        {msg.selectedMessage.senderRole}@smartmadrassa.com
+                        {selectedMessage.senderRole}@smartmadrassa.com
                       </p>
                     </div>
                   </div>
                   <span className="text-sm text-gray-500 dark:text-slate-400">
-                    {new Date(msg.selectedMessage.timestamp).toLocaleString(i18n.language)}
+                    {new Date(selectedMessage.timestamp).toLocaleString(i18n.language)}
                   </span>
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                  {msg.selectedMessage.subject}
+                  {selectedMessage.subject}
                 </h1>
                 <div className="prose prose-orange max-w-none text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap mb-8">
-                  {msg.selectedMessage.content}
+                  {selectedMessage.content}
                 </div>
-                {msg.selectedMessage.attachments && msg.selectedMessage.attachments.length > 0 && (
+                {selectedMessage.attachments && selectedMessage.attachments.length > 0 && (
                   <div className="border-t pt-6">
                     <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <Paperclip size={16} />
-                      {t('messages.attachments')} ({msg.selectedMessage.attachments.length})
+                      {t('messages.attachments')} ({selectedMessage.attachments.length})
                     </h3>
                     <div className="flex flex-wrap gap-3">
-                      {msg.selectedMessage.attachments.map((url, index) => (
+                      {selectedMessage.attachments.map((url, index) => (
                         <a
                           key={index}
                           href={url}
@@ -297,18 +333,18 @@ const Messages = () => {
       </Card>
 
       {/* Compose Modal */}
-      <Modal isOpen={msg.isComposeOpen} onClose={() => msg.setIsComposeOpen(false)}>
+      <Modal isOpen={isComposeOpen} onClose={() => setIsComposeOpen(false)}>
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {msg.composeMode === 'reply'
+              {composeMode === 'reply'
                 ? t('messages.reply')
-                : msg.composeMode === 'forward'
+                : composeMode === 'forward'
                   ? t('messages.forward')
                   : t('messages.newMessage')}
             </h2>
             <button
-              onClick={() => msg.setIsComposeOpen(false)}
+              onClick={() => setIsComposeOpen(false)}
               className="text-gray-400 hover:text-gray-600"
             >
               <X size={24} />
@@ -322,27 +358,27 @@ const Messages = () => {
               </label>
               <input
                 type="text"
-                value={msg.recipient ? msg.selectedRecipientLabel : msg.recipientSearch}
+                value={recipient ? selectedRecipientLabel : recipientSearch}
                 onChange={(e) => {
-                  msg.setRecipientSearch(e.target.value);
-                  msg.setRecipient('');
-                  msg.setShowRecipientDropdown(true);
+                  setRecipientSearch(e.target.value);
+                  setRecipient('');
+                  setShowRecipientDropdown(true);
                 }}
-                onFocus={() => msg.setShowRecipientDropdown(true)}
+                onFocus={() => setShowRecipientDropdown(true)}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                 placeholder={t('messages.searchRecipientPlaceholder')}
-                disabled={msg.composeMode === 'reply'}
+                disabled={composeMode === 'reply'}
               />
-              {msg.showRecipientDropdown && !msg.recipient && msg.filteredRecipients.length > 0 && (
+              {showRecipientDropdown && !recipient && filteredRecipients.length > 0 && (
                 <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                  {msg.filteredRecipients.map((item) => (
+                  {filteredRecipients.map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => {
-                        msg.setRecipient(item.id);
-                        msg.setRecipientSearch('');
-                        msg.setShowRecipientDropdown(false);
+                        setRecipient(item.id);
+                        setRecipientSearch('');
+                        setShowRecipientDropdown(false);
                       }}
                       className="w-full px-4 py-3 text-left hover:bg-orange-50 dark:hover:bg-slate-600 transition-colors flex items-center gap-2 border-b border-gray-100 dark:border-slate-600 last:border-0"
                     >
@@ -355,8 +391,8 @@ const Messages = () => {
 
             <Input
               label={t('messages.subject')}
-              value={msg.subject}
-              onChange={(e) => msg.setSubject(e.target.value)}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               placeholder={t('messages.subjectPlaceholder')}
             />
 
@@ -365,8 +401,8 @@ const Messages = () => {
                 {t('messages.message')}
               </label>
               <textarea
-                value={msg.content}
-                onChange={(e) => msg.setContent(e.target.value)}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
                 rows={8}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none resize-none"
                 placeholder={t('messages.messagePlaceholder')}
@@ -380,7 +416,7 @@ const Messages = () => {
                   {t('messages.attachments')}
                 </label>
                 <button
-                  onClick={() => msg.fileInputRef.current?.click()}
+                  onClick={() => fileInputRef.current?.click()}
                   className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
                 >
                   <Paperclip size={16} />
@@ -388,15 +424,15 @@ const Messages = () => {
                 </button>
                 <input
                   type="file"
-                  ref={msg.fileInputRef}
-                  onChange={msg.handleFileSelect}
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
                   className="hidden"
                   multiple
                 />
               </div>
-              {msg.attachments.length > 0 && (
+              {attachments.length > 0 && (
                 <div className="space-y-2">
-                  {msg.attachments.map((file, index) => (
+                  {attachments.map((file, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-2 bg-gray-50 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600"
@@ -411,7 +447,7 @@ const Messages = () => {
                         </span>
                       </div>
                       <button
-                        onClick={() => msg.removeAttachment(index)}
+                        onClick={() => removeAttachment(index)}
                         className="text-gray-400 hover:text-red-500 p-1"
                       >
                         <X size={16} />
@@ -423,10 +459,10 @@ const Messages = () => {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button variant="secondary" onClick={() => msg.setIsComposeOpen(false)}>
+              <Button variant="secondary" onClick={() => setIsComposeOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button variant="primary" onClick={msg.handleSendMessage} icon={Send}>
+              <Button variant="primary" onClick={handleSendMessage} icon={Send}>
                 {t('messages.send')}
               </Button>
             </div>

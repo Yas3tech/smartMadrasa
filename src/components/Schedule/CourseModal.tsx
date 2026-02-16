@@ -146,7 +146,7 @@ const CourseModal = ({
       await onSave(courseData);
       toast.success(editingCourse ? t('schedule.courseUpdated') : t('schedule.courseAdded'));
       onClose();
-    } catch (error) {
+    } catch {
       toast.error(t('schedule.courseSaveError'));
     } finally {
       setLoading(false);

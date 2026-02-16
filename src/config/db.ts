@@ -11,7 +11,7 @@ if (isFirebaseConfigured) {
         const app = initializeApp(firebaseConfig);
         db = getFirestore(app);
         storage = getStorage(app);
-    } catch (error) {
+    } catch {
         // Silent fail
     }
 }

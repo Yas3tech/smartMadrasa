@@ -9,7 +9,7 @@ export const checkIfDatabaseEmpty = async (): Promise<boolean> => {
     try {
         const snapshot = await getDocs(collection(db, 'users'));
         return snapshot.empty;
-    } catch (error) {
+    } catch {
         return false;
     }
 };

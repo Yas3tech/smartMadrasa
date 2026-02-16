@@ -54,7 +54,8 @@ const loadSettings = (): UserSettings => {
     if (saved) {
       return { ...defaultSettings, ...JSON.parse(saved) };
     }
-  } catch (e) {
+  } catch {
+    // Ignore malformed stored settings; defaults will be used
   }
   return defaultSettings;
 };
@@ -344,8 +345,8 @@ const Settings = () => {
                   <button
                     onClick={() => handleThemeChange('light')}
                     className={`p-4 rounded-lg border-2 transition-colors ${theme === 'light'
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
-                        : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                       }`}
                   >
                     <Sun className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
@@ -356,8 +357,8 @@ const Settings = () => {
                   <button
                     onClick={() => handleThemeChange('dark')}
                     className={`p-4 rounded-lg border-2 transition-colors ${theme === 'dark'
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
-                        : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                       }`}
                   >
                     <Moon className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
@@ -368,8 +369,8 @@ const Settings = () => {
                   <button
                     onClick={() => handleThemeChange('auto')}
                     className={`p-4 rounded-lg border-2 transition-colors ${theme === 'auto'
-                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
-                        : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                       }`}
                   >
                     <Monitor className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />

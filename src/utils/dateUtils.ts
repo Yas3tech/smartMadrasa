@@ -11,9 +11,9 @@ export const formatFirestoreTimestamp = (value: unknown): unknown => {
     value &&
     typeof value === 'object' &&
     'toDate' in value &&
-    typeof (value as any).toDate === 'function'
+    typeof (value as { toDate: () => Date }).toDate === 'function'
   ) {
-    return (value as any).toDate()?.toISOString() || value;
+    return (value as { toDate: () => Date }).toDate()?.toISOString() || value;
   }
   return value;
 };

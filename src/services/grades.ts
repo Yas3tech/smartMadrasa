@@ -9,8 +9,6 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/db';
-import { normalizeDate } from '../utils/date';
-import { formatFirestoreDate } from '../utils/date';
 import type { Grade } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
 
@@ -35,7 +33,6 @@ export const getGrades = async (studentId?: string): Promise<Grade[]> => {
       ({
         ...doc.data(),
         id: doc.id,
-        date: normalizeDate(doc.data().date),
         date: formatFirestoreTimestamp(doc.data().date),
       }) as Grade
   );
@@ -77,7 +74,6 @@ export const subscribeToGrades = (callback: (grades: Grade[]) => void) => {
         ({
           ...doc.data(),
           id: doc.id,
-          date: normalizeDate(doc.data().date),
           date: formatFirestoreTimestamp(doc.data().date),
         }) as Grade
     );

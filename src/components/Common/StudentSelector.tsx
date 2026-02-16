@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Users, ChevronDown } from 'lucide-react';
@@ -21,11 +21,12 @@ const StudentSelector = ({ onSelect, selectedStudentId }: StudentSelectorProps) 
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Safety check: ensure user is parent
-  if (!user || user.role !== 'parent') return null;
-
-  const parent = user as Parent;
-  const children = parent.children || [];
+  // Compute children array unconditionally (hooks must not be conditional)
+  const children = useMemo(() => {
+    if (!user || user.role !== 'parent') return [];
+    const parent = user as Parent;
+    return parent.children || [];
+  }, [user]);
 
   // Auto-select first child if none selected
   useEffect(() => {
@@ -33,6 +34,9 @@ const StudentSelector = ({ onSelect, selectedStudentId }: StudentSelectorProps) 
       onSelect(children[0]);
     }
   }, [children, selectedStudentId, onSelect]);
+
+  // Safety check: ensure user is parent
+  if (!user || user.role !== 'parent') return null;
 
   if (children.length === 0) return null;
 
@@ -68,9 +72,8 @@ const StudentSelector = ({ onSelect, selectedStudentId }: StudentSelectorProps) 
           {children.map((child) => (
             <div
               key={child.id}
-              className={`p-3 hover:bg-orange-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
-                child.id === selectedStudentId ? 'bg-orange-50 dark:bg-slate-700/50' : ''
-              }`}
+              className={`p-3 hover:bg-orange-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${child.id === selectedStudentId ? 'bg-orange-50 dark:bg-slate-700/50' : ''
+                }`}
               onClick={() => {
                 onSelect(child);
                 setIsOpen(false);

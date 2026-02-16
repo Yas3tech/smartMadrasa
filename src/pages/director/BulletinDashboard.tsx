@@ -95,7 +95,7 @@ const BulletinDashboard: React.FC = () => {
       try {
         await publishPeriodBulletins(selectedPeriod);
         toast.success(t('bulletinDashboard.publishSuccess'));
-      } catch (error) {
+      } catch {
         toast.error(t('bulletinDashboard.publishError'));
       }
     }
@@ -110,7 +110,7 @@ const BulletinDashboard: React.FC = () => {
         await publishPeriodBulletins(selectedPeriod);
 
         toast.success(t('bulletinDashboard.classPublishSuccess'));
-      } catch (error) {
+      } catch {
         toast.error(t('bulletinDashboard.publishError'));
       }
     }

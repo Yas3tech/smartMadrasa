@@ -34,7 +34,7 @@ const Login = () => {
         const { checkIfDatabaseEmpty: check } = await import('../../services/setup');
         const isEmpty = await check();
         setIsDatabaseEmpty(isEmpty);
-      } catch (e) {
+      } catch {
         // Silently fail if firestore is blocked or fails to load
       }
     };
@@ -115,7 +115,7 @@ const Login = () => {
 
     try {
       await signInWithPopup(auth, provider);
-    } catch (err) {
+    } catch {
       setError(t('auth.errors.googleLoginFailed', 'Échec de la connexion avec Google.'));
       setLoading(false);
     }

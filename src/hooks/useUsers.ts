@@ -108,7 +108,7 @@ export function useUsers(): UseUsersReturn {
     setIsModalOpen(true);
   };
 
-    const handleSave = async () => {
+  const handleSave = async () => {
     if (!name || !email) {
       toast.error(t('users.fillRequired'));
       return;
@@ -171,7 +171,7 @@ export function useUsers(): UseUsersReturn {
         } else {
           toast.error(t('users.deleteError'));
         }
-      } catch (error) {
+      } catch {
         toast.error(t('users.deleteError'));
       }
     }
@@ -232,7 +232,7 @@ export function useUsers(): UseUsersReturn {
 
       toast.success(t('users.importSuccess', { count: totalImported }));
       if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch (error) {
+    } catch {
       toast.error(t('users.importError'));
     }
   };

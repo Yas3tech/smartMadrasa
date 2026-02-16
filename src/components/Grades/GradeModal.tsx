@@ -79,7 +79,7 @@ const GradeModal = ({
         feedback: feedback || undefined,
       });
       onClose();
-    } catch (error) {
+    } catch {
       // Error handled by caller
     } finally {
       setLoading(false);

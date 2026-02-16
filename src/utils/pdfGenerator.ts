@@ -89,7 +89,7 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
   const overallAverage =
     courseData.length > 0
       ? courseData.reduce((acc, c) => acc + (c.average || 0), 0) /
-        courseData.filter((c) => c.average !== null).length
+      courseData.filter((c) => c.average !== null).length
       : 0;
 
   // Header
@@ -132,7 +132,7 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
   });
 
   // Footer Stats
-  const finalY = (doc as any).lastAutoTable.finalY + 20;
+  const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
 
   // Overall Average Box
   doc.setFillColor(240, 240, 240);

@@ -109,7 +109,7 @@ const BulkGradeModal = ({
       } else {
         // No grades to save
       }
-    } catch (error) {
+    } catch {
       // Error handled by caller
     } finally {
       setLoading(false);

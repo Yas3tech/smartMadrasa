@@ -52,8 +52,8 @@ describe('useUsers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAuth as any).mockReturnValue({ user: { role: 'director' } });
-    (useData as any).mockReturnValue({
+    vi.mocked(useAuth).mockReturnValue({ user: { role: 'director' } } as ReturnType<typeof useAuth>);
+    vi.mocked(useData).mockReturnValue({
       users: mockUsers,
       addUser: vi.fn(),
       updateUser: vi.fn(),

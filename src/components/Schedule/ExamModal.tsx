@@ -87,7 +87,7 @@ const ExamModal = ({
       await onSave(eventData);
       toast.success(editingEvent ? t('schedule.eventUpdated') : t('schedule.eventAdded'));
       onClose();
-    } catch (error) {
+    } catch {
       toast.error(t('schedule.eventSaveError'));
     } finally {
       setLoading(false);

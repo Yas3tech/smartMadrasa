@@ -24,7 +24,8 @@ const initializeTheme = () => {
         }
       }
     }
-  } catch (e) {
+  } catch {
+    // Ignore malformed stored settings; defaults will be used
   }
 };
 
