@@ -11,7 +11,11 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/db';
+import { normalizeDate } from '../utils/date';
+import { formatFirestoreDate } from '../utils/date';
 import type { Homework, Submission } from '../types';
+import { formatFirestoreTimestamp } from '../utils/dateUtils';
+import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'homeworks';
 const SUBMISSIONS_COLLECTION = 'submissions';
@@ -36,7 +40,8 @@ export const getHomeworks = async (classId?: string): Promise<Homework[]> => {
       ({
         ...doc.data(),
         id: doc.id,
-        dueDate: doc.data().dueDate?.toDate?.()?.toISOString() || doc.data().dueDate,
+        dueDate: normalizeDate(doc.data().dueDate),
+        dueDate: formatFirestoreTimestamp(doc.data().dueDate),
       }) as Homework
   );
 };
@@ -67,7 +72,8 @@ export const subscribeToHomeworks = (callback: (homeworks: Homework[]) => void) 
         ({
           ...doc.data(),
           id: doc.id,
-          dueDate: doc.data().dueDate?.toDate?.()?.toISOString() || doc.data().dueDate,
+          dueDate: normalizeDate(doc.data().dueDate),
+          dueDate: formatFirestoreTimestamp(doc.data().dueDate),
         }) as Homework
     );
     callback(homeworks);
@@ -90,7 +96,8 @@ export const subscribeToHomeworksByClassIds = (
         ({
           ...doc.data(),
           id: doc.id,
-          dueDate: doc.data().dueDate?.toDate?.()?.toISOString() || doc.data().dueDate,
+          dueDate: normalizeDate(doc.data().dueDate),
+          dueDate: formatFirestoreTimestamp(doc.data().dueDate),
         }) as Homework
     );
     // Client-side sort
@@ -110,7 +117,8 @@ export const getSubmissions = async (homeworkId: string): Promise<Submission[]> 
       ({
         ...doc.data(),
         id: doc.id,
-        submittedAt: doc.data().submittedAt?.toDate?.()?.toISOString() || doc.data().submittedAt,
+        submittedAt: normalizeDate(doc.data().submittedAt),
+        submittedAt: formatFirestoreTimestamp(doc.data().submittedAt),
       }) as Submission
   );
 };
@@ -160,7 +168,8 @@ export const subscribeToSubmissions = (
         ({
           ...doc.data(),
           id: doc.id,
-          submittedAt: doc.data().submittedAt?.toDate?.()?.toISOString() || doc.data().submittedAt,
+          submittedAt: normalizeDate(doc.data().submittedAt),
+          submittedAt: formatFirestoreTimestamp(doc.data().submittedAt),
         }) as Submission
     );
     callback(submissions);
