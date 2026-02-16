@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import type {
   User,
@@ -187,11 +187,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       if (user?.role === 'parent') {
         const parentUser = user as Parent;
         const childIds = parentUser.childrenIds || [];
-        // Collect class IDs for all children to fetch relevant Events and Homework
-        // We need to look up children objects to get their classId.
-        // Since user object might not have full children details denormalized,
-        // we might need to rely on 'children' array if populated, or we fetch users.
-        // Assuming 'children' prop is populated on login (denormalized).
         const childrenData = parentUser.children || [];
         const classIds = childrenData.map((c) => c.classId).filter(Boolean);
 
@@ -218,33 +213,47 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         if (classIds.length > 0) {
           unsubEvents = subscribeToEventsByClassIds(classIds, setEvents);
           unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
-          // Subscribe to all courses - filtering by classId is done in Schedule.tsx
           unsubCourses = subscribeToCourses(setCourses);
         }
       } else {
-        // Default / Admin / Teacher behavior (Fetch All)
-        // Note: For students we could also optimize, but prioritization is Parent now.
-        // Teachers might need specific filtering too later.
-        unsubEvents = subscribeToEvents(setEvents);
-        unsubGrades = subscribeToCourseGrades((courseGrades) => {
-          const grades = courseGrades.map((cg) => ({
-            id: cg.id,
-            studentId: cg.studentId,
-            studentName: cg.studentName,
-            subject: cg.courseName || 'Unknown',
-            score: cg.score,
-            maxScore: cg.maxScore,
-            type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
-            date: cg.date,
-            feedback: cg.comment,
-            courseId: cg.courseId,
-            className: undefined,
-          }));
-          setGrades(grades as any);
-        });
-        unsubAttendance = subscribeToAttendance(setAttendance);
-        unsubHomeworks = subscribeToHomeworks(setHomeworks);
-        unsubCourses = subscribeToCourses(setCourses);
+        const setupDefaultSubs = () => {
+          unsubGrades = subscribeToCourseGrades((courseGrades) => {
+            const grades = courseGrades.map((cg) => ({
+              id: cg.id,
+              studentId: cg.studentId,
+              studentName: cg.studentName,
+              subject: cg.courseName || 'Unknown',
+              score: cg.score,
+              maxScore: cg.maxScore,
+              type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
+              date: cg.date,
+              feedback: cg.comment,
+              courseId: cg.courseId,
+              className: undefined,
+            }));
+            setGrades(grades as any);
+          });
+          unsubAttendance = subscribeToAttendance(setAttendance);
+          unsubHomeworks = subscribeToHomeworks(setHomeworks);
+          unsubCourses = subscribeToCourses(setCourses);
+        };
+
+        if (user?.role === 'student') {
+          const student = user as Student;
+          unsubEvents = student.classId
+            ? subscribeToEvents(setEvents, [student.classId])
+            : () => { };
+          setupDefaultSubs();
+        } else if (user?.role === 'teacher') {
+          const teacher = user as Teacher;
+          unsubEvents =
+            teacher.classIds?.length > 0 ? subscribeToEvents(setEvents, teacher.classIds) : () => { };
+          setupDefaultSubs();
+        } else {
+          // Default / Admin / Director behavior (Fetch All)
+          unsubEvents = subscribeToEvents(setEvents);
+          setupDefaultSubs();
+        }
       }
 
       // Role-based subscriptions could be added here if needed
@@ -484,7 +493,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const students = users.filter((u): u is Student => u.role === 'student');
+  const students = useMemo(
+    () => users.filter((u): u is Student => u.role === 'student'),
+    [users]
+  );
 
   // Bulletin CRUD operations (mock implementation for now, will be enhanced later)
   const addAcademicPeriod = async (period: Omit<AcademicPeriod, 'id'>) => {
