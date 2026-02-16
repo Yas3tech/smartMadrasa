@@ -66,40 +66,10 @@ export function useDashboard(): UseDashboardReturn {
   }, [parentChildren, effectiveSelectedChildId]);
 
   // Memoized General Stats Calculations
-  const teachers = useMemo(() => users.filter((u) => u.role === 'teacher'), [users]);
+  const teachers = useMemo(() => users.filter((u): u is Teacher => u.role === 'teacher'), [users]);
 
   const { presentCount, attendanceRate } = useMemo(() => {
     const todayDate = new Date().toISOString().split('T')[0];
-    const todayAttendance = attendance.filter((a) => a.date === todayDate);
-  // Parent children
-  const parentChildren = useMemo(() =>
-    user?.role === 'parent' ? students.filter((s) => s.parentId === user.id) : [],
-    [user?.role, user?.id, students]
-  );
-
-
-  const effectiveSelectedChildId =
-    selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
-  const selectedChild = useMemo(() =>
-    parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
-    (parentChildren.length > 0 ? parentChildren[0] : null),
-  [parentChildren, effectiveSelectedChildId]);
-    [user?.role, user?.id, students]
-  );
-
-  const selectedChild = useMemo(() =>
-    parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
-    (parentChildren.length > 0 ? parentChildren[0] : null),
-    [parentChildren, effectiveSelectedChildId]
-  );
-
-  // General Stats Calculations
-  const teachers = users.filter((u): u is Teacher => u.role === 'teacher');
-  const teachers = useMemo(() => users.filter((u) => u.role === 'teacher'), [users]);
-
-  const todayDate = new Date().toISOString().split('T')[0];
-
-  const { presentCount, attendanceRate } = useMemo(() => {
     const todayAttendance = attendance.filter((a) => a.date === todayDate);
     const count = todayAttendance.filter((a) => a.status === 'present').length;
     const rate = students.length > 0 ? ((count / students.length) * 100).toFixed(0) : 0;

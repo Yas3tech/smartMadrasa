@@ -1,6 +1,6 @@
-import { normalizeDate } from './date';
-import { Timestamp } from 'firebase/firestore';
 import { describe, it, expect } from 'vitest';
+import { normalizeDate, formatFirestoreDate, formatFirestoreTimestamp } from './date';
+import { Timestamp } from 'firebase/firestore';
 
 describe('normalizeDate', () => {
   it('should return ISO string for Firestore Timestamp', () => {
@@ -33,8 +33,8 @@ describe('normalizeDate', () => {
   it('should return original value if input is number', () => {
     const num = 123456789;
     expect(normalizeDate(num)).toBe(num);
-import { describe, it, expect } from 'vitest';
-import { formatFirestoreDate } from './date';
+  });
+});
 
 describe('formatFirestoreDate', () => {
   it('should format Firestore Timestamp to ISO string', () => {
@@ -60,7 +60,8 @@ describe('formatFirestoreDate', () => {
   it('should handle complex object without toDate as original', () => {
       const obj = { some: 'value' };
       expect(formatFirestoreDate(obj)).toBe(obj);
-import { formatFirestoreTimestamp } from './date';
+  });
+});
 
 describe('formatFirestoreTimestamp', () => {
   it('should format a Firestore Timestamp-like object', () => {
