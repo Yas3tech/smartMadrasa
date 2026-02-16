@@ -32,6 +32,9 @@ interface DirectorDashboardProps {
   weeklyAttendanceData: { name: string; présents: number; absents: number }[];
   gradeDistributionData: { name: string; value: number; color: string }[];
   subjectPerformanceData: { subject: string; moyenne: number }[];
+  weeklyAttendanceData: any[];
+  gradeDistributionData: any[];
+  subjectPerformanceData: any[];
 }
 
 export function DirectorDashboard({
