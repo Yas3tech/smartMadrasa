@@ -17,3 +17,8 @@
 **Vulnerability:** User documents allowed unrestricted updates by the owner (`allow update: if isOwner(userId)`). This allowed users to modify critical fields like `role`, leading to privilege escalation (e.g., student becoming superadmin).
 **Learning:** Checking ownership is not enough for `update` operations on sensitive documents. Always validate *what* is being updated.
 **Prevention:** Use `request.resource.data.diff(resource.data).affectedKeys().hasOnly(['safe_field1', 'safe_field2'])` to whitelist modifiable fields.
+
+## 2025-02-21 - Decoupled Security Verification
+**Vulnerability:** The `firestore.rules` file contained critical syntax errors (duplicate match blocks) rendering it invalid, yet the `npm run verify-rules` script passed successfully because it mocked the logic in JS rather than testing the actual rules file.
+**Learning:** Mock-based verification scripts can give a false sense of security if they don't validate the actual configuration file's integrity.
+**Prevention:** Ensure verification pipelines include a step to parse/compile the actual `firestore.rules` file (e.g., using firebase-tools or a parser) in addition to logic tests.
