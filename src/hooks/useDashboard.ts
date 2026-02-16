@@ -35,7 +35,6 @@ export interface UseDashboardReturn {
   pendingHomeworks: Homework[];
   childClass?: { name: string };
 
-  // Chart data generators
   // Chart data
   weeklyAttendanceData: { name: string; présents: number; absents: number }[];
   gradeDistributionData: { name: string; value: number; color: string }[];
@@ -72,53 +71,10 @@ export function useDashboard(): UseDashboardReturn {
   const { presentCount, attendanceRate } = useMemo(() => {
     const todayDate = new Date().toISOString().split('T')[0];
     const todayAttendance = attendance.filter((a) => a.date === todayDate);
-  // Parent children
-  const parentChildren = useMemo(() =>
-    user?.role === 'parent' ? students.filter((s) => s.parentId === user.id) : [],
-    [user?.role, user?.id, students]
-  );
-
-
-  const effectiveSelectedChildId =
-    selectedChildId || (parentChildren.length > 0 ? parentChildren[0].id : null);
-  const selectedChild = useMemo(() =>
-    parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
-    (parentChildren.length > 0 ? parentChildren[0] : null),
-  [parentChildren, effectiveSelectedChildId]);
-    [user?.role, user?.id, students]
-  );
-
-  const selectedChild = useMemo(() =>
-    parentChildren.find((c) => c.id === effectiveSelectedChildId) ||
-    (parentChildren.length > 0 ? parentChildren[0] : null),
-    [parentChildren, effectiveSelectedChildId]
-  );
-
-  // General Stats Calculations
-  const teachers = useMemo(() => users.filter((u) => u.role === 'teacher'), [users]);
-
-  const todayDate = new Date().toISOString().split('T')[0];
-
-  const { presentCount, attendanceRate } = useMemo(() => {
-    const todayAttendance = attendance.filter((a) => a.date === todayDate);
     const count = todayAttendance.filter((a) => a.status === 'present').length;
     const rate = students.length > 0 ? ((count / students.length) * 100).toFixed(0) : 0;
     return { presentCount: count, attendanceRate: rate };
-  }, [attendance, students.length, todayDate]);
-    const presentCount = todayAttendance.filter((a) => a.status === 'present').length;
-    const attendanceRate =
-      students.length > 0 ? ((presentCount / students.length) * 100).toFixed(0) : 0;
-    return { presentCount, attendanceRate };
-  }, [attendance, students, todayDate]);
-
-  const allGrades = useMemo(() => grades.filter((g) => g.score > 0), [grades]);
-  const { presentCount, attendanceRate } = useMemo(() => {
-    const todayDate = new Date().toISOString().split('T')[0];
-    const todayAttendance = attendance.filter((a) => a.date === todayDate);
-    const count = todayAttendance.filter((a) => a.status === 'present').length;
-    const rate = students.length > 0 ? ((count / students.length) * 100).toFixed(0) : 0;
-    return { presentCount: count, attendanceRate: rate };
-  }, [attendance, students.length]);
+  }, [attendance, students]);
 
   const allGrades = useMemo(() => grades.filter((g) => g.score > 0), [grades]);
 
@@ -141,59 +97,17 @@ export function useDashboard(): UseDashboardReturn {
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
       .slice(0, 3);
   }, [events]);
-  const avgGrade = useMemo(() =>
-    allGrades.length > 0
-      ? (
-          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
-        ).toFixed(1)
-      : 0
-  , [allGrades]);
-
-  const unreadMessages = useMemo(() => messages.filter((m) => m.receiverId === user?.id && !m.read).length, [messages, user]);
-
-  const upcomingEvents = useMemo(() => events
-    .filter((e) => new Date(e.start) >= new Date())
-    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-    .slice(0, 3)
-  , [events]);
-      : 0,
-    [allGrades]
-  );
-
-  const unreadMessages = useMemo(() =>
-    messages.filter((m) => m.receiverId === user?.id && !m.read).length,
-    [messages, user?.id]
-  );
-
-  const upcomingEvents = useMemo(() =>
-    events
-      .filter((e) => new Date(e.start) >= new Date())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-      .slice(0, 3),
-    [events]
-  );
 
   // Memoized Student Specific Calculations
   const targetStudentId = user?.role === 'parent' && selectedChild ? selectedChild.id : user?.id;
 
-  const targetClassId = useMemo(() =>
-  const targetClassId =
-    user?.role === 'parent' && selectedChild
+  const targetClassId = useMemo(() => {
+    return user?.role === 'parent' && selectedChild
       ? (selectedChild as any).classId
-      : (user as any)?.classId,
-    [user, selectedChild]
-  );
+      : (user as any)?.classId;
+  }, [user, selectedChild]);
 
   const myGrades = useMemo(() => grades.filter((g) => g.studentId === targetStudentId), [grades, targetStudentId]);
-  const myGrades = useMemo(() =>
-    grades.filter((g) => g.studentId === targetStudentId),
-    [grades, targetStudentId]
-  );
-
-  const myGrades = useMemo(
-    () => grades.filter((g) => g.studentId === targetStudentId),
-    [grades, targetStudentId]
-  );
 
   const myAvg = useMemo(() => {
     return myGrades.length > 0
@@ -202,19 +116,10 @@ export function useDashboard(): UseDashboardReturn {
         ).toFixed(1)
       : 0;
   }, [myGrades]);
-  const myAvg = useMemo(() =>
-    myGrades.length > 0
-      ? (
-          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
-        ).toFixed(1)
-      : 0
-  , [myGrades]);
-      : 0,
-    [myGrades]
-  );
 
   const mySubjectPerformance = useMemo(() => {
-    return [...new Set(myGrades.map((g) => g.subject))].map((subject) => {
+    const subjects = [...new Set(myGrades.map((g) => g.subject))];
+    return subjects.map((subject) => {
       const subjectGrades = myGrades.filter((g) => g.subject === subject);
       const avg =
         subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) /
@@ -228,18 +133,6 @@ export function useDashboard(): UseDashboardReturn {
 
   const pendingHomeworks = useMemo(() => {
     return homeworks
-  const pendingHomeworks = useMemo(() => homeworks
-    .filter((hw) => {
-      if (hw.classId !== targetClassId) return false;
-      return new Date(hw.dueDate) >= new Date();
-    })
-    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-    .slice(0, 5)
-  , [homeworks, targetClassId]);
-
-  const childClass = useMemo(() => classes.find((c) => c.id === targetClassId), [classes, targetClassId]);
-  const pendingHomeworks = useMemo(() =>
-    homeworks
       .filter((hw) => {
         if (hw.classId !== targetClassId) return false;
         return new Date(hw.dueDate) >= new Date();
@@ -248,17 +141,7 @@ export function useDashboard(): UseDashboardReturn {
       .slice(0, 5);
   }, [homeworks, targetClassId]);
 
-  const childClass = useMemo(
-    () => classes.find((c) => c.id === targetClassId),
-      .slice(0, 5),
-    [homeworks, targetClassId]
-  );
-
   const childClass = useMemo(() => classes.find((c) => c.id === targetClassId), [classes, targetClassId]);
-  const childClass = useMemo(() =>
-    classes.find((c) => c.id === targetClassId),
-    [classes, targetClassId]
-  );
 
   // Handlers
   const handleOpenHomework = useCallback((homework: Homework) => {
@@ -268,9 +151,7 @@ export function useDashboard(): UseDashboardReturn {
 
   // Memoized Chart data generators
   const weeklyAttendanceData = useMemo(() => {
-  // Chart data generators
-  const weeklyAttendanceData = useMemo(() => {
-    const today = new Date(todayDate);
+    const today = new Date();
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date(today);
       date.setDate(today.getDate() - (6 - i));
@@ -287,7 +168,6 @@ export function useDashboard(): UseDashboardReturn {
         absents: absent,
       };
     });
-  }, [attendance, todayDate]); // Depends on todayDate so it refreshes daily
   }, [attendance]);
 
   const gradeDistributionData = useMemo(() => {
@@ -321,11 +201,6 @@ export function useDashboard(): UseDashboardReturn {
     });
   }, [grades]);
 
-  // Helper functions returning memoized data
-  const getWeeklyAttendanceData = () => weeklyAttendanceData;
-  const getGradeDistributionData = () => gradeDistributionData;
-  const getSubjectPerformanceData = () => subjectPerformanceData;
-
   return {
     selectedChildId,
     setSelectedChildId,
@@ -353,8 +228,5 @@ export function useDashboard(): UseDashboardReturn {
     weeklyAttendanceData,
     gradeDistributionData,
     subjectPerformanceData,
-    getWeeklyAttendanceData,
-    getGradeDistributionData,
-    getSubjectPerformanceData,
   };
 }
