@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Event } from '../types';
+import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'events';
 
@@ -24,8 +25,8 @@ export const getEvents = async (): Promise<Event[]> => {
       ({
         ...doc.data(),
         id: doc.id,
-        start: doc.data().start?.toDate?.()?.toISOString() || doc.data().start,
-        end: doc.data().end?.toDate?.()?.toISOString() || doc.data().end,
+        start: formatFirestoreTimestamp(doc.data().start),
+        end: formatFirestoreTimestamp(doc.data().end),
       }) as Event
   );
 };
@@ -87,8 +88,8 @@ export const subscribeToEvents = (
         ({
           ...doc.data(),
           id: doc.id,
-          start: doc.data().start?.toDate?.()?.toISOString() || doc.data().start,
-          end: doc.data().end?.toDate?.()?.toISOString() || doc.data().end,
+          start: formatFirestoreTimestamp(doc.data().start),
+          end: formatFirestoreTimestamp(doc.data().end),
         }) as Event
     );
 
@@ -103,6 +104,22 @@ export const subscribeToEventsByClassIds = (
   classIds: string[],
   callback: (events: Event[]) => void
 ) => {
+  if (!db || classIds.length === 0) return () => { };
+
+  const q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
+
+  return onSnapshot(q, (snapshot) => {
+    const events = snapshot.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          id: doc.id,
+          start: formatFirestoreTimestamp(doc.data().start),
+          end: formatFirestoreTimestamp(doc.data().end),
+        }) as Event
+    );
+    callback(events);
+  });
   if (!classIds || classIds.length === 0) return () => { };
   return subscribeToEvents(callback, classIds);
 };
