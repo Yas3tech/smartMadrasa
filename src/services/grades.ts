@@ -15,7 +15,20 @@ import { formatFirestoreTimestamp } from '../utils/date';
 const COLLECTION_NAME = 'grades';
 const USERS_COLLECTION = 'users';
 
+/**
+ * @deprecated This service is deprecated in favor of src/services/courseGrades.ts
+ * The new system uses a root 'courseGrades' collection instead of subcollections.
+ */
+const logDeprecationWarning = () => {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(
+      'Using deprecated grades service. Please migrate to courseGrades service.'
+    );
+  }
+};
+
 export const getGrades = async (studentId?: string): Promise<Grade[]> => {
+  logDeprecationWarning();
   if (!db) return [];
 
   let q;
@@ -39,6 +52,7 @@ export const getGrades = async (studentId?: string): Promise<Grade[]> => {
 };
 
 export const createGrade = async (studentId: string, grade: Omit<Grade, 'id'>): Promise<string> => {
+  logDeprecationWarning();
   if (!db) throw new Error('Firebase not configured');
   // Add to users/{studentId}/grades
   const docRef = await addDoc(collection(db, USERS_COLLECTION, studentId, COLLECTION_NAME), {
@@ -53,6 +67,7 @@ export const updateGrade = async (
   gradeId: string,
   updates: Partial<Grade>
 ): Promise<void> => {
+  logDeprecationWarning();
   if (!db) throw new Error('Firebase not configured');
   const docRef = doc(db, USERS_COLLECTION, studentId, COLLECTION_NAME, gradeId);
   type GradeUpdate = Partial<Omit<Grade, 'date'> & { date: string | Timestamp }>;
@@ -66,6 +81,7 @@ export const updateGrade = async (
 };
 
 export const subscribeToGrades = (callback: (grades: Grade[]) => void) => {
+  logDeprecationWarning();
   if (!db) return () => { };
   // Use collectionGroup to listen to ALL grades across all users
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
