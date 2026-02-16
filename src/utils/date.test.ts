@@ -1,6 +1,6 @@
+import { describe, it, expect } from 'vitest';
 import { normalizeDate, formatFirestoreDate, formatFirestoreTimestamp } from './date';
 import { Timestamp } from 'firebase/firestore';
-import { describe, it, expect } from 'vitest';
 
 describe('normalizeDate', () => {
   it('should return ISO string for Firestore Timestamp', () => {
@@ -85,7 +85,7 @@ describe('formatFirestoreTimestamp', () => {
   });
 
   it('should handle objects without toDate method', () => {
-      const obj = { foo: 'bar' };
-      expect(formatFirestoreTimestamp(obj)).toBe(obj);
+    const obj = { foo: 'bar' };
+    expect(formatFirestoreTimestamp(obj)).toBe(obj);
   });
 });
