@@ -195,6 +195,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
 
       // Role-based subscriptions
+      let unsubClasses = () => { };
       let unsubGrades = () => { };
       let unsubAttendance = () => { };
       let unsubEvents = () => { };
@@ -206,6 +207,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const childIds = parentUser.childrenIds || [];
         const childrenData = parentUser.children || [];
         const classIds = childrenData.map((c) => c.classId).filter(Boolean);
+
+        unsubClasses = subscribeToClasses(setClasses, classIds);
 
         if (childIds.length > 0) {
           unsubGrades = subscribeToCourseGradesByStudentIds(childIds, (courseGrades) => {
@@ -257,17 +260,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
         if (user?.role === 'student') {
           const student = user as Student;
+          unsubClasses = subscribeToClasses(setClasses, student.classId ? [student.classId] : []);
           unsubEvents = student.classId
             ? subscribeToEvents(setEvents, [student.classId])
             : () => { };
           setupDefaultSubs();
         } else if (user?.role === 'teacher') {
           const teacher = user as Teacher;
+          unsubClasses = subscribeToClasses(setClasses, teacher.classIds || []);
           unsubEvents =
             teacher.classIds?.length > 0 ? subscribeToEvents(setEvents, teacher.classIds) : () => { };
           setupDefaultSubs();
         } else {
           // Default / Admin / Director behavior (Fetch All)
+          unsubClasses = subscribeToClasses(setClasses);
           unsubEvents = subscribeToEvents(setEvents);
           setupDefaultSubs();
         }

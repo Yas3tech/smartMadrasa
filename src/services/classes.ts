@@ -6,6 +6,9 @@ import {
   updateDoc,
   deleteDoc,
   onSnapshot,
+  query,
+  where,
+  documentId,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { ClassGroup } from '../types';
@@ -35,8 +38,25 @@ export const deleteClass = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
 
-export const subscribeToClasses = (callback: (classes: ClassGroup[]) => void) => {
+export const subscribeToClasses = (
+  callback: (classes: ClassGroup[]) => void,
+  classIds?: string[]
+) => {
   if (!db) return () => { };
+
+  if (classIds) {
+    if (classIds.length === 0) {
+      callback([]);
+      return () => { };
+    }
+
+    const q = query(collection(db, COLLECTION_NAME), where(documentId(), 'in', classIds));
+    return onSnapshot(q, (snapshot) => {
+      const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
+      callback(classes);
+    });
+  }
+
   return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
     const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
     callback(classes);
