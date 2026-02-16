@@ -110,7 +110,13 @@ service cloud.firestore {
         resource.data.receiverId == request.auth.uid ||
         resource.data.receiverId == 'all' // Public announcements
       );
-      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid &&
+        (
+          request.resource.data.receiverId != 'all' ||
+          isDirector() ||
+          isSuperAdmin()
+        );
       allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
     }
     
