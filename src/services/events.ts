@@ -9,10 +9,14 @@ import {
   onSnapshot,
   query,
   where,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import { normalizeDate } from '../utils/date';
+import { formatFirestoreDate } from '../utils/date';
 import type { Event } from '../types';
+import { formatFirestoreTimestamp } from '../utils/dateUtils';
+import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'events';
 
@@ -26,6 +30,8 @@ export const getEvents = async (): Promise<Event[]> => {
         id: doc.id,
         start: normalizeDate(doc.data().start),
         end: normalizeDate(doc.data().end),
+        start: formatFirestoreTimestamp(doc.data().start),
+        end: formatFirestoreTimestamp(doc.data().end),
       }) as Event
   );
 };
@@ -60,9 +66,28 @@ export const deleteEvent = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
 
-export const subscribeToEvents = (callback: (events: Event[]) => void) => {
+export const subscribeToEvents = (
+  callback: (events: Event[]) => void,
+  classIds?: string[]
+) => {
   if (!db) return () => { };
-  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+
+  let q;
+  if (classIds) {
+    // If classIds is provided but empty, we return an empty subscription
+    if (classIds.length === 0) {
+      callback([]);
+      return () => { };
+    }
+    // Note: If we use 'in' filter and orderBy on a different field, we may need a composite index.
+    // To ensure compatibility, we'll sort client-side after fetching.
+    q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
+  } else {
+    // No filter provided: fetch all events
+    q = query(collection(db, COLLECTION_NAME), orderBy('start', 'asc'));
+  }
+
+  return onSnapshot(q, (snapshot) => {
     const events = snapshot.docs.map(
       (doc) =>
         ({
@@ -70,8 +95,14 @@ export const subscribeToEvents = (callback: (events: Event[]) => void) => {
           id: doc.id,
           start: normalizeDate(doc.data().start),
           end: normalizeDate(doc.data().end),
+          start: formatFirestoreTimestamp(doc.data().start),
+          end: formatFirestoreTimestamp(doc.data().end),
         }) as Event
     );
+
+    // Ensure events are always sorted by start date
+    events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
     callback(events);
   });
 };
@@ -92,8 +123,12 @@ export const subscribeToEventsByClassIds = (
           id: doc.id,
           start: normalizeDate(doc.data().start),
           end: normalizeDate(doc.data().end),
+          start: formatFirestoreTimestamp(doc.data().start),
+          end: formatFirestoreTimestamp(doc.data().end),
         }) as Event
     );
     callback(events);
   });
+  if (!classIds || classIds.length === 0) return () => { };
+  return subscribeToEvents(callback, classIds);
 };

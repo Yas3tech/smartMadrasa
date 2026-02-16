@@ -22,21 +22,35 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import type { Student, Teacher } from '../../types';
 
 interface DirectorDashboardProps {
-  students: any[];
-  teachers: any[];
+  students: Student[];
+  teachers: Teacher[];
   attendanceRate: string | number;
   avgGrade: string | number;
-  getWeeklyAttendanceData: () => any[];
-  getGradeDistributionData: () => any[];
-  getSubjectPerformanceData: () => any[];
+  getWeeklyAttendanceData: () => { name: string; présents: number; absents: number }[];
+  getGradeDistributionData: () => { name: string; value: number; color: string }[];
+  getSubjectPerformanceData: () => { subject: string; moyenne: number }[];
+import type { User } from '../../types';
+
+interface DirectorDashboardProps {
+  students: User[];
+  teachers: User[];
+  attendanceRate: string | number;
+  avgGrade: string | number;
+  weeklyAttendanceData: { name: string; présents: number; absents: number }[];
+  gradeDistributionData: { name: string; value: number; color: string }[];
+  subjectPerformanceData: { subject: string; moyenne: number }[];
+  weeklyAttendanceData: any[];
+  gradeDistributionData: any[];
+  subjectPerformanceData: any[];
 }
 
 export function DirectorDashboard({
   students,
   teachers,
-  getWeeklyAttendanceData,
+  weeklyAttendanceData,
 }: DirectorDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -115,7 +129,7 @@ export function DirectorDashboard({
             <p className="text-sm text-gray-500">{t('dashboard.charts.attendanceTrends')}</p>
           </div>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={getWeeklyAttendanceData()}>
+            <LineChart data={weeklyAttendanceData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
               <YAxis stroke="#6b7280" fontSize={12} />

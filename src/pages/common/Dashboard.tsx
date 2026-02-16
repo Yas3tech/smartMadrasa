@@ -43,11 +43,12 @@ const Dashboard = () => {
         <DirectorDashboard
           students={dash.students}
           teachers={dash.teachers}
+          weeklyAttendanceData={dash.weeklyAttendanceData}
           attendanceRate={dash.attendanceRate}
           avgGrade={dash.avgGrade}
-          getWeeklyAttendanceData={dash.getWeeklyAttendanceData}
-          getGradeDistributionData={dash.getGradeDistributionData}
-          getSubjectPerformanceData={dash.getSubjectPerformanceData}
+          weeklyAttendanceData={dash.weeklyAttendanceData}
+          gradeDistributionData={dash.gradeDistributionData}
+          subjectPerformanceData={dash.subjectPerformanceData}
         />
       )}
 
