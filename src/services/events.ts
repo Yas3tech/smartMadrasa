@@ -12,11 +12,8 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from '../config/db';
-import { normalizeDate } from '../utils/date';
-import { formatFirestoreDate } from '../utils/date';
 import type { Event } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
-import { formatFirestoreTimestamp } from '../utils/date';
 
 const COLLECTION_NAME = 'events';
 
@@ -28,8 +25,6 @@ export const getEvents = async (): Promise<Event[]> => {
       ({
         ...doc.data(),
         id: doc.id,
-        start: normalizeDate(doc.data().start),
-        end: normalizeDate(doc.data().end),
         start: formatFirestoreTimestamp(doc.data().start),
         end: formatFirestoreTimestamp(doc.data().end),
       }) as Event
@@ -102,8 +97,6 @@ export const subscribeToEvents = (
         ({
           ...doc.data(),
           id: doc.id,
-          start: normalizeDate(doc.data().start),
-          end: normalizeDate(doc.data().end),
           start: formatFirestoreTimestamp(doc.data().start),
           end: formatFirestoreTimestamp(doc.data().end),
         }) as Event
@@ -130,14 +123,10 @@ export const subscribeToEventsByClassIds = (
         ({
           ...doc.data(),
           id: doc.id,
-          start: normalizeDate(doc.data().start),
-          end: normalizeDate(doc.data().end),
           start: formatFirestoreTimestamp(doc.data().start),
           end: formatFirestoreTimestamp(doc.data().end),
         }) as Event
     );
     callback(events);
   });
-  if (!classIds || classIds.length === 0) return () => { };
-  return subscribeToEvents(callback, classIds);
 };
