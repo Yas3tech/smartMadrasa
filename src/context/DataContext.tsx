@@ -78,7 +78,7 @@ import {
   deleteGradeCategory as fbDeleteGradeCategory,
 } from '../services/gradeCategories';
 
-import type { AcademicPeriod, GradeCategory } from '../types/bulletin';
+import type { AcademicPeriod, GradeCategory, CourseGrade } from '../types/bulletin';
 
 interface DataContextType {
   // State
@@ -419,7 +419,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const updateGrade = async (id: string, updates: Partial<Grade>) => {
     if (useFirebase) {
       // Convert updates to CourseGrade format
-      const courseGradeUpdates: any = {};
+      const courseGradeUpdates: Partial<CourseGrade> = {};
       if (updates.score !== undefined) courseGradeUpdates.score = updates.score;
       if (updates.maxScore !== undefined) courseGradeUpdates.maxScore = updates.maxScore;
       if (updates.feedback !== undefined) courseGradeUpdates.comment = updates.feedback;
