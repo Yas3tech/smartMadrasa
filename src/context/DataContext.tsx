@@ -170,7 +170,24 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
 
       // Subscribe to Firebase collections
-      const unsubUsers = subscribeToUsers(setUsers);
+      let unsubUsers = () => { };
+
+      if (user?.role === 'student') {
+        const student = user as Student;
+        // Optimization: For students, only fetch:
+        // 1. Classmates (students in the same class)
+        // 2. Staff (teachers, directors, admins)
+        // This avoids fetching students from all other classes and all parents.
+        unsubUsers = subscribeToUsers(setUsers, [
+          ...(student.classId ? [{ classId: student.classId }] : []),
+          { role: ['teacher', 'director', 'superadmin'] },
+        ]);
+      } else {
+        // Default behavior: Fetch all users
+        // TODO: Optimize for teachers (fetch only their students + parents + staff)
+        unsubUsers = subscribeToUsers(setUsers);
+      }
+
       const unsubClasses = subscribeToClasses(setClasses);
       const unsubMessages = subscribeToMessages(setMessages);
       // Subscribe to bulletin system collections
