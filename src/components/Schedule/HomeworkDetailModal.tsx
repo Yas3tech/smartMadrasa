@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Modal, Button, Badge } from '../UI';
 import { X, Calendar, User, FileText, BookOpen } from 'lucide-react';
 import type { Homework } from '../../types';
@@ -9,11 +10,13 @@ interface HomeworkDetailModalProps {
 }
 
 const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalProps) => {
+  const { t, i18n } = useTranslation();
+
   if (!homework) return null;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR', {
+    return date.toLocaleDateString(i18n.language, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -49,7 +52,7 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="text-gray-400" size={18} />
             <div>
-              <p className="text-gray-500">Date limite</p>
+              <p className="text-gray-500">{t('homework.dueDate')}</p>
               <p className={`font-medium ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
                 {formatDate(homework.dueDate)}
               </p>
@@ -58,7 +61,7 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
           <div className="flex items-center gap-2 text-sm">
             <User className="text-gray-400" size={18} />
             <div>
-              <p className="text-gray-500">Assigné par</p>
+              <p className="text-gray-500">{t('homework.assignedBy')}</p>
               <p className="font-medium text-gray-900">{homework.assignedBy}</p>
             </div>
           </div>
@@ -66,17 +69,21 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
 
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {homework.maxGrade && <Badge variant="info">Note maximale: {homework.maxGrade}</Badge>}
-          {homework.allowOnlineSubmission && (
-            <Badge variant="success">Rendu en ligne autorisé</Badge>
+          {homework.maxGrade && (
+            <Badge variant="info">
+              {t('homework.maxGrade')}: {homework.maxGrade}
+            </Badge>
           )}
-          {isOverdue && <Badge variant="error">En retard</Badge>}
+          {homework.allowOnlineSubmission && (
+            <Badge variant="success">{t('homework.allowOnlineSubmission')}</Badge>
+          )}
+          {isOverdue && <Badge variant="error">{t('homework.overdue')}</Badge>}
         </div>
 
         {/* Description */}
         {homework.description && (
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('homework.description')}</h3>
             <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
               {homework.description}
             </p>
@@ -86,7 +93,7 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
         {/* Attachments */}
         {homework.attachments && homework.attachments.length > 0 && (
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-2">Pièces jointes</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('homework.attachedFiles')}</h3>
             <div className="space-y-2">
               {homework.attachments.map((url, index) => (
                 <a
@@ -97,7 +104,9 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
                   className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <FileText size={16} className="text-blue-600" />
-                  <span className="text-sm text-blue-700">Fichier {index + 1}</span>
+                  <span className="text-sm text-blue-700">
+                    {t('common.file')} {index + 1}
+                  </span>
                 </a>
               ))}
             </div>
@@ -107,7 +116,7 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
         {/* Footer */}
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="secondary" onClick={onClose}>
-            Fermer
+            {t('common.close')}
           </Button>
         </div>
       </div>

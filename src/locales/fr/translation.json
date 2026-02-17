@@ -38,6 +38,7 @@
     "date": "Date",
     "student": "Élève",
     "description": "Description",
+    "file": "Fichier",
     "close": "Fermer",
     "saving": "Enregistrement...",
     "optional": "Optionnel",
