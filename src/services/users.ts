@@ -198,11 +198,12 @@ export const subscribeToUsers = (
   callback: (users: User[]) => void,
   queries: UserQueryFilters[] = []
 ) => {
-  if (!db) return () => { };
+  const firestore = db;
+  if (!firestore) return () => { };
 
   // If no queries provided, fallback to default (fetch all)
   if (!queries || queries.length === 0) {
-    return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+    return onSnapshot(collection(firestore, COLLECTION_NAME), (snapshot) => {
       callback(mapQuerySnapshot<User>(snapshot));
     });
   }
@@ -212,7 +213,7 @@ export const subscribeToUsers = (
   const results = new Map<number, User[]>(); // Map query index to results
 
   queries.forEach((filter, index) => {
-    let q = query(collection(db, COLLECTION_NAME));
+    let q = query(collection(firestore, COLLECTION_NAME));
 
     if (filter.role) {
       const roles = Array.isArray(filter.role) ? filter.role : [filter.role];

@@ -10,8 +10,8 @@ import {
   query,
   where,
   orderBy,
-  DocumentData,
 } from 'firebase/firestore';
+import type { DocumentData } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Event } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
@@ -21,8 +21,8 @@ const COLLECTION_NAME = 'events';
 
 // Helper for transforming timestamps
 const transformEvent = (data: DocumentData): Partial<Event> => ({
-  start: formatFirestoreTimestamp(data.start),
-  end: formatFirestoreTimestamp(data.end),
+  start: formatFirestoreTimestamp(data.start) as string,
+  end: formatFirestoreTimestamp(data.end) as string,
 });
 
 export const getEvents = async (): Promise<Event[]> => {

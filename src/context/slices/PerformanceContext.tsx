@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback, t
 import { useAuth } from '../AuthContext';
 import { useUsers } from './UserContext';
 import { useAcademics } from './AcademicContext';
-import type { Grade, Attendance, Homework, Parent, Student, Teacher } from '../../types';
+import type { Grade, Attendance, Homework, Parent } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {

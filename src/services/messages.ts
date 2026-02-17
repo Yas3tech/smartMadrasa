@@ -10,8 +10,8 @@ import {
   Timestamp,
   onSnapshot,
   or,
-  DocumentData,
 } from 'firebase/firestore';
+import type { DocumentData } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Message } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
@@ -21,7 +21,7 @@ const COLLECTION_NAME = 'messages';
 
 // Helper for transforming message timestamps
 const transformMessage = (data: DocumentData): Partial<Message> => ({
-  timestamp: formatFirestoreTimestamp(data.timestamp),
+  timestamp: formatFirestoreTimestamp(data.timestamp) as string,
 });
 
 export const getMessages = async (userId?: string): Promise<Message[]> => {

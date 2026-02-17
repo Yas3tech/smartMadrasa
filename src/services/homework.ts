@@ -9,8 +9,8 @@ import {
   where,
   orderBy,
   onSnapshot,
-  DocumentData,
 } from 'firebase/firestore';
+import type { DocumentData } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Homework, Submission } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
@@ -21,7 +21,7 @@ const SUBMISSIONS_COLLECTION = 'submissions';
 
 // Helper for transforming homework timestamps
 const transformHomework = (data: DocumentData): Partial<Homework> => ({
-  dueDate: formatFirestoreTimestamp(data.dueDate),
+  dueDate: formatFirestoreTimestamp(data.dueDate) as string,
 });
 
 export const getHomeworks = async (classId?: string): Promise<Homework[]> => {
