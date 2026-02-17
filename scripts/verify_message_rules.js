@@ -1,104 +1,142 @@
-/**
- * scripts/verify_message_rules.js
- * Mocks the Firestore Security Rules logic for message creation to verify the fix for unauthorized public announcements.
- */
 
-console.log('🛡️  Running Security Rule Verification for Messages...\n');
+class MapDiff {
+  constructor(oldData, newData) {
+    this.oldData = oldData || {};
+    this.newData = newData || {};
+  }
 
-function checkMessageCreateRule(testCase) {
-  const { actorRole, actorId, messageData } = testCase;
+  affectedKeys() {
+    const keys = new Set();
+    for (const key in this.newData) {
+      if (JSON.stringify(this.newData[key]) !== JSON.stringify(this.oldData[key])) {
+        keys.add(key);
+      }
+    }
+    // Check for removed keys (if any)
+    for (const key in this.oldData) {
+      if (!(key in this.newData)) {
+        keys.add(key);
+      }
+    }
 
-  // Mocks
+    return {
+      hasOnly: (allowedKeys) => {
+        for (const key of keys) {
+          if (!allowedKeys.includes(key)) return false;
+        }
+        return true;
+      },
+      debug: () => Array.from(keys)
+    };
+  }
+}
+
+function checkMessageUpdate(testCase) {
+  const { actorId, oldData, newData } = testCase;
+
   const request = {
     auth: { uid: actorId },
-    resource: { data: messageData }
+    resource: { data: newData }
   };
+  const resource = { data: oldData };
 
-  // Helper functions from rules
-  const isAuthenticated = () => request.auth != null;
+  // Proposed Rules Logic Mock
 
-  // Mock role check (in real rules this fetches from DB)
-  const isDirector = () => actorRole === 'director';
-  const isSuperAdmin = () => actorRole === 'superadmin';
+  function isMessageSenderUpdate() {
+    const diff = new MapDiff(resource.data, request.resource.data);
+    return resource.data.senderId == request.auth.uid &&
+           request.resource.data.senderId == request.auth.uid &&
+           request.resource.data.receiverId == resource.data.receiverId &&
+           diff.affectedKeys().hasOnly(['subject', 'content', 'attachments', 'archived', 'updatedAt']);
+  }
 
-  // The NEW rule logic we want to test:
-  // allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid && (
-  //   request.resource.data.receiverId != 'all' ||
-  //   isDirector() ||
-  //   isSuperAdmin()
-  // );
+  function isMessageReceiverUpdate() {
+    const diff = new MapDiff(resource.data, request.resource.data);
+    return resource.data.receiverId == request.auth.uid &&
+           request.resource.data.senderId == resource.data.senderId &&
+           request.resource.data.receiverId == request.auth.uid &&
+           diff.affectedKeys().hasOnly(['read', 'archived', 'updatedAt']);
+  }
 
-  const allowed = isAuthenticated() &&
-    request.resource.data.senderId == request.auth.uid &&
-    (
-      request.resource.data.receiverId != 'all' ||
-      isDirector() ||
-      isSuperAdmin()
-    );
+  const allowed = (request.auth != null) && (isMessageSenderUpdate() || isMessageReceiverUpdate());
 
   return allowed;
 }
 
+console.log('🛡️  Verifying Proposed Message Rules...\n');
+
 const cases = [
   {
-    name: 'Student sends message to another user (allowed)',
-    actorRole: 'student',
-    actorId: 'student1',
-    messageData: { senderId: 'student1', receiverId: 'student2', content: 'Hi' },
+    name: 'Sender updates content (Allowed)',
+    actorId: 'sender1',
+    oldData: { senderId: 'sender1', receiverId: 'recv1', content: 'Old', read: false },
+    newData: { senderId: 'sender1', receiverId: 'recv1', content: 'New', read: false },
     expected: true
   },
   {
-    name: 'Student sends message as someone else (DENIED)',
-    actorRole: 'student',
-    actorId: 'student1',
-    messageData: { senderId: 'student2', receiverId: 'student3', content: 'Fake' },
+    name: 'Sender changes senderId (Impersonation) (DENIED)',
+    actorId: 'sender1',
+    oldData: { senderId: 'sender1', receiverId: 'recv1', content: 'Old' },
+    newData: { senderId: 'admin', receiverId: 'recv1', content: 'Old' },
     expected: false
   },
   {
-    name: 'Student sends PUBLIC announcement (DENIED)',
-    actorRole: 'student',
-    actorId: 'student1',
-    messageData: { senderId: 'student1', receiverId: 'all', content: 'Hacked!' },
+    name: 'Sender changes receiverId (Redirection) (DENIED)',
+    actorId: 'sender1',
+    oldData: { senderId: 'sender1', receiverId: 'recv1' },
+    newData: { senderId: 'sender1', receiverId: 'victim' },
     expected: false
   },
   {
-    name: 'Director sends PUBLIC announcement (allowed)',
-    actorRole: 'director',
-    actorId: 'director1',
-    messageData: { senderId: 'director1', receiverId: 'all', content: 'Official' },
+    name: 'Receiver marks as read (Allowed)',
+    actorId: 'recv1',
+    oldData: { senderId: 'sender1', receiverId: 'recv1', read: false },
+    newData: { senderId: 'sender1', receiverId: 'recv1', read: true },
     expected: true
   },
   {
-    name: 'SuperAdmin sends PUBLIC announcement (allowed)',
-    actorRole: 'superadmin',
-    actorId: 'admin1',
-    messageData: { senderId: 'admin1', receiverId: 'all', content: 'System' },
-    expected: true
+    name: 'Receiver changes content (DENIED)',
+    actorId: 'recv1',
+    oldData: { senderId: 'sender1', receiverId: 'recv1', content: 'Old' },
+    newData: { senderId: 'sender1', receiverId: 'recv1', content: 'Hacked' },
+    expected: false
   },
   {
-    name: 'Teacher sends PUBLIC announcement (DENIED by default)',
-    actorRole: 'teacher',
-    actorId: 'teacher1',
-    messageData: { senderId: 'teacher1', receiverId: 'all', content: 'Homework for everyone' },
+    name: 'Receiver changes senderId (Impersonation) (DENIED)',
+    actorId: 'recv1',
+    oldData: { senderId: 'sender1', receiverId: 'recv1' },
+    newData: { senderId: 'recv1', receiverId: 'recv1' },
     expected: false
+  },
+  {
+    name: 'Random user tries to update (DENIED)',
+    actorId: 'random',
+    oldData: { senderId: 'sender1', receiverId: 'recv1' },
+    newData: { senderId: 'sender1', receiverId: 'recv1', read: true },
+    expected: false
+  },
+  {
+     name: 'Sender tries to mark as read (DENIED - strict)',
+     actorId: 'sender1',
+     oldData: { senderId: 'sender1', receiverId: 'recv1', read: false },
+     newData: { senderId: 'sender1', receiverId: 'recv1', read: true },
+     expected: false
   }
 ];
 
 let passed = 0;
 let failed = 0;
 
-cases.forEach((c) => {
-  const allowed = checkMessageCreateRule(c);
-
+cases.forEach(c => {
+  const allowed = checkMessageUpdate(c);
   if (allowed === c.expected) {
     passed++;
     console.log(`✅ ${c.name}: PASSED`);
   } else {
     failed++;
-    console.error(`❌ ${c.name}: FAILED (Expected ${c.expected}, got ${allowed})`);
+    console.error(`❌ ${c.name}: FAILED (Expected ${c.expected}, Got ${allowed})`);
   }
 });
 
-console.log(`\nSummary: ${passed} Passed, ${failed} Failed`);
-
+console.log(`\nSummary: ${passed}/${cases.length} Passed`);
 if (failed > 0) process.exit(1);

@@ -27,6 +27,24 @@ service cloud.firestore {
         .hasOnly(['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword']);
     }
 
+    // Helper to validate message updates by sender
+    function isMessageSenderUpdate() {
+      return resource.data.senderId == request.auth.uid &&
+             request.resource.data.senderId == request.auth.uid && // No transfer
+             request.resource.data.receiverId == resource.data.receiverId && // No redirect
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['subject', 'content', 'attachments', 'archived', 'updatedAt']);
+    }
+
+    // Helper to validate message updates by receiver (read status)
+    function isMessageReceiverUpdate() {
+      return resource.data.receiverId == request.auth.uid &&
+             request.resource.data.senderId == resource.data.senderId && // No spoofing
+             request.resource.data.receiverId == request.auth.uid && // No redirect
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['read', 'archived', 'updatedAt']);
+    }
+
     function isTeacher() { return isRole('teacher'); }
     function isDirector() { return isRole('director'); }
     function isParent() { return isRole('parent'); }
@@ -154,7 +172,14 @@ service cloud.firestore {
           isDirector() ||
           isSuperAdmin()
         );
-      allow update, delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+
+      // 🛡️ SECURITY: Prevent Impersonation & Content Tampering
+      // - Sender can update content (but not senderId/receiverId)
+      // - Receiver can mark as read/archived (but not change content)
+      allow update: if isAuthenticated() && (isMessageSenderUpdate() || isMessageReceiverUpdate());
+
+      // Only sender can delete (hard delete)
+      allow delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
     }
     
     // Events:
