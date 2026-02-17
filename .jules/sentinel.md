@@ -27,3 +27,8 @@
 **Vulnerability:** The `firestore.rules` file contained critical syntax errors (duplicate match blocks) rendering it invalid, yet the `npm run verify-rules` script passed successfully because it mocked the logic in JS rather than testing the actual rules file.
 **Learning:** Mock-based verification scripts can give a false sense of security if they don't validate the actual configuration file's integrity.
 **Prevention:** Ensure verification pipelines include a step to parse/compile the actual `firestore.rules` file (e.g., using firebase-tools or a parser) in addition to logic tests.
+
+## 2025-02-21 - Message Impersonation and Update Logic
+**Vulnerability:** The `messages` collection allowed any user to update a message if `senderId` matched their UID (`isOwner`). This allowed a malicious user to change `senderId` to impersonate another user (e.g., Director) or alter message content after sending. Conversely, legitimate receivers could not mark messages as read because they were not the owner.
+**Learning:** Ownership checks (`isOwner`) for `update` operations on shared resources (like messages) are insufficient and often incorrect. Permissions must be granular based on role (Sender vs Receiver) and field (Content vs Read Status).
+**Prevention:** Implement separate logic for Sender updates (`isMessageSenderUpdate`) and Receiver updates (`isMessageReceiverUpdate`) using `diff().affectedKeys().hasOnly([...])` to enforce field-level permissions and immutability of critical fields like `senderId`.
