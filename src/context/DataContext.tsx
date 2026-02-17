@@ -184,9 +184,20 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           ...(student.classId ? [{ classId: student.classId }] : []),
           { role: ['teacher', 'director', 'superadmin'] },
         ]);
+      } else if (user?.role === 'teacher') {
+        const teacher = user as Teacher;
+        const classIds = teacher.classIds || [];
+
+        unsubUsers = subscribeToUsers(setUsers, [
+          // 1. Students in teacher's classes
+          ...(classIds.length > 0 ? [{ classId: classIds }] : []),
+          // 2. Parents linked to these classes
+          ...(classIds.length > 0 ? [{ role: 'parent', relatedClassIds: classIds }] : []),
+          // 3. Staff members
+          { role: ['teacher', 'director', 'superadmin'] },
+        ]);
       } else {
         // Default behavior: Fetch all users
-        // TODO: Optimize for teachers (fetch only their students + parents + staff)
         unsubUsers = subscribeToUsers(setUsers);
       }
 

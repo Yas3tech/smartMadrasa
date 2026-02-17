@@ -113,7 +113,7 @@ export function useUsers(): UseUsersReturn {
       toast.error(t('users.fillRequired'));
       return;
     }
-    const userData: Omit<User, 'id'> & { childrenIds?: string[] } = {
+    const userData: Omit<User, 'id'> & { childrenIds?: string[]; relatedClassIds?: string[] } = {
       name,
       email: email.toLowerCase().trim(),
       role,
@@ -123,6 +123,11 @@ export function useUsers(): UseUsersReturn {
     };
     if (role === 'parent' && selectedStudentId) {
       userData.childrenIds = [selectedStudentId];
+      // Find the selected student to get classId
+      const student = students.find((s) => s.id === selectedStudentId);
+      if (student && 'classId' in student) {
+        userData.relatedClassIds = [(student as any).classId];
+      }
     }
     if (editingUser) {
       updateUser(editingUser.id, userData);
