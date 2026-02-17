@@ -7,8 +7,8 @@ import {
   collectionGroup,
   Timestamp,
   onSnapshot,
-  DocumentData,
 } from 'firebase/firestore';
+import type { DocumentData } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Grade } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
@@ -31,7 +31,7 @@ const logDeprecationWarning = () => {
 
 // Helper for transforming timestamps
 const transformGrade = (data: DocumentData): Partial<Grade> => ({
-  date: formatFirestoreTimestamp(data.date),
+  date: formatFirestoreTimestamp(data.date) as string,
 });
 
 export const getGrades = async (studentId?: string): Promise<Grade[]> => {

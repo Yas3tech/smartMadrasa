@@ -1,5 +1,5 @@
 import { read, utils } from 'xlsx';
-import { User, Role, Parent } from '../types';
+import type { User, Role, Parent } from '../types';
 
 export interface ImportedUserSummary {
   id: string;
