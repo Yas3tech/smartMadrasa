@@ -7,7 +7,7 @@ import {
   collectionGroup,
   Timestamp,
   onSnapshot,
-  DocumentData,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Grade } from '../types';

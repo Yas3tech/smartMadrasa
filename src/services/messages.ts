@@ -10,7 +10,7 @@ import {
   Timestamp,
   onSnapshot,
   or,
-  DocumentData,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Message } from '../types';

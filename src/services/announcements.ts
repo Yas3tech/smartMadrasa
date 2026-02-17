@@ -8,7 +8,7 @@ import {
   query,
   orderBy,
   Timestamp,
-  DocumentData,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import { mapQuerySnapshot } from './firebaseHelper';

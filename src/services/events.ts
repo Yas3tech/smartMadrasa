@@ -10,7 +10,7 @@ import {
   query,
   where,
   orderBy,
-  DocumentData,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Event } from '../types';

@@ -9,7 +9,7 @@ import {
   where,
   orderBy,
   onSnapshot,
-  DocumentData,
+  type DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Homework, Submission } from '../types';
