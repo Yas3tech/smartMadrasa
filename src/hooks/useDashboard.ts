@@ -200,8 +200,9 @@ export function useDashboard(): UseDashboardReturn {
     // Optimization: Single pass over grades O(N) instead of O(4*N)
     grades.forEach((g) => {
       const percentage = (g.score / g.maxScore) * 100;
+      // Assumes ranges are sorted descending
       for (const range of ranges) {
-        if (percentage >= range.min && percentage <= range.max) {
+        if (percentage >= range.min) {
           range.count++;
           break;
         }
