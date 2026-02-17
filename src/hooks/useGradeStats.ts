@@ -20,18 +20,20 @@ export const useGradeStats = () => {
     );
 
     // Subject-wise performance
-    const subjects = [...new Set(studentGrades.map((g) => g.subject))];
-    const subjectPerformance = subjects.map((subject) => {
-      const subjectGrades = studentGrades.filter((g) => g.subject === subject);
-      const average =
-        subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) /
-        subjectGrades.length;
-      return {
-        subject,
-        average: Math.round(average),
-        count: subjectGrades.length,
-      };
-    });
+    const subjectMap = new Map<string, { sum: number; count: number }>();
+
+    for (const g of studentGrades) {
+      const current = subjectMap.get(g.subject) || { sum: 0, count: 0 };
+      current.sum += (g.score / g.maxScore) * 100;
+      current.count++;
+      subjectMap.set(g.subject, current);
+    }
+
+    const subjectPerformance = Array.from(subjectMap.entries()).map(([subject, { sum, count }]) => ({
+      subject,
+      average: Math.round(sum / count),
+      count,
+    }));
 
     return {
       avgGrade,
