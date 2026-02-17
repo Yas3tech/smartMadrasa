@@ -118,17 +118,22 @@ export function useDashboard(): UseDashboardReturn {
   }, [myGrades]);
 
   const mySubjectPerformance = useMemo(() => {
-    const subjects = [...new Set(myGrades.map((g) => g.subject))];
-    return subjects.map((subject) => {
-      const subjectGrades = myGrades.filter((g) => g.subject === subject);
-      const avg =
-        subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) /
-        subjectGrades.length;
-      return {
-        subject,
-        average: parseFloat(avg.toFixed(1)),
-      };
+    // Optimization: Single pass aggregation instead of nested loops O(N)
+    const subjectStats = new Map<string, { total: number; count: number }>();
+
+    myGrades.forEach((g) => {
+      if (!subjectStats.has(g.subject)) {
+        subjectStats.set(g.subject, { total: 0, count: 0 });
+      }
+      const stats = subjectStats.get(g.subject)!;
+      stats.total += (g.score / g.maxScore) * 100;
+      stats.count++;
     });
+
+    return Array.from(subjectStats.entries()).map(([subject, stats]) => ({
+      subject,
+      average: parseFloat((stats.total / stats.count).toFixed(1)),
+    }));
   }, [myGrades]);
 
   const pendingHomeworks = useMemo(() => {
@@ -152,53 +157,81 @@ export function useDashboard(): UseDashboardReturn {
   // Memoized Chart data generators
   const weeklyAttendanceData = useMemo(() => {
     const today = new Date();
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
+    // Optimization: Create map of dates to indices for O(1) lookup
+    const last7DaysMap = new Map<string, { present: number; absent: number; dateObj: Date }>();
+    const last7DaysKeys: string[] = [];
+
+    // Initialize map for last 7 days
+    for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() - (6 - i));
-      return date.toISOString().split('T')[0];
+      const dateStr = date.toISOString().split('T')[0];
+      last7DaysMap.set(dateStr, { present: 0, absent: 0, dateObj: date });
+      last7DaysKeys.push(dateStr);
+    }
+
+    // Optimization: Single pass over attendance data O(N)
+    attendance.forEach((a) => {
+      const dayStats = last7DaysMap.get(a.date);
+      if (dayStats) {
+        if (a.status === 'present') dayStats.present++;
+        else if (a.status === 'absent') dayStats.absent++;
+      }
     });
 
-    return last7Days.map((date) => {
-      const dayAttendance = attendance.filter((a) => a.date === date);
-      const present = dayAttendance.filter((a) => a.status === 'present').length;
-      const absent = dayAttendance.filter((a) => a.status === 'absent').length;
+    return last7DaysKeys.map((dateStr) => {
+      const stats = last7DaysMap.get(dateStr)!;
       return {
-        name: new Date(date).toLocaleDateString('fr-FR', { weekday: 'short' }),
-        présents: present,
-        absents: absent,
+        name: stats.dateObj.toLocaleDateString('fr-FR', { weekday: 'short' }),
+        présents: stats.present,
+        absents: stats.absent,
       };
     });
   }, [attendance]);
 
   const gradeDistributionData = useMemo(() => {
     const ranges = [
-      { name: 'Excellent (90-100)', min: 90, max: 100, color: '#10B981' },
-      { name: 'Bien (70-89)', min: 70, max: 89, color: '#3B82F6' },
-      { name: 'Moyen (50-69)', min: 50, max: 69, color: '#F59E0B' },
-      { name: 'Faible (<50)', min: 0, max: 49, color: '#EF4444' },
+      { name: 'Excellent (90-100)', min: 90, max: 100, color: '#10B981', count: 0 },
+      { name: 'Bien (70-89)', min: 70, max: 89, color: '#3B82F6', count: 0 },
+      { name: 'Moyen (50-69)', min: 50, max: 69, color: '#F59E0B', count: 0 },
+      { name: 'Faible (<50)', min: 0, max: 49, color: '#EF4444', count: 0 },
     ];
+
+    // Optimization: Single pass over grades O(N) instead of O(4*N)
+    grades.forEach((g) => {
+      const percentage = (g.score / g.maxScore) * 100;
+      for (const range of ranges) {
+        if (percentage >= range.min && percentage <= range.max) {
+          range.count++;
+          break;
+        }
+      }
+    });
 
     return ranges.map((range) => ({
       name: range.name,
-      value: grades.filter((g) => {
-        const percentage = (g.score / g.maxScore) * 100;
-        return percentage >= range.min && percentage <= range.max;
-      }).length,
+      value: range.count,
       color: range.color,
     }));
   }, [grades]);
 
   const subjectPerformanceData = useMemo(() => {
-    const subjects = [...new Set(grades.map((g) => g.subject))];
-    return subjects.map((subject) => {
-      const subjectGrades = grades.filter((g) => g.subject === subject);
-      const avg =
-        subjectGrades.length > 0
-          ? subjectGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) /
-          subjectGrades.length
-          : 0;
-      return { subject, moyenne: Math.round(avg) };
+    // Optimization: Single pass aggregation instead of nested loops O(N)
+    const subjectStats = new Map<string, { total: number; count: number }>();
+
+    grades.forEach((g) => {
+      if (!subjectStats.has(g.subject)) {
+        subjectStats.set(g.subject, { total: 0, count: 0 });
+      }
+      const stats = subjectStats.get(g.subject)!;
+      stats.total += (g.score / g.maxScore) * 100;
+      stats.count++;
     });
+
+    return Array.from(subjectStats.entries()).map(([subject, stats]) => ({
+      subject,
+      moyenne: Math.round(stats.total / stats.count),
+    }));
   }, [grades]);
 
   return {
