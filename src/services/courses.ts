@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Course } from '../types';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'courses';
 const CLASSES_COLLECTION = 'classes';
@@ -25,7 +26,7 @@ export const getCourses = async (classId?: string): Promise<Course[]> => {
   }
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Course);
+  return mapQuerySnapshot<Course>(snapshot);
 };
 
 export const createCourse = async (
@@ -56,7 +57,6 @@ export const subscribeToCourses = (callback: (courses: Course[]) => void) => {
   if (!db) return () => { };
   // Use collectionGroup to listen to ALL courses across all classes
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
-    const courses = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Course);
-    callback(courses);
+    callback(mapQuerySnapshot<Course>(snapshot));
   });
 };

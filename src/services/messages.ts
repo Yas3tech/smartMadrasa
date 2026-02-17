@@ -10,12 +10,19 @@ import {
   Timestamp,
   onSnapshot,
   or,
+  DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Message } from '../types';
 import { formatFirestoreTimestamp } from '../utils/dateUtils';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'messages';
+
+// Helper for transforming message timestamps
+const transformMessage = (data: DocumentData): Partial<Message> => ({
+  timestamp: formatFirestoreTimestamp(data.timestamp),
+});
 
 export const getMessages = async (userId?: string): Promise<Message[]> => {
   if (!db) return [];
@@ -34,14 +41,7 @@ export const getMessages = async (userId?: string): Promise<Message[]> => {
   }
 
   const snapshot = await getDocs(q);
-  const messages = snapshot.docs.map(
-    (doc) =>
-      ({
-        ...doc.data(),
-        id: doc.id,
-        timestamp: formatFirestoreTimestamp(doc.data().timestamp),
-      }) as Message
-  );
+  const messages = mapQuerySnapshot<Message>(snapshot, transformMessage);
 
   return messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
@@ -89,14 +89,7 @@ export const subscribeToMessages = (callback: (messages: Message[]) => void, use
   }
 
   return onSnapshot(q, (snapshot) => {
-    const messages = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          timestamp: formatFirestoreTimestamp(doc.data().timestamp),
-        }) as Message
-    );
+    const messages = mapQuerySnapshot<Message>(snapshot, transformMessage);
     messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     callback(messages);
   });

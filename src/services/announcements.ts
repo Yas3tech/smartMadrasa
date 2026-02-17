@@ -8,8 +8,10 @@ import {
   query,
   orderBy,
   Timestamp,
+  DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 export interface Announcement {
   id: string;
@@ -26,24 +28,21 @@ export interface Announcement {
 
 const COLLECTION_NAME = 'announcements';
 
+// Helper for transforming timestamps
+const transformAnnouncement = (data: DocumentData): Partial<Announcement> => ({
+  date:
+    data.date instanceof Timestamp
+      ? data.date.toDate().toISOString()
+      : data.date,
+});
+
 export const subscribeToAnnouncements = (callback: (announcements: Announcement[]) => void) => {
   if (!db) return () => { };
 
   const q = query(collection(db, COLLECTION_NAME), orderBy('date', 'desc'));
 
   return onSnapshot(q, (snapshot) => {
-    const announcements = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          date:
-            doc.data().date instanceof Timestamp
-              ? doc.data().date.toDate().toISOString()
-              : doc.data().date,
-        }) as Announcement
-    );
-    callback(announcements);
+    callback(mapQuerySnapshot<Announcement>(snapshot, transformAnnouncement));
   });
 };
 

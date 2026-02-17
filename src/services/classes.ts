@@ -12,13 +12,14 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { ClassGroup } from '../types';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'classes';
 
 export const getClasses = async (): Promise<ClassGroup[]> => {
   if (!db) return [];
   const snapshot = await getDocs(collection(db, COLLECTION_NAME));
-  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
+  return mapQuerySnapshot<ClassGroup>(snapshot);
 };
 
 export const createClass = async (classGroup: Omit<ClassGroup, 'id'>): Promise<string> => {
@@ -52,13 +53,11 @@ export const subscribeToClasses = (
 
     const q = query(collection(db, COLLECTION_NAME), where(documentId(), 'in', classIds));
     return onSnapshot(q, (snapshot) => {
-      const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
-      callback(classes);
+      callback(mapQuerySnapshot<ClassGroup>(snapshot));
     });
   }
 
   return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
-    const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
-    callback(classes);
+    callback(mapQuerySnapshot<ClassGroup>(snapshot));
   });
 };

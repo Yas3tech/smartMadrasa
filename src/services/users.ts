@@ -12,13 +12,14 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { User } from '../types';
+import { mapQuerySnapshot, mapDocumentSnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'users';
 
 export const getUsers = async (): Promise<User[]> => {
   if (!db) return [];
   const snapshot = await getDocs(collection(db, COLLECTION_NAME));
-  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as User);
+  return mapQuerySnapshot<User>(snapshot);
 };
 
 export const checkIfDatabaseEmpty = async (): Promise<boolean> => {
@@ -31,7 +32,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
   if (!db) return null;
   const docRef = doc(db, COLLECTION_NAME, id);
   const docSnap = await getDoc(docRef);
-  return docSnap.exists() ? ({ ...docSnap.data(), id: docSnap.id } as User) : null;
+  return mapDocumentSnapshot<User>(docSnap);
 };
 
 import { initializeApp, deleteApp } from 'firebase/app';
@@ -142,8 +143,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   const q = query(collection(db, COLLECTION_NAME), where('email', '==', normalizedEmail), limit(1));
   const snapshot = await getDocs(q);
   if (snapshot.empty) return null;
-  const doc = snapshot.docs[0];
-  return { ...doc.data(), id: doc.id } as User;
+  return mapDocumentSnapshot<User>(snapshot.docs[0]);
 };
 
 export const updateUser = async (id: string, updates: Partial<User>): Promise<void> => {
@@ -197,8 +197,7 @@ export const subscribeToUsers = (
   // If no queries provided, fallback to default (fetch all)
   if (!queries || queries.length === 0) {
     return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
-      const users = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as User);
-      callback(users);
+      callback(mapQuerySnapshot<User>(snapshot));
     });
   }
 
@@ -233,7 +232,7 @@ export const subscribeToUsers = (
     }
 
     const unsub = onSnapshot(q, (snapshot) => {
-      const users = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as User);
+      const users = mapQuerySnapshot<User>(snapshot);
       results.set(index, users);
 
       // Merge results

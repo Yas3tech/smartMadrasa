@@ -9,7 +9,7 @@ import {
   where,
   orderBy,
 } from 'firebase/firestore';
-import { getDb } from './firebaseHelper';
+import { getDb, mapQuerySnapshot } from './firebaseHelper';
 import type { CourseGrade } from '../types/bulletin';
 
 const COLLECTION_NAME = 'courseGrades';
@@ -28,11 +28,7 @@ export const subscribeToCourseGradesByStudent = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const grades: CourseGrade[] = [];
-    snapshot.forEach((doc) => {
-      grades.push({ id: doc.id, ...doc.data() } as CourseGrade);
-    });
-    callback(grades);
+    callback(mapQuerySnapshot<CourseGrade>(snapshot));
   });
 };
 
@@ -52,11 +48,7 @@ export const subscribeToCourseGradesByCourseAndPeriod = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const grades: CourseGrade[] = [];
-    snapshot.forEach((doc) => {
-      grades.push({ id: doc.id, ...doc.data() } as CourseGrade);
-    });
-    callback(grades);
+    callback(mapQuerySnapshot<CourseGrade>(snapshot));
   });
 };
 
@@ -74,11 +66,7 @@ export const subscribeToCourseGradesByPeriod = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const grades: CourseGrade[] = [];
-    snapshot.forEach((doc) => {
-      grades.push({ id: doc.id, ...doc.data() } as CourseGrade);
-    });
-    callback(grades);
+    callback(mapQuerySnapshot<CourseGrade>(snapshot));
   });
 };
 
@@ -134,11 +122,7 @@ export const subscribeToCourseGrades = (
   callback: (grades: CourseGrade[]) => void
 ): (() => void) => {
   return onSnapshot(collection(getDb(), COLLECTION_NAME), (snapshot) => {
-    const grades: CourseGrade[] = [];
-    snapshot.forEach((doc) => {
-      grades.push({ id: doc.id, ...doc.data() } as CourseGrade);
-    });
-    callback(grades);
+    callback(mapQuerySnapshot<CourseGrade>(snapshot));
   });
 };
 
@@ -156,10 +140,7 @@ export const subscribeToCourseGradesByStudentIds = (
   const q = query(collection(getDb(), COLLECTION_NAME), where('studentId', 'in', studentIds));
 
   return onSnapshot(q, (snapshot) => {
-    const grades: CourseGrade[] = [];
-    snapshot.forEach((doc) => {
-      grades.push({ id: doc.id, ...doc.data() } as CourseGrade);
-    });
+    const grades = mapQuerySnapshot<CourseGrade>(snapshot);
     // Client-side sort by date descending
     grades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     callback(grades);
