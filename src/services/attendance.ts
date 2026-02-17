@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Attendance } from '../types';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'attendance';
 const USERS_COLLECTION = 'users';
@@ -26,7 +27,7 @@ export const getAttendance = async (studentId?: string): Promise<Attendance[]> =
   }
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Attendance);
+  return mapQuerySnapshot<Attendance>(snapshot);
 };
 
 export const createAttendance = async (
@@ -53,8 +54,7 @@ export const subscribeToAttendance = (callback: (attendance: Attendance[]) => vo
   if (!db) return () => { };
   // Use collectionGroup to listen to ALL attendance records
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
-    const attendance = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Attendance);
-    callback(attendance);
+    callback(mapQuerySnapshot<Attendance>(snapshot));
   });
 };
 
@@ -73,7 +73,6 @@ export const subscribeToAttendanceByStudentIds = (
   const q = query(collectionGroup(db, COLLECTION_NAME), where('studentId', 'in', studentIds));
 
   return onSnapshot(q, (snapshot) => {
-    const attendance = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as Attendance);
-    callback(attendance);
+    callback(mapQuerySnapshot<Attendance>(snapshot));
   });
 };

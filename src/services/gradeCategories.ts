@@ -9,7 +9,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import type { GradeCategory } from '../types/bulletin';
-import { getDb } from './firebaseHelper';
+import { getDb, mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'gradeCategories';
 
@@ -22,11 +22,7 @@ export const subscribeToGradeCategories = (
   const q = query(collection(getDb(), COLLECTION_NAME), orderBy('name', 'asc'));
 
   return onSnapshot(q, (snapshot) => {
-    const categories: GradeCategory[] = [];
-    snapshot.forEach((doc) => {
-      categories.push({ id: doc.id, ...doc.data() } as GradeCategory);
-    });
-    callback(categories);
+    callback(mapQuerySnapshot<GradeCategory>(snapshot));
   });
 };
 

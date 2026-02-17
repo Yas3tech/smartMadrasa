@@ -10,7 +10,7 @@ import {
   orderBy,
   writeBatch,
 } from 'firebase/firestore';
-import { getDb } from './firebaseHelper';
+import { getDb, mapQuerySnapshot } from './firebaseHelper';
 import type { TeacherComment } from '../types/bulletin';
 
 const COLLECTION_NAME = 'teacherComments';
@@ -29,11 +29,7 @@ export const subscribeToTeacherCommentsByStudent = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const comments: TeacherComment[] = [];
-    snapshot.forEach((doc) => {
-      comments.push({ id: doc.id, ...doc.data() } as TeacherComment);
-    });
-    callback(comments);
+    callback(mapQuerySnapshot<TeacherComment>(snapshot));
   });
 };
 
@@ -52,11 +48,7 @@ export const subscribeToTeacherCommentsByCourseAndPeriod = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const comments: TeacherComment[] = [];
-    snapshot.forEach((doc) => {
-      comments.push({ id: doc.id, ...doc.data() } as TeacherComment);
-    });
-    callback(comments);
+    callback(mapQuerySnapshot<TeacherComment>(snapshot));
   });
 };
 
@@ -76,11 +68,7 @@ export const subscribeToTeacherCommentsByTeacher = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const comments: TeacherComment[] = [];
-    snapshot.forEach((doc) => {
-      comments.push({ id: doc.id, ...doc.data() } as TeacherComment);
-    });
-    callback(comments);
+    callback(mapQuerySnapshot<TeacherComment>(snapshot));
   });
 };
 
@@ -167,10 +155,6 @@ export const subscribeToTeacherCommentsByPeriod = (
   const q = query(collection(getDb(), COLLECTION_NAME), where('periodId', '==', periodId));
 
   return onSnapshot(q, (snapshot) => {
-    const comments: TeacherComment[] = [];
-    snapshot.forEach((doc) => {
-      comments.push({ id: doc.id, ...doc.data() } as TeacherComment);
-    });
-    callback(comments);
+    callback(mapQuerySnapshot<TeacherComment>(snapshot));
   });
 };

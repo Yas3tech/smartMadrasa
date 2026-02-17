@@ -10,25 +10,25 @@ import {
   query,
   where,
   orderBy,
+  DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Event } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'events';
+
+// Helper for transforming timestamps
+const transformEvent = (data: DocumentData): Partial<Event> => ({
+  start: formatFirestoreTimestamp(data.start),
+  end: formatFirestoreTimestamp(data.end),
+});
 
 export const getEvents = async (): Promise<Event[]> => {
   if (!db) return [];
   const snapshot = await getDocs(collection(db, COLLECTION_NAME));
-  return snapshot.docs.map(
-    (doc) =>
-      ({
-        ...doc.data(),
-        id: doc.id,
-        start: formatFirestoreTimestamp(doc.data().start),
-        end: formatFirestoreTimestamp(doc.data().end),
-      }) as Event
-  );
+  return mapQuerySnapshot<Event>(snapshot, transformEvent);
 };
 
 export const createEvent = async (event: Omit<Event, 'id'>): Promise<string> => {
@@ -92,15 +92,7 @@ export const subscribeToEvents = (
   }
 
   return onSnapshot(q, (snapshot) => {
-    const events = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          start: formatFirestoreTimestamp(doc.data().start),
-          end: formatFirestoreTimestamp(doc.data().end),
-        }) as Event
-    );
+    const events = mapQuerySnapshot<Event>(snapshot, transformEvent);
 
     // Ensure events are always sorted by start date
     events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());

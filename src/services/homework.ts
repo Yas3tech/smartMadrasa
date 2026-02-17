@@ -9,13 +9,20 @@ import {
   where,
   orderBy,
   onSnapshot,
+  DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Homework, Submission } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'homeworks';
 const SUBMISSIONS_COLLECTION = 'submissions';
+
+// Helper for transforming homework timestamps
+const transformHomework = (data: DocumentData): Partial<Homework> => ({
+  dueDate: formatFirestoreTimestamp(data.dueDate),
+});
 
 export const getHomeworks = async (classId?: string): Promise<Homework[]> => {
   if (!db) return [];
@@ -32,14 +39,7 @@ export const getHomeworks = async (classId?: string): Promise<Homework[]> => {
   }
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(
-    (doc) =>
-      ({
-        ...doc.data(),
-        id: doc.id,
-        dueDate: formatFirestoreTimestamp(doc.data().dueDate),
-      }) as Homework
-  );
+  return mapQuerySnapshot<Homework>(snapshot, transformHomework);
 };
 
 export const createHomework = async (homework: Omit<Homework, 'id'>): Promise<string> => {
@@ -63,15 +63,7 @@ export const subscribeToHomeworks = (callback: (homeworks: Homework[]) => void) 
   if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME), orderBy('dueDate', 'asc'));
   return onSnapshot(q, (snapshot) => {
-    const homeworks = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          dueDate: formatFirestoreTimestamp(doc.data().dueDate),
-        }) as Homework
-    );
-    callback(homeworks);
+    callback(mapQuerySnapshot<Homework>(snapshot, transformHomework));
   });
 };
 
@@ -86,14 +78,7 @@ export const subscribeToHomeworksByClassIds = (
   const q = query(collection(db, COLLECTION_NAME), where('classId', 'in', classIds));
 
   return onSnapshot(q, (snapshot) => {
-    const homeworks = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          dueDate: formatFirestoreTimestamp(doc.data().dueDate),
-        }) as Homework
-    );
+    const homeworks = mapQuerySnapshot<Homework>(snapshot, transformHomework);
     // Client-side sort
     homeworks.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
     callback(homeworks);
@@ -102,18 +87,16 @@ export const subscribeToHomeworksByClassIds = (
 
 // Submissions
 
+// Helper for transforming submission timestamps
+const transformSubmission = (data: DocumentData): Partial<Submission> => ({
+  submittedAt: formatFirestoreTimestamp(data.submittedAt),
+});
+
 export const getSubmissions = async (homeworkId: string): Promise<Submission[]> => {
   if (!db) return [];
   const q = query(collection(db, COLLECTION_NAME, homeworkId, SUBMISSIONS_COLLECTION));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(
-    (doc) =>
-      ({
-        ...doc.data(),
-        id: doc.id,
-        submittedAt: formatFirestoreTimestamp(doc.data().submittedAt),
-      }) as Submission
-  );
+  return mapQuerySnapshot<Submission>(snapshot, transformSubmission);
 };
 
 export const submitHomework = async (
@@ -156,14 +139,6 @@ export const subscribeToSubmissions = (
   if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME, homeworkId, SUBMISSIONS_COLLECTION));
   return onSnapshot(q, (snapshot) => {
-    const submissions = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          submittedAt: formatFirestoreTimestamp(doc.data().submittedAt),
-        }) as Submission
-    );
-    callback(submissions);
+    callback(mapQuerySnapshot<Submission>(snapshot, transformSubmission));
   });
 };

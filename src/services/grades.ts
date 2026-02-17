@@ -7,10 +7,12 @@ import {
   collectionGroup,
   Timestamp,
   onSnapshot,
+  DocumentData,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Grade } from '../types';
 import { formatFirestoreTimestamp } from '../utils/date';
+import { mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'grades';
 const USERS_COLLECTION = 'users';
@@ -27,6 +29,11 @@ const logDeprecationWarning = () => {
   }
 };
 
+// Helper for transforming timestamps
+const transformGrade = (data: DocumentData): Partial<Grade> => ({
+  date: formatFirestoreTimestamp(data.date),
+});
+
 export const getGrades = async (studentId?: string): Promise<Grade[]> => {
   logDeprecationWarning();
   if (!db) return [];
@@ -41,14 +48,7 @@ export const getGrades = async (studentId?: string): Promise<Grade[]> => {
   }
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(
-    (doc) =>
-      ({
-        ...doc.data(),
-        id: doc.id,
-        date: formatFirestoreTimestamp(doc.data().date),
-      }) as Grade
-  );
+  return mapQuerySnapshot<Grade>(snapshot, transformGrade);
 };
 
 export const createGrade = async (studentId: string, grade: Omit<Grade, 'id'>): Promise<string> => {
@@ -85,14 +85,6 @@ export const subscribeToGrades = (callback: (grades: Grade[]) => void) => {
   if (!db) return () => { };
   // Use collectionGroup to listen to ALL grades across all users
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
-    const grades = snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-          date: formatFirestoreTimestamp(doc.data().date),
-        }) as Grade
-    );
-    callback(grades);
+    callback(mapQuerySnapshot<Grade>(snapshot, transformGrade));
   });
 };

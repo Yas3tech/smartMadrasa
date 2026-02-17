@@ -10,7 +10,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import type { AcademicPeriod } from '../types/bulletin';
-import { getDb } from './firebaseHelper';
+import { getDb, mapQuerySnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'academicPeriods';
 
@@ -23,11 +23,7 @@ export const subscribeToAcademicPeriods = (
   const q = query(collection(getDb(), COLLECTION_NAME), orderBy('order', 'asc'));
 
   return onSnapshot(q, (snapshot) => {
-    const periods: AcademicPeriod[] = [];
-    snapshot.forEach((doc) => {
-      periods.push({ id: doc.id, ...doc.data() } as AcademicPeriod);
-    });
-    callback(periods);
+    callback(mapQuerySnapshot<AcademicPeriod>(snapshot));
   });
 };
 
@@ -45,11 +41,7 @@ export const subscribeToAcademicPeriodsByYear = (
   );
 
   return onSnapshot(q, (snapshot) => {
-    const periods: AcademicPeriod[] = [];
-    snapshot.forEach((doc) => {
-      periods.push({ id: doc.id, ...doc.data() } as AcademicPeriod);
-    });
-    callback(periods);
+    callback(mapQuerySnapshot<AcademicPeriod>(snapshot));
   });
 };
 
