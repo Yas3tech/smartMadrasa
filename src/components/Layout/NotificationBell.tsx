@@ -186,6 +186,9 @@ const NotificationBell = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-xl transition-all duration-200 group"
+        aria-label={t('notificationCenter.title')}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
         <Bell size={24} className="group-hover:scale-110 transition-transform" />
         {unreadCount > 0 && (
@@ -225,6 +228,7 @@ const NotificationBell = () => {
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                aria-label={t('common.close')}
               >
                 <X size={20} />
               </button>
