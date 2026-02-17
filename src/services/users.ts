@@ -185,6 +185,7 @@ export const deleteUser = async (id: string): Promise<void> => {
 export interface UserQueryFilters {
   role?: string | string[];
   classId?: string | string[];
+  relatedClassIds?: string | string[];
 }
 
 export const subscribeToUsers = (
@@ -219,6 +220,15 @@ export const subscribeToUsers = (
       const classIds = Array.isArray(filter.classId) ? filter.classId : [filter.classId];
       if (classIds.length > 0) {
         q = query(q, where('classId', 'in', classIds));
+      }
+    }
+
+    if (filter.relatedClassIds) {
+      const relatedClassIds = Array.isArray(filter.relatedClassIds)
+        ? filter.relatedClassIds
+        : [filter.relatedClassIds];
+      if (relatedClassIds.length > 0) {
+        q = query(q, where('relatedClassIds', 'array-contains-any', relatedClassIds));
       }
     }
 

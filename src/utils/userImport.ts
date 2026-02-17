@@ -65,6 +65,7 @@ export const processParentUsers = async (
       const roleNormalized = row.role.toLowerCase().trim();
       if (roleNormalized === 'parent') {
         const childrenIds: string[] = [];
+        const relatedClassIds: string[] = [];
 
         if (row.studentEmail) {
           // Check existing users first
@@ -79,6 +80,9 @@ export const processParentUsers = async (
             }
           } else {
             childrenIds.push(student.id);
+            if ('classId' in student) {
+              relatedClassIds.push((student as any).classId);
+            }
           }
         }
 
@@ -91,6 +95,7 @@ export const processParentUsers = async (
           birthDate: row.birthDate || '',
           avatar: row.name.charAt(0).toUpperCase(),
           childrenIds,
+          relatedClassIds: relatedClassIds.length > 0 ? relatedClassIds : undefined,
         };
 
         await addUser(newUser);

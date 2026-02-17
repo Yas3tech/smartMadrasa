@@ -21,6 +21,7 @@ export interface Student extends User {
 export interface Parent extends User {
   role: 'parent';
   childrenIds: string[];
+  relatedClassIds?: string[]; // For optimized queries
   children?: { id: string; name: string; classId: string; className?: string }[]; // Denormalized
 }
 
