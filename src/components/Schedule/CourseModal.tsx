@@ -245,7 +245,7 @@ const CourseModal = ({
 
           {!isRecurring && (
             <Input
-              label="Date *"
+              label={`${t('common.date')} *`}
               type="date"
               value={specificDate}
               onChange={(e) => {

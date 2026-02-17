@@ -178,7 +178,7 @@ const ExamModal = ({
               required
             />
             <Input
-              label={`${t('schedule.room')} (optionnel)`}
+              label={`${t('schedule.room')} (${t('common.optional').toLowerCase()})`}
               value={room}
               onChange={(e) => setRoom(e.target.value)}
               placeholder={t('schedule.roomPlaceholder')}

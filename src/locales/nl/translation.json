@@ -38,6 +38,7 @@
     "date": "Datum",
     "student": "Leerling",
     "description": "Beschrijving",
+    "file": "Bestand",
     "close": "Sluiten",
     "saving": "Opslaan...",
     "optional": "Optioneel",
