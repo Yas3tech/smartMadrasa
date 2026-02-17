@@ -35,8 +35,8 @@ export const getUserById = async (id: string): Promise<User | null> => {
   return mapDocumentSnapshot<User>(docSnap);
 };
 
-import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, type Auth } from 'firebase/auth';
 import { firebaseConfig } from '../config/firebase';
 
 
@@ -103,33 +103,39 @@ export const createUser = async (user: Omit<User, 'id'>): Promise<{ uid: string;
   }
 };
 
+let secondaryApp: FirebaseApp | undefined;
+let secondaryAuth: Auth | undefined;
+
+const getSecondaryAuth = (): Auth => {
+  if (!secondaryApp) {
+    secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
+    secondaryAuth = getAuth(secondaryApp);
+  }
+  // We know secondaryAuth is set if secondaryApp is set
+  return secondaryAuth!;
+};
+
 const createAuthUser = async (email: string): Promise<{ uid: string; password?: string; emailSent: boolean }> => {
-  // Initialize a secondary app
-  const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
-  const secondaryAuth = getAuth(secondaryApp);
+  // Use the existing secondary app or initialize it if needed
+  const auth = getSecondaryAuth();
   const password = generateSecurePassword();
 
+  // Create user with a secure random password
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const uid = userCredential.user.uid;
+  let emailSent = false;
+
+  // Attempt to send password reset email
   try {
-    // Create user with a secure random password
-    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-    const uid = userCredential.user.uid;
-    let emailSent = false;
-
-    // Attempt to send password reset email
-    try {
-      await sendPasswordResetEmail(secondaryAuth, email);
-      emailSent = true;
-    } catch (emailError) {
-      console.warn('Failed to send password reset email:', emailError);
-    }
-
-    // Sign out from secondary auth immediately
-    await signOut(secondaryAuth);
-    return { uid, password, emailSent };
-  } finally {
-    // Clean up the secondary app
-    await deleteApp(secondaryApp);
+    await sendPasswordResetEmail(auth, email);
+    emailSent = true;
+  } catch (emailError) {
+    console.warn('Failed to send password reset email:', emailError);
   }
+
+  // Sign out from secondary auth immediately
+  await signOut(auth);
+  return { uid, password, emailSent };
 };
 
 /**
