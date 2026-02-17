@@ -16,6 +16,7 @@ const Profile = () => {
   const isRTL = i18n.language === 'ar';
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
 
@@ -33,10 +34,18 @@ const Profile = () => {
 
   if (!user) return null;
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (user) {
-      updateUser(user.id, { name, email });
-      setIsEditing(false);
+      setIsSaving(true);
+      try {
+        await updateUser(user.id, { name, email });
+        setIsEditing(false);
+        toast.success(t('profile.profileUpdated'));
+      } catch {
+        toast.error(t('auth.errors.generic'));
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -250,10 +259,15 @@ const Profile = () => {
 
               {isEditing && (
                 <div className="flex justify-end gap-3 pt-4 border-t">
-                  <Button variant="secondary" onClick={handleCancelEdit}>
+                  <Button variant="secondary" onClick={handleCancelEdit} disabled={isSaving}>
                     {t('common.cancel')}
                   </Button>
-                  <Button variant="primary" icon={Save} onClick={handleSaveProfile}>
+                  <Button
+                    variant="primary"
+                    icon={Save}
+                    onClick={handleSaveProfile}
+                    isLoading={isSaving}
+                  >
                     {t('common.save')}
                   </Button>
                 </div>

@@ -1,4 +1,5 @@
 import React, { type ReactNode } from 'react';
+import { Spinner } from './LoadingStates';
 
 interface CardProps {
   children: ReactNode;
@@ -17,10 +18,11 @@ export const Card = ({ children, className = '', onClick, id }: CardProps) => (
   </div>
 );
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ElementType;
+  isLoading?: boolean;
 }
 
 export const Button = ({
@@ -29,6 +31,7 @@ export const Button = ({
   size = 'md',
   icon: Icon,
   className = '',
+  isLoading,
   ...props
 }: ButtonProps) => {
   const baseStyles =
@@ -51,9 +54,24 @@ export const Button = ({
     lg: 'px-6 py-3 text-base',
   };
 
+  const spinnerColors = {
+    primary: '!border-white',
+    secondary: '!border-orange-500',
+    danger: '!border-red-600',
+    ghost: '!border-gray-500',
+  };
+
   return (
-    <button className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`} {...props}>
-      {Icon && <Icon size={size === 'sm' ? 16 : 18} />}
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      disabled={isLoading || props.disabled}
+      {...props}
+    >
+      {isLoading ? (
+        <Spinner size="sm" className={spinnerColors[variant]} />
+      ) : (
+        Icon && <Icon size={size === 'sm' ? 16 : 18} />
+      )}
       {children}
     </button>
   );
