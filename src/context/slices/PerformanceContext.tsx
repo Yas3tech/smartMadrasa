@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback, t
 import { useAuth } from '../AuthContext';
 import { useUsers } from './UserContext';
 import { useAcademics } from './AcademicContext';
-import type { Grade, Attendance, Homework, Parent } from '../../types';
+import type { Grade, Attendance, Homework, Parent, Student } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -65,6 +65,23 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       let unsubAttendance = () => { };
       let unsubHomeworks = () => { };
 
+      const handleGradesUpdate = (courseGrades: CourseGrade[]) => {
+        const grades = courseGrades.map((cg) => ({
+          id: cg.id,
+          studentId: cg.studentId,
+          studentName: cg.studentName,
+          subject: cg.courseName || 'Unknown',
+          score: cg.score,
+          maxScore: cg.maxScore,
+          type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
+          date: cg.date,
+          feedback: cg.comment,
+          courseId: cg.courseId,
+          className: undefined,
+        }));
+        setGrades(grades as Grade[]);
+      };
+
       if (user?.role === 'parent') {
         const parentUser = user as Parent;
         const childIds = parentUser.childrenIds || [];
@@ -72,58 +89,31 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         const classIds = childrenData.map((c) => c.classId).filter(Boolean);
 
         if (childIds.length > 0) {
-          unsubGrades = subscribeToCourseGradesByStudentIds(childIds, (courseGrades) => {
-            const grades = courseGrades.map((cg) => ({
-              id: cg.id,
-              studentId: cg.studentId,
-              studentName: cg.studentName,
-              subject: cg.courseName || 'Unknown',
-              score: cg.score,
-              maxScore: cg.maxScore,
-              type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
-              date: cg.date,
-              feedback: cg.comment,
-              courseId: cg.courseId,
-              className: undefined,
-            }));
-            setGrades(grades as Grade[]);
-          });
+          unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);
           unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
         }
 
         if (classIds.length > 0) {
           unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
         }
+      } else if (user?.role === 'student') {
+        const studentUser = user as Student;
+        // Fetch only relevant data for the student
+        unsubGrades = subscribeToCourseGradesByStudentIds([user.id], handleGradesUpdate);
+        unsubAttendance = subscribeToAttendanceByStudentIds([user.id], setAttendance);
+
+        if (studentUser.classId) {
+          unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
+        }
       } else {
         const setupDefaultSubs = () => {
-          unsubGrades = subscribeToCourseGrades((courseGrades) => {
-            const grades = courseGrades.map((cg) => ({
-              id: cg.id,
-              studentId: cg.studentId,
-              studentName: cg.studentName,
-              subject: cg.courseName || 'Unknown',
-              score: cg.score,
-              maxScore: cg.maxScore,
-              type: cg.categoryName?.toLowerCase() === 'examen' ? 'exam' : 'homework',
-              date: cg.date,
-              feedback: cg.comment,
-              courseId: cg.courseId,
-              className: undefined,
-            }));
-            setGrades(grades as Grade[]);
-          });
+          unsubGrades = subscribeToCourseGrades(handleGradesUpdate);
           unsubAttendance = subscribeToAttendance(setAttendance);
           unsubHomeworks = subscribeToHomeworks(setHomeworks);
         };
 
-        // For student, teacher, director, superadmin - use default subs logic
-        // Note: Logic is slightly simplified from original but functionally equivalent for these roles
-        // assuming subscribeToHomeworks handles role filtering internally OR fetches all if not filtered.
-        // Original code called setupDefaultSubs() for everyone except parent.
+        // For teacher, director, superadmin - fetch all data
         setupDefaultSubs();
-
-        // Original code had specific checks for student/teacher but they ended up calling setupDefaultSubs() anyway.
-        // The student/teacher specific checks were mostly for 'classes' and 'events' which are handled in other contexts.
       }
 
       setIsLoading(false);
