@@ -8,6 +8,7 @@ import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToCourseGrades,
   subscribeToCourseGradesByStudentIds,
+  subscribeToCourseGradesByPeriodIds,
   createCourseGrade as fbCreateCourseGrade,
   updateCourseGrade as fbUpdateCourseGrade,
 } from '../../services/courseGrades';
@@ -24,6 +25,7 @@ import {
   updateHomework as fbUpdateHomework,
   deleteHomework as fbDeleteHomework,
 } from '../../services/homework';
+import { getRelevantPeriodIds } from '../../utils/academic';
 
 export interface PerformanceContextType {
   grades: Grade[];
@@ -107,12 +109,23 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         }
       } else {
         const setupDefaultSubs = () => {
-          unsubGrades = subscribeToCourseGrades(handleGradesUpdate);
+          // Optimized subscription: fetch only grades for the relevant academic periods (current year)
+          // instead of fetching all grades ever created.
+          const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+
+          if (relevantPeriodIds.length > 0) {
+            unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+          } else {
+            // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
+            // We avoid subscribing to EVERYTHING to prevent performance issues.
+            unsubGrades = () => {};
+          }
+
           unsubAttendance = subscribeToAttendance(setAttendance);
           unsubHomeworks = subscribeToHomeworks(setHomeworks);
         };
 
-        // For teacher, director, superadmin - fetch all data
+        // For teacher, director, superadmin - fetch filtered data
         setupDefaultSubs();
       }
 
@@ -126,7 +139,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setIsLoading(false);
     }
-  }, [useFirebase, user]);
+  }, [useFirebase, user, academicPeriods]);
 
   const addGrade = useCallback(async (grade: Omit<Grade, 'id'>) => {
     if (useFirebase) {

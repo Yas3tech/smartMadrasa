@@ -142,7 +142,35 @@ export const subscribeToCourseGradesByStudentIds = (
   return onSnapshot(q, (snapshot) => {
     const grades = mapQuerySnapshot<CourseGrade>(snapshot);
     // Client-side sort by date descending
-    grades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    grades.sort((a, b) => b.date.localeCompare(a.date));
+    callback(grades);
+  });
+};
+
+/**
+ * Subscribe to course grades for specific periods (optimized)
+ * This is used to fetch grades only for the current academic year,
+ * avoiding loading the entire history of grades.
+ */
+export const subscribeToCourseGradesByPeriodIds = (
+  periodIds: string[],
+  callback: (grades: CourseGrade[]) => void
+): (() => void) => {
+  if (periodIds.length === 0) {
+    callback([]);
+    return () => {};
+  }
+
+  // Note: 'in' queries are limited to 30 items.
+  // Assuming periodIds.length is small (one academic year = 3-4 periods).
+  // Also cannot use orderBy with 'in' without composite index on (periodId, date).
+  // We sort client-side.
+  const q = query(collection(getDb(), COLLECTION_NAME), where('periodId', 'in', periodIds));
+
+  return onSnapshot(q, (snapshot) => {
+    const grades = mapQuerySnapshot<CourseGrade>(snapshot);
+    // Client-side sort by date descending
+    grades.sort((a, b) => b.date.localeCompare(a.date));
     callback(grades);
   });
 };
