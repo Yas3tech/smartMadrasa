@@ -72,7 +72,8 @@ describe('subscribeToMessages Performance & Logic', () => {
     const callback = vi.fn();
 
     // Mock onSnapshot to immediately invoke callback with mock data
-    vi.mocked(onSnapshot).mockImplementation((q, snapshotCallback) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (vi.mocked(onSnapshot) as any).mockImplementation((_q: unknown, snapshotCallback: (snapshot: unknown) => void) => {
       const mockDocs = [
         { id: '1', data: () => ({ timestamp: '2023-01-01T10:00:00Z', content: 'Old' }) },
         { id: '2', data: () => ({ timestamp: '2023-01-02T10:00:00Z', content: 'New' }) },
@@ -80,7 +81,7 @@ describe('subscribeToMessages Performance & Logic', () => {
       ];
 
       // Pass the mock snapshot
-      snapshotCallback({ docs: mockDocs } as unknown as Parameters<typeof snapshotCallback>[0]);
+      snapshotCallback({ docs: mockDocs });
       return () => { };
     });
 

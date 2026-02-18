@@ -78,7 +78,7 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
   const overallAverage =
     courseData.length > 0
       ? courseData.reduce((acc, c) => acc + (c.average || 0), 0) /
-        courseData.filter((c) => c.average !== null).length
+      courseData.filter((c) => c.average !== null).length
       : 0;
 
   const handleDownload = () => {
@@ -140,7 +140,7 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
                 </p>
                 <p>
                   <span className="text-gray-500">{t('bulletin.studentClass')} :</span>{' '}
-                  <span className="font-medium">{student.className || 'N/A'}</span>
+                  <span className="font-medium">{className || student.className || 'N/A'}</span>
                 </p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">

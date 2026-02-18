@@ -134,6 +134,7 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
           grades={grades}
           comments={comments}
           absences={getStudentAbsences(selectedStudent.id)}
+          className={className}
           onClose={() => setSelectedStudent(null)}
         />
       )}
