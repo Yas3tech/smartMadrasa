@@ -104,8 +104,8 @@ service cloud.firestore {
         isTeacher() || 
         isDirector()
       );
-      // Improved Write Rule: Validate Score Range
-      allow write: if (isTeacher() || isDirector()) && isValidGrade();
+      // Improved Write Rule: Validate Score Range and Class Access
+      allow write: if (isDirector() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
     }
 
     // CourseGrades (New Collection):
@@ -116,8 +116,8 @@ service cloud.firestore {
         isTeacher() ||
         isDirector()
       );
-      // Improved Write Rule: Validate Score Range
-      allow write: if (isTeacher() || isDirector()) && isValidGrade();
+      // Improved Write Rule: Validate Score Range and Class Access
+      allow write: if (isDirector() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
     }
 
     // Attendance:
