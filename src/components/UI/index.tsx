@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useId } from 'react';
 import { Spinner } from './LoadingStates';
 
 interface CardProps {
@@ -107,27 +107,43 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ElementType;
 }
 
-export const Input = ({ label, error, icon: Icon, className = '', ...props }: InputProps) => (
-  <div className="w-full">
-    {label && (
-      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-        {label}
-      </label>
-    )}
-    <div className="relative">
-      {Icon && (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
-          <Icon size={18} />
-        </div>
+export const Input = ({ label, error, icon: Icon, className = '', ...props }: InputProps) => {
+  const generatedId = useId();
+  const inputId = props.id || generatedId;
+  const errorId = `${inputId}-error`;
+
+  return (
+    <div className="w-full">
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5"
+        >
+          {label}
+        </label>
       )}
-      <input
-        className={`w-full ${Icon ? 'pl-10' : 'px-4'} py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-slate-500 ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''} ${className}`}
-        {...props}
-      />
+      <div className="relative">
+        {Icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
+            <Icon size={18} />
+          </div>
+        )}
+        <input
+          id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          className={`w-full ${Icon ? 'pl-10' : 'px-4'} py-2.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-slate-500 ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''} ${className}`}
+          {...props}
+        />
+      </div>
+      {error && (
+        <p id={errorId} className="mt-1 text-xs text-red-500">
+          {error}
+        </p>
+      )}
     </div>
-    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-  </div>
-);
+  );
+};
 
 interface ModalProps {
   isOpen: boolean;
