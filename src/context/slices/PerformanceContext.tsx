@@ -6,7 +6,6 @@ import type { Grade, Attendance, Homework, Parent, Student } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
-  subscribeToCourseGrades,
   subscribeToCourseGradesByStudentIds,
   subscribeToCourseGradesByPeriodIds,
   createCourseGrade as fbCreateCourseGrade,
