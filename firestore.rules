@@ -136,8 +136,14 @@ service cloud.firestore {
     // - Read: Students in key class, Parents of students in key class, Teachers.
     // - Write: Teachers.
     match /homeworks/{homeworkId} {
-      allow read: if isAuthenticated(); // Simplified: Visible to logged-in users (filtering done in UI for now)
-      allow write: if isTeacher() || isDirector();
+      allow read: if isAuthenticated() && (
+        isTeacher() ||
+        isDirector() ||
+        isSuperAdmin() ||
+        (isStudent() && getUserData().classId == resource.data.classId) ||
+        (isParent() && resource.data.classId in getUserData().relatedClassIds)
+      );
+      allow write: if isTeacher() || isDirector() || isSuperAdmin();
     }
 
     // Courses/Schedule:
