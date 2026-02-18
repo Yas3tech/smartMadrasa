@@ -71,6 +71,11 @@ service cloud.firestore {
               (isStudent() && getUserData().classId == targetUserData.classId);
     }
 
+    // Helper: Check if teacher is assigned to the class
+    function isTeacherForClass(classId) {
+      return isTeacher() && classId in getUserData().classIds;
+    }
+
     // --- Collection Rules ---
 
     // Users:
@@ -134,7 +139,7 @@ service cloud.firestore {
 
     // Homework:
     // - Read: Students in key class, Parents of students in key class, Teachers.
-    // - Write: Teachers.
+    // - Write: Teachers (restricted to their classes), Directors, Admins.
     match /homeworks/{homeworkId} {
       allow read: if isAuthenticated() && (
         isTeacher() ||
@@ -143,7 +148,18 @@ service cloud.firestore {
         (isStudent() && getUserData().classId == resource.data.classId) ||
         (isParent() && resource.data.classId in getUserData().relatedClassIds)
       );
-      allow write: if isTeacher() || isDirector() || isSuperAdmin();
+
+      // 🛡️ SECURITY: Prevent IDOR/Unauthorized Writes
+      // Teachers can only create/update homework for classes they are assigned to.
+
+      allow create: if isDirector() || isSuperAdmin() || isTeacherForClass(request.resource.data.classId);
+
+      allow update: if isDirector() || isSuperAdmin() || (
+        isTeacherForClass(request.resource.data.classId) &&
+        resource.data.classId == request.resource.data.classId
+      );
+
+      allow delete: if isDirector() || isSuperAdmin() || isTeacherForClass(resource.data.classId);
     }
 
     // Courses/Schedule:
