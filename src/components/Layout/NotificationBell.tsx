@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useCommunication, usePerformance } from '../../context/DataContext';
 import { Bell, MessageSquare, GraduationCap, Calendar, Users, X } from 'lucide-react';
 
 interface Notification {
@@ -19,7 +19,8 @@ interface Notification {
 const NotificationBell = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { messages, grades, events, markMessageAsRead } = useData();
+  const { messages, events, markMessageAsRead } = useCommunication();
+  const { grades } = usePerformance();
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [isOpen, setIsOpen] = useState(false);

@@ -1,7 +1,7 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useCommunication } from '../../context/DataContext';
 import {
   LayoutDashboard,
   Users,
@@ -27,7 +27,7 @@ interface SidebarProps {
 const Sidebar = ({ isCollapsed }: SidebarProps) => {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
-  const { messages } = useData();
+  const { messages } = useCommunication();
   const isRTL = i18n.language === 'ar';
 
   // Count unread messages
