@@ -81,21 +81,26 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
   const selectedClass = classes.find((c) => c.id === selectedClassId);
   const selectedStudentData = students.find((s) => s.id === selectedStudentId);
 
-  const filteredStudents = useMemo(() => {
-    if (!selectedClassId) return [];
-    return students.filter(
-      (s) =>
-        (s as Student).classId === selectedClassId &&
-        s.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [selectedClassId, students, searchTerm]);
-
   // Optimization: Get all students in the class for efficient lookups
   // independent of search term
   const classStudents = useMemo(() => {
     if (!selectedClassId) return [];
     return students.filter((s) => (s as Student).classId === selectedClassId);
   }, [selectedClassId, students]);
+
+  // Optimization: Create Set of student IDs for O(1) existence checks
+  // This avoids recreating the Set every time grades change in subjectGrades
+  const classStudentIds = useMemo(() => {
+    return new Set(classStudents.map((s) => s.id));
+  }, [classStudents]);
+
+  // Optimization: Filter from classStudents (O(M)) instead of all students (O(N))
+  const filteredStudents = useMemo(() => {
+    if (!classStudents.length) return [];
+    if (!searchTerm) return classStudents;
+    const lowerTerm = searchTerm.toLowerCase();
+    return classStudents.filter((s) => s.name.toLowerCase().includes(lowerTerm));
+  }, [classStudents, searchTerm]);
 
   // Optimization: Create a map for O(1) student lookups in render loops
   const studentMap = useMemo(() => {
@@ -118,13 +123,10 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
   const subjectGrades = useMemo(() => {
     if (!selectedSubject || !selectedClassId) return [];
 
-    // Optimization: Use Set for O(1) lookup instead of O(N) find inside loop
-    const classStudentIds = new Set(classStudents.map(s => s.id));
-
     return grades.filter((g) =>
       g.subject === selectedSubject && classStudentIds.has(g.studentId)
     );
-  }, [grades, selectedSubject, selectedClassId, classStudents]);
+  }, [grades, selectedSubject, selectedClassId, classStudentIds]);
 
   const subjectGradesByStudent = useMemo(() => {
     const grouped: Record<string, Grade[]> = {};
