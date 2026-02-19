@@ -1,7 +1,7 @@
-## 2024-05-22 - [Hooks returning generator functions]
-**Learning:** The `useDashboard` hook was returning functions like `getWeeklyAttendanceData` that calculated data on demand. This caused two issues: 1) The functions were recreated on every render, breaking memoization of child components. 2) The calculation happened during render of child components, potentially multiple times.
-**Action:** In future hooks, calculate derived data using `useMemo` and return the data arrays directly. This stabilizes references and avoids redundant calculations.
+## 2025-02-17 - [Nested Loop Optimization in Hooks]
+**Learning:** Found a performance bottleneck in `useBulletinGrades` where a nested loop (Students x Courses) checked for grades using `grades.some(...)`. This resulted in O(S*C*G) complexity.
+**Action:** Replaced the inner search with a `Set` lookup (O(1)) by pre-processing grades in a single pass O(G). Always prefer pre-computing lookups for nested iterations over large datasets.
 
-## 2024-05-23 - [Optimizing derived state in hooks]
-**Learning:** The `useUsers` hook was recalculating `filteredUsers` and `roleCounts` on every render, causing unnecessary re-renders of the user list and stats cards. This is a common pattern when derived state depends on context data.
-**Action:** Use `useMemo` to memoize derived state that depends on context data or local filters. Use single-pass loops for calculating multiple aggregates (like role counts) to reduce complexity from O(kN) to O(N).
+## 2025-02-17 - [Cache Key Delimiters]
+**Learning:** When creating composite keys for Sets/Maps (e.g. `${id1}-${id2}`), use a delimiter that is unlikely to appear in the IDs themselves (like `::`) to prevent potential collisions (e.g. `1-2` and `3` vs `1` and `2-3`).
+**Action:** Use `::` or similar distinct separators for composite keys.
