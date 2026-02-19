@@ -93,13 +93,20 @@ export function HomeworkCard({
           >
             {t('homework.viewSubmissions')}
           </Button>
-          <Button variant="ghost" size="sm" icon={Edit2} onClick={() => onEdit?.(homework)} />
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={Edit2}
+            onClick={() => onEdit?.(homework)}
+            aria-label={t('common.edit')}
+          />
           <Button
             variant="ghost"
             size="sm"
             icon={Trash2}
             onClick={() => onDelete?.(homework.id)}
             className="text-red-500 hover:text-red-700"
+            aria-label={t('common.delete')}
           />
         </div>
       )}
