@@ -45,21 +45,42 @@ import { firebaseConfig } from '../config/firebase';
  * Generates a secure random password
  */
 export const generateSecurePassword = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  const special = '!@#$%^&*()_+';
+  const allChars = upper + lower + numbers + special;
+
+  const getRandomInt = (max: number): number => {
+    const array = new Uint32Array(1);
+    let randomValue = 0;
+    do {
+      crypto.getRandomValues(array);
+      randomValue = array[0];
+    } while (randomValue >= (0xFFFFFFFF - (0xFFFFFFFF % max)));
+    return randomValue % max;
+  };
+
   let password = '';
   // Ensure we have at least one of each type
-  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.floor(Math.random() * 26));
-  password += 'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26));
-  password += '0123456789'.charAt(Math.floor(Math.random() * 10));
-  password += '!@#$%^&*()_+'.charAt(Math.floor(Math.random() * 12));
+  password += upper.charAt(getRandomInt(upper.length));
+  password += lower.charAt(getRandomInt(lower.length));
+  password += numbers.charAt(getRandomInt(numbers.length));
+  password += special.charAt(getRandomInt(special.length));
 
   // Fill the rest randomly
   for (let i = 0; i < 8; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
+    password += allChars.charAt(getRandomInt(allChars.length));
   }
 
-  // Shuffle the password
-  return password.split('').sort(() => 0.5 - Math.random()).join('');
+  // Fisher-Yates Shuffle
+  const passwordArray = password.split('');
+  for (let i = passwordArray.length - 1; i > 0; i--) {
+    const j = getRandomInt(i + 1);
+    [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
+  }
+
+  return passwordArray.join('');
 };
 
 export const createUser = async (user: Omit<User, 'id'>): Promise<{ uid: string; password?: string; emailSent: boolean } | string> => {
