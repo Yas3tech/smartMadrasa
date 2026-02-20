@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeacherGrades } from '../useTeacherGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -10,7 +10,9 @@ vi.mock('../../context/AuthContext', () => ({
 }));
 
 vi.mock('../../context/DataContext', () => ({
-  useData: vi.fn(),
+  useUsers: vi.fn(),
+  useAcademics: vi.fn(),
+  usePerformance: vi.fn(),
 }));
 
 vi.mock('react-hot-toast', () => ({
@@ -53,13 +55,24 @@ describe('useTeacherGrades', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useAuth).mockReturnValue({ user: { id: 't1', role: 'teacher' } } as any);
-    vi.mocked(useData).mockReturnValue({
+
+    // Mock individual hooks
+    vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
+      isLoading: false,
+    } as any);
+
+    vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
-      grades: mockGrades,
       courses: mockCourses,
+      isLoading: false,
+    } as any);
+
+    vi.mocked(usePerformance).mockReturnValue({
+      grades: mockGrades,
       addGrade: vi.fn(),
       updateGrade: vi.fn(),
+      isLoading: false,
     } as any);
   });
 
@@ -82,7 +95,7 @@ describe('useTeacherGrades', () => {
     expect(result.current.subjectGrades.map(g => g.id)).toContain('g2');
   });
 
-  it('should not be affected by search term in filteredStudents (if we use classStudents)', () => {
+  it('should not be affected by search term in filteredStudents', () => {
     const { result } = renderHook(() => useTeacherGrades());
 
     act(() => {
@@ -91,11 +104,6 @@ describe('useTeacherGrades', () => {
       result.current.setSearchTerm('Alice');
     });
 
-    // If implementation uses filteredStudents for subjectGrades calculation, this might fail (or pass but be buggy in UI).
-    // If implementation uses all students, it should still have 2 grades.
-    // The current implementation uses `students` (all students), so it should pass.
-    // But the UI iterates subjectGrades and looks up in filteredStudents, which is the bug.
-    // Here we test that subjectGrades itself contains all relevant grades regardless of search.
     expect(result.current.subjectGrades).toHaveLength(2);
   });
 
@@ -106,14 +114,10 @@ describe('useTeacherGrades', () => {
           result.current.setSelectedClassId('c1');
       });
 
-      // This part will fail until I implement studentMap return
       if (result.current.studentMap) {
           expect(result.current.studentMap.get('s1')).toBeDefined();
           expect(result.current.studentMap.get('s1')?.name).toBe('Alice');
           expect(result.current.studentMap.get('s2')).toBeDefined();
-          // s3 is in c2, so should not be in c1 map? Or maybe map contains all students?
-          // Ideally map contains students relevant to current context (class).
-          // If we implement map of class students:
           expect(result.current.studentMap.get('s3')).toBeUndefined();
       }
   });
