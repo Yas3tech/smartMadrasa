@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  getStoredLanguage,
-  storeLanguage,
-  applyLanguageDirection,
-  getLanguageLabel,
-} from './lang';
+import { getStoredLanguage, storeLanguage, applyLanguageDirection, getLanguageLabel } from './lang';
 
 describe('Language Utilities', () => {
   // Clear localStorage before each test

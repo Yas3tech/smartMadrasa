@@ -140,7 +140,10 @@ export function useUsers(): UseUsersReturn {
         if (result.emailSent) {
           toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
         } else if (result.password) {
-          toast(`Email failed. Temporary password: ${result.password}`, { duration: 20000, icon: '⚠️' });
+          toast(`Email failed. Temporary password: ${result.password}`, {
+            duration: 20000,
+            icon: '⚠️',
+          });
         } else {
           toast.success(t('users.userCreated'));
         }
@@ -228,7 +231,10 @@ export function useUsers(): UseUsersReturn {
       const jsonData = await parseUserFile(file);
 
       // First pass: import all non-parent users and track them
-      const { importedUsers, count: countNonParents } = await processNonParentUsers(jsonData, addUser);
+      const { importedUsers, count: countNonParents } = await processNonParentUsers(
+        jsonData,
+        addUser
+      );
 
       // Second pass: import parents and link to students (including just-imported ones)
       const countParents = await processParentUsers(jsonData, users, importedUsers, addUser);
@@ -242,17 +248,23 @@ export function useUsers(): UseUsersReturn {
     }
   };
 
-
   const isSuperadmin = currentUser?.role === 'superadmin';
-  const visibleUsers = useMemo(() => isSuperadmin ? users : users.filter((u) => u.role !== 'superadmin'), [users, isSuperadmin]);
+  const visibleUsers = useMemo(
+    () => (isSuperadmin ? users : users.filter((u) => u.role !== 'superadmin')),
+    [users, isSuperadmin]
+  );
 
-  const filteredUsers = useMemo(() => visibleUsers.filter((u) => {
-    const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = filterRole === 'all' || u.role === filterRole;
-    return matchesSearch && matchesRole;
-  }), [visibleUsers, searchQuery, filterRole]);
+  const filteredUsers = useMemo(
+    () =>
+      visibleUsers.filter((u) => {
+        const matchesSearch =
+          u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = filterRole === 'all' || u.role === filterRole;
+        return matchesSearch && matchesRole;
+      }),
+    [visibleUsers, searchQuery, filterRole]
+  );
 
   const roleCounts = useMemo(() => {
     const counts = {

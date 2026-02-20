@@ -51,7 +51,6 @@ const ExamModal = ({
       setStartTime(startDate.toTimeString().slice(0, 5));
       setEndTime(endDate.toTimeString().slice(0, 5));
     } else {
-
       setTitle('');
       setDescription('');
       setType('exam');
@@ -131,7 +130,6 @@ const ExamModal = ({
               />
             </div>
           </div>
-
 
           {!propClassId && (
             <div>

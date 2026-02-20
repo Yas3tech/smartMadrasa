@@ -4,18 +4,18 @@
 const teacher = {
   uid: 'teacher1',
   role: 'teacher',
-  classIds: ['classA', 'classB']
+  classIds: ['classA', 'classB'],
 };
 
 const director = {
   uid: 'director1',
-  role: 'director'
+  role: 'director',
 };
 
 const otherTeacher = {
   uid: 'teacher2',
   role: 'teacher',
-  classIds: ['classC']
+  classIds: ['classC'],
 };
 
 // Mock Helper Functions
@@ -83,50 +83,50 @@ const testCases = [
     user: teacher,
     gradeData: { classId: 'classA', score: 10, maxScore: 20 },
     expectedVulnerable: true,
-    expectedFixed: true
+    expectedFixed: true,
   },
   {
     name: 'Teacher writes grade for UNASSIGNED class',
     user: teacher,
     gradeData: { classId: 'classC', score: 10, maxScore: 20 },
     expectedVulnerable: true, // Vulnerability: Allows write!
-    expectedFixed: false // Fixed: Denies write!
+    expectedFixed: false, // Fixed: Denies write!
   },
   {
     name: 'Director writes grade',
     user: director,
     gradeData: { classId: 'classC', score: 10, maxScore: 20 },
     expectedVulnerable: true,
-    expectedFixed: true
+    expectedFixed: true,
   },
   {
     name: 'Teacher writes invalid grade (score > max)',
     user: teacher,
     gradeData: { classId: 'classA', score: 25, maxScore: 20 },
     expectedVulnerable: false,
-    expectedFixed: false
+    expectedFixed: false,
   },
   {
-     name: 'Other Teacher writes to class C (assigned)',
-     user: otherTeacher,
-     gradeData: { classId: 'classC', score: 15, maxScore: 20 },
-     expectedVulnerable: true,
-     expectedFixed: true
+    name: 'Other Teacher writes to class C (assigned)',
+    user: otherTeacher,
+    gradeData: { classId: 'classC', score: 15, maxScore: 20 },
+    expectedVulnerable: true,
+    expectedFixed: true,
   },
   {
-     name: 'Other Teacher writes to class A (unassigned)',
-     user: otherTeacher,
-     gradeData: { classId: 'classA', score: 15, maxScore: 20 },
-     expectedVulnerable: true, // Vulnerability
-     expectedFixed: false
-  }
+    name: 'Other Teacher writes to class A (unassigned)',
+    user: otherTeacher,
+    gradeData: { classId: 'classA', score: 15, maxScore: 20 },
+    expectedVulnerable: true, // Vulnerability
+    expectedFixed: false,
+  },
 ];
 
 console.log('🛡️  Verifying Grade Security Rules Logic...\n');
 
 let passed = true;
 
-testCases.forEach(tc => {
+testCases.forEach((tc) => {
   const vulnResult = checkVulnerableRule(tc.user, tc.gradeData);
   const fixedResult = checkFixedRule(tc.user, tc.gradeData);
 
@@ -138,8 +138,10 @@ testCases.forEach(tc => {
   } else {
     passed = false;
     console.error(`❌ ${tc.name}: FAILED`);
-    if (!vulnMatch) console.error(`   Vulnerable Rule: Got ${vulnResult}, Expected ${tc.expectedVulnerable}`);
-    if (!fixedMatch) console.error(`   Fixed Rule:      Got ${fixedResult}, Expected ${tc.expectedFixed}`);
+    if (!vulnMatch)
+      console.error(`   Vulnerable Rule: Got ${vulnResult}, Expected ${tc.expectedVulnerable}`);
+    if (!fixedMatch)
+      console.error(`   Fixed Rule:      Got ${fixedResult}, Expected ${tc.expectedFixed}`);
   }
 });
 

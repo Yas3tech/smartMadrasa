@@ -72,8 +72,9 @@ const StudentSelector = ({ onSelect, selectedStudentId }: StudentSelectorProps) 
           {children.map((child) => (
             <div
               key={child.id}
-              className={`p-3 hover:bg-orange-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${child.id === selectedStudentId ? 'bg-orange-50 dark:bg-slate-700/50' : ''
-                }`}
+              className={`p-3 hover:bg-orange-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
+                child.id === selectedStudentId ? 'bg-orange-50 dark:bg-slate-700/50' : ''
+              }`}
               onClick={() => {
                 onSelect(child);
                 setIsOpen(false);

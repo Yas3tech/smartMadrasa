@@ -282,10 +282,11 @@ const BulletinDashboard: React.FC = () => {
             <button
               onClick={handlePublishBulletins}
               disabled={!canPublishAll}
-              className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 justify-center ${canPublishAll
-                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+              className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 justify-center ${
+                canPublishAll
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               <Send size={20} />
               {t('bulletinDashboard.publishAllBulletins')}

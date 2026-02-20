@@ -21,7 +21,10 @@ describe('useDashboard', () => {
   it('should return dashboard data correctly', () => {
     // Setup mock data
     const mockUser = { id: 'user1', role: 'director', name: 'Director' };
-    const mockStudents = [{ id: 's1', name: 'Student 1', role: 'student' }, { id: 's2', name: 'Student 2', role: 'student' }];
+    const mockStudents = [
+      { id: 's1', name: 'Student 1', role: 'student' },
+      { id: 's2', name: 'Student 2', role: 'student' },
+    ];
     const mockTeachers = [{ id: 't1', role: 'teacher', name: 'Teacher 1' }];
     const mockAttendance = [
       { date: new Date().toISOString().split('T')[0], status: 'present' },
@@ -60,7 +63,7 @@ describe('useDashboard', () => {
     // So 1 / 2 * 100 = 50.
 
     expect(dash.presentCount).toBe(1);
-    expect(dash.attendanceRate).toBe("50");
+    expect(dash.attendanceRate).toBe('50');
 
     // Check memoization/data structure
     // Check if property exists directly as useDashboard returns an object
@@ -118,10 +121,10 @@ describe('useDashboard', () => {
 
     // Check gradeDistributionData
     // Excellent: 1, Bien: 1, Moyen: 1, Faible: 1
-    const excellent = dash.gradeDistributionData.find(d => d.name.includes('Excellent'));
-    const bien = dash.gradeDistributionData.find(d => d.name.includes('Bien'));
-    const moyen = dash.gradeDistributionData.find(d => d.name.includes('Moyen'));
-    const faible = dash.gradeDistributionData.find(d => d.name.includes('Faible'));
+    const excellent = dash.gradeDistributionData.find((d) => d.name.includes('Excellent'));
+    const bien = dash.gradeDistributionData.find((d) => d.name.includes('Bien'));
+    const moyen = dash.gradeDistributionData.find((d) => d.name.includes('Moyen'));
+    const faible = dash.gradeDistributionData.find((d) => d.name.includes('Faible'));
 
     expect(excellent?.value).toBe(1);
     expect(bien?.value).toBe(1);
@@ -131,8 +134,8 @@ describe('useDashboard', () => {
     // Check subjectPerformanceData
     // Math: (95+85)/2 = 90
     // History: (55+40)/2 = 47.5 -> round to 48
-    const math = dash.subjectPerformanceData.find(d => d.subject === 'Math');
-    const history = dash.subjectPerformanceData.find(d => d.subject === 'History');
+    const math = dash.subjectPerformanceData.find((d) => d.subject === 'Math');
+    const history = dash.subjectPerformanceData.find((d) => d.subject === 'History');
 
     expect(math?.moyenne).toBe(90);
     expect(history?.moyenne).toBe(48);

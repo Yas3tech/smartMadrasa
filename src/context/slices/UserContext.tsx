@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import { useAuth } from '../AuthContext';
 import type { User, Student, Teacher } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
@@ -14,7 +22,9 @@ export interface UserContextType {
   users: User[];
   students: Student[];
   isLoading: boolean;
-  addUser: (user: User) => Promise<{ uid: string; password?: string; emailSent: boolean } | string | void>;
+  addUser: (
+    user: User
+  ) => Promise<{ uid: string; password?: string; emailSent: boolean } | string | void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 }
@@ -29,7 +39,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubUsers = () => { };
+      let unsubUsers = () => {};
 
       if (user?.role === 'student') {
         const student = user as Student;
@@ -60,45 +70,54 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [useFirebase, user]);
 
-  const students = useMemo(
-    () => users.filter((u): u is Student => u.role === 'student'),
-    [users]
+  const students = useMemo(() => users.filter((u): u is Student => u.role === 'student'), [users]);
+
+  const addUser = useCallback(
+    async (user: User) => {
+      if (useFirebase) {
+        return await fbCreateUser(user);
+      }
+    },
+    [useFirebase]
   );
 
-  const addUser = useCallback(async (user: User) => {
-    if (useFirebase) {
-      return await fbCreateUser(user);
-    }
-  }, [useFirebase]);
+  const updateUser = useCallback(
+    async (id: string, updates: Partial<User>) => {
+      if (useFirebase) {
+        await fbUpdateUser(id, updates);
+      }
+    },
+    [useFirebase]
+  );
 
-  const updateUser = useCallback(async (id: string, updates: Partial<User>) => {
-    if (useFirebase) {
-      await fbUpdateUser(id, updates);
-    }
-  }, [useFirebase]);
-
-  const deleteUser = useCallback(async (id: string) => {
-    if (useFirebase) {
-      const userToDelete = users.find((u) => u.id === id);
-      if (userToDelete) {
-        await deleteUserWithAllData(id, userToDelete.role);
-      } else {
-        const fetchedUser = await getUserById(id);
-        if (fetchedUser) {
-          await deleteUserWithAllData(id, fetchedUser.role);
+  const deleteUser = useCallback(
+    async (id: string) => {
+      if (useFirebase) {
+        const userToDelete = users.find((u) => u.id === id);
+        if (userToDelete) {
+          await deleteUserWithAllData(id, userToDelete.role);
+        } else {
+          const fetchedUser = await getUserById(id);
+          if (fetchedUser) {
+            await deleteUserWithAllData(id, fetchedUser.role);
+          }
         }
       }
-    }
-  }, [useFirebase, users]);
+    },
+    [useFirebase, users]
+  );
 
-  const value = useMemo(() => ({
-    users,
-    students,
-    isLoading,
-    addUser,
-    updateUser,
-    deleteUser,
-  }), [users, students, isLoading, addUser, updateUser, deleteUser]);
+  const value = useMemo(
+    () => ({
+      users,
+      students,
+      isLoading,
+      addUser,
+      updateUser,
+      deleteUser,
+    }),
+    [users, students, isLoading, addUser, updateUser, deleteUser]
+  );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };

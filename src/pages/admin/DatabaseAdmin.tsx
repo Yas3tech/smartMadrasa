@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { Card, Button } from '../../components/UI';
 import { Database, Trash2, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
-import {
-  clearAllData,
-  seedSystemBasics,
-} from '../../services/initFirebase';
+import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
 
 const DatabaseAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -70,14 +67,17 @@ const DatabaseAdmin = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Administration Base de Données
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Gérer les données de la plateforme</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Gérer les données de la plateforme
+          </p>
         </div>
       </div>
 
       {message && (
         <div
-          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-            }`}
+          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
+            message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+          }`}
         >
           {message.type === 'success' ? (
             <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />

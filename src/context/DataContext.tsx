@@ -41,7 +41,9 @@ export interface DataContextType {
   useFirebase: boolean;
 
   // Actions
-  addUser: (user: User) => Promise<{ uid: string; password?: string; emailSent: boolean } | string | void>;
+  addUser: (
+    user: User
+  ) => Promise<{ uid: string; password?: string; emailSent: boolean } | string | void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
@@ -92,9 +94,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     <UserProvider>
       <AcademicProvider>
         <CommunicationProvider>
-          <PerformanceProvider>
-            {children}
-          </PerformanceProvider>
+          <PerformanceProvider>{children}</PerformanceProvider>
         </CommunicationProvider>
       </AcademicProvider>
     </UserProvider>

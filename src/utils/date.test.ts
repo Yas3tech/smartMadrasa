@@ -58,8 +58,8 @@ describe('formatFirestoreDate', () => {
   });
 
   it('should handle complex object without toDate as original', () => {
-      const obj = { some: 'value' };
-      expect(formatFirestoreDate(obj)).toBe(obj);
+    const obj = { some: 'value' };
+    expect(formatFirestoreDate(obj)).toBe(obj);
   });
 });
 

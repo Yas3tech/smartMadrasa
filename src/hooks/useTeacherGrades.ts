@@ -123,9 +123,7 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
   const subjectGrades = useMemo(() => {
     if (!selectedSubject || !selectedClassId) return [];
 
-    return grades.filter((g) =>
-      g.subject === selectedSubject && classStudentIds.has(g.studentId)
-    );
+    return grades.filter((g) => g.subject === selectedSubject && classStudentIds.has(g.studentId));
   }, [grades, selectedSubject, selectedClassId, classStudentIds]);
 
   const subjectGradesByStudent = useMemo(() => {
@@ -174,7 +172,7 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
         gradesData.map((grade) =>
           addGrade({
             ...grade,
-            teacherId: user?.id || "",
+            teacherId: user?.id || '',
             classId: selectedClassId,
             courseId: courses.find(
               (c) => c.subject === grade.subject && c.classId === selectedClassId
@@ -182,7 +180,7 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
           })
         )
       );
-      toast.success(t("grades.gradesSaved"));
+      toast.success(t('grades.gradesSaved'));
       setIsBulkModalOpen(false);
     } catch {
       toast.error(t('grades.saveError'));

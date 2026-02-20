@@ -15,7 +15,7 @@ vi.mock('firebase/firestore', () => ({
       seconds: date.getTime() / 1000,
       nanoseconds: 0,
       toDate: () => date,
-      toISOString: () => date.toISOString()
+      toISOString: () => date.toISOString(),
     })),
   },
 }));
@@ -79,8 +79,12 @@ describe('events service', () => {
 
       expect(updateData.title).toBe('New Title');
       // Verify Timestamp structure
-      expect(updateData.start).toEqual(expect.objectContaining({ seconds: new Date(updates.start).getTime() / 1000 }));
-      expect(updateData.end).toEqual(expect.objectContaining({ seconds: new Date(updates.end).getTime() / 1000 }));
+      expect(updateData.start).toEqual(
+        expect.objectContaining({ seconds: new Date(updates.start).getTime() / 1000 })
+      );
+      expect(updateData.end).toEqual(
+        expect.objectContaining({ seconds: new Date(updates.end).getTime() / 1000 })
+      );
     });
 
     it('should handle updates without start/end dates', async () => {

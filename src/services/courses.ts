@@ -54,7 +54,7 @@ export const deleteCourse = async (classId: string, courseId: string): Promise<v
 };
 
 export const subscribeToCourses = (callback: (courses: Course[]) => void) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
   // Use collectionGroup to listen to ALL courses across all classes
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     callback(mapQuerySnapshot<Course>(snapshot));

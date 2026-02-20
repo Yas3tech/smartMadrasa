@@ -63,7 +63,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
   const [teacherComments, setTeacherComments] = useState<TeacherComment[]>([]);
   const [classComments, setClassComments] = useState<TeacherComment[]>([]);
 
-
   useEffect(() => {
     if (selectedStudent) {
       const unsubscribe = subscribeToTeacherCommentsByStudent(
@@ -77,7 +76,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
       setTeacherComments([]);
     }
   }, [selectedStudent]);
-
 
   useEffect(() => {
     if (selectedPeriod && user?.id) {
@@ -111,7 +109,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     if (!selectedClassId) return [];
     return students.filter((s) => (s as Student).classId === selectedClassId);
   }, [selectedClassId, students]);
-
 
   const classValidationStats = useMemo(() => {
     if (!selectedClassId || !user?.id || !selectedPeriodData) return { total: 0, validated: 0 };
@@ -166,7 +163,6 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     grades,
   ]);
 
-
   const studentCourseAverages = useMemo(() => {
     if (!selectedStudent || !selectedPeriod || !selectedPeriodData || !user) return [];
 
@@ -218,15 +214,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
         };
       })
       .filter((item) => item.gradeCount > 0);
-  }, [
-    selectedStudent,
-    selectedPeriod,
-    selectedPeriodData,
-    courses,
-    user,
-    grades,
-    teacherComments,
-  ]);
+  }, [selectedStudent, selectedPeriod, selectedPeriodData, courses, user, grades, teacherComments]);
 
   const overallAverage = useMemo(() => {
     if (studentCourseAverages.length === 0) return 0;

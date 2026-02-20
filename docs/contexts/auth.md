@@ -3,9 +3,10 @@
 Le `AuthContext` est responsable de la gestion de l'identité de l'utilisateur et de sa session.
 
 ## 🎯 Objectif
-*   Surveiller l'état de connexion Firebase (`onAuthStateChanged`).
-*   Récupérer le profil utilisateur enrichi depuis Firestore (rôle, classe, etc.).
-*   Fournir l'objet `user` globalement à l'application.
+
+- Surveiller l'état de connexion Firebase (`onAuthStateChanged`).
+- Récupérer le profil utilisateur enrichi depuis Firestore (rôle, classe, etc.).
+- Fournir l'objet `user` globalement à l'application.
 
 ## 🔄 Flux d'Authentification
 
@@ -48,11 +49,11 @@ sequenceDiagram
 
 L'interface `AuthContextType` expose :
 
-| Propriété | Type | Description |
-|-----------|------|-------------|
-| `user` | `User \| null` | L'objet utilisateur complet (avec rôle). |
-| `loading` | `boolean` | `true` tant que Firebase vérifie la session. |
-| `logout` | `() => Promise<void>` | Déconnecte l'utilisateur. |
+| Propriété | Type                  | Description                                  |
+| --------- | --------------------- | -------------------------------------------- |
+| `user`    | `User \| null`        | L'objet utilisateur complet (avec rôle).     |
+| `loading` | `boolean`             | `true` tant que Firebase vérifie la session. |
+| `logout`  | `() => Promise<void>` | Déconnecte l'utilisateur.                    |
 
 ## ⚠️ Points Notables
 

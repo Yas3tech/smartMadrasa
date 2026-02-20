@@ -34,7 +34,6 @@ const GradeModal = ({
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
 
-
   // Filter students by class if classId is provided
   const classStudents = classId
     ? students.filter((s) => (s as Student).classId === classId)
@@ -99,7 +98,6 @@ const GradeModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('common.student')} *
@@ -119,7 +117,6 @@ const GradeModal = ({
             </select>
           </div>
 
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('common.subject')} *
@@ -138,7 +135,6 @@ const GradeModal = ({
               ))}
             </select>
           </div>
-
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -167,7 +163,6 @@ const GradeModal = ({
             />
           </div>
 
-
           <div className="grid grid-cols-2 gap-4">
             <Input
               label={`${t('grades.score')} *`}
@@ -189,7 +184,6 @@ const GradeModal = ({
             />
           </div>
 
-
           <Input
             label={`${t('common.date')} *`}
             type="date"
@@ -197,7 +191,6 @@ const GradeModal = ({
             onChange={(e) => setDate(e.target.value)}
             required
           />
-
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -211,7 +204,6 @@ const GradeModal = ({
               placeholder={t('grades.feedbackDescPlaceholder')}
             />
           </div>
-
 
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={onClose} type="button">

@@ -78,8 +78,8 @@ describe('useTeacherGrades', () => {
     // Should NOT include g3 (Alice, Science)
     // Should NOT include g4 (Charlie, Math, c2)
     expect(result.current.subjectGrades).toHaveLength(2);
-    expect(result.current.subjectGrades.map(g => g.id)).toContain('g1');
-    expect(result.current.subjectGrades.map(g => g.id)).toContain('g2');
+    expect(result.current.subjectGrades.map((g) => g.id)).toContain('g1');
+    expect(result.current.subjectGrades.map((g) => g.id)).toContain('g2');
   });
 
   it('should not be affected by search term in filteredStudents (if we use classStudents)', () => {
@@ -100,21 +100,21 @@ describe('useTeacherGrades', () => {
   });
 
   it('should return a studentMap for efficient lookups', () => {
-      const { result } = renderHook(() => useTeacherGrades());
+    const { result } = renderHook(() => useTeacherGrades());
 
-      act(() => {
-          result.current.setSelectedClassId('c1');
-      });
+    act(() => {
+      result.current.setSelectedClassId('c1');
+    });
 
-      // This part will fail until I implement studentMap return
-      if (result.current.studentMap) {
-          expect(result.current.studentMap.get('s1')).toBeDefined();
-          expect(result.current.studentMap.get('s1')?.name).toBe('Alice');
-          expect(result.current.studentMap.get('s2')).toBeDefined();
-          // s3 is in c2, so should not be in c1 map? Or maybe map contains all students?
-          // Ideally map contains students relevant to current context (class).
-          // If we implement map of class students:
-          expect(result.current.studentMap.get('s3')).toBeUndefined();
-      }
+    // This part will fail until I implement studentMap return
+    if (result.current.studentMap) {
+      expect(result.current.studentMap.get('s1')).toBeDefined();
+      expect(result.current.studentMap.get('s1')?.name).toBe('Alice');
+      expect(result.current.studentMap.get('s2')).toBeDefined();
+      // s3 is in c2, so should not be in c1 map? Or maybe map contains all students?
+      // Ideally map contains students relevant to current context (class).
+      // If we implement map of class students:
+      expect(result.current.studentMap.get('s3')).toBeUndefined();
+    }
   });
 });

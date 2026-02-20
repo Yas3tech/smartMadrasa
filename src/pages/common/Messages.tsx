@@ -76,12 +76,13 @@ const Messages = () => {
       <Card className="flex-1 flex overflow-hidden !p-0 border-0 shadow-xl">
         {/* Left Sidebar - Folders */}
         <div
-          className={`${isMobile
-            ? mobileView === 'folders'
-              ? 'flex-1 w-full bg-white dark:bg-slate-800'
-              : 'hidden'
-            : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
-            }`}
+          className={`${
+            isMobile
+              ? mobileView === 'folders'
+                ? 'flex-1 w-full bg-white dark:bg-slate-800'
+                : 'hidden'
+              : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+          }`}
         >
           <div className="p-4">
             <div className="flex items-center gap-3 mb-6 px-2">
@@ -105,10 +106,11 @@ const Messages = () => {
                     setSelectedFolder(folder.id);
                     if (isMobile) setMobileView('list');
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedFolder === folder.id
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
-                    }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    selectedFolder === folder.id
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
                 >
                   <folder.icon size={18} />
                   {folder.label}
@@ -120,12 +122,13 @@ const Messages = () => {
 
         {/* Middle Column - Message List */}
         <div
-          className={`${isMobile
-            ? mobileView === 'list'
-              ? 'flex-1 w-full bg-white dark:bg-slate-900'
-              : 'hidden'
-            : 'w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col'
-            }`}
+          className={`${
+            isMobile
+              ? mobileView === 'list'
+                ? 'flex-1 w-full bg-white dark:bg-slate-900'
+                : 'hidden'
+              : 'w-80 bg-gray-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+          }`}
         >
           <div className="p-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800">
             <div className="flex items-center gap-2 mb-2">
@@ -171,10 +174,11 @@ const Messages = () => {
               <div
                 key={message.id}
                 onClick={() => handleSelectMessage(message)}
-                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${selectedMessage?.id === message.id
-                  ? 'bg-orange-50 border-l-4 border-l-orange-500'
-                  : 'hover:bg-white'
-                  }`}
+                className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                  selectedMessage?.id === message.id
+                    ? 'bg-orange-50 border-l-4 border-l-orange-500'
+                    : 'hover:bg-white'
+                }`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center gap-2">
@@ -214,12 +218,13 @@ const Messages = () => {
 
         {/* Right Column - Message Detail */}
         <div
-          className={`${isMobile
-            ? mobileView === 'detail'
-              ? 'flex-1 w-full bg-white dark:bg-slate-800 flex flex-col'
-              : 'hidden'
-            : 'flex-1 bg-white dark:bg-slate-800 flex flex-col'
-            }`}
+          className={`${
+            isMobile
+              ? mobileView === 'detail'
+                ? 'flex-1 w-full bg-white dark:bg-slate-800 flex flex-col'
+                : 'hidden'
+              : 'flex-1 bg-white dark:bg-slate-800 flex flex-col'
+          }`}
         >
           {selectedMessage ? (
             <>

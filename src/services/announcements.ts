@@ -30,14 +30,11 @@ const COLLECTION_NAME = 'announcements';
 
 // Helper for transforming timestamps
 const transformAnnouncement = (data: DocumentData): Partial<Announcement> => ({
-  date:
-    data.date instanceof Timestamp
-      ? data.date.toDate().toISOString()
-      : data.date,
+  date: data.date instanceof Timestamp ? data.date.toDate().toISOString() : data.date,
 });
 
 export const subscribeToAnnouncements = (callback: (announcements: Announcement[]) => void) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
 
   const q = query(collection(db, COLLECTION_NAME), orderBy('date', 'desc'));
 

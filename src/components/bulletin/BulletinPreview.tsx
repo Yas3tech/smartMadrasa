@@ -78,7 +78,7 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
   const overallAverage =
     courseData.length > 0
       ? courseData.reduce((acc, c) => acc + (c.average || 0), 0) /
-      courseData.filter((c) => c.average !== null).length
+        courseData.filter((c) => c.average !== null).length
       : 0;
 
   const handleDownload = () => {

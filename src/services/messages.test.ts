@@ -73,17 +73,19 @@ describe('subscribeToMessages Performance & Logic', () => {
 
     // Mock onSnapshot to immediately invoke callback with mock data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (vi.mocked(onSnapshot) as any).mockImplementation((_q: unknown, snapshotCallback: (snapshot: unknown) => void) => {
-      const mockDocs = [
-        { id: '1', data: () => ({ timestamp: '2023-01-01T10:00:00Z', content: 'Old' }) },
-        { id: '2', data: () => ({ timestamp: '2023-01-02T10:00:00Z', content: 'New' }) },
-        { id: '3', data: () => ({ timestamp: '2023-01-01T12:00:00Z', content: 'Middle' }) },
-      ];
+    (vi.mocked(onSnapshot) as any).mockImplementation(
+      (_q: unknown, snapshotCallback: (snapshot: unknown) => void) => {
+        const mockDocs = [
+          { id: '1', data: () => ({ timestamp: '2023-01-01T10:00:00Z', content: 'Old' }) },
+          { id: '2', data: () => ({ timestamp: '2023-01-02T10:00:00Z', content: 'New' }) },
+          { id: '3', data: () => ({ timestamp: '2023-01-01T12:00:00Z', content: 'Middle' }) },
+        ];
 
-      // Pass the mock snapshot
-      snapshotCallback({ docs: mockDocs });
-      return () => { };
-    });
+        // Pass the mock snapshot
+        snapshotCallback({ docs: mockDocs });
+        return () => {};
+      }
+    );
 
     subscribeToMessages(callback, userId);
 

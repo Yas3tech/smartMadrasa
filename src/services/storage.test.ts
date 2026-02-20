@@ -38,7 +38,9 @@ describe('Storage Path Generators', () => {
 
       const path = generateHomeworkPath(homeworkId, studentId, fileName);
 
-      expect(path).toBe(`homework/${homeworkId}/${studentId}/${MOCK_TIMESTAMP}_${expectedSanitizedName}`);
+      expect(path).toBe(
+        `homework/${homeworkId}/${studentId}/${MOCK_TIMESTAMP}_${expectedSanitizedName}`
+      );
     });
 
     it('should preserve dots and dashes in the filename', () => {

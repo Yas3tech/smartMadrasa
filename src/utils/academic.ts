@@ -13,7 +13,7 @@ export const getRelevantPeriodIds = (periods: AcademicPeriod[]): string[] => {
   const now = new Date();
 
   // 1. Try to find the period that currently encompasses today
-  let targetPeriod = periods.find(p => {
+  let targetPeriod = periods.find((p) => {
     const start = new Date(p.startDate);
     const end = new Date(p.endDate);
     return now >= start && now <= end;
@@ -23,8 +23,8 @@ export const getRelevantPeriodIds = (periods: AcademicPeriod[]): string[] => {
   if (!targetPeriod) {
     // Sort periods by endDate descending to find the latest one
     // We clone the array to avoid mutating the input
-    const sortedPeriods = [...periods].sort((a, b) =>
-      new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+    const sortedPeriods = [...periods].sort(
+      (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
     );
     targetPeriod = sortedPeriods[0];
   }
@@ -32,7 +32,5 @@ export const getRelevantPeriodIds = (periods: AcademicPeriod[]): string[] => {
   if (!targetPeriod) return [];
 
   // 3. Return all period IDs that belong to the same academic year as the target period
-  return periods
-    .filter(p => p.academicYear === targetPeriod!.academicYear)
-    .map(p => p.id);
+  return periods.filter((p) => p.academicYear === targetPeriod!.academicYear).map((p) => p.id);
 };

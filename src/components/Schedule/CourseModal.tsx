@@ -15,7 +15,6 @@ interface CourseModalProps {
   teacherId: string;
 }
 
-
 const DAY_KEYS = [
   'monday',
   'tuesday',
@@ -46,7 +45,6 @@ const CourseModal = ({
   const [room, setRoom] = useState('');
   const [notes, setNotes] = useState('');
 
-
   const [isRecurring, setIsRecurring] = useState(true);
   const [recurrenceType, setRecurrenceType] = useState<'all_year' | 'custom_period'>('all_year');
   const [recurrenceStart, setRecurrenceStart] = useState('');
@@ -76,7 +74,6 @@ const CourseModal = ({
         setSpecificDate(editingCourse.specificDate || '');
       }
     } else {
-
       setSubject('');
       if (!propClassId) setClassId('');
       setDayOfWeek(1);
@@ -99,12 +96,10 @@ const CourseModal = ({
       return;
     }
 
-
     if (!isRecurring && !specificDate) {
       toast.error(t('schedule.selectDateError'));
       return;
     }
-
 
     if (isRecurring && recurrenceType === 'custom_period' && (!recurrenceStart || !recurrenceEnd)) {
       toast.error(t('schedule.definePeriodError'));
@@ -113,7 +108,6 @@ const CourseModal = ({
 
     setLoading(true);
     try {
-
       const courseData: Omit<Course, 'id'> & {
         room?: string;
         notes?: string;
@@ -137,8 +131,6 @@ const CourseModal = ({
         // User requested "All Year" to start from today
         courseData.recurrenceStart = new Date().toISOString().split('T')[0];
       }
-
-
 
       if (room) courseData.room = room;
       if (notes) courseData.notes = notes;
@@ -166,7 +158,6 @@ const CourseModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {!propClassId && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -190,7 +181,6 @@ const CourseModal = ({
             </div>
           )}
 
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('schedule.subject')} *
@@ -205,7 +195,6 @@ const CourseModal = ({
               required
             />
             <datalist id="subjects-list">
-
               {courses
                 .filter((c) => c.teacherId === teacherId)
                 .map((c) => c.subject)
@@ -215,7 +204,6 @@ const CourseModal = ({
                 ))}
             </datalist>
           </div>
-
 
           <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -242,7 +230,6 @@ const CourseModal = ({
             </label>
           </div>
 
-
           {!isRecurring && (
             <Input
               label={`${t('common.date')} *`}
@@ -258,7 +245,6 @@ const CourseModal = ({
               required
             />
           )}
-
 
           {isRecurring && (
             <div className="space-y-3 pl-4 border-l-2 border-orange-100">
@@ -308,7 +294,6 @@ const CourseModal = ({
             </div>
           )}
 
-
           {isRecurring && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -329,7 +314,6 @@ const CourseModal = ({
             </div>
           )}
 
-
           <div className="grid grid-cols-2 gap-4">
             <Input
               label={`${t('schedule.startTime')} *`}
@@ -349,7 +333,6 @@ const CourseModal = ({
 
           {/* Recurring Checkbox Removed (replaced by radio buttons above) */}
 
-
           <Input
             label={t('schedule.roomOptional')}
             type="text"
@@ -357,7 +340,6 @@ const CourseModal = ({
             onChange={(e) => setRoom(e.target.value)}
             placeholder="ex: Salle 101"
           />
-
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -371,7 +353,6 @@ const CourseModal = ({
               placeholder={t('schedule.notesPlaceholder')}
             />
           </div>
-
 
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={onClose} type="button">

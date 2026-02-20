@@ -36,10 +36,14 @@ export const getUserById = async (id: string): Promise<User | null> => {
 };
 
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, type Auth } from 'firebase/auth';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  type Auth,
+} from 'firebase/auth';
 import { firebaseConfig } from '../config/firebase';
-
-
 
 /**
  * Generates a secure random password
@@ -57,7 +61,7 @@ export const generateSecurePassword = (): string => {
     do {
       crypto.getRandomValues(array);
       randomValue = array[0];
-    } while (randomValue >= (0xFFFFFFFF - (0xFFFFFFFF % max)));
+    } while (randomValue >= 0xffffffff - (0xffffffff % max));
     return randomValue % max;
   };
 
@@ -83,7 +87,9 @@ export const generateSecurePassword = (): string => {
   return passwordArray.join('');
 };
 
-export const createUser = async (user: Omit<User, 'id'>): Promise<{ uid: string; password?: string; emailSent: boolean } | string> => {
+export const createUser = async (
+  user: Omit<User, 'id'>
+): Promise<{ uid: string; password?: string; emailSent: boolean } | string> => {
   if (!db) throw new Error('Firebase not configured');
 
   let authResult: { uid: string; password?: string; emailSent: boolean } | null = null;
@@ -136,7 +142,9 @@ const getSecondaryAuth = (): Auth => {
   return secondaryAuth!;
 };
 
-const createAuthUser = async (email: string): Promise<{ uid: string; password?: string; emailSent: boolean }> => {
+const createAuthUser = async (
+  email: string
+): Promise<{ uid: string; password?: string; emailSent: boolean }> => {
   // Use the existing secondary app or initialize it if needed
   const auth = getSecondaryAuth();
   const password = generateSecurePassword();
@@ -220,7 +228,7 @@ export const subscribeToUsers = (
   queries: UserQueryFilters[] = []
 ) => {
   const firestore = db;
-  if (!firestore) return () => { };
+  if (!firestore) return () => {};
 
   // If no queries provided, fallback to default (fetch all)
   if (!queries || queries.length === 0) {

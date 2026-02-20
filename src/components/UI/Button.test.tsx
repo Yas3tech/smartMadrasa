@@ -49,7 +49,11 @@ describe('Button', () => {
 
   it('is disabled when isLoading is true', () => {
     const handleClick = vi.fn();
-    render(<Button isLoading onClick={handleClick}>Loading</Button>);
+    render(
+      <Button isLoading onClick={handleClick}>
+        Loading
+      </Button>
+    );
 
     const button = screen.getByText('Loading').closest('button');
     expect(button).toBeDisabled();
@@ -60,7 +64,11 @@ describe('Button', () => {
 
   it('does not show icon when isLoading is true', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    render(<Button isLoading icon={MockIcon as any}>Loading</Button>);
+    render(
+      <Button isLoading icon={MockIcon as any}>
+        Loading
+      </Button>
+    );
     expect(screen.queryByTestId('mock-icon')).not.toBeInTheDocument();
   });
 });

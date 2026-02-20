@@ -1,0 +1,3 @@
+## 2024-05-22 - [Playwright Verification of :focus-visible]
+**Learning:** Testing `:focus-visible` styles with Playwright can be tricky in headless mode. `element.focus()` might not trigger `:focus-visible` unless a keyboard interaction (like Tab) is simulated. Also, taking screenshots immediately after focus might capture the state before the ring is fully rendered or if the browser doesn't apply it in that specific context.
+**Action:** When verifying focus rings, use `page.keyboard.press("Tab")` to navigate to the element instead of `element.focus()`. Ensure the screenshot is taken after the interaction. Rely on attribute verification (`role`, `tabIndex`) as the primary source of truth for accessibility logic.

@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { processNonParentUsers, processParentUsers, ImportedUserSummary, parseUserFile, UserImportRow } from './userImport';
+import {
+  processNonParentUsers,
+  processParentUsers,
+  ImportedUserSummary,
+  parseUserFile,
+  UserImportRow,
+} from './userImport';
 import { User, Parent } from '../types';
 import * as xlsx from 'xlsx';
 
@@ -30,7 +36,9 @@ describe('userImport', () => {
         Sheets: { Sheet1: {} },
       };
       vi.mocked(xlsx.read).mockReturnValue(mockWorkbook as ReturnType<typeof xlsx.read>);
-      vi.mocked(xlsx.utils.sheet_to_json).mockReturnValue(mockData as ReturnType<typeof xlsx.utils.sheet_to_json>);
+      vi.mocked(xlsx.utils.sheet_to_json).mockReturnValue(
+        mockData as ReturnType<typeof xlsx.utils.sheet_to_json>
+      );
 
       const result = await parseUserFile(mockFile);
 
@@ -62,11 +70,14 @@ describe('userImport', () => {
   describe('processParentUsers', () => {
     it('should import parent users and link to existing students', async () => {
       const mockData: UserImportRow[] = [
-        { name: 'Parent 1', email: 'p1@example.com', role: 'parent', studentEmail: 's1@example.com' },
+        {
+          name: 'Parent 1',
+          email: 'p1@example.com',
+          role: 'parent',
+          studentEmail: 's1@example.com',
+        },
       ];
-      const existingUsers = [
-        { id: 'u1', email: 's1@example.com', role: 'student' } as User,
-      ];
+      const existingUsers = [{ id: 'u1', email: 's1@example.com', role: 'student' } as User];
       const importedUsers: ImportedUserSummary[] = [];
       const addUser = vi.fn();
 
@@ -82,7 +93,12 @@ describe('userImport', () => {
 
     it('should import parent users and link to imported students', async () => {
       const mockData: UserImportRow[] = [
-        { name: 'Parent 1', email: 'p1@example.com', role: 'parent', studentEmail: 's2@example.com' },
+        {
+          name: 'Parent 1',
+          email: 'p1@example.com',
+          role: 'parent',
+          studentEmail: 's2@example.com',
+        },
       ];
       const existingUsers: User[] = [];
       const importedUsers: ImportedUserSummary[] = [

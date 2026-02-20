@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import { useAuth } from '../AuthContext';
 import type { Message, Event, Parent, Student, Teacher } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
@@ -45,7 +53,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   useEffect(() => {
     if (useFirebase) {
       const unsubMessages = subscribeToMessages(setMessages, user?.id);
-      let unsubEvents = () => { };
+      let unsubEvents = () => {};
 
       if (user?.role === 'parent') {
         const parentUser = user as Parent;
@@ -57,13 +65,11 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
         }
       } else if (user?.role === 'student') {
         const student = user as Student;
-        unsubEvents = student.classId
-          ? subscribeToEvents(setEvents, [student.classId])
-          : () => { };
+        unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => {};
       } else if (user?.role === 'teacher') {
         const teacher = user as Teacher;
         unsubEvents =
-          teacher.classIds?.length > 0 ? subscribeToEvents(setEvents, teacher.classIds) : () => { };
+          teacher.classIds?.length > 0 ? subscribeToEvents(setEvents, teacher.classIds) : () => {};
       } else {
         // Director / Admin
         unsubEvents = subscribeToEvents(setEvents);
@@ -80,71 +86,95 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
     }
   }, [useFirebase, user]);
 
-  const sendMessage = useCallback(async (message: Omit<Message, 'id' | 'timestamp'>) => {
-    if (useFirebase) {
-      await fbSendMessage(message);
-    }
-  }, [useFirebase]);
+  const sendMessage = useCallback(
+    async (message: Omit<Message, 'id' | 'timestamp'>) => {
+      if (useFirebase) {
+        await fbSendMessage(message);
+      }
+    },
+    [useFirebase]
+  );
 
-  const deleteMessage = useCallback(async (id: string | number) => {
-    if (useFirebase) {
-      await fbDeleteMessage(String(id));
-    }
-  }, [useFirebase]);
+  const deleteMessage = useCallback(
+    async (id: string | number) => {
+      if (useFirebase) {
+        await fbDeleteMessage(String(id));
+      }
+    },
+    [useFirebase]
+  );
 
-  const markMessageAsRead = useCallback(async (id: string | number) => {
-    if (useFirebase) {
-      await fbMarkMessageAsRead(String(id));
-    }
-  }, [useFirebase]);
+  const markMessageAsRead = useCallback(
+    async (id: string | number) => {
+      if (useFirebase) {
+        await fbMarkMessageAsRead(String(id));
+      }
+    },
+    [useFirebase]
+  );
 
-  const updateMessage = useCallback(async (id: string | number, updates: Partial<Message>) => {
-    if (useFirebase) {
-      await fbUpdateMessage(String(id), updates);
-    }
-  }, [useFirebase]);
+  const updateMessage = useCallback(
+    async (id: string | number, updates: Partial<Message>) => {
+      if (useFirebase) {
+        await fbUpdateMessage(String(id), updates);
+      }
+    },
+    [useFirebase]
+  );
 
-  const addEvent = useCallback(async (event: Omit<Event, 'id'>) => {
-    if (useFirebase) {
-      await fbCreateEvent(event);
-    }
-  }, [useFirebase]);
+  const addEvent = useCallback(
+    async (event: Omit<Event, 'id'>) => {
+      if (useFirebase) {
+        await fbCreateEvent(event);
+      }
+    },
+    [useFirebase]
+  );
 
-  const updateEvent = useCallback(async (id: string, updates: Partial<Event>) => {
-    if (useFirebase) {
-      await fbUpdateEvent(id, updates);
-    }
-  }, [useFirebase]);
+  const updateEvent = useCallback(
+    async (id: string, updates: Partial<Event>) => {
+      if (useFirebase) {
+        await fbUpdateEvent(id, updates);
+      }
+    },
+    [useFirebase]
+  );
 
-  const deleteEvent = useCallback(async (id: string) => {
-    if (useFirebase) {
-      await fbDeleteEvent(id);
-    }
-  }, [useFirebase]);
+  const deleteEvent = useCallback(
+    async (id: string) => {
+      if (useFirebase) {
+        await fbDeleteEvent(id);
+      }
+    },
+    [useFirebase]
+  );
 
-  const value = useMemo(() => ({
-    messages,
-    events,
-    isLoading,
-    sendMessage,
-    deleteMessage,
-    markMessageAsRead,
-    updateMessage,
-    addEvent,
-    updateEvent,
-    deleteEvent,
-  }), [
-    messages,
-    events,
-    isLoading,
-    sendMessage,
-    deleteMessage,
-    markMessageAsRead,
-    updateMessage,
-    addEvent,
-    updateEvent,
-    deleteEvent,
-  ]);
+  const value = useMemo(
+    () => ({
+      messages,
+      events,
+      isLoading,
+      sendMessage,
+      deleteMessage,
+      markMessageAsRead,
+      updateMessage,
+      addEvent,
+      updateEvent,
+      deleteEvent,
+    }),
+    [
+      messages,
+      events,
+      isLoading,
+      sendMessage,
+      deleteMessage,
+      markMessageAsRead,
+      updateMessage,
+      addEvent,
+      updateEvent,
+      deleteEvent,
+    ]
+  );
 
   return <CommunicationContext.Provider value={value}>{children}</CommunicationContext.Provider>;
 };

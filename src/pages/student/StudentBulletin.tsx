@@ -25,7 +25,7 @@ const StudentBulletin: React.FC = () => {
     if (user?.role !== 'parent') return [];
     const parentUser = user as unknown as Parent;
     // Filter students from the global list that match the parent's children IDs
-    return students.filter(s => parentUser.childrenIds?.includes(s.id));
+    return students.filter((s) => parentUser.childrenIds?.includes(s.id));
   }, [user, students]);
 
   // Auto-select first child for parents
@@ -39,7 +39,8 @@ const StudentBulletin: React.FC = () => {
   const canAccess = user?.role === 'student' || user?.role === 'parent';
 
   // Get student ID - use optional chaining since user might be null at this point
-  const studentId = user?.role === 'student' ? user?.id : (user?.role === 'parent' ? selectedChildId : null);
+  const studentId =
+    user?.role === 'student' ? user?.id : user?.role === 'parent' ? selectedChildId : null;
   const studentData = students.find((s) => s.id === studentId) as Student | undefined;
 
   // Subscribe to teacher comments for this student

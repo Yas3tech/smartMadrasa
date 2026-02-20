@@ -126,12 +126,7 @@ describe('LoadingStates Components', () => {
     });
 
     it('should render action if provided', () => {
-      render(
-        <EmptyState
-          title="No Data"
-          action={<button>Retry</button>}
-        />
-      );
+      render(<EmptyState title="No Data" action={<button>Retry</button>} />);
       expect(screen.getByText('Retry')).toBeInTheDocument();
     });
   });

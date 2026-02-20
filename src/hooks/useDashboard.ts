@@ -81,8 +81,8 @@ export function useDashboard(): UseDashboardReturn {
   const avgGrade = useMemo(() => {
     return allGrades.length > 0
       ? (
-        allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
-      ).toFixed(1)
+          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
+        ).toFixed(1)
       : 0;
   }, [allGrades]);
 
@@ -107,13 +107,16 @@ export function useDashboard(): UseDashboardReturn {
       : (user as User & { classId?: string })?.classId;
   }, [user, selectedChild]);
 
-  const myGrades = useMemo(() => grades.filter((g) => g.studentId === targetStudentId), [grades, targetStudentId]);
+  const myGrades = useMemo(
+    () => grades.filter((g) => g.studentId === targetStudentId),
+    [grades, targetStudentId]
+  );
 
   const myAvg = useMemo(() => {
     return myGrades.length > 0
       ? (
-        myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
-      ).toFixed(1)
+          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
+        ).toFixed(1)
       : 0;
   }, [myGrades]);
 
@@ -146,7 +149,10 @@ export function useDashboard(): UseDashboardReturn {
       .slice(0, 5);
   }, [homeworks, targetClassId]);
 
-  const childClass = useMemo(() => classes.find((c) => c.id === targetClassId), [classes, targetClassId]);
+  const childClass = useMemo(
+    () => classes.find((c) => c.id === targetClassId),
+    [classes, targetClassId]
+  );
 
   // Handlers
   const handleOpenHomework = useCallback((homework: Homework) => {
