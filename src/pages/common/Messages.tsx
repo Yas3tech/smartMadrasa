@@ -8,6 +8,7 @@
 import { useTranslation } from 'react-i18next';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { useMessages } from '../../hooks/useMessages';
+import { isSafeUrl } from '../../utils/security';
 import {
   Search,
   PenSquare,
@@ -299,7 +300,7 @@ const Messages = () => {
                       {t('messages.attachments')} ({selectedMessage.attachments.length})
                     </h3>
                     <div className="flex flex-wrap gap-3">
-                      {selectedMessage.attachments.map((url, index) => (
+                      {selectedMessage.attachments.filter(isSafeUrl).map((url, index) => (
                         <a
                           key={index}
                           href={url}
