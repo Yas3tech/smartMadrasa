@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+} from 'react';
 import { useAuth } from '../AuthContext';
 import type { ClassGroup, Course, Parent, Student, Teacher } from '../../types';
 import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
@@ -68,8 +76,8 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubClasses = () => { };
-      let unsubCourses = () => { };
+      let unsubClasses = () => {};
+      let unsubCourses = () => {};
       const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
       const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
 
@@ -109,129 +117,171 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [useFirebase, user]);
 
-  const addClass = useCallback(async (classGroup: ClassGroup) => {
-    if (useFirebase) {
-      await fbCreateClass(classGroup);
-    }
-  }, [useFirebase]);
-
-  const updateClass = useCallback(async (id: string, updates: Partial<ClassGroup>) => {
-    if (useFirebase) {
-      await fbUpdateClass(id, updates);
-    }
-  }, [useFirebase]);
-
-  const deleteClass = useCallback(async (id: string) => {
-    if (useFirebase) {
-      await fbDeleteClass(id);
-    }
-  }, [useFirebase]);
-
-  const addCourse = useCallback(async (course: Omit<Course, 'id'>) => {
-    if (useFirebase) {
-      await fbCreateCourse(course.classId, course);
-    }
-  }, [useFirebase]);
-
-  const updateCourse = useCallback(async (id: string, updates: Partial<Course>) => {
-    if (useFirebase) {
-      const course = courses.find((c) => c.id === id);
-      if (course) {
-        await fbUpdateCourse(course.classId, id, updates);
+  const addClass = useCallback(
+    async (classGroup: ClassGroup) => {
+      if (useFirebase) {
+        await fbCreateClass(classGroup);
       }
-    }
-  }, [useFirebase, courses]);
+    },
+    [useFirebase]
+  );
 
-  const deleteCourse = useCallback(async (id: string) => {
-    if (useFirebase) {
-      const course = courses.find((c) => c.id === id);
-      if (course) {
-        await fbDeleteCourse(course.classId, id);
+  const updateClass = useCallback(
+    async (id: string, updates: Partial<ClassGroup>) => {
+      if (useFirebase) {
+        await fbUpdateClass(id, updates);
       }
-    }
-  }, [useFirebase, courses]);
+    },
+    [useFirebase]
+  );
 
-  const addAcademicPeriod = useCallback(async (period: Omit<AcademicPeriod, 'id'>) => {
-    if (useFirebase) {
-      await fbCreateAcademicPeriod(period);
-    }
-  }, [useFirebase]);
+  const deleteClass = useCallback(
+    async (id: string) => {
+      if (useFirebase) {
+        await fbDeleteClass(id);
+      }
+    },
+    [useFirebase]
+  );
 
-  const updateAcademicPeriod = useCallback(async (id: string, updates: Partial<AcademicPeriod>) => {
-    if (useFirebase) {
-      await fbUpdateAcademicPeriod(id, updates);
-    }
-  }, [useFirebase]);
+  const addCourse = useCallback(
+    async (course: Omit<Course, 'id'>) => {
+      if (useFirebase) {
+        await fbCreateCourse(course.classId, course);
+      }
+    },
+    [useFirebase]
+  );
 
-  const deleteAcademicPeriod = useCallback(async (id: string) => {
-    if (useFirebase) {
-      await fbDeleteAcademicPeriod(id);
-    }
-  }, [useFirebase]);
+  const updateCourse = useCallback(
+    async (id: string, updates: Partial<Course>) => {
+      if (useFirebase) {
+        const course = courses.find((c) => c.id === id);
+        if (course) {
+          await fbUpdateCourse(course.classId, id, updates);
+        }
+      }
+    },
+    [useFirebase, courses]
+  );
 
-  const publishPeriodBulletins = useCallback(async (periodId: string) => {
-    if (useFirebase) {
-      await fbPublishPeriodBulletins(periodId);
-    }
-  }, [useFirebase]);
+  const deleteCourse = useCallback(
+    async (id: string) => {
+      if (useFirebase) {
+        const course = courses.find((c) => c.id === id);
+        if (course) {
+          await fbDeleteCourse(course.classId, id);
+        }
+      }
+    },
+    [useFirebase, courses]
+  );
 
-  const addGradeCategory = useCallback(async (category: Omit<GradeCategory, 'id'>) => {
-    if (useFirebase) {
-      await fbCreateGradeCategory(category);
-    }
-  }, [useFirebase]);
+  const addAcademicPeriod = useCallback(
+    async (period: Omit<AcademicPeriod, 'id'>) => {
+      if (useFirebase) {
+        await fbCreateAcademicPeriod(period);
+      }
+    },
+    [useFirebase]
+  );
 
-  const updateGradeCategory = useCallback(async (id: string, updates: Partial<GradeCategory>) => {
-    if (useFirebase) {
-      await fbUpdateGradeCategory(id, updates);
-    }
-  }, [useFirebase]);
+  const updateAcademicPeriod = useCallback(
+    async (id: string, updates: Partial<AcademicPeriod>) => {
+      if (useFirebase) {
+        await fbUpdateAcademicPeriod(id, updates);
+      }
+    },
+    [useFirebase]
+  );
 
-  const deleteGradeCategory = useCallback(async (id: string) => {
-    if (useFirebase) {
-      await fbDeleteGradeCategory(id);
-    }
-  }, [useFirebase]);
+  const deleteAcademicPeriod = useCallback(
+    async (id: string) => {
+      if (useFirebase) {
+        await fbDeleteAcademicPeriod(id);
+      }
+    },
+    [useFirebase]
+  );
 
-  const value = useMemo(() => ({
-    classes,
-    courses,
-    academicPeriods,
-    gradeCategories,
-    isLoading,
-    addClass,
-    updateClass,
-    deleteClass,
-    addCourse,
-    updateCourse,
-    deleteCourse,
-    addAcademicPeriod,
-    updateAcademicPeriod,
-    deleteAcademicPeriod,
-    publishPeriodBulletins,
-    addGradeCategory,
-    updateGradeCategory,
-    deleteGradeCategory,
-  }), [
-    classes,
-    courses,
-    academicPeriods,
-    gradeCategories,
-    isLoading,
-    addClass,
-    updateClass,
-    deleteClass,
-    addCourse,
-    updateCourse,
-    deleteCourse,
-    addAcademicPeriod,
-    updateAcademicPeriod,
-    deleteAcademicPeriod,
-    publishPeriodBulletins,
-    addGradeCategory,
-    updateGradeCategory,
-    deleteGradeCategory
-  ]);
+  const publishPeriodBulletins = useCallback(
+    async (periodId: string) => {
+      if (useFirebase) {
+        await fbPublishPeriodBulletins(periodId);
+      }
+    },
+    [useFirebase]
+  );
+
+  const addGradeCategory = useCallback(
+    async (category: Omit<GradeCategory, 'id'>) => {
+      if (useFirebase) {
+        await fbCreateGradeCategory(category);
+      }
+    },
+    [useFirebase]
+  );
+
+  const updateGradeCategory = useCallback(
+    async (id: string, updates: Partial<GradeCategory>) => {
+      if (useFirebase) {
+        await fbUpdateGradeCategory(id, updates);
+      }
+    },
+    [useFirebase]
+  );
+
+  const deleteGradeCategory = useCallback(
+    async (id: string) => {
+      if (useFirebase) {
+        await fbDeleteGradeCategory(id);
+      }
+    },
+    [useFirebase]
+  );
+
+  const value = useMemo(
+    () => ({
+      classes,
+      courses,
+      academicPeriods,
+      gradeCategories,
+      isLoading,
+      addClass,
+      updateClass,
+      deleteClass,
+      addCourse,
+      updateCourse,
+      deleteCourse,
+      addAcademicPeriod,
+      updateAcademicPeriod,
+      deleteAcademicPeriod,
+      publishPeriodBulletins,
+      addGradeCategory,
+      updateGradeCategory,
+      deleteGradeCategory,
+    }),
+    [
+      classes,
+      courses,
+      academicPeriods,
+      gradeCategories,
+      isLoading,
+      addClass,
+      updateClass,
+      deleteClass,
+      addCourse,
+      updateCourse,
+      deleteCourse,
+      addAcademicPeriod,
+      updateAcademicPeriod,
+      deleteAcademicPeriod,
+      publishPeriodBulletins,
+      addGradeCategory,
+      updateGradeCategory,
+      deleteGradeCategory,
+    ]
+  );
 
   return <AcademicContext.Provider value={value}>{children}</AcademicContext.Provider>;
 };

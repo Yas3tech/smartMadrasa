@@ -32,7 +32,6 @@ export const FileUpload = ({
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     const validFiles: File[] = [];
 
-
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > maxSizeBytes) {
@@ -57,7 +56,6 @@ export const FileUpload = ({
 
         uploadedUrls.push(url);
         setUploadedFiles((prev) => [...prev, { name: file.name, url }]);
-
 
         setUploadProgress((prev) => {
           const newProgress = { ...prev };
@@ -89,8 +87,9 @@ export const FileUpload = ({
         </label>
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed border-gray-300 rounded-xl p-6 text-center ${uploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-500'
-            } transition-colors`}
+          className={`border-2 border-dashed border-gray-300 rounded-xl p-6 text-center ${
+            uploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-500'
+          } transition-colors`}
         >
           <input
             ref={fileInputRef}
@@ -108,7 +107,6 @@ export const FileUpload = ({
           </p>
         </div>
       </div>
-
 
       {Object.keys(uploadProgress).length > 0 && (
         <div className="space-y-2">
@@ -131,7 +129,6 @@ export const FileUpload = ({
           ))}
         </div>
       )}
-
 
       {uploadedFiles.length > 0 && (
         <div className="space-y-2">

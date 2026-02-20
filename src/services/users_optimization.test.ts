@@ -79,8 +79,8 @@ describe('User Service Optimization', () => {
   });
 
   it('should not call deleteApp', async () => {
-     const user = { email: 'test3@example.com', role: 'student', name: 'Test 3' };
-     await createUser(user);
-     expect(firebaseApp.deleteApp).not.toHaveBeenCalled();
+    const user = { email: 'test3@example.com', role: 'student', name: 'Test 3' };
+    await createUser(user);
+    expect(firebaseApp.deleteApp).not.toHaveBeenCalled();
   });
 });

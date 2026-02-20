@@ -23,9 +23,7 @@ const USERS_COLLECTION = 'users';
  */
 const logDeprecationWarning = () => {
   if (process.env.NODE_ENV === 'development') {
-    console.warn(
-      'Using deprecated grades service. Please migrate to courseGrades service.'
-    );
+    console.warn('Using deprecated grades service. Please migrate to courseGrades service.');
   }
 };
 
@@ -82,7 +80,7 @@ export const updateGrade = async (
 
 export const subscribeToGrades = (callback: (grades: Grade[]) => void) => {
   logDeprecationWarning();
-  if (!db) return () => { };
+  if (!db) return () => {};
   // Use collectionGroup to listen to ALL grades across all users
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     callback(mapQuerySnapshot<Grade>(snapshot, transformGrade));

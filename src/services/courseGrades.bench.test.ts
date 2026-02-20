@@ -24,9 +24,9 @@ vi.mock('./firebaseHelper', () => {
   return {
     getDb: vi.fn(() => ({})),
     mapQuerySnapshot: vi.fn((snapshot) => {
-        const results: any[] = [];
-        snapshot.forEach((doc: any) => results.push({ id: doc.id, ...doc.data() }));
-        return results;
+      const results: any[] = [];
+      snapshot.forEach((doc: any) => results.push({ id: doc.id, ...doc.data() }));
+      return results;
     }),
   };
 });
@@ -60,26 +60,36 @@ describe('Course Grades Subscription Benchmark', () => {
     }
 
     // Setup mocks to handle query inspection
-    (where as any).mockImplementation((field: string, op: string, val: any) => ({ type: 'where', field, op, val }));
-    (query as any).mockImplementation((collectionRef: any, ...constraints: any[]) => ({ type: 'query', constraints }));
+    (where as any).mockImplementation((field: string, op: string, val: any) => ({
+      type: 'where',
+      field,
+      op,
+      val,
+    }));
+    (query as any).mockImplementation((collectionRef: any, ...constraints: any[]) => ({
+      type: 'query',
+      constraints,
+    }));
 
     (onSnapshot as any).mockImplementation((q: any, callback: any) => {
-        let gradesToReturn = mockGrades;
+      let gradesToReturn = mockGrades;
 
-        // Check for 'where' constraints in the query object
-        if (q && q.type === 'query' && q.constraints) {
-             const periodFilter = q.constraints.find((c: any) => c.type === 'where' && c.field === 'periodId');
-             if (periodFilter && periodFilter.op === 'in') {
-                 // Simulate filtering by periodId IN [...]
-                 gradesToReturn = mockGrades.filter(g => periodFilter.val.includes(g.periodId));
-             }
+      // Check for 'where' constraints in the query object
+      if (q && q.type === 'query' && q.constraints) {
+        const periodFilter = q.constraints.find(
+          (c: any) => c.type === 'where' && c.field === 'periodId'
+        );
+        if (periodFilter && periodFilter.op === 'in') {
+          // Simulate filtering by periodId IN [...]
+          gradesToReturn = mockGrades.filter((g) => periodFilter.val.includes(g.periodId));
         }
+      }
 
-        const snapshot = {
-           forEach: (cb: any) => gradesToReturn.forEach(g => cb({ id: g.id, data: () => g })),
-        };
-        callback(snapshot);
-        return () => {};
+      const snapshot = {
+        forEach: (cb: any) => gradesToReturn.forEach((g) => cb({ id: g.id, data: () => g })),
+      };
+      callback(snapshot);
+      return () => {};
     });
   });
 
@@ -101,10 +111,14 @@ describe('Course Grades Subscription Benchmark', () => {
     });
 
     // Expected: 3000 / 9 * 3 = 1000
-    const expectedCount = mockGrades.filter(g => CURRENT_YEAR_PERIODS.includes(g.periodId)).length;
+    const expectedCount = mockGrades.filter((g) =>
+      CURRENT_YEAR_PERIODS.includes(g.periodId)
+    ).length;
 
     expect(resultCount).toBe(expectedCount);
     console.log(`Optimized: Fetched ${resultCount} grades (Current Year)`);
-    console.log(`Improvement: ${(TOTAL_GRADES / resultCount).toFixed(2)}x reduction in document reads`);
+    console.log(
+      `Improvement: ${(TOTAL_GRADES / resultCount).toFixed(2)}x reduction in document reads`
+    );
   });
 });

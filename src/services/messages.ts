@@ -31,10 +31,7 @@ export const getMessages = async (userId?: string): Promise<Message[]> => {
   if (userId) {
     q = query(
       collection(db, COLLECTION_NAME),
-      or(
-        where('senderId', '==', userId),
-        where('receiverId', 'in', [userId, 'all'])
-      )
+      or(where('senderId', '==', userId), where('receiverId', 'in', [userId, 'all']))
     );
   } else {
     q = query(collection(db, COLLECTION_NAME));
@@ -73,16 +70,13 @@ export const deleteMessage = async (id: string): Promise<void> => {
 };
 
 export const subscribeToMessages = (callback: (messages: Message[]) => void, userId?: string) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
 
   let q;
   if (userId) {
     q = query(
       collection(db, COLLECTION_NAME),
-      or(
-        where('senderId', '==', userId),
-        where('receiverId', 'in', [userId, 'all'])
-      )
+      or(where('senderId', '==', userId), where('receiverId', 'in', [userId, 'all']))
     );
   } else {
     q = query(collection(db, COLLECTION_NAME));

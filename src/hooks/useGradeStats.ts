@@ -29,11 +29,13 @@ export const useGradeStats = () => {
       subjectMap.set(g.subject, current);
     }
 
-    const subjectPerformance = Array.from(subjectMap.entries()).map(([subject, { sum, count }]) => ({
-      subject,
-      average: Math.round(sum / count),
-      count,
-    }));
+    const subjectPerformance = Array.from(subjectMap.entries()).map(
+      ([subject, { sum, count }]) => ({
+        subject,
+        average: Math.round(sum / count),
+        count,
+      })
+    );
 
     return {
       avgGrade,

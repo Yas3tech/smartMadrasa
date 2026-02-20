@@ -12,12 +12,12 @@ const { triggerMessages, subscribe } = vi.hoisted(() => {
   const callbacks: Set<(msgs: any[]) => void> = new Set();
   return {
     triggerMessages: (msgs: any[]) => {
-      callbacks.forEach(cb => cb(msgs));
+      callbacks.forEach((cb) => cb(msgs));
     },
     subscribe: (cb: any) => {
       callbacks.add(cb);
       return () => callbacks.delete(cb);
-    }
+    },
   };
 });
 
@@ -163,7 +163,15 @@ describe('DataProvider Performance', () => {
 
     // Trigger message update
     await act(async () => {
-        triggerMessages([{ id: 'msg1', content: 'New Message', senderId: '2', receiverId: '1', timestamp: new Date().toISOString() }]);
+      triggerMessages([
+        {
+          id: 'msg1',
+          content: 'New Message',
+          senderId: '2',
+          receiverId: '1',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     });
 
     // useData returns a new object because messages changed
@@ -200,7 +208,15 @@ describe('DataProvider Performance', () => {
 
     // Trigger message update
     await act(async () => {
-        triggerMessages([{ id: 'msg2', content: 'Another Message', senderId: '2', receiverId: '1', timestamp: new Date().toISOString() }]);
+      triggerMessages([
+        {
+          id: 'msg2',
+          content: 'Another Message',
+          senderId: '2',
+          receiverId: '1',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     });
 
     const afterUpdateRenders = renderCount;

@@ -70,18 +70,15 @@ export const deleteEvent = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
 
-export const subscribeToEvents = (
-  callback: (events: Event[]) => void,
-  classIds?: string[]
-) => {
-  if (!db) return () => { };
+export const subscribeToEvents = (callback: (events: Event[]) => void, classIds?: string[]) => {
+  if (!db) return () => {};
 
   let q;
   if (classIds) {
     // If classIds is provided but empty, we return an empty subscription
     if (classIds.length === 0) {
       callback([]);
-      return () => { };
+      return () => {};
     }
     // Note: If we use 'in' filter and orderBy on a different field, we may need a composite index.
     // To ensure compatibility, we'll sort client-side after fetching.

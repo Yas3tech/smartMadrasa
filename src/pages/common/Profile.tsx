@@ -20,7 +20,6 @@ const Profile = () => {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
 
-
   const teacherData = useMemo(() => {
     if (!user || user.role !== 'teacher') return { subjects: [], teacherClasses: [] };
 
@@ -71,7 +70,6 @@ const Profile = () => {
   const getRoleLabel = (role: string) => {
     return t(`roles.${role}`);
   };
-
 
   const getStudentInfo = () => {
     if (user.role !== 'student') return null;
@@ -201,7 +199,6 @@ const Profile = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         <div className="space-y-6">
           <Card className="p-6">
             <div className="flex flex-col items-center">
@@ -218,15 +215,12 @@ const Profile = () => {
             </div>
           </Card>
 
-
           {getStudentInfo()}
           {getParentInfo()}
           {getTeacherInfo()}
         </div>
 
-
         <div className="lg:col-span-2 space-y-6">
-
           <Card className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-gray-900">{t('profile.personalInfo')}</h3>
@@ -274,7 +268,6 @@ const Profile = () => {
               )}
             </div>
           </Card>
-
 
           <Card className="p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">{t('profile.changePassword')}</h3>

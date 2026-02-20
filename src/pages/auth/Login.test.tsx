@@ -85,7 +85,9 @@ describe('Login Component - Security Vulnerability Check', () => {
     await waitFor(() => {
       expect(screen.getByText('Un email de réinitialisation a été envoyé.')).toBeInTheDocument();
       // Ensure the error message is NOT present
-      expect(screen.queryByText('Aucun utilisateur trouvé avec cet email.')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Aucun utilisateur trouvé avec cet email.')
+      ).not.toBeInTheDocument();
     });
   });
 

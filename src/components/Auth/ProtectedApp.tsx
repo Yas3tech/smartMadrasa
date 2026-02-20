@@ -25,101 +25,101 @@ const TeacherBulletinGrades = lazy(() => import('../../pages/teacher/BulletinGra
 const StudentBulletin = lazy(() => import('../../pages/student/StudentBulletin'));
 
 const ProtectedApp = () => {
-    return (
-        <ProtectedRoute>
-            <DataProvider>
-                <Suspense fallback={<PageLoader />}>
-                    <MainLayout>
-                        <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/profile" element={<Profile />} />
-                            <Route path="/settings" element={<Settings />} />
-                            <Route path="/messages" element={<Messages />} />
-                            <Route
-                                path="/classes"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin', 'teacher']}>
-                                        <Classes />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/grades"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin', 'teacher']}>
-                                        <Grades />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/attendance"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin', 'teacher']}>
-                                        <Attendance />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route path="/homework" element={<Homework />} />
-                            <Route path="/schedule" element={<Schedule />} />
-                            <Route path="/announcements" element={<Announcements />} />
-                            <Route path="/resources" element={<Resources />} />
-                            <Route
-                                path="/users"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin']}>
-                                        <UserManagement />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/admin/database"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin']}>
-                                        <DatabaseAdmin />
-                                    </ProtectedRoute>
-                                }
-                            />
+  return (
+    <ProtectedRoute>
+      <DataProvider>
+        <Suspense fallback={<PageLoader />}>
+          <MainLayout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route
+                path="/classes"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin', 'teacher']}>
+                    <Classes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/grades"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin', 'teacher']}>
+                    <Grades />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/attendance"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin', 'teacher']}>
+                    <Attendance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/homework" element={<Homework />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/announcements" element={<Announcements />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin']}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/database"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin']}>
+                    <DatabaseAdmin />
+                  </ProtectedRoute>
+                }
+              />
 
-                            {/* Bulletin System Routes */}
-                            <Route
-                                path="/bulletins/config"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin']}>
-                                        <AcademicYearConfig />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/bulletins/dashboard"
-                                element={
-                                    <ProtectedRoute allowedRoles={['director', 'superadmin']}>
-                                        <BulletinDashboard />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/bulletins/grades"
-                                element={
-                                    <ProtectedRoute allowedRoles={['teacher', 'director', 'superadmin']}>
-                                        <TeacherBulletinGrades />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/bulletins/view"
-                                element={
-                                    <ProtectedRoute allowedRoles={['student', 'parent', 'director', 'superadmin']}>
-                                        <StudentBulletin />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                    </MainLayout>
-                </Suspense>
-            </DataProvider>
-        </ProtectedRoute>
-    );
+              {/* Bulletin System Routes */}
+              <Route
+                path="/bulletins/config"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin']}>
+                    <AcademicYearConfig />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulletins/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={['director', 'superadmin']}>
+                    <BulletinDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulletins/grades"
+                element={
+                  <ProtectedRoute allowedRoles={['teacher', 'director', 'superadmin']}>
+                    <TeacherBulletinGrades />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulletins/view"
+                element={
+                  <ProtectedRoute allowedRoles={['student', 'parent', 'director', 'superadmin']}>
+                    <StudentBulletin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </MainLayout>
+        </Suspense>
+      </DataProvider>
+    </ProtectedRoute>
+  );
 };
 
 export default ProtectedApp;

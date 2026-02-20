@@ -160,7 +160,10 @@ describe('pdfGenerator', () => {
   });
 
   it('should generate class bulletin PDF', () => {
-    const dataList = [mockData, { ...mockData, student: { ...mockStudent, id: 'student2', name: 'Jane Doe' } }];
+    const dataList = [
+      mockData,
+      { ...mockData, student: { ...mockStudent, id: 'student2', name: 'Jane Doe' } },
+    ];
     const doc = generateClassBulletinPDF(dataList, 'Class A', 'Trimester 1');
 
     // Should call addPage for the second student

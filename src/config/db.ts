@@ -7,13 +7,13 @@ let db: Firestore | undefined;
 let storage: FirebaseStorage | undefined;
 
 if (isFirebaseConfigured) {
-    try {
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        storage = getStorage(app);
-    } catch {
-        // Silent fail
-    }
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    storage = getStorage(app);
+  } catch {
+    // Silent fail
+  }
 }
 
 export { db, storage };

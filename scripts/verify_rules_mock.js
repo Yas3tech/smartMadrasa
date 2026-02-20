@@ -36,7 +36,7 @@ class MapDiff {
         }
         return true;
       },
-      debug: () => Array.from(keys)
+      debug: () => Array.from(keys),
     };
   }
 }
@@ -47,7 +47,7 @@ function checkUpdateRule(testCase) {
   // Mocks
   const request = {
     auth: { uid: actorId },
-    resource: { data: newData }
+    resource: { data: newData },
   };
   const resource = { data: oldData };
 
@@ -71,12 +71,7 @@ function checkUpdateRule(testCase) {
   const whitelist = ['name', 'email', 'phone', 'avatar', 'birthDate', 'mustChangePassword'];
 
   const allowed =
-    isDirector() ||
-    isSuperAdmin() ||
-    (
-      isOwner(targetId) &&
-      diff.affectedKeys().hasOnly(whitelist)
-    );
+    isDirector() || isSuperAdmin() || (isOwner(targetId) && diff.affectedKeys().hasOnly(whitelist));
 
   return { allowed, diff };
 }
@@ -91,7 +86,7 @@ const cases = [
     targetId: 'student1',
     oldData: { name: 'Old Name', role: 'student', classId: 'classA' },
     newData: { name: 'New Name', role: 'student', classId: 'classA' },
-    expected: true
+    expected: true,
   },
   {
     name: 'Student updates their own role (DENIED)',
@@ -100,7 +95,7 @@ const cases = [
     targetId: 'student1',
     oldData: { name: 'Student', role: 'student' },
     newData: { name: 'Student', role: 'superadmin' },
-    expected: false
+    expected: false,
   },
   {
     name: 'Student updates their own classId (DENIED)',
@@ -109,7 +104,7 @@ const cases = [
     targetId: 'student1',
     oldData: { name: 'Student', role: 'student', classId: 'classA' },
     newData: { name: 'Student', role: 'student', classId: 'classB' },
-    expected: false
+    expected: false,
   },
   {
     name: 'Student updates whitelisted fields (email, phone) (allowed)',
@@ -118,7 +113,7 @@ const cases = [
     targetId: 'student1',
     oldData: { name: 'Student', role: 'student' },
     newData: { name: 'Student', role: 'student', email: 'new@test.com', phone: '123456' },
-    expected: true
+    expected: true,
   },
   {
     name: 'Director updates a student role (allowed)',
@@ -127,16 +122,16 @@ const cases = [
     targetId: 'student1',
     oldData: { name: 'Student', role: 'student' },
     newData: { name: 'Student', role: 'prefect' },
-    expected: true
+    expected: true,
   },
-   {
+  {
     name: 'Student adds a new field "permissions" (DENIED)',
     actorRole: 'student',
     actorId: 'student1',
     targetId: 'student1',
     oldData: { name: 'Student', role: 'student' },
     newData: { name: 'Student', role: 'student', permissions: 'full' },
-    expected: false
+    expected: false,
   },
   {
     name: 'Student tries to change someone else profile (DENIED)',
@@ -145,8 +140,8 @@ const cases = [
     targetId: 'student2',
     oldData: { name: 'Student2', role: 'student' },
     newData: { name: 'Student2', role: 'student', phone: '123' },
-    expected: false
-  }
+    expected: false,
+  },
 ];
 
 let passed = 0;
