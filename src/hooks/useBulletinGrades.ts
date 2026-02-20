@@ -12,7 +12,7 @@ import {
 } from '../services/teacherComments';
 import toast from 'react-hot-toast';
 import type { TeacherComment } from '../types/bulletin';
-import type { Student, Course, AcademicPeriod } from '../types';
+import type { Student, Course, AcademicPeriod, Grade } from '../types';
 
 export interface UseBulletinGradesReturn {
   // State
@@ -125,15 +125,19 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     const periodStart = new Date(selectedPeriodData.startDate);
     const periodEnd = new Date(selectedPeriodData.endDate);
 
+    // Optimization: Create a Set of active student-course pairs with grades in this period
+    // This reduces complexity from O(S * C * G) to O(G + S * C)
+    const activeGradeKeys = new Set<string>();
+    grades.forEach((g) => {
+      const gDate = new Date(g.date);
+      if (gDate >= periodStart && gDate <= periodEnd && g.courseId) {
+        activeGradeKeys.add(`${g.studentId}::${g.courseId}`);
+      }
+    });
+
     classStudents.forEach((student) => {
       teacherCoursesInClass.forEach((course) => {
-        const hasGrades = grades.some(
-          (g) =>
-            g.studentId === student.id &&
-            g.courseId === course.id &&
-            new Date(g.date) >= periodStart &&
-            new Date(g.date) <= periodEnd
-        );
+        const hasGrades = activeGradeKeys.has(`${student.id}::${course.id}`);
 
         if (hasGrades) {
           total++;
@@ -168,18 +172,30 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
 
     const teacherCourses = courses.filter((c) => c.teacherId === user.id);
 
+    // Optimization: Filter grades once and group by course
+    // Reduces complexity from O(C * G) to O(G + C)
+    const periodStart = new Date(selectedPeriodData.startDate);
+    const periodEnd = new Date(selectedPeriodData.endDate);
+
+    const relevantGrades = grades.filter(
+      (g) =>
+        g.studentId === selectedStudent &&
+        new Date(g.date) >= periodStart &&
+        new Date(g.date) <= periodEnd
+    );
+
+    const gradesByCourse = new Map<string, Grade[]>();
+    relevantGrades.forEach((g) => {
+      if (!g.courseId) return;
+      if (!gradesByCourse.has(g.courseId)) {
+        gradesByCourse.set(g.courseId, []);
+      }
+      gradesByCourse.get(g.courseId)!.push(g);
+    });
+
     return teacherCourses
       .map((course) => {
-        const studentGrades = grades.filter(
-          (g) => g.studentId === selectedStudent && g.courseId === course.id
-        );
-
-        const periodGrades = studentGrades.filter((g) => {
-          const gradeDate = new Date(g.date);
-          const periodStart = new Date(selectedPeriodData.startDate);
-          const periodEnd = new Date(selectedPeriodData.endDate);
-          return gradeDate >= periodStart && gradeDate <= periodEnd;
-        });
+        const periodGrades = gradesByCourse.get(course.id) || [];
 
         let average = 0;
         if (periodGrades.length > 0) {
