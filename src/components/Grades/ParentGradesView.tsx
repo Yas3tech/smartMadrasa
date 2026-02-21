@@ -5,25 +5,18 @@ import { FileText, GraduationCap, Clock } from 'lucide-react';
 import GradeCard from './GradeCard';
 import { useGradeStats } from '../../hooks/useGradeStats';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
 import StudentSelector from '../Common/StudentSelector';
 
 const ParentGradesView = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { grades } = useData();
-  const { calculateStudentStats } = useGradeStats();
 
   const [selectedChildId, setSelectedChildId] = useState('');
 
+  // Use the optimized hook
+  const { stats, studentGrades } = useGradeStats(selectedChildId);
+
   if (!user || user.role !== 'parent') return null;
-
-  const stats = selectedChildId ? calculateStudentStats(selectedChildId) : null;
-
-  // Filter grades for the selected child
-  const childGrades = grades
-    .filter((g) => g.studentId === selectedChildId)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="space-y-6">
@@ -85,8 +78,8 @@ const ParentGradesView = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {childGrades.length > 0 ? (
-              childGrades.map((grade) => <GradeCard key={grade.id} grade={grade} />)
+            {studentGrades.length > 0 ? (
+              studentGrades.map((grade) => <GradeCard key={grade.id} grade={grade} />)
             ) : (
               <div className="col-span-full text-center py-12 text-gray-500 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700">
                 <FileText size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
