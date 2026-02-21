@@ -1,0 +1,12 @@
+
+> smartmadrassa@0.0.0 dev /app
+> vite --port 5173 --host
+
+
+  VITE v7.3.1  ready in 689 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.0.2:5173/
+1:05:21 PM [vite] (client) hmr update /src/App.tsx, /src/index.css
+1:05:25 PM [vite] (client) hmr update /src/pages/VerifySecurity.tsx, /src/index.css
+ ELIFECYCLE  Command failed with exit code 143.

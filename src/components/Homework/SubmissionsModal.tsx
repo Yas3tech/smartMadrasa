@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Modal, Card, Button, Badge, Input } from '../UI';
-import { X, BookOpen, File as FileIcon, Download } from 'lucide-react';
+import { X, BookOpen, File as FileIcon, Download, AlertTriangle } from 'lucide-react';
 import type { Homework, Submission } from '../../types';
+import { isSafeUrl } from '../../utils/security';
 
 interface SubmissionsModalProps {
   isOpen: boolean;
@@ -105,16 +106,26 @@ export function SubmissionsModal({
                               <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
                             </div>
                           </div>
-                          <a
-                            href={file.url}
-                            download={file.name}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded transition-colors"
-                          >
-                            <Download size={14} />
-                            {t('common.download')}
-                          </a>
+                          {isSafeUrl(file.url) ? (
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded transition-colors"
+                            >
+                              <Download size={14} />
+                              {t('common.download')}
+                            </a>
+                          ) : (
+                            <div
+                              className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-red-600 bg-red-50 rounded cursor-not-allowed"
+                              title="Unsafe URL detected"
+                            >
+                              <AlertTriangle size={14} />
+                              {t('common.unsafeFile') || 'Fichier suspect'}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

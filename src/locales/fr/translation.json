@@ -46,7 +46,8 @@
     "all": "Tous",
     "subject": "Matière",
     "add": "Ajouter",
-    "actions": "Actions"
+    "actions": "Actions",
+    "unsafeFile": "Fichier suspect"
   },
   "subjects": {
     "Arabe": "Arabe",
