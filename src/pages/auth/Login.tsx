@@ -59,7 +59,7 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // We don't set loading(false) here because if it succeeds, 
+      // We don't set loading(false) here because if it succeeds,
       // the useEffect will navigate away.
       // However, if the profile lookup fails, we'll be stuck.
       // Let's add a timeout or check authLoading in the UI.
@@ -75,7 +75,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,9 +145,7 @@ const Login = () => {
           />
           <h1 className="text-3xl font-bold text-gray-900">SmartMadrassa</h1>
           <p className="text-gray-500 mt-2">
-            {isResetMode
-              ? t('auth.resetPasswordTitle')
-              : t('auth.signInToContinue')}
+            {isResetMode ? t('auth.resetPasswordTitle') : t('auth.signInToContinue')}
           </p>
         </div>
 
@@ -262,10 +259,15 @@ const Login = () => {
                 <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
                   <div className="flex items-center gap-3 text-orange-800 font-semibold">
                     <Sparkles size={18} className="text-orange-500" />
-                    <span className="text-sm">{t('auth.firstRunTitle', 'Première utilisation ?')}</span>
+                    <span className="text-sm">
+                      {t('auth.firstRunTitle', 'Première utilisation ?')}
+                    </span>
                   </div>
                   <p className="text-xs text-orange-700 leading-relaxed">
-                    {t('auth.firstRunDesc', "Aucune école n'est configurée. Commencez par créer votre compte administrateur.")}
+                    {t(
+                      'auth.firstRunDesc',
+                      "Aucune école n'est configurée. Commencez par créer votre compte administrateur."
+                    )}
                   </p>
                   <Button
                     onClick={() => navigate('/setup')}

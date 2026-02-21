@@ -54,7 +54,11 @@ export function SubmitHomeworkModal({
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{homework.title}</h2>
             <p className="text-sm text-gray-500">{homework.subject}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label={t('common.close')}
+          >
             <X size={24} />
           </button>
         </div>
@@ -112,6 +116,7 @@ export function SubmitHomeworkModal({
                     <button
                       onClick={() => handleRemoveExistingFile(index)}
                       className="text-red-500 hover:text-red-700"
+                      aria-label={`${t('common.delete')} ${file.name}`}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -126,10 +131,10 @@ export function SubmitHomeworkModal({
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('homework.attachFiles')} ({t('homework.maxFileSize')})
             </label>
-            <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-orange-400 transition-colors">
+            <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-orange-400 transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-offset-2">
               <Upload size={20} className="text-gray-400" />
               <span className="text-sm text-gray-500">{t('homework.form.attachFileHelp')}</span>
-              <input type="file" multiple onChange={onFileSelect} className="hidden" />
+              <input type="file" multiple onChange={onFileSelect} className="sr-only" />
             </label>
           </div>
 
@@ -157,6 +162,7 @@ export function SubmitHomeworkModal({
                     <button
                       onClick={() => onRemoveFile(index)}
                       className="text-red-500 hover:text-red-700"
+                      aria-label={`${t('common.delete')} ${file.name}`}
                     >
                       <Trash2 size={16} />
                     </button>
