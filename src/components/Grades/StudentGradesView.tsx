@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../UI';
 import { FileText, BarChart3, GraduationCap, Clock } from 'lucide-react';
@@ -7,29 +7,37 @@ import { useGradeStats } from '../../hooks/useGradeStats';
 
 import type { Grade } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useUsers, useAcademics } from '../../context/DataContext';
 
 const StudentGradesView = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { grades, courses, users } = useData();
-  const { calculateStudentStats } = useGradeStats();
+
+  // Use specific hooks instead of useData
+  const { users } = useUsers();
+  const { courses } = useAcademics();
+
+  // Use optimized hook with user.id
+  // It handles grades subscription via usePerformance internally
+  const { stats, studentGrades } = useGradeStats(user?.id);
 
   const [selectedSubject, setSelectedSubject] = useState('all');
 
-  if (!user) return null;
+  // Derive available subjects from memoized studentGrades
+  const availableSubjects = useMemo(() => {
+     return [
+      ...new Set(studentGrades.map((g) => g.subject)),
+    ].sort();
+  }, [studentGrades]);
 
-  const stats = calculateStudentStats(user.id);
+  // Filter local grades (already filtered by studentId in hook)
+  const myGrades = useMemo(() => {
+    // studentGrades is already sorted by date descending in the hook
+    if (selectedSubject === 'all') return studentGrades;
+    return studentGrades.filter((g) => g.subject === selectedSubject);
+  }, [studentGrades, selectedSubject]);
 
-  // Derive available subjects
-  const availableSubjects = [
-    ...new Set(grades.filter((g) => g.studentId === user.id).map((g) => g.subject)),
-  ].sort();
-
-  const myGrades = grades
-    .filter((g) => g.studentId === user.id)
-    .filter((g) => selectedSubject === 'all' || g.subject === selectedSubject)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  if (!user || !stats) return null;
 
   const getTeacherName = (grade: Grade) => {
     if (grade.teacherId) {
