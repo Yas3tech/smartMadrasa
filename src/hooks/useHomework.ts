@@ -15,6 +15,44 @@ import {
 import { uploadFileWithProgress, generateHomeworkPath } from '../services/storage';
 import type { Homework, Submission, SubmissionFile } from '../types';
 
+// Allowed file types for homework submissions
+export const ALLOWED_FILE_TYPES = [
+  // Images
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  // Documents
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOC, DOCX
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLS, XLSX
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PPT, PPTX
+  'text/plain',
+  // Archives
+  'application/zip',
+  'application/x-zip-compressed',
+];
+
+export const ALLOWED_EXTENSIONS = [
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.webp',
+  '.gif',
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.xls',
+  '.xlsx',
+  '.ppt',
+  '.pptx',
+  '.txt',
+  '.zip',
+];
+
 export interface FormState {
   title: string;
   subject: string;
@@ -277,11 +315,25 @@ export function useHomework(): UseHomeworkReturn {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const validFiles = files.filter((file) => {
+      // Check file size
       const maxSize = 10 * 1024 * 1024; // 10MB
       if (file.size > maxSize) {
         toast.error(t('homework.toasts.fileTooLarge', { name: file.name }));
         return false;
       }
+
+      // Check file type
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      const isTypeAllowed = ALLOWED_FILE_TYPES.includes(file.type);
+      const isExtAllowed = ALLOWED_EXTENSIONS.includes(fileExtension);
+
+      if (!isTypeAllowed && !isExtAllowed) {
+        toast.error(
+          t('homework.toasts.invalidFileType', { formats: ALLOWED_EXTENSIONS.join(', ') })
+        );
+        return false;
+      }
+
       return true;
     });
     setSelectedFiles([...selectedFiles, ...validFiles]);

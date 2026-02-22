@@ -210,6 +210,9 @@
     "attachedFiles": "Bijgevoegde bestanden",
     "noHomeworkCategory": "Geen huiswerk in deze categorie",
     "edit": "Huiswerk bewerken",
+    "toasts": {
+      "invalidFileType": "Bestandstype niet toegestaan. Geaccepteerde formaten: {{formats}}"
+    },
     "form": {
       "title": "Titel",
       "titlePlaceholder": "Bijv: Oefeningen pagina 42",

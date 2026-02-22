@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../UI';
 import { X, Upload, File as FileIcon, Trash2, Check } from 'lucide-react';
 import type { Homework, SubmissionFile } from '../../types';
+import { ALLOWED_EXTENSIONS } from '../../hooks/useHomework';
 
 interface SubmitHomeworkModalProps {
   isOpen: boolean;
@@ -129,7 +130,13 @@ export function SubmitHomeworkModal({
             <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-orange-400 transition-colors">
               <Upload size={20} className="text-gray-400" />
               <span className="text-sm text-gray-500">{t('homework.form.attachFileHelp')}</span>
-              <input type="file" multiple onChange={onFileSelect} className="hidden" />
+              <input
+                type="file"
+                multiple
+                accept={ALLOWED_EXTENSIONS.join(',')}
+                onChange={onFileSelect}
+                className="hidden"
+              />
             </label>
           </div>
 
