@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useId } from 'react';
 import toast from 'react-hot-toast';
 import { Upload, X, File as FileIcon, Loader } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ export const FileUpload = ({
   maxSizeMB = 20,
 }: FileUploadProps) => {
   const { t } = useTranslation();
+  const inputId = useId();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; url: string }>>([]);
@@ -82,22 +83,24 @@ export const FileUpload = ({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-2">
           {t('fileUpload.label')}
         </label>
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
           className={`border-2 border-dashed border-gray-300 rounded-xl p-6 text-center ${
             uploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-500'
-          } transition-colors`}
+          } transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500`}
         >
           <input
+            id={inputId}
             ref={fileInputRef}
             type="file"
             onChange={handleFileSelect}
+            onClick={(e) => e.stopPropagation()}
             accept={accept}
             multiple={multiple}
-            className="hidden"
+            className="sr-only"
             disabled={uploading}
           />
           <Upload className="mx-auto mb-2 text-gray-400" size={32} />
@@ -145,6 +148,7 @@ export const FileUpload = ({
               <button
                 onClick={() => removeFile(index)}
                 className="p-1 text-green-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                aria-label={t('common.delete')}
               >
                 <X size={16} />
               </button>

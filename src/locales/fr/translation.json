@@ -1017,5 +1017,15 @@
     "enterGrades": "Saisir les notes",
     "sendMessage": "Envoyer un message",
     "addEvent": "Ajouter un événement"
+  },
+  "fileUpload": {
+    "label": "Télécharger un fichier",
+    "dropzone": "Glissez-déposez des fichiers ici ou cliquez pour sélectionner",
+    "maxSize": "Taille maximale : {{size}}MB",
+    "uploadedFiles": "Fichiers téléchargés",
+    "error": {
+      "fileTooBig": "Le fichier {{name}} est trop volumineux (max {{size}}MB)",
+      "uploadFailed": "Le téléchargement a échoué"
+    }
   }
 }
