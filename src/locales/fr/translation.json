@@ -254,7 +254,8 @@
       "fileTooLarge": "{{name}} est trop volumineux (max 10MB)",
       "emptySubmission": "Veuillez saisir une réponse ou joindre un fichier",
       "submitSuccess": "Devoir rendu avec succès !",
-      "submitError": "Erreur lors de l'envoi du devoir"
+      "submitError": "Erreur lors de l'envoi du devoir",
+      "invalidFileType": "Type de fichier non autorisé. Formats acceptés : {{formats}}"
     }
   },
   "bulletin": {

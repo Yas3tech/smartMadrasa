@@ -224,6 +224,9 @@
     "dueToday": "مستحق اليوم",
     "noDescription": "لا يوجد وصف",
     "edit": "تعديل الواجب",
+    "toasts": {
+      "invalidFileType": "نوع الملف غير مسموح به. التنسيقات المقبولة: {{formats}}"
+    },
     "form": {
       "title": "العنوان",
       "titlePlaceholder": "مثال: تمارين صفحة 42",
