@@ -45,7 +45,8 @@
     "download": "تحميل",
     "all": "الكل",
     "subject": "المادة",
-    "add": "إضافة"
+    "add": "إضافة",
+    "unsafeFile": "ملف مشبوه"
   },
   "subjects": {
     "Arabe": "اللغة العربية",

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Button, Badge } from '../UI';
 import { X, Calendar, User, FileText, BookOpen } from 'lucide-react';
 import type { Homework } from '../../types';
+import { isSafeUrl } from '../../utils/security';
 
 interface HomeworkDetailModalProps {
   isOpen: boolean;
@@ -91,11 +92,11 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
         )}
 
         {/* Attachments */}
-        {homework.attachments && homework.attachments.length > 0 && (
+        {homework.attachments && homework.attachments.filter(isSafeUrl).length > 0 && (
           <div className="mb-6">
             <h3 className="font-semibold text-gray-900 mb-2">{t('homework.attachedFiles')}</h3>
             <div className="space-y-2">
-              {homework.attachments.map((url, index) => (
+              {homework.attachments.filter(isSafeUrl).map((url, index) => (
                 <a
                   key={index}
                   href={url}

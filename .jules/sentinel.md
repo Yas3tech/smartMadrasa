@@ -47,3 +47,9 @@
 **Vulnerability:** The application rendered user-supplied attachment URLs directly in `href` attributes. While React 19 blocks `javascript:` URLs by default, it allows other dangerous schemes like `data:` (e.g., `data:text/html`), enabling potential XSS or phishing attacks.
 **Learning:** Framework protections (like React's `javascript:` blocking) are often incomplete or version-dependent. Explicit sanitization using an allowlist of safe protocols (http, https) is necessary for user-generated links.
 **Prevention:** Implement a strict URL sanitization utility (`isSafeUrl`) that whitelists allowed protocols and rejects everything else before rendering links.
+
+## 2025-02-21 - XSS via Unsafe Attachment Protocols (Consistency)
+
+**Vulnerability:** Identified XSS vulnerabilities in `SubmissionsModal` and `HomeworkDetailModal` where user-supplied URLs were rendered directly in `href` attributes without sanitization. This allowed execution of malicious scripts via `javascript:` (if not blocked by framework) or `data:` URLs.
+**Learning:** Security controls must be applied consistently across all components handling similar data. While `Messages` was protected, `Homework` components were not, creating a security gap. React 19's protections are not a substitute for explicit input sanitization.
+**Prevention:** Enforce use of `isSafeUrl` for ALL user-generated links. Added unit tests to verify that malicious links are not rendered.
