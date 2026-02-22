@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
+import { usePerformance } from '../context/DataContext';
 import {
   createHomework,
   updateHomework,
@@ -131,7 +131,7 @@ export function useHomework(): UseHomeworkReturn {
   const [gradeValue, setGradeValue] = useState<number>(0);
   const [feedbackValue, setFeedbackValue] = useState('');
 
-  const { homeworks } = useData();
+  const { homeworks } = usePerformance();
 
   // Set individual form field
   const setFormField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
