@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import {
   subscribeToTeacherCommentsByStudent,
@@ -52,7 +52,9 @@ export interface UseBulletinGradesReturn {
 
 export function useBulletinGrades(): UseBulletinGradesReturn {
   const { t, i18n } = useTranslation();
-  const { academicPeriods, courses, students, grades, classes } = useData();
+  const { academicPeriods, courses, classes } = useAcademics();
+  const { students } = useUsers();
+  const { grades } = usePerformance();
   const { user } = useAuth();
   const locale = i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'nl' ? 'nl-NL' : 'fr-FR';
 
