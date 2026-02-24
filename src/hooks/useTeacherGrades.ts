@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../context/DataContext';
 import toast from 'react-hot-toast';
 import type { Grade, Student, ClassGroup } from '../types';
 
@@ -51,7 +51,10 @@ export interface UseTeacherGradesReturn {
 export function useTeacherGrades(): UseTeacherGradesReturn {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { students, classes, grades, addGrade, updateGrade, courses } = useData();
+  // Optimization: Use specific hooks to avoid re-renders from unrelated context changes (e.g. messages)
+  const { students } = useUsers();
+  const { classes, courses } = useAcademics();
+  const { grades, addGrade, updateGrade } = usePerformance();
 
   // Navigation States
   const [selectedClassId, setSelectedClassId] = useState('');
