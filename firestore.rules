@@ -162,6 +162,33 @@ service cloud.firestore {
       allow delete: if isDirector() || isSuperAdmin() || isTeacherForClass(resource.data.classId);
     }
 
+    // Submissions (Subcollection)
+    // 🛡️ SECURITY: Prevent Unauthorized Access to Submissions
+    match /homeworks/{homeworkId}/submissions/{submissionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        (isParent() && resource.data.studentId in getUserData().childrenIds) ||
+        isTeacher() || isDirector() || isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        (isStudent() && request.resource.data.studentId == request.auth.uid) ||
+        (isParent() && request.resource.data.studentId in getUserData().childrenIds)
+      );
+
+      allow update: if isAuthenticated() && (
+        (
+          (
+            (isStudent() && resource.data.studentId == request.auth.uid) ||
+            (isParent() && resource.data.studentId in getUserData().childrenIds)
+          ) &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['content', 'files', 'submittedAt'])
+        ) ||
+        (isTeacher() || isDirector() || isSuperAdmin())
+      );
+    }
+
     // Courses/Schedule:
     // - Read: All authenticated.
     // - Write: Director sets schedule.
