@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeacherGrades } from '../useTeacherGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -10,7 +10,9 @@ vi.mock('../../context/AuthContext', () => ({
 }));
 
 vi.mock('../../context/DataContext', () => ({
-  useData: vi.fn(),
+  useUsers: vi.fn(),
+  useAcademics: vi.fn(),
+  usePerformance: vi.fn(),
 }));
 
 vi.mock('react-hot-toast', () => ({
@@ -53,11 +55,18 @@ describe('useTeacherGrades', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useAuth).mockReturnValue({ user: { id: 't1', role: 'teacher' } } as any);
-    vi.mocked(useData).mockReturnValue({
+
+    vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
+    } as any);
+
+    vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
-      grades: mockGrades,
       courses: mockCourses,
+    } as any);
+
+    vi.mocked(usePerformance).mockReturnValue({
+      grades: mockGrades,
       addGrade: vi.fn(),
       updateGrade: vi.fn(),
     } as any);
