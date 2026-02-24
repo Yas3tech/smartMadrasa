@@ -22,19 +22,18 @@ export const FileUpload = ({
   const { t } = useTranslation();
   const inputId = useId();
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; url: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const processFiles = async (files: File[]) => {
+    if (files.length === 0) return;
 
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     const validFiles: File[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (const file of files) {
       if (file.size > maxSizeBytes) {
         toast.error(t('fileUpload.error.fileTooBig', { name: file.name, size: maxSizeMB }));
         continue;
@@ -76,6 +75,34 @@ export const FileUpload = ({
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processFiles(Array.from(files));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!uploading) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (uploading) return;
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      await processFiles(Array.from(files));
+    }
+  };
+
   const removeFile = (index: number) => {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
@@ -88,9 +115,16 @@ export const FileUpload = ({
         </label>
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className={`border-2 border-dashed border-gray-300 rounded-xl p-6 text-center ${
-            uploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-500'
-          } transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500 ${
+            uploading
+              ? 'border-gray-300 cursor-not-allowed opacity-50'
+              : isDragging
+                ? 'border-orange-500 bg-orange-50 cursor-copy'
+                : 'border-gray-300 cursor-pointer hover:border-orange-500 hover:bg-gray-50'
+          }`}
         >
           <input
             id={inputId}
