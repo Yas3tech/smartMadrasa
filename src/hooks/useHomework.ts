@@ -13,6 +13,7 @@ import {
   gradeSubmission,
 } from '../services/homework';
 import { uploadFileWithProgress, generateHomeworkPath } from '../services/storage';
+import { validateFile } from '../utils/fileValidation';
 import type { Homework, Submission, SubmissionFile } from '../types';
 
 export interface FormState {
@@ -277,9 +278,13 @@ export function useHomework(): UseHomeworkReturn {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const validFiles = files.filter((file) => {
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      if (file.size > maxSize) {
-        toast.error(t('homework.toasts.fileTooLarge', { name: file.name }));
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        if (validation.error === 'fileTooLarge') {
+          toast.error(t('homework.toasts.fileTooLarge', { name: file.name }));
+        } else if (validation.error === 'invalidFileType') {
+          toast.error(t('homework.toasts.invalidFileType', { name: file.name }));
+        }
         return false;
       }
       return true;

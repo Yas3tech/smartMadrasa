@@ -233,6 +233,15 @@
       "feedbackPlaceholder": "تعليقك...",
       "answerPlaceholder": "اكتب إجابتك هنا...",
       "attachFileHelp": "إرفاق ملفات"
+    },
+    "toasts": {
+      "saveError": "خطأ في حفظ الواجب",
+      "gradeError": "خطأ في حفظ الدرجة",
+      "fileTooLarge": "{{name}} كبير جداً (أقصى حد 10 ميغابايت)",
+      "emptySubmission": "يرجى كتابة إجابة أو إرفاق ملف",
+      "submitSuccess": "تم تسليم الواجب بنجاح!",
+      "submitError": "خطأ في إرسال الواجب",
+      "invalidFileType": "نوع الملف غير مسموح به: {{name}}"
     }
   },
   "bulletin": {

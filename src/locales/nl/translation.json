@@ -219,6 +219,15 @@
       "feedbackPlaceholder": "Uw opmerking...",
       "answerPlaceholder": "Schrijf hier uw antwoord...",
       "attachFileHelp": "Bestanden bijvoegen"
+    },
+    "toasts": {
+      "saveError": "Fout bij opslaan huiswerk",
+      "gradeError": "Fout bij opslaan cijfer",
+      "fileTooLarge": "{{name}} is te groot (max 10MB)",
+      "emptySubmission": "Voer een antwoord in of voeg een bestand toe",
+      "submitSuccess": "Huiswerk succesvol ingeleverd!",
+      "submitError": "Fout bij inleveren huiswerk",
+      "invalidFileType": "Ongeldig bestandstype: {{name}}"
     }
   },
   "bulletin": {
