@@ -1,7 +1,7 @@
 import { useState, useRef, type ChangeEvent, type RefObject, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
+import { useUsers as useUserContext } from '../context/DataContext';
 import type { User, Role, Parent } from '../types';
 import { utils, writeFile } from 'xlsx';
 import { parseUserFile, processNonParentUsers, processParentUsers } from '../utils/userImport';
@@ -61,7 +61,7 @@ const roleColors: Record<Role, string> = {
 export function useUsers(): UseUsersReturn {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
-  const { users, addUser, updateUser } = useData();
+  const { users, students, addUser, updateUser } = useUserContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Modal state
@@ -79,7 +79,6 @@ export function useUsers(): UseUsersReturn {
   const [selectedStudentId, setSelectedStudentId] = useState('');
 
   // Data
-  const students = useMemo(() => users.filter((u) => u.role === 'student'), [users]);
 
   const handleOpenNew = () => {
     setEditingUser(null);
