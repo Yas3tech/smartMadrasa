@@ -172,7 +172,12 @@ service cloud.firestore {
       );
 
       allow create: if isAuthenticated() && (
-        (isStudent() && request.resource.data.studentId == request.auth.uid) ||
+        (
+          isStudent() &&
+          request.resource.data.studentId == request.auth.uid &&
+          // Verify student belongs to the homework's class
+          getUserData().classId == get(/databases/$(database)/documents/homeworks/$(homeworkId)).data.classId
+        ) ||
         (isParent() && request.resource.data.studentId in getUserData().childrenIds)
       );
 
