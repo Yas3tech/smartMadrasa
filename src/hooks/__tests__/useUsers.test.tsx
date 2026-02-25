@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useUsers } from '../useUsers';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useUsers as useUserContext } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -10,7 +10,7 @@ vi.mock('../../context/AuthContext', () => ({
 }));
 
 vi.mock('../../context/DataContext', () => ({
-  useData: vi.fn(),
+  useUsers: vi.fn(),
 }));
 
 // Mock toast
@@ -55,10 +55,13 @@ describe('useUsers', () => {
     vi.mocked(useAuth).mockReturnValue({ user: { role: 'director' } } as ReturnType<
       typeof useAuth
     >);
-    vi.mocked(useData).mockReturnValue({
+    vi.mocked(useUserContext).mockReturnValue({
       users: mockUsers,
+      students: mockUsers.filter((u) => u.role === 'student'),
       addUser: vi.fn(),
       updateUser: vi.fn(),
+      isLoading: false,
+      deleteUser: vi.fn(),
     });
   });
 
