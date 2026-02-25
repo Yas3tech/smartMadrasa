@@ -53,3 +53,9 @@
 **Vulnerability:** Identified XSS vulnerabilities in `SubmissionsModal` and `HomeworkDetailModal` where user-supplied URLs were rendered directly in `href` attributes without sanitization. This allowed execution of malicious scripts via `javascript:` (if not blocked by framework) or `data:` URLs.
 **Learning:** Security controls must be applied consistently across all components handling similar data. While `Messages` was protected, `Homework` components were not, creating a security gap. React 19's protections are not a substitute for explicit input sanitization.
 **Prevention:** Enforce use of `isSafeUrl` for ALL user-generated links. Added unit tests to verify that malicious links are not rendered.
+
+## 2025-02-23 - IDOR in Homework Submissions
+
+**Vulnerability:** Students could submit homework to assignments from other classes by manipulating the `homeworkId` in the path, as the security rules only checked if the user was a student but failed to verify that the student belonged to the class of the target homework.
+**Learning:** Checking user role (e.g., `isStudent()`) is insufficient for multi-tenant data (like classes). Relationships must be explicitly validated in `create` rules by reading the parent resource (e.g., `get(...).data.classId`).
+**Prevention:** Always validate foreign key relationships in Firestore Rules, especially for write operations that link a user to a resource (like `submissions` to `homework`).
