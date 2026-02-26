@@ -275,21 +275,31 @@ export function useHomework(): UseHomeworkReturn {
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter((file) => {
-      const validation = validateFile(file);
-      if (!validation.valid) {
+    const validFiles: File[] = [];
+
+    for (const file of files) {
+      const validation = await validateFile(file);
+      if (validation.valid) {
+        validFiles.push(file);
+      } else {
         if (validation.error === 'fileTooLarge') {
           toast.error(t('homework.toasts.fileTooLarge', { name: file.name }));
-        } else if (validation.error === 'invalidFileType') {
+        } else if (
+          validation.error === 'invalidFileType' ||
+          validation.error === 'invalidFileSignature'
+        ) {
           toast.error(t('homework.toasts.invalidFileType', { name: file.name }));
+        } else {
+          toast.error(t('common.error', { defaultValue: 'Error validating file' }));
         }
-        return false;
       }
-      return true;
-    });
-    setSelectedFiles([...selectedFiles, ...validFiles]);
+    }
+
+    if (validFiles.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+    }
   };
 
   const handleRemoveFile = (index: number) => {
