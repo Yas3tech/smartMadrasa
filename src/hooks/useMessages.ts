@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
+import { useCommunication, useUsers, useAcademics } from '../context/DataContext';
 import type { Message, Parent, Student } from '../types';
 import { useTranslation } from 'react-i18next';
 
@@ -58,8 +58,10 @@ export interface UseMessagesReturn {
 export function useMessages(): UseMessagesReturn {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage, users, classes } =
-    useData();
+  const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage } =
+    useCommunication();
+  const { users } = useUsers();
+  const { classes } = useAcademics();
 
   // Folder state
   const [selectedFolder, setSelectedFolder] = useState<'inbox' | 'sent' | 'archive'>('inbox');
@@ -87,27 +89,31 @@ export function useMessages(): UseMessagesReturn {
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter messages
-  const filteredMessages = messages.filter((msg) => {
-    const matchesSearch =
-      msg.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      msg.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      msg.senderName.toLowerCase().includes(searchQuery.toLowerCase());
+  // Optimization: Memoize filtered messages to prevent re-filtering on every render
+  const filteredMessages = useMemo(() => {
+    return messages.filter((msg) => {
+      const matchesSearch =
+        msg.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        msg.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        msg.senderName.toLowerCase().includes(searchQuery.toLowerCase());
 
-    if (selectedFolder === 'inbox') {
-      return msg.receiverId === user?.id && !msg.archived && matchesSearch;
-    } else if (selectedFolder === 'sent') {
-      return msg.senderId === user?.id && !msg.archived && matchesSearch;
-    } else if (selectedFolder === 'archive') {
-      return (
-        (msg.receiverId === user?.id || msg.senderId === user?.id) && msg.archived && matchesSearch
-      );
-    }
-    return matchesSearch;
-  });
+      if (selectedFolder === 'inbox') {
+        return msg.receiverId === user?.id && !msg.archived && matchesSearch;
+      } else if (selectedFolder === 'sent') {
+        return msg.senderId === user?.id && !msg.archived && matchesSearch;
+      } else if (selectedFolder === 'archive') {
+        return (
+          (msg.receiverId === user?.id || msg.senderId === user?.id) &&
+          msg.archived &&
+          matchesSearch
+        );
+      }
+      return matchesSearch;
+    });
+  }, [messages, searchQuery, selectedFolder, user?.id]);
 
-  // Filter recipients
-  const filteredRecipients = (() => {
+  // Optimization: Memoize recipients list generation
+  const filteredRecipients = useMemo(() => {
     const allRecipients = [
       {
         type: 'all',
@@ -147,11 +153,13 @@ export function useMessages(): UseMessagesReturn {
       if (recipientSearch === '') return true;
       return item.searchText.includes(recipientSearch.toLowerCase());
     });
-  })();
+  }, [users, classes, recipientSearch, t]);
 
-  const selectedRecipientLabel = recipient
-    ? filteredRecipients.find((r) => r.id === recipient)?.label || recipientSearch
-    : '';
+  const selectedRecipientLabel = useMemo(() => {
+    return recipient
+      ? filteredRecipients.find((r) => r.id === recipient)?.label || recipientSearch
+      : '';
+  }, [recipient, filteredRecipients, recipientSearch]);
 
   // Handlers
   const handleArchiveMessage = async (messageId: string | number) => {
