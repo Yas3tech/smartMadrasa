@@ -146,7 +146,7 @@ export const FileUpload = ({
       </div>
 
       {Object.keys(uploadProgress).length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2" role="status" aria-live="polite">
           {Object.entries(uploadProgress).map(([fileName, progress]) => (
             <div key={fileName} className="flex items-center gap-2">
               <Loader size={16} className="animate-spin text-orange-600" />
@@ -155,7 +155,14 @@ export const FileUpload = ({
                   <span className="truncate">{fileName}</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-2 bg-gray-200 rounded-full overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={Math.round(progress)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${t('common.loading')} ${fileName}`}
+                >
                   <div
                     className="h-full bg-orange-600 transition-all duration-300"
                     style={{ width: `${progress}%` }}
@@ -182,7 +189,7 @@ export const FileUpload = ({
               <button
                 onClick={() => removeFile(index)}
                 className="p-1 text-green-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                aria-label={t('common.delete')}
+                aria-label={`${t('common.delete')} ${file.name}`}
               >
                 <X size={16} />
               </button>

@@ -9,6 +9,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       if (key === 'fileUpload.label') return 'Upload File';
       if (key === 'common.delete') return 'Delete';
+      if (key === 'common.loading') return 'Loading...';
       return key;
     },
   }),
@@ -83,5 +84,51 @@ describe('FileUpload', () => {
     // Let's just assume if it was orange before, it shouldn't be orange-500 border if not dragging,
     // unless hover is active, but hover isn't simulated by drop.
     // Actually, after drop, setIsDragging(false) is called.
+  });
+
+  it('displays accessible progress bar during upload', async () => {
+    const onFilesUploaded = vi.fn();
+    const generatePath = () => 'path/file.png';
+
+    // Mock upload to hang so we can see progress
+    vi.mocked(uploadFileWithProgress).mockImplementation(async (file, path, onProgress) => {
+      if (onProgress) onProgress(50); // Immediate 50%
+      return new Promise(() => {}); // Never resolve to keep it in "uploading" state
+    });
+
+    render(<FileUpload onFilesUploaded={onFilesUploaded} generatePath={generatePath} />);
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['content'], 'test.png', { type: 'image/png' });
+
+    // Trigger upload
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      const progressbar = screen.getByRole('progressbar');
+      expect(progressbar).toBeInTheDocument();
+      expect(progressbar).toHaveAttribute('aria-valuenow', '50');
+      expect(progressbar).toHaveAttribute('aria-valuemin', '0');
+      expect(progressbar).toHaveAttribute('aria-valuemax', '100');
+      expect(progressbar).toHaveAttribute('aria-label', 'Loading... test.png');
+    });
+
+    // Check for status region
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('displays accessible delete button for uploaded files', async () => {
+    const onFilesUploaded = vi.fn();
+    vi.mocked(uploadFileWithProgress).mockResolvedValue('url');
+
+    render(<FileUpload onFilesUploaded={onFilesUploaded} generatePath={() => ''} />);
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File([''], 'doc.pdf', { type: 'application/pdf' });
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Delete doc.pdf')).toBeInTheDocument();
+    });
   });
 });
