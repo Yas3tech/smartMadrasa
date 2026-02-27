@@ -47,7 +47,9 @@
     "subject": "Matière",
     "add": "Ajouter",
     "actions": "Actions",
-    "unsafeFile": "Fichier suspect"
+    "unsafeFile": "Fichier suspect",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
   },
   "subjects": {
     "Arabe": "Arabe",

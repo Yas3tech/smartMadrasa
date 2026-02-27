@@ -46,7 +46,9 @@
     "all": "الكل",
     "subject": "المادة",
     "add": "إضافة",
-    "unsafeFile": "ملف مشبوه"
+    "unsafeFile": "ملف مشبوه",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "subjects": {
     "Arabe": "اللغة العربية",
