@@ -45,7 +45,9 @@
     "all": "Alle",
     "subject": "Vak",
     "add": "Toevoegen",
-    "unsafeFile": "Onveilig bestand"
+    "unsafeFile": "Onveilig bestand",
+    "showPassword": "Wachtwoord tonen",
+    "hidePassword": "Wachtwoord verbergen"
   },
   "subjects": {
     "Arabe": "Arabisch",
