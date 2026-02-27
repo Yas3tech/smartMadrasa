@@ -51,9 +51,8 @@ const validateFileSignature = async (file: File): Promise<boolean> => {
   // Extension check helpers
   const ext = ('.' + file.name.split('.').pop()?.toLowerCase()) as string;
 
-  // 7. Text files (.txt) & Legacy Office - Skip signature check
-  // We allow them for now as they are harder to validate strictly without false positives
-  if (['.txt', '.doc', '.xls', '.ppt'].includes(ext)) {
+  // 7. Text files (.txt) - Skip signature check
+  if (ext === '.txt') {
     return true;
   }
 
@@ -81,6 +80,7 @@ const validateFileSignature = async (file: File): Promise<boolean> => {
     pdf: '25504446', // %PDF
     zip: '504B0304', // ZIP, DOCX, XLSX, PPTX, APK, JAR
     rar: '52617221', // Rar!
+    ole: 'D0CF11E0A1B11AE1', // Legacy Office (DOC, XLS, PPT, MSI, MSG)
   };
 
   // 1. JPEG
@@ -118,6 +118,11 @@ const validateFileSignature = async (file: File): Promise<boolean> => {
         .join('')
         .toUpperCase() === '57454250'
     );
+  }
+
+  // 7. Legacy Office (DOC, XLS, PPT) - OLE Format
+  if (['.doc', '.xls', '.ppt'].includes(ext)) {
+    return header.startsWith(signatures.ole);
   }
 
   // Unknown extension (should be caught by allowed extensions check before this)
