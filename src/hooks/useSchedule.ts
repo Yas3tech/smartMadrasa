@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
+import { useAcademics, useCommunication, usePerformance } from '../context/DataContext';
 import type { Course, Event, Homework } from '../types';
 
 export interface ScheduleSlot {
@@ -80,18 +80,9 @@ export interface UseScheduleReturn {
 export function useSchedule(): UseScheduleReturn {
   const { i18n } = useTranslation();
   const { user } = useAuth();
-  const {
-    courses,
-    events,
-    homeworks,
-    classes,
-    addCourse,
-    updateCourse,
-    deleteCourse,
-    addEvent,
-    updateEvent,
-    deleteEvent,
-  } = useData();
+  const { courses, classes, addCourse, updateCourse, deleteCourse } = useAcademics();
+  const { events, addEvent, updateEvent, deleteEvent } = useCommunication();
+  const { homeworks } = usePerformance();
 
   // Week navigation
   const [weekOffset, setWeekOffset] = useState(0);

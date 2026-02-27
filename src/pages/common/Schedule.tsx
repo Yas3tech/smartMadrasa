@@ -7,7 +7,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useCommunication, usePerformance } from '../../context/DataContext';
 import { useSchedule } from '../../hooks/useSchedule';
 import { Card, Button, Badge } from '../../components/UI';
 import {
@@ -29,7 +29,8 @@ import StudentSelector from '../../components/Common/StudentSelector';
 const Schedule = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { events, homeworks } = useData();
+  const { events } = useCommunication();
+  const { homeworks } = usePerformance();
   const schedule = useSchedule();
 
   const days = [
