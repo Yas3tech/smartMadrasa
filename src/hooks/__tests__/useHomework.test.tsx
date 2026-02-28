@@ -45,8 +45,22 @@ vi.mock('../../services/storage', () => ({
 
 describe('useHomework', () => {
   const mockHomeworks = [
-    { id: 'h1', title: 'HW 1', classId: 'c1', dueDate: '2023-01-01', subject: 'Math', description: 'Desc' },
-    { id: 'h2', title: 'HW 2', classId: 'c1', dueDate: '2023-01-02', subject: 'Math', description: 'Desc' },
+    {
+      id: 'h1',
+      title: 'HW 1',
+      classId: 'c1',
+      dueDate: '2023-01-01',
+      subject: 'Math',
+      description: 'Desc',
+    },
+    {
+      id: 'h2',
+      title: 'HW 2',
+      classId: 'c1',
+      dueDate: '2023-01-02',
+      subject: 'Math',
+      description: 'Desc',
+    },
   ];
 
   beforeEach(() => {
@@ -59,7 +73,7 @@ describe('useHomework', () => {
 
   it('should subscribe to submissions for student user', () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 's1', role: 'student', classId: 'c1', name: 'Student 1' }
+      user: { id: 's1', role: 'student', classId: 'c1', name: 'Student 1' },
     } as any);
 
     renderHook(() => useHomework());
@@ -72,7 +86,7 @@ describe('useHomework', () => {
 
   it('should not subscribe to submissions for teacher user', () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 't1', role: 'teacher', name: 'Teacher 1' }
+      user: { id: 't1', role: 'teacher', name: 'Teacher 1' },
     } as any);
 
     renderHook(() => useHomework());

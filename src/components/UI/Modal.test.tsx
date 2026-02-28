@@ -5,7 +5,7 @@ import { Modal } from './index';
 // Mock translation
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key === 'common.close' ? 'Close' : key,
+    t: (key: string) => (key === 'common.close' ? 'Close' : key),
   }),
 }));
 

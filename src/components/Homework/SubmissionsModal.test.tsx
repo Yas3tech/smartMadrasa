@@ -93,11 +93,15 @@ describe('SubmissionsModal', () => {
 
     // Verify safe link is rendered
     const links = screen.getAllByRole('link');
-    const safeLinkFound = links.find((link) => link.getAttribute('href') === 'https://example.com/safe.pdf');
+    const safeLinkFound = links.find(
+      (link) => link.getAttribute('href') === 'https://example.com/safe.pdf'
+    );
     expect(safeLinkFound).toBeInTheDocument();
 
     // Verify malicious link is NOT rendered
-    const maliciousLinkFound = links.find((link) => link.getAttribute('href') === 'data:text/html,<script>alert(1)</script>');
+    const maliciousLinkFound = links.find(
+      (link) => link.getAttribute('href') === 'data:text/html,<script>alert(1)</script>'
+    );
     expect(maliciousLinkFound).toBeUndefined();
 
     // Verify warning is displayed

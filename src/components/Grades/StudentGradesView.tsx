@@ -25,9 +25,7 @@ const StudentGradesView = () => {
 
   // Derive available subjects from memoized studentGrades
   const availableSubjects = useMemo(() => {
-     return [
-      ...new Set(studentGrades.map((g) => g.subject)),
-    ].sort();
+    return [...new Set(studentGrades.map((g) => g.subject))].sort();
   }, [studentGrades]);
 
   // Filter local grades (already filtered by studentId in hook)

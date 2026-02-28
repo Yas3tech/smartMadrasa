@@ -9,7 +9,7 @@ describe('validateFile', () => {
 
   it('should validate a correct JPEG file', async () => {
     // JPEG signature: FF D8 FF
-    const content = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0]);
+    const content = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
     const file = createMockFile(content, 'test.jpg', 'image/jpeg');
     const result = await validateFile(file);
     expect(result.valid).toBe(true);
@@ -17,7 +17,7 @@ describe('validateFile', () => {
 
   it('should validate a correct PNG file', async () => {
     // PNG signature: 89 50 4E 47 0D 0A 1A 0A
-    const content = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    const content = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     const file = createMockFile(content, 'test.png', 'image/png');
     const result = await validateFile(file);
     expect(result.valid).toBe(true);
@@ -33,7 +33,7 @@ describe('validateFile', () => {
 
   it('should validate a correct ZIP/Office file', async () => {
     // ZIP signature: 50 4B 03 04
-    const content = new Uint8Array([0x50, 0x4B, 0x03, 0x04]);
+    const content = new Uint8Array([0x50, 0x4b, 0x03, 0x04]);
     const file = createMockFile(content, 'test.zip', 'application/zip');
     const result = await validateFile(file);
     expect(result.valid).toBe(true);

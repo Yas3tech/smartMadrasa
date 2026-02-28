@@ -221,10 +221,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
       <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
         {title && (
           <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
-            <h3
-              id={titleId}
-              className="font-bold text-lg text-gray-800 dark:text-slate-100"
-            >
+            <h3 id={titleId} className="font-bold text-lg text-gray-800 dark:text-slate-100">
               {title}
             </h3>
             <button

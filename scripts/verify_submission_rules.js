@@ -12,16 +12,16 @@ function checkSubmissionRule(testCase, useFix = false) {
     resource: {
       data: {
         studentId: actorId, // claiming to be the student
-        content: "My Homework Submission"
-      }
+        content: 'My Homework Submission',
+      },
     },
   };
 
   // Mock getUserData
   const getUserData = () => {
-      if (actorRole === 'student') return { role: 'student', classId: studentClassId };
-      if (actorRole === 'parent') return { role: 'parent', childrenIds: [actorId] }; // simplified for parent
-      return { role: actorRole };
+    if (actorRole === 'student') return { role: 'student', classId: studentClassId };
+    if (actorRole === 'parent') return { role: 'parent', childrenIds: [actorId] }; // simplified for parent
+    return { role: actorRole };
   };
 
   const isAuthenticated = () => request.auth != null;
@@ -30,15 +30,16 @@ function checkSubmissionRule(testCase, useFix = false) {
 
   // Mock get() for homework parent document
   const getHomeworkData = () => {
-      return { classId: homeworkClassId };
+    return { classId: homeworkClassId };
   };
 
   // --- VULNERABLE LOGIC (Current) ---
   if (!useFix) {
     if (method === 'create') {
-      return isAuthenticated() && (
-        (isStudent() && request.resource.data.studentId == request.auth.uid) ||
-        (isParent() && getUserData().childrenIds.includes(request.resource.data.studentId))
+      return (
+        isAuthenticated() &&
+        ((isStudent() && request.resource.data.studentId == request.auth.uid) ||
+          (isParent() && getUserData().childrenIds.includes(request.resource.data.studentId)))
       );
     }
     return false;
@@ -46,18 +47,14 @@ function checkSubmissionRule(testCase, useFix = false) {
 
   // --- SECURE LOGIC (Proposed Fix) ---
   if (method === 'create') {
-    return isAuthenticated() && (
-      (
-        isStudent() &&
+    return (
+      isAuthenticated() &&
+      ((isStudent() &&
         request.resource.data.studentId == request.auth.uid &&
         // NEW CHECK: Verify student belongs to the class of the homework
-        getUserData().classId == getHomeworkData().classId
-      ) ||
-      (
-        isParent() &&
-        getUserData().childrenIds.includes(request.resource.data.studentId)
+        getUserData().classId == getHomeworkData().classId) ||
+        (isParent() && getUserData().childrenIds.includes(request.resource.data.studentId)))
         // Parent check omitted for simplicity/scope of this fix, or can be added if we mock child data lookup
-      )
     );
   }
 

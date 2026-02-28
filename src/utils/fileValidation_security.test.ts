@@ -22,7 +22,7 @@ describe('validateFile Security Enhancements', () => {
 
   it('should allow valid .doc files with OLE signature', async () => {
     // OLE Signature: D0 CF 11 E0 A1 B1 1A E1
-    const content = new Uint8Array([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]);
+    const content = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]);
     const file = createMockFile(content, 'real.doc', 'application/msword');
 
     const result = await validateFile(file);
