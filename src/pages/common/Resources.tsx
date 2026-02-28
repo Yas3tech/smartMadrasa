@@ -93,7 +93,7 @@ const Resources = () => {
     if (!fileName) return;
 
     const newResource: Resource = {
-      id: `r${Math.random().toString(36).substring(7)}`,
+      id: crypto.randomUUID(),
       name: fileName,
       type: 'pdf',
       subject,

@@ -35,7 +35,7 @@ export const processNonParentUsers = async (
       const roleNormalized = row.role.toLowerCase().trim() as Role;
       if (roleNormalized !== 'parent') {
         const newUser: User = {
-          id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: crypto.randomUUID(),
           name: row.name,
           email: row.email.toLowerCase().trim(),
           role: roleNormalized,
@@ -87,7 +87,7 @@ export const processParentUsers = async (
         }
 
         const newUser: Parent = {
-          id: `u${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: crypto.randomUUID(),
           name: row.name,
           email: row.email.toLowerCase().trim(),
           role: 'parent',
