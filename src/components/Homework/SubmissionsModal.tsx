@@ -47,7 +47,11 @@ export function SubmissionsModal({
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">{homework.subject}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label={t('common.close')}
+          >
             <X size={24} />
           </button>
         </div>

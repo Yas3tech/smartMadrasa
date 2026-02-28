@@ -112,6 +112,7 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label={t('common.close')}
               >
                 <X size={20} />
               </button>

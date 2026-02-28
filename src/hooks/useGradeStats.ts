@@ -58,52 +58,54 @@ export const useGradeStats = (studentId?: string) => {
   }, [studentId, studentGrades, attendance]);
 
   // Kept for backward compatibility and manual usage
-  const calculateStudentStats = useCallback((id: string) => {
-    // If the requested ID matches the one passed to the hook, return the memoized stats
-    if (studentId === id && stats) {
+  const calculateStudentStats = useCallback(
+    (id: string) => {
+      // If the requested ID matches the one passed to the hook, return the memoized stats
+      if (studentId === id && stats) {
         return stats;
-    }
+      }
 
-    const sGrades = grades.filter((g) => g.studentId === id);
-    const sAttendance = attendance.filter((a) => a.studentId === id);
+      const sGrades = grades.filter((g) => g.studentId === id);
+      const sAttendance = attendance.filter((a) => a.studentId === id);
 
-    const avgGrade = Math.round(
-      sGrades.length > 0
-        ? sGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) /
-            sGrades.length
-        : 0
-    );
+      const avgGrade = Math.round(
+        sGrades.length > 0
+          ? sGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / sGrades.length
+          : 0
+      );
 
-    const presentCount = sAttendance.filter((a) => a.status === 'present').length;
-    const attendanceRate = Math.round(
-      sAttendance.length > 0 ? (presentCount / sAttendance.length) * 100 : 0
-    );
+      const presentCount = sAttendance.filter((a) => a.status === 'present').length;
+      const attendanceRate = Math.round(
+        sAttendance.length > 0 ? (presentCount / sAttendance.length) * 100 : 0
+      );
 
-    // Subject-wise performance
-    const subjectMap = new Map<string, { sum: number; count: number }>();
+      // Subject-wise performance
+      const subjectMap = new Map<string, { sum: number; count: number }>();
 
-    for (const g of sGrades) {
-      const current = subjectMap.get(g.subject) || { sum: 0, count: 0 };
-      current.sum += (g.score / g.maxScore) * 100;
-      current.count++;
-      subjectMap.set(g.subject, current);
-    }
+      for (const g of sGrades) {
+        const current = subjectMap.get(g.subject) || { sum: 0, count: 0 };
+        current.sum += (g.score / g.maxScore) * 100;
+        current.count++;
+        subjectMap.set(g.subject, current);
+      }
 
-    const subjectPerformance = Array.from(subjectMap.entries()).map(
-      ([subject, { sum, count }]) => ({
-        subject,
-        average: Math.round(sum / count),
-        count,
-      })
-    );
+      const subjectPerformance = Array.from(subjectMap.entries()).map(
+        ([subject, { sum, count }]) => ({
+          subject,
+          average: Math.round(sum / count),
+          count,
+        })
+      );
 
-    return {
-      avgGrade,
-      attendanceRate,
-      totalGrades: sGrades.length,
-      subjectPerformance,
-    };
-  }, [grades, attendance, studentId, stats]);
+      return {
+        avgGrade,
+        attendanceRate,
+        totalGrades: sGrades.length,
+        subjectPerformance,
+      };
+    },
+    [grades, attendance, studentId, stats]
+  );
 
   return { calculateStudentStats, stats, studentGrades };
 };

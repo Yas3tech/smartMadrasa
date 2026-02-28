@@ -100,7 +100,11 @@ const ExamModal = ({
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             {editingEvent ? t('schedule.editEvent') : t('schedule.addEvent')}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label={t('common.close')}
+          >
             <X size={24} />
           </button>
         </div>

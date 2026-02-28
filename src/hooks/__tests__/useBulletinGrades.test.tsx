@@ -58,9 +58,7 @@ describe('useBulletinGrades', () => {
     { id: 'g2', studentId: 's1', courseId: 'course1', score: 18, maxScore: 20, date: '2023-10-15' },
   ];
 
-  const mockPeriods = [
-    { id: 'p1', name: 'T1', startDate: '2023-09-01', endDate: '2023-12-31' },
-  ];
+  const mockPeriods = [{ id: 'p1', name: 'T1', startDate: '2023-09-01', endDate: '2023-12-31' }];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -100,8 +98,8 @@ describe('useBulletinGrades', () => {
 
     expect(result.current.selectedClassId).toBe('c1');
     expect(result.current.classStudents).toHaveLength(2);
-    expect(result.current.classStudents.map(s => s.name)).toContain('Alice');
-    expect(result.current.classStudents.map(s => s.name)).toContain('Bob');
+    expect(result.current.classStudents.map((s) => s.name)).toContain('Alice');
+    expect(result.current.classStudents.map((s) => s.name)).toContain('Bob');
   });
 
   it('should calculate student averages correctly', () => {

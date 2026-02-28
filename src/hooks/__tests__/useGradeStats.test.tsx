@@ -19,7 +19,14 @@ describe('useGradeStats', () => {
     const mockGrades = [
       { id: 'g1', score: 90, maxScore: 100, subject: 'Math', studentId: 's1', date: '2024-01-01' },
       { id: 'g2', score: 80, maxScore: 100, subject: 'Math', studentId: 's1', date: '2024-01-02' },
-      { id: 'g3', score: 70, maxScore: 100, subject: 'History', studentId: 's1', date: '2024-01-03' },
+      {
+        id: 'g3',
+        score: 70,
+        maxScore: 100,
+        subject: 'History',
+        studentId: 's1',
+        date: '2024-01-03',
+      },
     ];
     const mockAttendance = [
       { id: 'a1', studentId: 's1', status: 'present', date: '2024-01-01' },
@@ -62,9 +69,7 @@ describe('useGradeStats', () => {
     const mockGrades = [
       { id: 'g1', score: 90, maxScore: 100, subject: 'Math', studentId: 's1', date: '2024-01-01' },
     ];
-    const mockAttendance = [
-      { id: 'a1', studentId: 's1', status: 'present', date: '2024-01-01' },
-    ];
+    const mockAttendance = [{ id: 'a1', studentId: 's1', status: 'present', date: '2024-01-01' }];
 
     const mockData = {
       grades: mockGrades,

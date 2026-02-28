@@ -69,9 +69,7 @@ describe('useMessages', () => {
     { id: 'user3', name: 'User 3', role: 'parent' },
   ];
 
-  const mockClasses = [
-    { id: 'c1', name: 'Class A', teacherId: 'user1' },
-  ];
+  const mockClasses = [{ id: 'c1', name: 'Class A', teacherId: 'user1' }];
 
   const mockSendMessage = vi.fn();
   const mockDeleteMessage = vi.fn();
@@ -170,7 +168,7 @@ describe('useMessages', () => {
     // Check if recipients are generated
     // 1 All Users + 3 Users + 1 Class = 5
     expect(result.current.filteredRecipients.length).toBeGreaterThan(0);
-    const userRecipient = result.current.filteredRecipients.find(r => r.id === 'user2');
+    const userRecipient = result.current.filteredRecipients.find((r) => r.id === 'user2');
     expect(userRecipient).toBeDefined();
   });
 
@@ -191,10 +189,12 @@ describe('useMessages', () => {
       result.current.handleSendMessage();
     });
 
-    expect(mockSendMessage).toHaveBeenCalledWith(expect.objectContaining({
-      receiverId: 'user2',
-      subject: 'Test Subject',
-      content: 'Test Content',
-    }));
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        receiverId: 'user2',
+        subject: 'Test Subject',
+        content: 'Test Content',
+      })
+    );
   });
 });

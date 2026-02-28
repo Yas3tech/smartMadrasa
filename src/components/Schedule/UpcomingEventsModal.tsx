@@ -76,7 +76,11 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
             <Calendar className="text-orange-600" size={28} />
             {t('calendar.upcoming')}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label={t('common.close')}
+          >
             <X size={24} />
           </button>
         </div>

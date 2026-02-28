@@ -90,6 +90,7 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Fermer"
             >
               <X size={20} />
             </button>

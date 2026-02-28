@@ -70,7 +70,11 @@ describe('FileUpload', () => {
 
     // Check if upload function was called
     await waitFor(() => {
-      expect(uploadFileWithProgress).toHaveBeenCalledWith(file, 'path/test.png', expect.any(Function));
+      expect(uploadFileWithProgress).toHaveBeenCalledWith(
+        file,
+        'path/test.png',
+        expect.any(Function)
+      );
     });
 
     // Check if onFilesUploaded was called
