@@ -136,6 +136,7 @@ const Messages = () => {
                 <button
                   onClick={() => setMobileView('folders')}
                   className="p-1 mr-2 -ml-2 text-gray-500"
+                  aria-label={t('common.back')}
                 >
                   <ChevronLeft size={24} />
                 </button>
@@ -164,7 +165,10 @@ const Messages = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <button className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+              <button
+                className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+                aria-label={t('common.filter')}
+              >
                 <Filter size={18} />
               </button>
             </div>
@@ -235,6 +239,7 @@ const Messages = () => {
                     <button
                       onClick={() => setMobileView('list')}
                       className="p-2 mr-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                      aria-label={t('common.back')}
                     >
                       <ChevronLeft size={24} />
                     </button>
@@ -352,6 +357,7 @@ const Messages = () => {
             <button
               onClick={() => setIsComposeOpen(false)}
               className="text-gray-400 hover:text-gray-600"
+              aria-label={t('common.close')}
             >
               <X size={24} />
             </button>
@@ -455,6 +461,7 @@ const Messages = () => {
                       <button
                         onClick={() => removeAttachment(index)}
                         className="text-gray-400 hover:text-red-500 p-1"
+                        aria-label={t('common.delete')}
                       >
                         <X size={16} />
                       </button>
