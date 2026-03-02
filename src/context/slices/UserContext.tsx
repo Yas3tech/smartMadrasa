@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { User, Student, Teacher } from '../../types';
+import type { User, Student } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToUsers,
@@ -47,16 +47,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           ...(student.classId ? [{ classId: student.classId }] : []),
           { role: ['teacher', 'director', 'superadmin'] },
         ]);
-      } else if (user?.role === 'teacher') {
-        const teacher = user as Teacher;
-        const classIds = teacher.classIds || [];
-
-        unsubUsers = subscribeToUsers(setUsers, [
-          ...(classIds.length > 0 ? [{ classId: classIds }] : []),
-          ...(classIds.length > 0 ? [{ role: 'parent', relatedClassIds: classIds }] : []),
-          { role: ['teacher', 'director', 'superadmin'] },
-        ]);
-      } else {
+      } else if (user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin') {
         unsubUsers = subscribeToUsers(setUsers);
       }
 

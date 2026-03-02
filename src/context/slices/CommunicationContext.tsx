@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { Message, Event, Parent, Student, Teacher } from '../../types';
+import type { Message, Event, Parent, Student } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToMessages,
@@ -66,12 +66,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       } else if (user?.role === 'student') {
         const student = user as Student;
         unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => {};
-      } else if (user?.role === 'teacher') {
-        const teacher = user as Teacher;
-        unsubEvents =
-          teacher.classIds?.length > 0 ? subscribeToEvents(setEvents, teacher.classIds) : () => {};
-      } else {
-        // Director / Admin
+      } else if (user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin') {
         unsubEvents = subscribeToEvents(setEvents);
       }
 
