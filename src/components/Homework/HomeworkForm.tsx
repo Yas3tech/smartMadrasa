@@ -68,7 +68,7 @@ export function HomeworkForm({
 
         <form
           className="space-y-4"
-          onSubmit={(e) => {
+          onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             onSubmit();
           }}
