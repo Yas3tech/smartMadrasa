@@ -66,9 +66,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       } else if (user?.role === 'student') {
         const student = user as Student;
         unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => {};
-      } else if (user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin') {
-        unsubEvents = subscribeToEvents(setEvents);
-      }
+       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
 
       setIsLoading(false);
 
