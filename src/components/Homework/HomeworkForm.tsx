@@ -66,7 +66,13 @@ export function HomeworkForm({
           </button>
         </div>
 
-        <div className="space-y-4">
+        <form
+          className="space-y-4"
+          onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            onSubmit();
+          }}
+        >
           {/* Class Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -186,14 +192,14 @@ export function HomeworkForm({
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="secondary" onClick={onClose}>
+            <Button variant="secondary" type="button" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button variant="primary" onClick={onSubmit}>
+            <Button variant="primary" type="submit">
               {isEditing ? t('common.save') : t('homework.create')}
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </Modal>
   );

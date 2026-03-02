@@ -54,7 +54,7 @@ function checkSubmissionRule(testCase, useFix = false) {
         // NEW CHECK: Verify student belongs to the class of the homework
         getUserData().classId == getHomeworkData().classId) ||
         (isParent() && getUserData().childrenIds.includes(request.resource.data.studentId)))
-        // Parent check omitted for simplicity/scope of this fix, or can be added if we mock child data lookup
+      // Parent check omitted for simplicity/scope of this fix, or can be added if we mock child data lookup
     );
   }
 
