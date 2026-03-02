@@ -10,6 +10,10 @@
       content="Une solution complète de gestion scolaire pour une éducation moderne et connectée."
     />
 
+    <!-- Security Enhancement: Security headers via meta tags -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; block-all-mixed-content;">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
     <!-- Performance: Preconnect to external services -->
     <link rel="preconnect" href="https://apis.google.com" crossorigin="anonymous" />
     <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin="anonymous" />
