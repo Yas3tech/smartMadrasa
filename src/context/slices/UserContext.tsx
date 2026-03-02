@@ -47,9 +47,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           ...(student.classId ? [{ classId: student.classId }] : []),
           { role: ['teacher', 'director', 'superadmin'] },
         ]);
-      } else if (user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin') {
-        unsubUsers = subscribeToUsers(setUsers);
-      }
+       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
 
       setIsLoading(false);
 
