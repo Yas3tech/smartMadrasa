@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCommunication, useUsers, useAcademics } from '../context/DataContext';
-import type { Message, Parent, Student } from '../types';
+import type { Message, Parent, Student, User } from '../types';
 import { useTranslation } from 'react-i18next';
 
 export interface UseMessagesReturn {
@@ -114,6 +114,14 @@ export function useMessages(): UseMessagesReturn {
 
   // Optimization: Memoize recipients list generation
   const filteredRecipients = useMemo(() => {
+    // Optimization: Create a student map for O(1) lookups
+    const studentMap = new Map<string, User>();
+    users.forEach((u) => {
+      if (u.role === 'student') {
+        studentMap.set(u.id, u);
+      }
+    });
+
     const allRecipients = [
       {
         type: 'all',
@@ -126,9 +134,13 @@ export function useMessages(): UseMessagesReturn {
         let searchText = '';
         if (u.role === 'parent') {
           const parent = u as Parent;
-          const children = users.filter(
-            (child) => child.role === 'student' && parent.childrenIds?.includes(child.id)
-          );
+          const children: User[] = [];
+          if (parent.childrenIds) {
+            parent.childrenIds.forEach((childId) => {
+              const child = studentMap.get(childId);
+              if (child) children.push(child);
+            });
+          }
           const childrenNames = children.map((c) => c.name).join(', ');
           label = `👨‍👩‍👧 ${t('messages.parentOf')} ${childrenNames || t('roles.student')}`;
           searchText = `${t('messages.parentOf')} ${childrenNames} ${u.name}`.toLowerCase();
