@@ -94,10 +94,7 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
         const student = user as Student;
         unsubClasses = subscribeToClasses(setClasses, student.classId ? [student.classId] : []);
         unsubCourses = subscribeToCourses(setCourses);
-      } else if (user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin') {
-        unsubClasses = subscribeToClasses(setClasses);
-        unsubCourses = subscribeToCourses(setCourses);
-      }
+       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
 
       setIsLoading(false);
 
