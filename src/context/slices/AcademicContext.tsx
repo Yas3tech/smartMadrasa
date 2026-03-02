@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { ClassGroup, Course, Parent, Student, Teacher } from '../../types';
+import type { ClassGroup, Course, Parent, Student } from '../../types';
 import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -94,15 +94,7 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
         const student = user as Student;
         unsubClasses = subscribeToClasses(setClasses, student.classId ? [student.classId] : []);
         unsubCourses = subscribeToCourses(setCourses);
-      } else if (user?.role === 'teacher') {
-        const teacher = user as Teacher;
-        unsubClasses = subscribeToClasses(setClasses, teacher.classIds || []);
-        unsubCourses = subscribeToCourses(setCourses);
-      } else {
-        // Director / Admin
-        unsubClasses = subscribeToClasses(setClasses);
-        unsubCourses = subscribeToCourses(setCourses);
-      }
+       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
 
       setIsLoading(false);
 
