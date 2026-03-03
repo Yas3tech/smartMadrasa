@@ -50,7 +50,7 @@ L'absence d'un système de Custom Claims robuste empêche de qualifier le systè
 
 - **Backups et Monitoring (Sentry) manquants** :
   Il n'y a aucune trace d'intégration d'un outil de monitoring (ex: Sentry ou Datadog) pour capturer les erreurs React ou Firestore (ex: `permission-denied`).
-  - *Risque* : En production, si un professeur n'arrive pas à entrer une note à cause d'un bug d'index ou de règles, il n'y a aucun log centralisé pour investiguer.
+  - *Risque* : En production, si un professeur n'arrive pas à entrer une note à cause d'un bug d'index ou de règles, il n'y a aucun log centralisé pour analyser le problème.
   - *Action requise* : Intégrer un Logger Error Boundary dans React et activer les sauvegardes automatiques de la base de données (Google Cloud Console > Firestore > Backups).
 
 ---
