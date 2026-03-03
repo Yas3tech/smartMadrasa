@@ -36,8 +36,10 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>
 );
 
-// @ts-ignore
-if (window.hideLoader) {
-  // @ts-ignore
-  window.hideLoader();
+// Type-safe access to the loading screen hideLoader injected by index.html
+declare global {
+  interface Window {
+    hideLoader?: () => void;
+  }
 }
+window.hideLoader?.();

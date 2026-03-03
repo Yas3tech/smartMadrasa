@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData
+import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Download, Calendar, Clock, Eye } from 'lucide-react';
 import type { TeacherComment } from '../../types/bulletin';
@@ -12,7 +13,9 @@ import toast from 'react-hot-toast';
 
 const StudentBulletin: React.FC = () => {
   const { t } = useTranslation();
-  const { academicPeriods, courses, grades, students, attendance, classes } = useData();
+  const { academicPeriods, courses, classes } = useAcademics();
+  const { grades, attendance } = usePerformance();
+  const { students } = useUsers();
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<string>('');
   const [teacherComments, setTeacherComments] = useState<TeacherComment[]>([]);

@@ -75,16 +75,15 @@ async function deleteStorageFolder(folderPath: string): Promise<number> {
     const folderRef = ref(storage, folderPath);
     const listResult = await listAll(folderRef);
 
-    let count = 0;
-    for (const itemRef of listResult.items) {
-      await deleteObject(itemRef);
-      count++;
-    }
+    // PERFORMANCE: Delete files in parallel instead of sequentially
+    await Promise.all(listResult.items.map((itemRef) => deleteObject(itemRef)));
+    let count = listResult.items.length;
 
-    // Récursion pour les sous-dossiers
-    for (const prefixRef of listResult.prefixes) {
-      count += await deleteStorageFolder(prefixRef.fullPath);
-    }
+    // Recursion for subfolders (also in parallel)
+    const subCounts = await Promise.all(
+      listResult.prefixes.map((prefixRef) => deleteStorageFolder(prefixRef.fullPath))
+    );
+    count += subCounts.reduce((sum, c) => sum + c, 0);
 
     return count;
   } catch {

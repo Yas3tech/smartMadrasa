@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hook instead of deprecated useData
+import { useAcademics } from '../../context/DataContext';
 import { X, Plus } from 'lucide-react';
 import type { Course } from '../../types';
 import { toast } from 'react-hot-toast';
@@ -34,7 +35,7 @@ const CourseModal = ({
   teacherId,
 }: CourseModalProps) => {
   const { t } = useTranslation();
-  const { classes, courses } = useData();
+  const { classes, courses } = useAcademics();
   const [loading, setLoading] = useState(false);
 
   const [subject, setSubject] = useState('');

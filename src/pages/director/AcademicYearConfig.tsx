@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData
+import { useAcademics } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Calendar, Plus, Edit2, Trash2, Check, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -9,7 +10,7 @@ import type { AcademicPeriod } from '../../types/bulletin';
 const AcademicYearConfig: React.FC = () => {
   const { t } = useTranslation();
   const { academicPeriods, addAcademicPeriod, updateAcademicPeriod, deleteAcademicPeriod } =
-    useData();
+    useAcademics();
   const { user } = useAuth();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);

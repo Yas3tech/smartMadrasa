@@ -43,12 +43,12 @@ export const subscribeToClasses = (
   callback: (classes: ClassGroup[]) => void,
   classIds?: string[]
 ) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
 
   if (classIds) {
     if (classIds.length === 0) {
       callback([]);
-      return () => {};
+      return () => { };
     }
 
     const q = query(collection(db, COLLECTION_NAME), where(documentId(), 'in', classIds));
@@ -58,6 +58,22 @@ export const subscribeToClasses = (
   }
 
   return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+    callback(mapQuerySnapshot<ClassGroup>(snapshot));
+  });
+};
+/**
+ * SECURITY: Scoped subscription — teacher only receives classes where they are assigned.
+ * Queries by 'teacherId' field. Used instead of subscribeToClasses() for teacher role
+ * because user.classIds on the Teacher doc may not be synced with actual class assignments.
+ * This is also used as the first step in chained subscriptions for events and users.
+ */
+export const subscribeToClassesByTeacherId = (
+  teacherId: string,
+  callback: (classes: ClassGroup[]) => void
+) => {
+  if (!db) return () => { };
+  const q = query(collection(db, COLLECTION_NAME), where('teacherId', '==', teacherId));
+  return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<ClassGroup>(snapshot));
   });
 };

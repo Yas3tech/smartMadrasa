@@ -7,6 +7,8 @@ import {
   deleteDoc,
   collectionGroup,
   onSnapshot,
+  query,
+  where,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { Course } from '../types';
@@ -54,9 +56,26 @@ export const deleteCourse = async (classId: string, courseId: string): Promise<v
 };
 
 export const subscribeToCourses = (callback: (courses: Course[]) => void) => {
-  if (!db) return () => {};
-  // Use collectionGroup to listen to ALL courses across all classes
+  if (!db) return () => { };
+  // Fetches ALL courses across all classes — only for director/superadmin
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
+    callback(mapQuerySnapshot<Course>(snapshot));
+  });
+};
+
+/**
+ * SECURITY: Scoped subscription — teacher only receives courses where teacherId matches.
+ * Uses collectionGroup query to search across all classes/{classId}/courses subcollections.
+ * This avoids fetching the entire courses collection and respects least-privilege access.
+ * NOTE: Requires a Firestore collectionGroup index on 'courses' with field 'teacherId'.
+ */
+export const subscribeToCoursesByTeacherId = (
+  teacherId: string,
+  callback: (courses: Course[]) => void
+) => {
+  if (!db) return () => { };
+  const q = query(collectionGroup(db, COLLECTION_NAME), where('teacherId', '==', teacherId));
+  return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<Course>(snapshot));
   });
 };

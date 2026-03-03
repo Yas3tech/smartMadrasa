@@ -1,0 +1,77 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // SECURITY: Default deny all
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Profile pictures: user uploads to profiles/{userId}/...
+    // Read: All authenticated users (needed for displaying avatars across the UI).
+    // Write: Only the user themselves, images only.
+    match /profiles/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 25 * 1024 * 1024  // Max 25MB
+        && request.resource.contentType.matches('image/.*');  // Images only
+    }
+
+    // Homework submissions: homework/{homeworkId}/{studentId}/...
+    // Read: Only the student who submitted. Teachers read via signed download URLs
+    //        stored in Firestore (which has its own role-based rules).
+    // Write: Only the student themselves.
+    match /homework/{homeworkId}/{studentId}/{fileName} {
+      allow read: if request.auth != null
+        && request.auth.uid == studentId;
+      allow write: if request.auth != null 
+        && request.auth.uid == studentId
+        && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+    }
+
+    // Message attachments: messages/{senderId}/...
+    // Read: Only the sender who uploaded. The receiver accesses files via signed
+    //        download URLs stored in the Firestore message document (protected by
+    //        Firestore rules that verify sender/receiver identity).
+    // Write: Only the sender themselves.
+    match /messages/{senderId}/{fileName} {
+      allow read: if request.auth != null
+        && request.auth.uid == senderId;
+      allow write: if request.auth != null
+        && request.auth.uid == senderId
+        && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+    }
+
+    // Event attachments: events/{eventId}/...
+    // Read: All authenticated users (events are visible to all school members).
+    // Write: Only authenticated users (role-based checks are enforced in Firestore
+    //         for the event document itself; storage only validates size).
+    match /events/{eventId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+    }
+
+    // General school documents
+    // Read: All authenticated users (school-wide documents).
+    // Write: Only authenticated users (role checks happen in Firestore/app layer).
+    match /documents/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+    }
+
+    // User data folder (used for deleteUserData cleanup)
+    // Read/Write/Delete: Only the user themselves.
+    match /users/{userId}/{allPaths=**} {
+      allow read: if request.auth != null
+        && request.auth.uid == userId;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+  }
+}

@@ -5,51 +5,211 @@
  * Contains UI for user listing, filtering, and CRUD operations.
  */
 
+import { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
-import type { Role } from '../../types';
+import type { User, Role } from '../../types';
+import ExcelJS from 'exceljs';
+import { parseUserFile, processNonParentUsers, processParentUsers } from '../../utils/userImport';
+import toast from 'react-hot-toast';
+import { deleteUserWithAllData, previewUserDeletion } from '../../services/users';
 
 const UserManagement = () => {
   const { t, i18n } = useTranslation();
   const { user: currentUser } = useAuth();
-  const {
-    isModalOpen,
-    setIsModalOpen,
-    editingUser,
-    searchQuery,
-    setSearchQuery,
-    filterRole,
-    setFilterRole,
-    name,
-    setName,
-    email,
-    setEmail,
-    role,
-    setRole,
-    phone,
-    setPhone,
-    birthDate,
-    setBirthDate,
-    selectedStudentId,
-    setSelectedStudentId,
-    students,
-    filteredUsers,
-    roleCounts,
-    roleColors,
-    fileInputRef,
-    handleOpenNew,
-    handleEdit,
-    handleSave,
-    handleDelete,
-    handleDownloadTemplate,
-    handleFileUpload,
-    getRoleLabel,
-  } = useUsers();
+  const { users, students, addUser, updateUser } = useUsers();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<Role>('student');
+  const [phone, setPhone] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+
   const isRTL = i18n.language === 'ar';
 
+  const isSuperadmin = currentUser?.role === 'superadmin';
+  const visibleUsers = useMemo(
+    () => (isSuperadmin ? users : users.filter((u) => u.role !== 'superadmin')),
+    [users, isSuperadmin]
+  );
+
+  const filteredUsers = useMemo(
+    () =>
+      visibleUsers.filter((u) => {
+        const matchesSearch =
+          u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = filterRole === 'all' || u.role === filterRole;
+        return matchesSearch && matchesRole;
+      }),
+    [visibleUsers, searchQuery, filterRole]
+  );
+
+  const roleCounts = useMemo(() => {
+    const counts = { all: 0, student: 0, teacher: 0, parent: 0, director: 0, superadmin: 0 };
+    counts.all = visibleUsers.length;
+    visibleUsers.forEach((u) => {
+      if (counts[u.role] !== undefined) counts[u.role]++;
+    });
+    return counts as Record<string, number>;
+  }, [visibleUsers]);
+
+  const roleColors: Record<Role, string> = {
+    student: 'bg-blue-100 text-blue-700',
+    teacher: 'bg-orange-100 text-orange-700',
+    parent: 'bg-purple-100 text-purple-700',
+    director: 'bg-green-100 text-green-700',
+    superadmin: 'bg-red-100 text-red-700',
+  };
+
+  const getRoleLabel = (r: Role | 'all') => {
+    if (r === 'all') return t('users.total');
+    return t(`roles.${r}`);
+  };
+
+  const handleOpenNew = () => {
+    setEditingUser(null);
+    setName('');
+    setEmail('');
+    setRole('student');
+    setPhone('');
+    setBirthDate('');
+    setSelectedStudentId('');
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (u: User) => {
+    setEditingUser(u);
+    setName(u.name);
+    setEmail(u.email);
+    setRole(u.role);
+    setPhone(u.phone || '');
+    setBirthDate(u.birthDate || '');
+    if (u.role === 'parent') {
+      const parent = u as any;
+      setSelectedStudentId(parent.childrenIds?.[0] || '');
+    } else {
+      setSelectedStudentId('');
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!name || !email) {
+      toast.error(t('users.fillRequired'));
+      return;
+    }
+    const userData: Omit<User, 'id'> & { childrenIds?: string[]; relatedClassIds?: string[] } = {
+      name,
+      email: email.toLowerCase().trim(),
+      role,
+      phone: role === 'teacher' || role === 'parent' ? phone : undefined,
+      birthDate: role === 'student' ? birthDate : undefined,
+      avatar: name.charAt(0).toUpperCase(),
+    };
+    if (role === 'parent' && selectedStudentId) {
+      userData.childrenIds = [selectedStudentId];
+      const student = students.find((s) => s.id === selectedStudentId);
+      if (student && 'classId' in student) {
+        userData.relatedClassIds = [(student as any).classId];
+      }
+    }
+    if (editingUser) {
+      updateUser(editingUser.id, userData);
+      toast.success(t('users.userUpdated'));
+    } else {
+      const result = await addUser({ id: `u${Date.now()}`, ...userData });
+      if (result && typeof result === 'object' && 'emailSent' in result) {
+        if (result.emailSent) {
+          toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
+        } else if (result.password) {
+          toast.success(`${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`, {
+            duration: 30000,
+            icon: '🔑',
+          });
+        } else {
+          toast.success(t('users.userCreated'));
+        }
+      } else {
+        toast.success(t('users.userCreated'));
+      }
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = async (userId: string, userRole: Role) => {
+    const userToDelete = users.find((u) => u.id === userId);
+    if (!userToDelete) return;
+    const preview = await previewUserDeletion(userId, userRole);
+    let confirmMessage = `${t('users.confirmDeleteComplete', { name: userToDelete.name })}\n\n`;
+    if (preview.collections.length > 0) {
+      confirmMessage += `${t('users.dataToDelete')}:\n`;
+      preview.collections.forEach((col) => {
+        confirmMessage += `- ${col.name}: ${col.count} ${t('users.documents')}\n`;
+      });
+    }
+    confirmMessage += `\n${t('users.actionIrreversible')}`;
+    if (confirm(confirmMessage)) {
+      try {
+        const result = await deleteUserWithAllData(userId, userRole);
+        if (result.success) {
+          const counts = result.deletedCounts as Record<string, number>;
+          const totalDeleted = Object.values(counts).reduce((a, b) => a + b, 0);
+          toast.success(t('users.userDeletedComplete', { count: totalDeleted }), { duration: 5000, icon: '🗑️' });
+        } else {
+          toast.error(t('users.deleteError'));
+        }
+      } catch {
+        toast.error(t('users.deleteError'));
+      }
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet('Template');
+    ws.columns = [
+      { header: 'name', key: 'name', width: 20 },
+      { header: 'email', key: 'email', width: 25 },
+      { header: 'role', key: 'role', width: 10 },
+      { header: 'phone', key: 'phone', width: 15 },
+      { header: 'birthDate', key: 'birthDate', width: 15 },
+      { header: 'studentEmail', key: 'studentEmail', width: 25 },
+    ];
+    ws.addRow({ name: 'Jean Dupont', email: 'jean@school.ma', role: 'student', phone: '', birthDate: '2010-01-01', studentEmail: '' });
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'smartmadrassa_users_template.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const jsonData = await parseUserFile(file);
+      const { importedUsers, count: countNonParents } = await processNonParentUsers(jsonData, addUser);
+      const countParents = await processParentUsers(jsonData, users, importedUsers, addUser);
+      toast.success(t('users.importSuccess', { count: countNonParents + countParents }));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch {
+      toast.error(t('users.importError'));
+    }
+  };
   if (currentUser?.role !== 'director' && currentUser?.role !== 'superadmin') {
     return (
       <div className="flex items-center justify-center h-96">

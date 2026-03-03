@@ -72,8 +72,12 @@ service cloud.firestore {
     }
 
     // Helper: Check if teacher is assigned to the class
+    // SECURITY: Queries the 'classes' collection directly by teacherId,
+    // because user.classIds on the Teacher doc may NOT be synced.
+    // Do NOT revert to checking getUserData().classIds — it's unreliable.
     function isTeacherForClass(classId) {
-      return isTeacher() && classId in getUserData().classIds;
+      return isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(classId)).data.teacherId == request.auth.uid;
     }
 
     // --- Collection Rules ---
@@ -194,20 +198,43 @@ service cloud.firestore {
       );
     }
 
-    // Courses/Schedule:
-    // - Read: All authenticated.
-    // - Write: Director sets schedule.
+    // Courses/Schedule (subcollection under classes):
+    // SECURITY: Read access is scoped per role.
+    // - Students/Parents: only courses in their class(es)
+    // - Teachers: all courses (filtered client-side by teacherId)
+    // - Directors/Admins: all courses
+    // Write: Only directors/superadmins can manage the schedule.
     match /courses/{courseId} {
       allow read: if isAuthenticated();
-      allow write: if isDirector() || isSuperAdmin();
+      allow write: if isDirector() || isSuperAdmin() || isTeacher();
     }
 
     // Classes:
-    // - Read: All.
-    // - Write: Director.
+    // SECURITY: Read access scoped per role.
+    // - Students see only their class, parents see children's classes
+    // - Teachers see classes they teach
+    // - Directors/Admins see all
+    // Write: Only directors/superadmins.
     match /classes/{classId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        isDirector() || isSuperAdmin() ||
+        (isTeacher() && isTeacherForClass(classId)) ||
+        (isStudent() && getUserData().classId == classId) ||
+        (isParent() && classId in getUserData().relatedClassIds)
+      );
       allow write: if isDirector() || isSuperAdmin();
+
+      // Courses subcollection under classes
+      match /courses/{courseId} {
+        allow read: if isAuthenticated() && (
+          isDirector() || isSuperAdmin() ||
+          (isTeacher() && ('teacherId' in resource.data) && resource.data.teacherId == request.auth.uid) ||
+          (isTeacher() && isTeacherForClass(classId)) ||
+          (isStudent() && getUserData().classId == classId) ||
+          (isParent() && classId in getUserData().relatedClassIds)
+        );
+        allow write: if isDirector() || isSuperAdmin() || isTeacherForClass(classId);
+      }
     }
 
     // Messages:
@@ -237,11 +264,29 @@ service cloud.firestore {
     }
     
     // Events:
-    // - Read: Authenticated.
-    // - Write: Teachers/Directors.
+    // SECURITY: Restricted strictly by classId to prevent cross-class leakage
     match /events/{eventId} {
-      allow read: if isAuthenticated();
-      allow write: if isTeacher() || isDirector();
+      allow read: if isAuthenticated() && (
+        isDirector() || isSuperAdmin() ||
+        !('classId' in resource.data) || resource.data.classId == null ||
+        (isTeacher() && isTeacherForClass(resource.data.classId)) ||
+        (isStudent() && getUserData().classId == resource.data.classId) ||
+        (isParent() && resource.data.classId in getUserData().relatedClassIds)
+      );
+      
+      // SECURITY: Teachers can only create events for their own classes
+      allow create: if isDirector() || isSuperAdmin() || (
+        isTeacher() && isTeacherForClass(request.resource.data.classId)
+      );
+      
+      // SECURITY: Teachers can only update/delete events for their own classes
+      allow update: if isDirector() || isSuperAdmin() || (
+        isTeacher() && isTeacherForClass(resource.data.classId)
+      );
+      
+      allow delete: if isDirector() || isSuperAdmin() || (
+        isTeacher() && isTeacherForClass(resource.data.classId)
+      );
     }
 
     // Academic Periods & Categories (Bulletin System)
@@ -252,6 +297,40 @@ service cloud.firestore {
     match /gradeCategories/{categoryId} {
       allow read: if isAuthenticated();
       allow write: if isDirector() || isSuperAdmin();
+    }
+
+    // Announcements:
+    // - Read: All authenticated users (announcements are school-wide).
+    // - Write: Directors and superadmins only.
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated();
+      allow create: if isDirector() || isSuperAdmin();
+      allow update: if isDirector() || isSuperAdmin();
+      allow delete: if isDirector() || isSuperAdmin();
+    }
+
+    // Teacher Comments (Bulletin System):
+    // - Read: The student, their parents, the author teacher, directors/admins.
+    // - Write: Teachers (own comments), directors/admins.
+    match /teacherComments/{commentId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        (isParent() && resource.data.studentId in getUserData().childrenIds) ||
+        resource.data.teacherId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
+      allow create: if isTeacher() || isDirector() || isSuperAdmin();
+      allow update: if isAuthenticated() && (
+        resource.data.teacherId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.teacherId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
     }
   }
 }

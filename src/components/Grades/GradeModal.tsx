@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 import { X, Plus } from 'lucide-react';
 import type { Grade, Student } from '../../types';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hook instead of deprecated useData
+import { useUsers } from '../../context/DataContext';
 
 interface GradeModalProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ const GradeModal = ({
   availableSubjects = [],
 }: GradeModalProps) => {
   const { t } = useTranslation();
-  const { students } = useData();
+  const { students } = useUsers();
   const [studentId, setStudentId] = useState('');
   const [subject, setSubject] = useState('');
   const [type, setType] = useState<'exam' | 'homework' | 'participation' | 'evaluation'>('exam');

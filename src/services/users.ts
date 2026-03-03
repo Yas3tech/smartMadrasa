@@ -77,14 +77,16 @@ export const generateSecurePassword = (): string => {
     password += allChars.charAt(getRandomInt(allChars.length));
   }
 
-  // Fisher-Yates Shuffle
+  // Cryptographically secure shuffle using sorting
   const passwordArray = password.split('');
-  for (let i = passwordArray.length - 1; i > 0; i--) {
-    const j = getRandomInt(i + 1);
-    [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
-  }
+  const randomValues = new Uint32Array(passwordArray.length);
+  crypto.getRandomValues(randomValues);
 
-  return passwordArray.join('');
+  return passwordArray
+    .map((char, i) => ({ char, sort: randomValues[i] }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ char }) => char)
+    .join('');
 };
 
 export const createUser = async (
@@ -228,7 +230,7 @@ export const subscribeToUsers = (
   queries: UserQueryFilters[] = []
 ) => {
   const firestore = db;
-  if (!firestore) return () => {};
+  if (!firestore) return () => { };
 
   // If no queries provided, fallback to default (fetch all)
   if (!queries || queries.length === 0) {
@@ -271,13 +273,11 @@ export const subscribeToUsers = (
       const users = mapQuerySnapshot<User>(snapshot);
       results.set(index, users);
 
-      // Merge results
-      const allUsersMap = new Map<string, User>();
-      results.forEach((userList) => {
-        userList.forEach((u) => allUsersMap.set(u.id, u));
-      });
+      // Optimized merge: flatten arrays and use Map constructor for deduping
+      const allUsers = Array.from(results.values()).flat();
+      const uniqueUsersMap = new Map(allUsers.map((u) => [u.id, u]));
 
-      callback(Array.from(allUsersMap.values()));
+      callback(Array.from(uniqueUsersMap.values()));
     });
 
     unsubscribes.push(unsub);

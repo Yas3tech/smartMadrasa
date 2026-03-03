@@ -9,7 +9,8 @@
 
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData
+import { useAcademics, usePerformance } from '../../context/DataContext';
 import { useHomework } from '../../hooks/useHomework';
 import { Card, Button } from '../../components/UI';
 import {
@@ -24,7 +25,8 @@ import { Plus, BookOpen, Clock, History, EyeOff } from 'lucide-react';
 const HomeworkPage = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { classes, homeworks, courses } = useData();
+  const { classes, courses } = useAcademics();
+  const { homeworks } = usePerformance();
 
   const hw = useHomework();
 

@@ -55,7 +55,7 @@ function checkFixedRule(user, gradeData) {
   const request = { resource: { data: gradeData } };
   const userData = getMockUserData(user);
 
-  // Proposed Fix:
+  // Current Implementation:
   // allow write: if (isDirector() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
 
   // Note: in firestore rules 'in' operator checks if value is in list.

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData
+import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeToTeacherCommentsByPeriod } from '../../services/teacherComments';
 import { CheckCircle, Clock, Calendar, Users, FileText, Send, Eye } from 'lucide-react';
@@ -11,7 +12,10 @@ import ClassBulletinListModal from '../../components/bulletin/ClassBulletinListM
 
 const BulletinDashboard: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { academicPeriods, classes, publishPeriodBulletins, students, courses, grades } = useData();
+  const { academicPeriods, classes, courses } = useAcademics();
+  const { students } = useUsers();
+  const { grades } = usePerformance();
+  const { publishPeriodBulletins } = useAcademics();
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<string>('');
   const [periodComments, setPeriodComments] = useState<TeacherComment[]>([]);
@@ -282,11 +286,10 @@ const BulletinDashboard: React.FC = () => {
             <button
               onClick={handlePublishBulletins}
               disabled={!canPublishAll}
-              className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 justify-center ${
-                canPublishAll
+              className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 justify-center ${canPublishAll
                   ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               <Send size={20} />
               {t('bulletinDashboard.publishAllBulletins')}

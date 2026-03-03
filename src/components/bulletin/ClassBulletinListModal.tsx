@@ -4,7 +4,8 @@ import type { Student, AcademicPeriod, Course, Grade, TeacherComment } from '../
 import BulletinPreview from './BulletinPreview';
 import { generateClassBulletinPDF } from '../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hook instead of deprecated useData
+import { usePerformance } from '../../context/DataContext';
 
 interface ClassBulletinListModalProps {
   classId: string;
@@ -26,7 +27,7 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
   comments,
   onClose,
 }) => {
-  const { attendance } = useData();
+  const { attendance } = usePerformance();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   // Helper function to calculate absences for a student during the period

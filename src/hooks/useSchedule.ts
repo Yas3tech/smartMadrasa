@@ -1,121 +1,58 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useAcademics, useCommunication, usePerformance } from '../context/DataContext';
 import type { Course, Event, Homework } from '../types';
+import { SUBJECT_COLORS } from '../constants/subjectColors';
+
+export interface CourseSlotInfo {
+  course: Course;
+  isStart: boolean;
+  rowSpan: number;
+  colIndex: number;
+  totalCols: number;
+}
 
 export interface ScheduleSlot {
   time: string;
-  courses: { [key: number]: Course | null };
+  startMinutes: number;
+  endMinutes: number;
+  courses: { [dayOfWeek: number]: CourseSlotInfo[] };
   exams: { [key: number]: Event[] };
 }
 
-export interface UseScheduleReturn {
-  // Week navigation
+export interface UseScheduleProps {
   weekOffset: number;
-  setWeekOffset: (offset: number) => void;
+  mobileDate: Date;
+  classId: string | null | undefined;
+}
+
+export interface UseScheduleDataReturn {
   weekStart: Date;
   getWeekRange: () => string;
   isCurrentWeek: boolean;
 
-  // Mobile navigation
-  mobileDate: Date;
-  setMobileDate: (date: Date) => void;
-  handlePrevDay: () => void;
-  handleNextDay: () => void;
-  isFabOpen: boolean;
-  setIsFabOpen: (open: boolean) => void;
-
-  // Modals
-  showCourseModal: boolean;
-  setShowCourseModal: (show: boolean) => void;
-  showExamModal: boolean;
-  setShowExamModal: (show: boolean) => void;
-  showUpcomingModal: boolean;
-  setShowUpcomingModal: (show: boolean) => void;
-  showHomeworkDetail: boolean;
-  setShowHomeworkDetail: (show: boolean) => void;
-
-  // Edit state
-  editingCourse: Course | null;
-  editingExam: Event | null;
-  selectedHomework: Homework | null;
-  setSelectedHomework: (hw: Homework | null) => void;
-
-  // Delete menu
-  deleteMenu: { courseId: string; date: string; x: number; y: number } | null;
-  showDeleteMenu: (e: React.MouseEvent, courseId: string, specificDate: string) => void;
-  closeDeleteMenu: () => void;
-
-  // Parent
-  selectedChild: { id: string; name: string; classId: string } | null;
-  setSelectedChild: (child: { id: string; name: string; classId: string } | null) => void;
-
-  // Data
   scheduleSlots: ScheduleSlot[];
+  timeSlotStrings: string[];
   weekHomeworks: Homework[];
   mobileCourses: Course[];
   mobileExams: Event[];
   mobileHomeworks: Homework[];
 
-  // Handlers
-  handleAddCourse: () => void;
-  handleAddExam: () => void;
-  handleEditCourse: (course: Course) => void;
-  handleEditExam: (exam: Event) => void;
-  handleSaveCourse: (courseData: Omit<Course, 'id'>) => Promise<void>;
-  handleSaveExam: (eventData: Omit<Event, 'id'>) => Promise<void>;
-  handleDeleteThisOccurrence: () => Promise<void>;
-  handleDeleteEntireCourse: () => Promise<void>;
-  handleDeleteExam: (eventId: string) => Promise<void>;
   getHomeworksForDay: (dayIndex: number) => Homework[];
   getDateForDayIndex: (dayIndex: number) => string;
 
-  // Utilities
   subjectColors: Record<string, string>;
   currentDay: number;
   canEdit: boolean;
 }
 
-export function useSchedule(): UseScheduleReturn {
+export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProps): UseScheduleDataReturn {
   const { i18n } = useTranslation();
   const { user } = useAuth();
-  const { courses, classes, addCourse, updateCourse, deleteCourse } = useAcademics();
-  const { events, addEvent, updateEvent, deleteEvent } = useCommunication();
+  const { courses, classes } = useAcademics();
+  const { events } = useCommunication();
   const { homeworks } = usePerformance();
-
-  // Week navigation
-  const [weekOffset, setWeekOffset] = useState(0);
-
-  // Mobile state
-  const [mobileDate, setMobileDate] = useState(new Date());
-  const [isFabOpen, setIsFabOpen] = useState(false);
-
-  // Modals
-  const [showCourseModal, setShowCourseModal] = useState(false);
-  const [showExamModal, setShowExamModal] = useState(false);
-  const [showUpcomingModal, setShowUpcomingModal] = useState(false);
-  const [showHomeworkDetail, setShowHomeworkDetail] = useState(false);
-
-  // Edit state
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [editingExam, setEditingExam] = useState<Event | null>(null);
-  const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
-
-  // Delete menu
-  const [deleteMenu, setDeleteMenu] = useState<{
-    courseId: string;
-    date: string;
-    x: number;
-    y: number;
-  } | null>(null);
-
-  // Parent state
-  const [selectedChild, setSelectedChild] = useState<{
-    id: string;
-    name: string;
-    classId: string;
-  } | null>(null);
 
   // Week utilities
   const getWeekStart = (offset: number) => {
@@ -138,27 +75,6 @@ export function useSchedule(): UseScheduleReturn {
       date.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' });
     return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
   };
-
-  // Mobile navigation
-  const handlePrevDay = () => {
-    const newDate = new Date(mobileDate);
-    newDate.setDate(mobileDate.getDate() - 1);
-    setMobileDate(newDate);
-  };
-
-  const handleNextDay = () => {
-    const newDate = new Date(mobileDate);
-    newDate.setDate(mobileDate.getDate() + 1);
-    setMobileDate(newDate);
-  };
-
-  // Get classId
-  const getUserClassId = () => {
-    if (user?.role === 'student') return (user as { classId?: string }).classId;
-    if (user?.role === 'parent') return selectedChild?.classId;
-    return null;
-  };
-  const classId = getUserClassId();
 
   // Filtered data
   const userCourses = useMemo(() => {
@@ -272,140 +188,155 @@ export function useSchedule(): UseScheduleReturn {
     );
   }, [userHomeworks, mobileDate]);
 
-  // Schedule slots
+  // Helper: convert "HH:mm" to total minutes
+  const timeToMinutes = (t: string): number => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  // Fixed time slot definitions for the grid
+  const timeSlotStrings = [
+    '08:00 - 09:00',
+    '09:00 - 10:00',
+    '10:00 - 10:15',
+    '10:15 - 11:15',
+    '11:15 - 12:15',
+    '12:15 - 13:30',
+    '13:30 - 14:30',
+    '14:30 - 15:30',
+    '15:30 - 16:30',
+    '16:30 - 17:30',
+  ];
+
+  const slotBoundaries = timeSlotStrings.map((ts) => {
+    const [start, end] = ts.split(' - ');
+    return { label: ts, startMin: timeToMinutes(start), endMin: timeToMinutes(end) };
+  });
+
   const scheduleSlots: ScheduleSlot[] = useMemo(() => {
-    const timeSlots = [
-      '08:00 - 09:00',
-      '09:00 - 10:00',
-      '10:00 - 10:15',
-      '10:15 - 11:15',
-      '11:15 - 12:15',
-      '12:15 - 13:30',
-      '13:30 - 14:30',
-      '14:30 - 15:30',
-      '15:30 - 16:30',
-      '16:30 - 17:30',
-    ];
+    const slots: ScheduleSlot[] = slotBoundaries.map((sb) => ({
+      time: sb.label,
+      startMinutes: sb.startMin,
+      endMinutes: sb.endMin,
+      courses: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] },
+      exams: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] },
+    }));
 
-    return timeSlots.map((time) => {
-      const slot: ScheduleSlot = {
-        time,
-        courses: { 1: null, 2: null, 3: null, 4: null, 5: null, 6: null, 7: null },
-        exams: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] },
-      };
+    const courseInfoMap = new Map<string, { startSlotIdx: number; rowSpan: number; course: Course }>();
 
-      const [slotStart] = time.split(' - ');
+    weekCourses.forEach((course) => {
+      const courseStartMin = timeToMinutes(course.startTime);
+      const courseEndMin = timeToMinutes(course.endTime);
 
-      weekCourses.forEach((course) => {
-        if (course.startTime === slotStart) {
-          slot.courses[course.dayOfWeek] = course;
+      let startSlotIdx = -1;
+      for (let i = 0; i < slotBoundaries.length; i++) {
+        if (courseStartMin >= slotBoundaries[i].startMin && courseStartMin < slotBoundaries[i].endMin) {
+          startSlotIdx = i;
+          break;
         }
-      });
-
-      weekExams.forEach((exam) => {
-        const examDate = new Date(exam.start);
-        let dayOfWeek = examDate.getDay();
-        if (dayOfWeek === 0) dayOfWeek = 7;
-        const examTime = examDate.toTimeString().slice(0, 5);
-        if (examTime === slotStart) {
-          slot.exams[dayOfWeek].push(exam);
+      }
+      if (startSlotIdx === -1) {
+        for (let i = 0; i < slotBoundaries.length; i++) {
+          if (courseStartMin === slotBoundaries[i].startMin) {
+            startSlotIdx = i;
+            break;
+          }
         }
-      });
+      }
+      if (startSlotIdx === -1) return;
 
-      return slot;
+      let rowSpan = 1;
+      for (let i = startSlotIdx + 1; i < slotBoundaries.length; i++) {
+        if (courseEndMin > slotBoundaries[i].startMin) {
+          rowSpan++;
+        } else {
+          break;
+        }
+      }
+
+      courseInfoMap.set(course.id, { startSlotIdx, rowSpan, course });
     });
+
+    const coursesByDay: Map<number, Array<{ courseId: string; startMin: number; endMin: number }>> = new Map();
+    weekCourses.forEach((course) => {
+      if (!coursesByDay.has(course.dayOfWeek)) coursesByDay.set(course.dayOfWeek, []);
+      coursesByDay.get(course.dayOfWeek)!.push({
+        courseId: course.id,
+        startMin: timeToMinutes(course.startTime),
+        endMin: timeToMinutes(course.endTime),
+      });
+    });
+
+    const colAssignment = new Map<string, { colIndex: number; totalCols: number }>();
+
+    coursesByDay.forEach((dayCourses) => {
+      dayCourses.sort((a, b) => a.startMin - b.startMin);
+      const groups: Array<typeof dayCourses> = [];
+      let currentGroup: typeof dayCourses = [];
+      let groupEnd = -1;
+
+      dayCourses.forEach((c) => {
+        if (currentGroup.length === 0 || c.startMin < groupEnd) {
+          currentGroup.push(c);
+          groupEnd = Math.max(groupEnd, c.endMin);
+        } else {
+          if (currentGroup.length > 0) groups.push(currentGroup);
+          currentGroup = [c];
+          groupEnd = c.endMin;
+        }
+      });
+      if (currentGroup.length > 0) groups.push(currentGroup);
+
+      groups.forEach((group) => {
+        const totalCols = group.length;
+        group.forEach((c, idx) => {
+          colAssignment.set(c.courseId, { colIndex: idx, totalCols });
+        });
+      });
+    });
+
+    courseInfoMap.forEach(({ startSlotIdx, rowSpan, course }) => {
+      const cols = colAssignment.get(course.id) || { colIndex: 0, totalCols: 1 };
+
+      slots[startSlotIdx].courses[course.dayOfWeek].push({
+        course,
+        isStart: true,
+        rowSpan,
+        colIndex: cols.colIndex,
+        totalCols: cols.totalCols,
+      });
+
+      for (let i = 1; i < rowSpan; i++) {
+        const idx = startSlotIdx + i;
+        if (idx < slots.length) {
+          slots[idx].courses[course.dayOfWeek].push({
+            course,
+            isStart: false,
+            rowSpan: 0,
+            colIndex: cols.colIndex,
+            totalCols: cols.totalCols,
+          });
+        }
+      }
+    });
+
+    weekExams.forEach((exam) => {
+      const examDate = new Date(exam.start);
+      let dayOfWeek = examDate.getDay();
+      if (dayOfWeek === 0) dayOfWeek = 7;
+      const examTime = examDate.toTimeString().slice(0, 5);
+      const examMin = timeToMinutes(examTime);
+
+      for (let i = 0; i < slotBoundaries.length; i++) {
+        if (examMin >= slotBoundaries[i].startMin && examMin < slotBoundaries[i].endMin) {
+          slots[i].exams[dayOfWeek].push(exam);
+          break;
+        }
+      }
+    });
+
+    return slots;
   }, [weekCourses, weekExams]);
-
-  // Subject colors
-  const subjectColors: Record<string, string> = {
-    Mathématiques: 'bg-blue-500 text-white border-blue-600',
-    Français: 'bg-purple-500 text-white border-purple-600',
-    Arabe: 'bg-green-500 text-white border-green-600',
-    Sciences: 'bg-orange-500 text-white border-orange-600',
-    Histoire: 'bg-yellow-500 text-yellow-900 border-yellow-600',
-    Sport: 'bg-red-500 text-white border-red-600',
-    Arts: 'bg-pink-500 text-white border-pink-600',
-    Religion: 'bg-teal-500 text-white border-teal-600',
-    Informatique: 'bg-indigo-400 text-indigo-900 border-indigo-500',
-    Coran: 'bg-emerald-500 text-white border-emerald-600',
-    Sira: 'bg-lime-500 text-lime-900 border-lime-600',
-    Fiqh: 'bg-sky-500 text-white border-sky-600',
-    Pause: 'bg-gray-400 text-gray-900 border-gray-500',
-    Déjeuner: 'bg-gray-400 text-gray-900 border-gray-500',
-    Bibliothèque: 'bg-amber-500 text-amber-900 border-amber-600',
-    Activités: 'bg-cyan-500 text-white border-cyan-600',
-  };
-
-  const currentDay = new Date().getDay() || 7;
-  const canEdit =
-    user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin';
-
-  // Handlers
-  const handleAddCourse = () => {
-    setEditingCourse(null);
-    setShowCourseModal(true);
-  };
-  const handleAddExam = () => {
-    setEditingExam(null);
-    setShowExamModal(true);
-  };
-
-  const handleEditCourse = (course: Course) => {
-    if (!canEdit) return;
-    setEditingCourse(course);
-    setShowCourseModal(true);
-  };
-
-  const handleEditExam = (exam: Event) => {
-    if (!canEdit) return;
-    setEditingExam(exam);
-    setShowExamModal(true);
-  };
-
-  const handleSaveCourse = async (courseData: Omit<Course, 'id'>) => {
-    if (editingCourse) {
-      await updateCourse(editingCourse.id, courseData);
-    } else {
-      await addCourse(courseData);
-    }
-  };
-
-  const handleSaveExam = async (eventData: Omit<Event, 'id'>) => {
-    if (editingExam) {
-      await updateEvent(editingExam.id, eventData);
-    } else {
-      await addEvent(eventData);
-    }
-  };
-
-  const showDeleteMenuFn = (e: React.MouseEvent, courseId: string, specificDate: string) => {
-    e.stopPropagation();
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
-    setDeleteMenu({ courseId, date: specificDate, x: rect.left, y: rect.bottom + 5 });
-  };
-
-  const closeDeleteMenu = () => setDeleteMenu(null);
-
-  const handleDeleteThisOccurrence = async () => {
-    if (!deleteMenu) return;
-    const course = courses.find((c) => c.id === deleteMenu.courseId);
-    if (!course) return;
-    await updateCourse(deleteMenu.courseId, {
-      excludedDates: [...(course.excludedDates || []), deleteMenu.date],
-    });
-    closeDeleteMenu();
-  };
-
-  const handleDeleteEntireCourse = async () => {
-    if (!deleteMenu) return;
-    await deleteCourse(deleteMenu.courseId);
-    closeDeleteMenu();
-  };
-
-  const handleDeleteExam = async (eventId: string) => {
-    if (!canEdit) return;
-    await deleteEvent(eventId);
-  };
 
   const getHomeworksForDay = (dayIndex: number) => {
     return weekHomeworks.filter((hw) => {
@@ -422,49 +353,20 @@ export function useSchedule(): UseScheduleReturn {
     return date.toISOString().split('T')[0];
   };
 
+  const subjectColors = SUBJECT_COLORS;
+  const currentDay = new Date().getDay() || 7;
+  const canEdit = user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin';
+
   return {
-    weekOffset,
-    setWeekOffset,
     weekStart,
     getWeekRange,
     isCurrentWeek,
-    mobileDate,
-    setMobileDate,
-    handlePrevDay,
-    handleNextDay,
-    isFabOpen,
-    setIsFabOpen,
-    showCourseModal,
-    setShowCourseModal,
-    showExamModal,
-    setShowExamModal,
-    showUpcomingModal,
-    setShowUpcomingModal,
-    showHomeworkDetail,
-    setShowHomeworkDetail,
-    editingCourse,
-    editingExam,
-    selectedHomework,
-    setSelectedHomework,
-    deleteMenu,
-    showDeleteMenu: showDeleteMenuFn,
-    closeDeleteMenu,
-    selectedChild,
-    setSelectedChild,
     scheduleSlots,
+    timeSlotStrings,
     weekHomeworks,
     mobileCourses,
     mobileExams,
     mobileHomeworks,
-    handleAddCourse,
-    handleAddExam,
-    handleEditCourse,
-    handleEditExam,
-    handleSaveCourse,
-    handleSaveExam,
-    handleDeleteThisOccurrence,
-    handleDeleteEntireCourse,
-    handleDeleteExam,
     getHomeworksForDay,
     getDateForDayIndex,
     subjectColors,

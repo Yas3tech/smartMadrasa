@@ -13,12 +13,14 @@ import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToClasses,
+  subscribeToClassesByTeacherId,
   createClass as fbCreateClass,
   updateClass as fbUpdateClass,
   deleteClass as fbDeleteClass,
 } from '../../services/classes';
 import {
   subscribeToCourses,
+  subscribeToCoursesByTeacherId,
   createCourse as fbCreateCourse,
   updateCourse as fbUpdateCourse,
   deleteCourse as fbDeleteCourse,
@@ -76,25 +78,40 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubClasses = () => {};
-      let unsubCourses = () => {};
+      let unsubClasses = () => { };
+      let unsubCourses = () => { };
       const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
       const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
 
+      // SECURITY: Each role only subscribes to the data it needs.
+      // Do NOT replace these scoped queries with a generic fetch-all.
+      // If a role sees incorrect data, fix the query — don't widen access.
       if (user?.role === 'parent') {
+        // Parent: only classes their children are enrolled in
         const parentUser = user as Parent;
         const childrenData = parentUser.children || [];
         const classIds = childrenData.map((c) => c.classId).filter(Boolean);
-
         unsubClasses = subscribeToClasses(setClasses, classIds);
         if (classIds.length > 0) {
           unsubCourses = subscribeToCourses(setCourses);
         }
       } else if (user?.role === 'student') {
+        // Student: only their own class
         const student = user as Student;
         unsubClasses = subscribeToClasses(setClasses, student.classId ? [student.classId] : []);
         unsubCourses = subscribeToCourses(setCourses);
-       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
+      } else if (user?.role === 'teacher') {
+        // SECURITY: Teacher only sees classes where teacherId === user.id,
+        // and only courses they teach. We query by teacherId (server-side)
+        // because user.classIds on the Teacher doc may not be synced.
+        // TODO: Consider syncing user.classIds when classes are created/updated.
+        unsubClasses = subscribeToClassesByTeacherId(user.id, setClasses);
+        unsubCourses = subscribeToCoursesByTeacherId(user.id, setCourses);
+      } else if (user && ['director', 'superadmin'].includes(user.role)) {
+        // Admin roles: full access to all academic data
+        unsubClasses = subscribeToClasses(setClasses);
+        unsubCourses = subscribeToCourses(setCourses);
+      }
 
       setIsLoading(false);
 
