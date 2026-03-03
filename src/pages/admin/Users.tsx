@@ -133,12 +133,10 @@ const UserManagement = () => {
         if (result.emailSent) {
           toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
         } else if (result.password) {
-          await navigator.clipboard.writeText(result.password);
-          toast.success(t('users.passwordCopied') || 'Mot de passe temporaire copié', {
-            duration: 5000,
-            icon: '📋',
+          toast.success(`${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`, {
+            duration: 30000,
+            icon: '🔑',
           });
-          setTimeout(() => navigator.clipboard.writeText(''), 30000);
         } else {
           toast.success(t('users.userCreated'));
         }
