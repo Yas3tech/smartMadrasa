@@ -27,7 +27,7 @@ function checkHomeworkRule(testCase, useFix = false) {
     return isTeacher() || isDirector() || isSuperAdmin();
   }
 
-  // --- SECURE LOGIC (Proposed Fix) ---
+  // --- SECURE LOGIC (Current Implementation) ---
 
   const isTeacherForClass = (classId) => isTeacher() && getUserData().classIds.includes(classId);
 

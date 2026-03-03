@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useDashboard } from '../useDashboard';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { useUsers, useAcademics, useCommunication, usePerformance } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -10,7 +10,10 @@ vi.mock('../../context/AuthContext', () => ({
 }));
 
 vi.mock('../../context/DataContext', () => ({
-  useData: vi.fn(),
+  useUsers: vi.fn(),
+  useAcademics: vi.fn(),
+  useCommunication: vi.fn(),
+  usePerformance: vi.fn(),
 }));
 
 describe('useDashboard', () => {
@@ -36,15 +39,21 @@ describe('useDashboard', () => {
     ];
 
     vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
-    vi.mocked(useData).mockReturnValue({
+    vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
       users: [...mockTeachers, ...mockStudents],
-      grades: mockGrades,
-      attendance: mockAttendance,
+    } as any);
+    vi.mocked(useAcademics).mockReturnValue({
+      classes: [],
+    } as any);
+    vi.mocked(useCommunication).mockReturnValue({
       messages: [],
       events: [],
+    } as any);
+    vi.mocked(usePerformance).mockReturnValue({
+      grades: mockGrades,
+      attendance: mockAttendance,
       homeworks: [],
-      classes: [],
     } as any);
 
     const { result } = renderHook(() => useDashboard());
@@ -58,15 +67,11 @@ describe('useDashboard', () => {
     // Check calculated stats
     // presentCount should be 1
     // attendanceRate: 1 present / 2 students * 100 = 50%
-    // Wait, useDashboard calculates: presentCount = todayAttendance.filter(present).length
-    // attendanceRate = students.length > 0 ? ((presentCount / students.length) * 100).toFixed(0) : 0
-    // So 1 / 2 * 100 = 50.
 
     expect(dash.presentCount).toBe(1);
     expect(dash.attendanceRate).toBe('50');
 
     // Check memoization/data structure
-    // Check if property exists directly as useDashboard returns an object
     expect(Array.isArray(dash.weeklyAttendanceData)).toBe(true);
     expect(dash.weeklyAttendanceData).toHaveLength(7);
   });
@@ -95,15 +100,21 @@ describe('useDashboard', () => {
     const mockUser = { id: 'user1', role: 'director', name: 'Director' };
 
     vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
-    vi.mocked(useData).mockReturnValue({
+    vi.mocked(useUsers).mockReturnValue({
       students: [],
       users: [],
-      grades: mockGrades,
-      attendance: mockAttendance,
+    } as any);
+    vi.mocked(useAcademics).mockReturnValue({
+      classes: [],
+    } as any);
+    vi.mocked(useCommunication).mockReturnValue({
       messages: [],
       events: [],
+    } as any);
+    vi.mocked(usePerformance).mockReturnValue({
+      grades: mockGrades,
+      attendance: mockAttendance,
       homeworks: [],
-      classes: [],
     } as any);
 
     const { result } = renderHook(() => useDashboard());

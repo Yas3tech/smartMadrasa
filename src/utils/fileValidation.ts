@@ -37,7 +37,7 @@ export const ALLOWED_EXTENSIONS = [
   '.rar',
 ];
 
-export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+export const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
 export interface FileValidationResult {
   valid: boolean;

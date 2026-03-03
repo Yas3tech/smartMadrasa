@@ -54,7 +54,7 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
   // Optimization: Use specific hooks to avoid re-renders from unrelated context changes (e.g. messages)
   const { students } = useUsers();
   const { classes, courses } = useAcademics();
-  const { grades, addGrade, updateGrade } = usePerformance();
+  const { grades, addGrade, addGradesBatch, updateGrade } = usePerformance();
 
   // Navigation States
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -170,19 +170,16 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
 
   const handleBulkSave = async (gradesData: Omit<Grade, 'id'>[]) => {
     try {
-      // Parallel save for performance
-      await Promise.all(
-        gradesData.map((grade) =>
-          addGrade({
-            ...grade,
-            teacherId: user?.id || '',
-            classId: selectedClassId,
-            courseId: courses.find(
-              (c) => c.subject === grade.subject && c.classId === selectedClassId
-            )?.id,
-          })
-        )
-      );
+      // Optimized: use Firestore writeBatch to save all grades in a single roundtrip
+      const formattedGrades = gradesData.map((grade) => ({
+        ...grade,
+        teacherId: user?.id || '',
+        classId: selectedClassId,
+        courseId: courses.find(
+          (c) => c.subject === grade.subject && c.classId === selectedClassId
+        )?.id,
+      }));
+      await addGradesBatch(formattedGrades);
       toast.success(t('grades.gradesSaved'));
       setIsBulkModalOpen(false);
     } catch {

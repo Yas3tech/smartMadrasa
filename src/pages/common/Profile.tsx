@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData
+import { useUsers, useAcademics } from '../../context/DataContext';
 import { Card, Button, Input } from '../../components/UI';
 import { User as UserIcon, Mail, Save, Edit2 } from 'lucide-react';
 import { sendPasswordResetEmail } from 'firebase/auth';
@@ -12,7 +13,8 @@ import type { Student, Parent } from '../../types';
 const Profile = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { users, students, classes, courses, updateUser } = useData();
+  const { users, students, updateUser } = useUsers();
+  const { classes, courses } = useAcademics();
   const isRTL = i18n.language === 'ar';
 
   const [isEditing, setIsEditing] = useState(false);

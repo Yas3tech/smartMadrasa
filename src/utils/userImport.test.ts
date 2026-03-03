@@ -7,15 +7,45 @@ import {
   UserImportRow,
 } from './userImport';
 import { User, Parent } from '../types';
-import * as xlsx from 'xlsx';
 
-// Mock xlsx
-vi.mock('xlsx', () => ({
-  read: vi.fn(),
-  utils: {
-    sheet_to_json: vi.fn(),
-  },
-}));
+// Mock exceljs
+vi.mock('exceljs', () => {
+  const mockWorkbook = {
+    xlsx: {
+      load: vi.fn().mockResolvedValue(undefined),
+    },
+    worksheets: [
+      {
+        eachRow: vi.fn((cb: (row: { eachCell: (fn: (cell: { value: string }, col: number) => void) => void }, rowNumber: number) => void) => {
+          // Header row
+          const headerRow = {
+            eachCell: (fn: (cell: { value: string }, col: number) => void) => {
+              fn({ value: 'name' }, 1);
+              fn({ value: 'email' }, 2);
+              fn({ value: 'role' }, 3);
+            },
+          };
+          cb(headerRow, 1);
+          // Data row
+          const dataRow = {
+            eachCell: (fn: (cell: { value: string }, col: number) => void) => {
+              fn({ value: 'Test' }, 1);
+              fn({ value: 'test@example.com' }, 2);
+              fn({ value: 'student' }, 3);
+            },
+          };
+          cb(dataRow, 2);
+        }),
+      },
+    ],
+  };
+  return {
+    default: {
+      // Must use 'function' (not arrow) so it can be called with 'new'
+      Workbook: vi.fn(function () { return mockWorkbook; }),
+    },
+  };
+});
 
 describe('userImport', () => {
   beforeEach(() => {
@@ -25,26 +55,14 @@ describe('userImport', () => {
   describe('parseUserFile', () => {
     it('should parse file correctly', async () => {
       const mockFile = new File([''], 'test.xlsx');
-      const mockData = [{ name: 'Test', email: 'test@example.com', role: 'student' }];
-
-      // Mock arrayBuffer
       mockFile.arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(8));
-
-      // Mock xlsx functions
-      const mockWorkbook = {
-        SheetNames: ['Sheet1'],
-        Sheets: { Sheet1: {} },
-      };
-      vi.mocked(xlsx.read).mockReturnValue(mockWorkbook as ReturnType<typeof xlsx.read>);
-      vi.mocked(xlsx.utils.sheet_to_json).mockReturnValue(
-        mockData as ReturnType<typeof xlsx.utils.sheet_to_json>
-      );
 
       const result = await parseUserFile(mockFile);
 
-      expect(xlsx.read).toHaveBeenCalled();
-      expect(xlsx.utils.sheet_to_json).toHaveBeenCalled();
-      expect(result).toEqual(mockData);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('Test');
+      expect(result[0].email).toBe('test@example.com');
+      expect(result[0].role).toBe('student');
     });
   });
 
@@ -64,6 +82,22 @@ describe('userImport', () => {
       expect(result.importedUsers).toHaveLength(2);
       expect(result.importedUsers[0].email).toBe('s1@example.com');
       expect(result.importedUsers[1].email).toBe('t1@example.com');
+    });
+
+    it('should skip users with invalid roles', async () => {
+      const mockData: UserImportRow[] = [
+        { name: 'Student 1', email: 's1@example.com', role: 'invalid_role' },
+        { name: 'Teacher 1', email: 't1@example.com', role: 'unknown' },
+        { name: 'Admin 1', email: 'a1@example.com', role: 'superadmin' },
+      ];
+      const addUser = vi.fn();
+
+      const result = await processNonParentUsers(mockData, addUser);
+
+      expect(addUser).toHaveBeenCalledTimes(1);
+      expect(result.count).toBe(1);
+      expect(result.importedUsers[0].email).toBe('a1@example.com');
+      expect(result.importedUsers[0].role).toBe('superadmin');
     });
   });
 

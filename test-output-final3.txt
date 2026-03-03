@@ -1,0 +1,146 @@
+﻿
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Dev/smartMadrasa[39m
+
+node.exe : (node:42440) Warning: `--localstorage-file` was provided 
+without a valid path
+At C:\Program Files\nodejs\npx.ps1:16 char:5
++     & "$basedir/node$exe"  "$basedir/node_modules/npm/bin/npx-cli.js" 
+...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:42440) Wa...ut a vali 
+   d path:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [31mΓ¥»[39m src/utils/lang.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+[31m       [31m├ù[31m should return null if no language is stored[39m[32m 4[2mms[22m[39m
+[31m       [31m├ù[31m should return the stored language[39m[32m 0[2mms[22m[39m
+[31m       [31m├ù[31m should store the language in localStorage[39m[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should set direction to rtl for Arabic[32m 1[2mms[22m[39m
+       [32mΓ£ô[39m should set direction to ltr for other languages[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should return the correct label for known languages[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should return the language code for unknown languages[32m 0[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/fileValidation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+[90mstdout[2m | src/services/courseGrades.bench.test.ts[2m > [22m[2mCourse Grades Subscription Benchmark[2m > [22m[2msubscribeToCourseGrades fetches ALL grades (Baseline)
+[22m[39mBaseline: Fetched 3000 grades (All History)
+
+[90mstdout[2m | src/services/courseGrades.bench.test.ts[2m > [22m[2mCourse Grades Subscription Benchmark[2m > [22m[2msubscribeToCourseGradesByPeriodIds fetches filtered grades (Optimized)
+[22m[39mOptimized: Fetched 999 grades (Current Year)
+Improvement: 3.00x reduction in document reads
+
+ [32mΓ£ô[39m src/services/courseGrades.bench.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useGradeStats.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useTeacherGrades.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useMessages.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useDashboard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useBulletinGrades.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useHomework.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Schedule/HomeworkDetailModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 180[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Homework/SubmissionsModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 230[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/LoadingStates.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[32m 251[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Input.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Card.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 37[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useUsers.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/FileUpload.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 279[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Button.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 142[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Modal.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 167[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Homework/HomeworkCard.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 204[2mms[22m[39m
+ [32mΓ£ô[39m src/pages/auth/Login.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 112[2mms[22m[39m
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mdoes not re-render consumers when DataProvider re-renders but state remains same
+[22m[39m--- Triggering Parent Re-render ---
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useData triggers re-renders on unrelated updates
+[22m[39mBaseline renders: 2
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useData triggers re-renders on unrelated updates
+[22m[39mAfter update renders: 3
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useUsers DOES NOT trigger re-renders on message updates
+[22m[39mBaseline renders (useUsers): 2
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useUsers DOES NOT trigger re-renders on message updates
+[22m[39mAfter update renders (useUsers): 2
+
+ [32mΓ£ô[39m src/context/DataContext.perf.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32mΓ£ô[39m src/pages/common/Messages.security.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 46[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Homework/SubmitHomeworkModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 289[2mms[22m[39m
+ [32mΓ£ô[39m src/services/events.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/userImport.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/pdfGenerator.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/services/users_perf.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/fileValidation_security.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/services/users_optimization.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/services/messages.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/dateUtils.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/services/classes.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/security.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/App.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 1[2mms[22m[39m
+ [32mΓ£ô[39m src/services/users.security.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/services/storage.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/date.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m[1m[41m Failed Tests 3 
+[49m[22m[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mgetStoredLanguage[2m > [22mshould return null if 
+no language is stored
+[31m[1mTypeError[22m: localStorage.getItem is not a function[39m
+[36m [2mΓ¥»[22m getStoredLanguage src/utils/lang.ts:[2m5:23[22m[39m
+    [90m  3| [39m */[39m
+    [90m  4| [39m[35mexport[39m [35mconst[39m getStoredLanguage 
+[33m=[39m ()[33m:[39m string [33m|[39m [35mnull[39m [33m=>[39m 
+{
+    [90m  5| [39m  [35mreturn[39m localStorage[33m.[39m[34mgetItem
+[39m([32m'i18nextLng'[39m)[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m  6| [39m}[33m;[39m
+    [90m  7| [39m
+[90m [2mΓ¥»[22m src/utils/lang.test.ts:[2m18:14[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»[1/3]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mgetStoredLanguage[2m > [22mshould return the 
+stored language
+[31m[1mTypeError[22m: localStorage.setItem is not a function[39m
+[36m [2mΓ¥»[22m src/utils/lang.test.ts:[2m22:20[22m[39m
+    [90m 20| [39m
+    [90m 21| [39m    [34mit[39m([32m'should return the stored 
+language'[39m[33m,[39m () [33m=>[39m {
+    [90m 22| [39m      localStorage[33m.[39m[34msetItem[39m([32m'i
+18nextLng'[39m[33m,[39m [32m'fr'[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m 23| [39m      [34mexpect[39m([34mgetStoredLanguage[39m())
+[33m.[39m[34mtoBe[39m([32m'fr'[39m)[33m;[39m
+    [90m 24| [39m    })[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»[2/3]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mstoreLanguage[2m > [22mshould store the language 
+in localStorage
+[31m[1mTypeError[22m: localStorage.setItem is not a function[39m
+[36m [2mΓ¥»[22m storeLanguage src/utils/lang.ts:[2m12:16[22m[39m
+    [90m 10| [39m */[39m
+    [90m 11| [39m[35mexport[39m [35mconst[39m storeLanguage 
+[33m=[39m (lang[33m:[39m string)[33m:[39m [35mvoid[39m 
+[33m=>[39m {
+    [90m 12| [39m  localStorage[33m.[39m[34msetItem[39m([32m'i18ne
+xtLng'[39m[33m,[39m lang)[33m;[39m
+    [90m   | [39m               [31m^[39m
+    [90m 13| [39m}[33m;[39m
+    [90m 14| [39m
+[90m [2mΓ¥»[22m src/utils/lang.test.ts:[2m29:7[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»[3/3]ΓÄ»[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m36 passed[39m[22m[90m (37)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m162 passed[39m[22m[90m (165)[39m
+[2m   Start at [22m 23:14:31
+[2m   Duration [22m 3.09s[2m (transform 3.78s, setup 3.79s, import 10.68s, tests 2.25s, environment 34.80s)[22m
+

@@ -17,6 +17,8 @@ import {
   deleteUserWithAllData,
   getUserById,
 } from '../../services/users';
+import type { UserQueryFilters } from '../../services/users';
+import { subscribeToClassesByTeacherId } from '../../services/classes';
 
 export interface UserContextType {
   users: User[];
@@ -39,15 +41,43 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubUsers = () => {};
+      let unsubUsers = () => { };
 
+      // SECURITY: Each role only subscribes to the users it needs.
+      // Do NOT replace these scoped queries with a generic fetch-all.
+      // Teachers must NOT see all student PII — only students in their classes.
       if (user?.role === 'student') {
+        // Student: only classmates + staff (teachers, directors, superadmins)
         const student = user as Student;
         unsubUsers = subscribeToUsers(setUsers, [
           ...(student.classId ? [{ classId: student.classId }] : []),
           { role: ['teacher', 'director', 'superadmin'] },
         ]);
-       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
+      } else if (user?.role === 'teacher') {
+        // SECURITY: Teacher only sees staff + students in classes they teach.
+        // Chained subscription: first get teacher's classIds from 'classes' collection
+        // (queried by teacherId), then subscribe to users scoped to those classIds.
+        // This avoids relying on user.classIds which may not be synced.
+        let innerUnsubUsers = () => { };
+        const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
+          innerUnsubUsers();
+          const classIds = teacherClasses.map((c) => c.id);
+          const queries: UserQueryFilters[] = [
+            { role: ['teacher', 'director', 'superadmin'] },
+          ];
+          if (classIds.length > 0) {
+            queries.push({ classId: classIds });
+          }
+          innerUnsubUsers = subscribeToUsers(setUsers, queries);
+        });
+        unsubUsers = () => {
+          unsubTeacherClasses();
+          innerUnsubUsers();
+        };
+      } else if (user && ['director', 'superadmin'].includes(user.role)) {
+        // Admin roles: full access to all users
+        unsubUsers = subscribeToUsers(setUsers);
+      }
 
       setIsLoading(false);
 

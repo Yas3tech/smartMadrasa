@@ -17,6 +17,7 @@ import {
   subscribeToCourseGradesByStudentIds,
   subscribeToCourseGradesByPeriodIds,
   createCourseGrade as fbCreateCourseGrade,
+  createCourseGradesBatch as fbCreateCourseGradesBatch,
   updateCourseGrade as fbUpdateCourseGrade,
 } from '../../services/courseGrades';
 import {
@@ -41,6 +42,7 @@ export interface PerformanceContextType {
   isLoading: boolean;
 
   addGrade: (grade: Omit<Grade, 'id'>) => Promise<void>;
+  addGradesBatch: (grades: Omit<Grade, 'id'>[]) => Promise<void>;
   updateGrade: (id: string, updates: Partial<Grade>) => Promise<void>;
 
   markAttendance: (record: Omit<Attendance, 'id'>) => Promise<void>;
@@ -70,9 +72,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubGrades = () => {};
-      let unsubAttendance = () => {};
-      let unsubHomeworks = () => {};
+      let unsubGrades = () => { };
+      let unsubAttendance = () => { };
+      let unsubHomeworks = () => { };
 
       const handleGradesUpdate = (courseGrades: CourseGrade[]) => {
         const grades = courseGrades.map((cg) => ({
@@ -125,7 +127,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           } else {
             // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
             // We avoid subscribing to EVERYTHING to prevent performance issues.
-            unsubGrades = () => {};
+            unsubGrades = () => { };
           }
 
           unsubAttendance = subscribeToAttendance(setAttendance);
@@ -201,6 +203,57 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
     [useFirebase, students, academicPeriods, user]
   );
 
+  const addGradesBatch = useCallback(
+    async (gradesToAdd: Omit<Grade, 'id'>[]) => {
+      if (!useFirebase || gradesToAdd.length === 0) return;
+
+      const courseGrades = gradesToAdd.map((grade) => {
+        const studentName =
+          grade.studentName || students.find((s) => s.id === grade.studentId)?.name || 'Unknown';
+
+        const gradeDate = new Date(grade.date);
+        const matchingPeriod = academicPeriods.find((period) => {
+          const startDate = new Date(period.startDate);
+          const endDate = new Date(period.endDate);
+          return gradeDate >= startDate && gradeDate <= endDate;
+        });
+
+        const periodId = matchingPeriod?.id;
+        if (!periodId) {
+          throw new Error(
+            'Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.'
+          );
+        }
+
+        return {
+          studentId: grade.studentId,
+          studentName: studentName,
+          courseId: grade.courseId || grade.classId || 'general',
+          courseName: grade.subject,
+          periodId: periodId,
+          categoryId:
+            grade.type === 'exam'
+              ? 'cat-exam'
+              : grade.type === 'homework'
+                ? 'cat-homework'
+                : 'cat-eval',
+          categoryName:
+            grade.type === 'exam' ? 'Examen' : grade.type === 'homework' ? 'Devoir' : 'Évaluation',
+          title: grade.title || `${grade.subject} - ${grade.type}`,
+          score: grade.score,
+          maxScore: grade.maxScore,
+          date: grade.date,
+          weight: 1,
+          teacherId: grade.teacherId || user?.id || 'unknown',
+          comment: grade.feedback || '',
+        };
+      });
+
+      await fbCreateCourseGradesBatch(courseGrades);
+    },
+    [useFirebase, students, academicPeriods, user]
+  );
+
   const updateGrade = useCallback(
     async (id: string, updates: Partial<Grade>) => {
       if (useFirebase) {
@@ -272,6 +325,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       homeworks,
       isLoading,
       addGrade,
+      addGradesBatch,
       updateGrade,
       markAttendance,
       updateAttendance,
@@ -285,6 +339,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       homeworks,
       isLoading,
       addGrade,
+      addGradesBatch,
       updateGrade,
       markAttendance,
       updateAttendance,

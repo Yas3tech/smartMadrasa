@@ -1,4 +1,4 @@
-import { read, utils } from 'xlsx';
+import ExcelJS from 'exceljs';
 import type { User, Role, Parent } from '../types';
 
 export interface ImportedUserSummary {
@@ -18,9 +18,44 @@ export interface UserImportRow {
 
 export const parseUserFile = async (file: File): Promise<UserImportRow[]> => {
   const data = await file.arrayBuffer();
-  const workbook = read(data, { cellDates: true });
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  return utils.sheet_to_json<UserImportRow>(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' });
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(data);
+
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet) return [];
+
+  const rows: UserImportRow[] = [];
+  const headers: string[] = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) {
+      // Header row — map column indices to field names
+      row.eachCell((cell, colNumber) => {
+        headers[colNumber] = String(cell.value || '').trim().toLowerCase();
+      });
+    } else {
+      // Data rows
+      const rowData: Record<string, string> = {};
+      row.eachCell((cell, colNumber) => {
+        const header = headers[colNumber];
+        if (header) {
+          rowData[header] = String(cell.value || '').trim();
+        }
+      });
+      if (rowData.name && rowData.email && rowData.role) {
+        rows.push({
+          name: rowData.name,
+          email: rowData.email,
+          role: rowData.role,
+          phone: rowData.phone,
+          birthDate: rowData.birthdate || rowData.birthDate,
+          studentEmail: rowData.studentemail || rowData.studentEmail,
+        });
+      }
+    }
+  });
+
+  return rows;
 };
 
 export const processNonParentUsers = async (
@@ -32,13 +67,17 @@ export const processNonParentUsers = async (
 
   for (const row of data) {
     if (row.name && row.email && row.role) {
-      const roleNormalized = row.role.toLowerCase().trim() as Role;
-      if (roleNormalized !== 'parent') {
+      const roleNormalized = row.role.toLowerCase().trim();
+      // SECURITY: Validate role — reject unknown roles to prevent invalid data
+      const validRoles = ['student', 'teacher', 'parent', 'director', 'superadmin'];
+      if (!validRoles.includes(roleNormalized)) continue;
+      const validRole = roleNormalized as Role;
+      if (validRole !== 'parent') {
         const newUser: User = {
           id: crypto.randomUUID(),
           name: row.name,
           email: row.email.toLowerCase().trim(),
-          role: roleNormalized,
+          role: validRole,
           phone: row.phone || '',
           birthDate: row.birthDate || '',
           avatar: row.name.charAt(0).toUpperCase(),

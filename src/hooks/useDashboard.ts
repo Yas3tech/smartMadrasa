@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useData } from '../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData to avoid global re-renders
+import { useUsers, useAcademics, useCommunication, usePerformance } from '../context/DataContext';
 import type { User, Grade, Homework, Event, Student, Teacher } from '../types';
 
 export interface UseDashboardReturn {
@@ -43,7 +44,10 @@ export interface UseDashboardReturn {
 
 export function useDashboard(): UseDashboardReturn {
   const { user } = useAuth();
-  const { students, users, grades, attendance, messages, events, homeworks, classes } = useData();
+  const { users, students } = useUsers();
+  const { classes } = useAcademics();
+  const { messages, events } = useCommunication();
+  const { grades, attendance, homeworks } = usePerformance();
 
   // State
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -69,9 +73,16 @@ export function useDashboard(): UseDashboardReturn {
   const teachers = useMemo(() => users.filter((u): u is Teacher => u.role === 'teacher'), [users]);
 
   const { presentCount, attendanceRate } = useMemo(() => {
+    let count = 0;
     const todayDate = new Date().toISOString().split('T')[0];
-    const todayAttendance = attendance.filter((a) => a.date === todayDate);
-    const count = todayAttendance.filter((a) => a.status === 'present').length;
+
+    // Optimization: Single pass over attendance history
+    for (let i = 0; i < attendance.length; i++) {
+      if (attendance[i].date === todayDate && attendance[i].status === 'present') {
+        count++;
+      }
+    }
+
     const rate = students.length > 0 ? ((count / students.length) * 100).toFixed(0) : 0;
     return { presentCount: count, attendanceRate: rate };
   }, [attendance, students]);
@@ -81,8 +92,8 @@ export function useDashboard(): UseDashboardReturn {
   const avgGrade = useMemo(() => {
     return allGrades.length > 0
       ? (
-          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
-        ).toFixed(1)
+        allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
+      ).toFixed(1)
       : 0;
   }, [allGrades]);
 
@@ -115,8 +126,8 @@ export function useDashboard(): UseDashboardReturn {
   const myAvg = useMemo(() => {
     return myGrades.length > 0
       ? (
-          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
-        ).toFixed(1)
+        myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
+      ).toFixed(1)
       : 0;
   }, [myGrades]);
 

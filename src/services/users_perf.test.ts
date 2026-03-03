@@ -37,11 +37,9 @@ describe('subscribeToUsers Performance', () => {
 
   it('optimizes subscription with filters', () => {
     const callback = vi.fn();
-    // Passing filters - this signature doesn't exist yet, so TypeScript might complain if we check types.
-    // We'll cast to any or ignore TS for this test file as we are changing the signature.
-
+    // subscribeToUsers now supports an optional filters parameter
     const filters = [{ role: ['student'] }];
-    // @ts-ignore
+    // @ts-ignore — filter shape may differ from final implementation
     subscribeToUsers(callback, filters);
 
     // Verify that query logic is used

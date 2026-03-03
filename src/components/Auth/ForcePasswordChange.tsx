@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { updatePassword } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hook instead of deprecated useData
+import { useUsers } from '../../context/DataContext';
 import { Modal, Button } from '../UI';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -16,7 +17,7 @@ interface ForcePasswordChangeProps {
 export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangeProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { updateUser } = useData();
+  const { updateUser } = useUsers();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +30,13 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
 
     if (newPassword.length < 8) {
       setError(t('auth.passwordTooShort'));
+      return;
+    }
+
+    // SECURITY: Enforce password complexity — uppercase, lowercase, number, special char
+    const complexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    if (!complexityRegex.test(newPassword)) {
+      setError(t('auth.passwordComplexity') || 'Le mot de passe doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial');
       return;
     }
 
@@ -67,7 +75,7 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={() => {}}>
+    <Modal isOpen={isOpen} onClose={() => { }}>
       <div className="p-6 max-w-md mx-auto">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">

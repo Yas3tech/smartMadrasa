@@ -69,10 +69,6 @@ try:
 };"""
 
     if search_func not in content:
-        print("Error: Could not find function block")
-        # Print content around expected location for debugging
-        print("Content sample:")
-        print(content[-500:])
         sys.exit(1)
 
     content = content.replace(search_func, replace_func)

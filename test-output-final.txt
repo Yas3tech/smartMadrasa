@@ -1,0 +1,222 @@
+﻿
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Dev/smartMadrasa[39m
+
+node.exe : (node:47536) Warning: `--localstorage-file` was provided 
+without a valid path
+At C:\Program Files\nodejs\npx.ps1:16 char:5
++     & "$basedir/node$exe"  "$basedir/node_modules/npm/bin/npx-cli.js" 
+...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:47536) Wa...ut a vali 
+   d path:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [31mΓ¥»[39m src/utils/lang.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m7 failed[39m[2m)[22m[32m 8[2mms[22m[39m
+[31m       [31m├ù[31m should return null if no language is stored[39m[32m 4[2mms[22m[39m
+[31m       [31m├ù[31m should return the stored language[39m[32m 1[2mms[22m[39m
+[31m       [31m├ù[31m should store the language in localStorage[39m[32m 0[2mms[22m[39m
+[31m       [31m├ù[31m should set direction to rtl for Arabic[39m[32m 0[2mms[22m[39m
+[31m       [31m├ù[31m should set direction to ltr for other languages[39m[32m 0[2mms[22m[39m
+[31m       [31m├ù[31m should return the correct label for known languages[39m[32m 0[2mms[22m[39m
+[31m       [31m├ù[31m should return the language code for unknown languages[39m[32m 0[2mms[22m[39m
+[90mstdout[2m | src/services/courseGrades.bench.test.ts[2m > [22m[2mCourse Grades Subscription Benchmark[2m > [22m[2msubscribeToCourseGrades fetches ALL grades (Baseline)
+[22m[39mBaseline: Fetched 3000 grades (All History)
+
+[90mstdout[2m | src/services/courseGrades.bench.test.ts[2m > [22m[2mCourse Grades Subscription Benchmark[2m > [22m[2msubscribeToCourseGradesByPeriodIds fetches filtered grades (Optimized)
+[22m[39mOptimized: Fetched 999 grades (Current Year)
+Improvement: 3.00x reduction in document reads
+
+ [32mΓ£ô[39m src/utils/fileValidation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/services/courseGrades.bench.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useGradeStats.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useTeacherGrades.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [31mΓ¥»[39m src/hooks/__tests__/useDashboard.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+[31m     [31m├ù[31m should return dashboard data correctly[39m[32m 14[2mms[22m[39m
+[31m     [31m├ù[31m should calculate complex stats correctly[39m[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useMessages.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useBulletinGrades.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Schedule/HomeworkDetailModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 184[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useHomework.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Homework/SubmissionsModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 222[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/LoadingStates.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[32m 236[2mms[22m[39m
+ [32mΓ£ô[39m src/hooks/__tests__/useUsers.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/FileUpload.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 250[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Card.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Input.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32mΓ£ô[39m src/pages/auth/Login.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 114[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Modal.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 178[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Homework/HomeworkCard.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 191[2mms[22m[39m
+ [32mΓ£ô[39m src/components/UI/Button.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 166[2mms[22m[39m
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mdoes not re-render consumers when DataProvider re-renders but state remains same
+[22m[39m--- Triggering Parent Re-render ---
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useData triggers re-renders on unrelated updates
+[22m[39mBaseline renders: 2
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useData triggers re-renders on unrelated updates
+[22m[39mAfter update renders: 3
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useUsers DOES NOT trigger re-renders on message updates
+[22m[39mBaseline renders (useUsers): 2
+
+[90mstdout[2m | src/context/DataContext.perf.test.tsx[2m > [22m[2mDataProvider Performance[2m > [22m[2mverifies that useUsers DOES NOT trigger re-renders on message updates
+[22m[39mAfter update renders (useUsers): 2
+
+ [32mΓ£ô[39m src/context/DataContext.perf.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mΓ£ô[39m src/components/Homework/SubmitHomeworkModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 305[2mms[22m[39m
+ [32mΓ£ô[39m src/pages/common/Messages.security.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/userImport.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/fileValidation_security.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/services/events.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/dateUtils.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/pdfGenerator.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/services/users_optimization.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mΓ£ô[39m src/services/users_perf.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/services/messages.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mΓ£ô[39m src/App.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32mΓ£ô[39m src/services/users.security.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/security.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/services/classes.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/services/storage.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32mΓ£ô[39m src/utils/date.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+
+[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m[1m[41m Failed Tests 9 
+[49m[22m[31mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[39m
+
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mgetStoredLanguage[2m > [22mshould return null if 
+no language is stored
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mgetStoredLanguage[2m > [22mshould return the 
+stored language
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mstoreLanguage[2m > [22mshould store the language 
+in localStorage
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mapplyLanguageDirection[2m > [22mshould set 
+direction to rtl for Arabic
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mapplyLanguageDirection[2m > [22mshould set 
+direction to ltr for other languages
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mgetLanguageLabel[2m > [22mshould return the 
+correct label for known languages
+[41m[1m FAIL [22m[49m src/utils/lang.test.ts[2m > [22mLanguage 
+Utilities[2m > [22mgetLanguageLabel[2m > [22mshould return the 
+language code for unknown languages
+[31m[1mTypeError[22m: localStorage.clear is not a function[39m
+[36m [2mΓ¥»[22m src/utils/lang.test.ts:[2m8:18[22m[39m
+    [90m  6| [39m  [90m// Clear localStorage before each test[39m
+    [90m  7| [39m  [34mbeforeEach[39m(() [33m=>[39m {
+    [90m  8| [39m    
+localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m  9| [39m    
+vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 10| [39m    document[33m.[39mdocumentElement[33m.[39mlang 
+[33m=[39m [32m''[39m[33m;[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»[1/9]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m src/hooks/__tests__/useDashboard.test.tsx[2m 
+> [22museDashboard[2m > [22mshould return dashboard data correctly
+[31m[1mError[22m: [vitest] No "useUsers" export is defined on the 
+"../../context/DataContext" mock. Did you forget to return it from 
+"vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" 
+helper inside:
+[39m
+vi.mock(import("../../context/DataContext"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2mΓ¥»[22m Module.useDashboard 
+src/hooks/useDashboard.ts:[2m47:31[22m[39m
+    [90m 45| [39m[35mexport[39m [35mfunction[39m 
+[34museDashboard[39m()[33m:[39m [33mUseDashboardReturn[39m {
+    [90m 46| [39m  [35mconst[39m { user } [33m=[39m 
+[34museAuth[39m()[33m;[39m
+    [90m 47| [39m  [35mconst[39m { users[33m,[39m students } 
+[33m=[39m [34museUsers[39m()[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 48| [39m  [35mconst[39m { classes } [33m=[39m 
+[34museAcademics[39m()[33m;[39m
+    [90m 49| [39m  [35mconst[39m { messages[33m,[39m events } 
+[33m=[39m [34museCommunication[39m()[33m;[39m
+[90m [2mΓ¥»[22m 
+src/hooks/__tests__/useDashboard.test.tsx:[2m50:41[22m[39m
+[90m [2mΓ¥»[22m TestComponent 
+node_modules/@testing-library/react/dist/pure.js:[2m330:27[22m[39m
+[90m [2mΓ¥»[22m Object.react_stack_bottom_frame node_modules/react-dom
+/cjs/react-dom-client.development.js:[2m25904:20[22m[39m
+[90m [2mΓ¥»[22m renderWithHooks node_modules/react-dom/cjs/react-dom-c
+lient.development.js:[2m7662:22[22m[39m
+[90m [2mΓ¥»[22m updateFunctionComponent node_modules/react-dom/cjs/rea
+ct-dom-client.development.js:[2m10166:19[22m[39m
+[90m [2mΓ¥»[22m beginWork node_modules/react-dom/cjs/react-dom-client.
+development.js:[2m11778:18[22m[39m
+[90m [2mΓ¥»[22m runWithFiberInDEV node_modules/react-dom/cjs/react-dom
+-client.development.js:[2m874:13[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»[2/9]ΓÄ»[22m[39m
+
+[41m[1m FAIL [22m[49m src/hooks/__tests__/useDashboard.test.tsx[2m 
+> [22museDashboard[2m > [22mshould calculate complex stats correctly
+[31m[1mError[22m: [vitest] No "useUsers" export is defined on the 
+"../../context/DataContext" mock. Did you forget to return it from 
+"vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" 
+helper inside:
+[39m
+vi.mock(import("../../context/DataContext"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2mΓ¥»[22m Module.useDashboard 
+src/hooks/useDashboard.ts:[2m47:31[22m[39m
+    [90m 45| [39m[35mexport[39m [35mfunction[39m 
+[34museDashboard[39m()[33m:[39m [33mUseDashboardReturn[39m {
+    [90m 46| [39m  [35mconst[39m { user } [33m=[39m 
+[34museAuth[39m()[33m;[39m
+    [90m 47| [39m  [35mconst[39m { users[33m,[39m students } 
+[33m=[39m [34museUsers[39m()[33m;[39m
+    [90m   | [39m                              [31m^[39m
+    [90m 48| [39m  [35mconst[39m { classes } [33m=[39m 
+[34museAcademics[39m()[33m;[39m
+    [90m 49| [39m  [35mconst[39m { messages[33m,[39m events } 
+[33m=[39m [34museCommunication[39m()[33m;[39m
+[90m [2mΓ¥»[22m 
+src/hooks/__tests__/useDashboard.test.tsx:[2m109:41[22m[39m
+[90m [2mΓ¥»[22m TestComponent 
+node_modules/@testing-library/react/dist/pure.js:[2m330:27[22m[39m
+[90m [2mΓ¥»[22m Object.react_stack_bottom_frame node_modules/react-dom
+/cjs/react-dom-client.development.js:[2m25904:20[22m[39m
+[90m [2mΓ¥»[22m renderWithHooks node_modules/react-dom/cjs/react-dom-c
+lient.development.js:[2m7662:22[22m[39m
+[90m [2mΓ¥»[22m updateFunctionComponent node_modules/react-dom/cjs/rea
+ct-dom-client.development.js:[2m10166:19[22m[39m
+[90m [2mΓ¥»[22m beginWork node_modules/react-dom/cjs/react-dom-client.
+development.js:[2m11778:18[22m[39m
+[90m [2mΓ¥»[22m runWithFiberInDEV node_modules/react-dom/cjs/react-dom
+-client.development.js:[2m874:13[22m[39m
+
+[31m[2mΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»Γ
+Ä»ΓÄ»ΓÄ»[3/9]ΓÄ»[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m35 passed[39m[22m[90m (37)[39m
+[2m      Tests [22m [1m[31m9 failed[39m[22m[2m | [22m[1m[32m156 passed[39m[22m[90m (165)[39m
+[2m   Start at [22m 23:10:15
+[2m   Duration [22m 3.22s[2m (transform 3.94s, setup 3.58s, import 11.97s, tests 2.22s, environment 35.89s)[22m
+

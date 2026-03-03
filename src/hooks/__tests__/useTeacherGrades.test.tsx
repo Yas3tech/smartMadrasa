@@ -100,11 +100,8 @@ describe('useTeacherGrades', () => {
       result.current.setSearchTerm('Alice');
     });
 
-    // If implementation uses filteredStudents for subjectGrades calculation, this might fail (or pass but be buggy in UI).
-    // If implementation uses all students, it should still have 2 grades.
-    // The current implementation uses `students` (all students), so it should pass.
-    // But the UI iterates subjectGrades and looks up in filteredStudents, which is the bug.
-    // Here we test that subjectGrades itself contains all relevant grades regardless of search.
+    // subjectGrades should contain all relevant grades regardless of search term.
+    // The UI uses studentMap for O(1) lookups, avoiding the earlier filteredStudents bug.
     expect(result.current.subjectGrades).toHaveLength(2);
   });
 

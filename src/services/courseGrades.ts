@@ -8,6 +8,7 @@ import {
   query,
   where,
   orderBy,
+  writeBatch,
 } from 'firebase/firestore';
 import { getDb, mapQuerySnapshot } from './firebaseHelper';
 import type { CourseGrade } from '../types/bulletin';
@@ -79,6 +80,22 @@ export const createCourseGrade = async (grade: Omit<CourseGrade, 'id'>): Promise
 };
 
 /**
+ * Create multiple course grades natively using Firestore batch
+ */
+export const createCourseGradesBatch = async (grades: Omit<CourseGrade, 'id'>[]): Promise<void> => {
+  const db = getDb();
+  const batch = writeBatch(db);
+  const gradesRef = collection(db, COLLECTION_NAME);
+
+  grades.forEach((grade) => {
+    const newDocRef = doc(gradesRef);
+    batch.set(newDocRef, grade);
+  });
+
+  await batch.commit();
+};
+
+/**
  * Update a course grade
  */
 export const updateCourseGrade = async (
@@ -133,7 +150,7 @@ export const subscribeToCourseGradesByStudentIds = (
   studentIds: string[],
   callback: (grades: CourseGrade[]) => void
 ): (() => void) => {
-  if (studentIds.length === 0) return () => {};
+  if (studentIds.length === 0) return () => { };
 
   // Note: We cannot use orderBy with 'in' query without a composite index.
   // We will sort client-side.
@@ -158,7 +175,7 @@ export const subscribeToCourseGradesByPeriodIds = (
 ): (() => void) => {
   if (periodIds.length === 0) {
     callback([]);
-    return () => {};
+    return () => { };
   }
 
   // Note: 'in' queries are limited to 30 items.

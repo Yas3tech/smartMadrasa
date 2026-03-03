@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+// PERFORMANCE: Use specific hooks instead of deprecated useData
+import { useUsers, useAcademics } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Users, GraduationCap, X, UserPlus, UserMinus, Search } from 'lucide-react';
 import type { ClassGroup, Student } from '../../types';
@@ -11,7 +12,8 @@ import toast from 'react-hot-toast';
 const Classes = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { classes, users, students, addClass, updateClass, deleteClass } = useData();
+  const { users, students } = useUsers();
+  const { classes, addClass, updateClass, deleteClass } = useAcademics();
   const isRTL = i18n.language === 'ar';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
