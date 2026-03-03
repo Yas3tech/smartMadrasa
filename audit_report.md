@@ -29,7 +29,7 @@ L'absence d'un système de Custom Claims robuste empêche de qualifier le systè
   Actuellement, l'authentification et l'autorisation sont gérées par une lecture d'un document utilisateur (ex: `/users/$(request.auth.uid)`).
   - *Risque de sécurité* : Bien que les règles Firestore interdisent la modification du champ `role` par l'utilisateur lui-même (grâce à la whitelist `isOwnerSafeUpdate`), si une faille applicative permettait un jour à un utilisateur d'écrire ce document, il pourrait s'attribuer le rôle `superadmin`.
   - *Risque financier/Performance* : Chaque requête Firestore nécessite de lire à nouveau le document utilisateur (coût = lectures Firestore facturées + latence).
-  - *Remédiation proposée* : Migrer la gestion des rôles vers les **Custom Claims Firebase Auth**. Cela nécessite le déploiement d'une Cloud Function (ex: au moment de la création par un `superadmin`, la function set le claim `role: 'teacher'`). La règle deviendrait `request.auth.token.role == 'teacher'`. *Action requise : Architecture à valider par l'équipe.*
+  - *Remédiation proposée* : Migrer la gestion des rôles vers les **Custom Claims Firebase Auth**. Cela nécessite le déploiement d'une Cloud Function (ex: au moment de la création par un `superadmin`, la fonction définit le claim `role: 'teacher'`). La règle deviendrait `request.auth.token.role == 'teacher'`. *Action requise : Architecture à valider par l'équipe.*
 
 - **[À RÉSOUDRE] Vulnérabilités critiques dans les dépendances (npm/pnpm audit)** :
   L'audit des paquets (`pnpm audit`) a révélé 9 vulnérabilités "High", principalement dans `minimatch`, `rollup` et `xlsx` (ReDoS : attaques par déni de service régulier).
