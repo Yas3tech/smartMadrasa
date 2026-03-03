@@ -1,4 +1,3 @@
-import ExcelJS from 'exceljs';
 import type { User, Role, Parent } from '../types';
 
 export interface ImportedUserSummary {
@@ -17,6 +16,7 @@ export interface UserImportRow {
 }
 
 export const parseUserFile = async (file: File): Promise<UserImportRow[]> => {
+  const ExcelJS = (await import('exceljs')).default;
   const data = await file.arrayBuffer();
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(data);

@@ -44,7 +44,6 @@ const Attendance = () => {
         markAttendance={markAttendance}
         updateAttendance={updateAttendance}
         t={t}
-        i18n={i18n}
         isRTL={isRTL}
       />
     );

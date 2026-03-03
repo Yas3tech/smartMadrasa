@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useCommunication, useUsers, useAcademics } from '../../context/DataContext';
 import type { Message, Parent, Student, User } from '../../types';
 import { Card, Button } from '../../components/UI';
-import { isSafeUrl } from '../../utils/security';
+
 import {
   PenSquare,
   Inbox,
@@ -23,7 +23,7 @@ import MessageList from '../../components/Messages/MessageList';
 import MessageDetail from '../../components/Messages/MessageDetail';
 
 const Messages = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage } = useCommunication();
   const { users } = useUsers();

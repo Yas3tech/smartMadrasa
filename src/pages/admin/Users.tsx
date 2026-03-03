@@ -12,7 +12,6 @@ import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
 import type { User, Role } from '../../types';
-import ExcelJS from 'exceljs';
 import { parseUserFile, processNonParentUsers, processParentUsers } from '../../utils/userImport';
 import toast from 'react-hot-toast';
 import { deleteUserWithAllData, previewUserDeletion } from '../../services/users';
@@ -176,6 +175,7 @@ const UserManagement = () => {
   };
 
   const handleDownloadTemplate = async () => {
+    const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
     const ws = workbook.addWorksheet('Template');
     ws.columns = [

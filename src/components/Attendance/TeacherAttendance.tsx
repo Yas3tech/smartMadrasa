@@ -12,7 +12,6 @@ interface TeacherAttendanceProps {
     markAttendance: any;
     updateAttendance: any;
     t: any;
-    i18n: any;
     isRTL: boolean;
 }
 
@@ -25,7 +24,6 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
     markAttendance,
     updateAttendance,
     t,
-    i18n,
     isRTL,
 }) => {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
