@@ -190,6 +190,7 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
             isCollapsed ? 'justify-center' : ''
           }`}
           title={t('sidebar.logout')}
+          aria-label={t('sidebar.logout')}
         >
           <LogOut size={20} />
           {!isCollapsed && <span>{t('sidebar.logout')}</span>}

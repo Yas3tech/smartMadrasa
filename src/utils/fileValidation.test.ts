@@ -51,8 +51,8 @@ describe('validateFile', () => {
   });
 
   it('should reject a file exceeding max size', async () => {
-    // Create a large file (10MB + 1 byte)
-    const content = new Uint8Array(10 * 1024 * 1024 + 1);
+    // Create a large file (25MB + 1 byte)
+    const content = new Uint8Array(25 * 1024 * 1024 + 1);
     const file = createMockFile(content, 'large.jpg', 'image/jpeg');
     const result = await validateFile(file);
 
