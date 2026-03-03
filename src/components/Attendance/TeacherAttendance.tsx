@@ -55,13 +55,21 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
         return students.filter((s) => (s as Student).classId === selectedCourse.classId);
     }, [selectedCourse, students]);
 
+    // Pre-compute attendance records for the selected date and course to ensure O(1) lookups
+    const attendanceMap = useMemo(() => {
+        const map = new Map();
+        if (!selectedCourse) return map;
+
+        for (const a of attendance) {
+            if (a.date === selectedDate && (a.courseId === selectedCourseId || !a.courseId)) {
+                map.set(a.studentId, a);
+            }
+        }
+        return map;
+    }, [attendance, selectedDate, selectedCourseId, selectedCourse]);
+
     const getAttendanceRecord = (studentId: string) => {
-        return attendance.find(
-            (a) =>
-                a.studentId === studentId &&
-                a.date === selectedDate &&
-                (a.courseId === selectedCourseId || !a.courseId)
-        );
+        return attendanceMap.get(studentId);
     };
 
     const handleMarkAttendance = async (studentId: string, status: 'present' | 'absent' | 'late') => {
@@ -90,19 +98,20 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
         setJustificationMap((prev) => ({ ...prev, [studentId]: value }));
     };
 
-    const getStats = () => {
+    const stats = useMemo(() => {
         if (!selectedCourse) return { present: 0, absent: 0, late: 0, unmarked: 0, total: 0 };
 
-        const records = courseStudents.map((s) => getAttendanceRecord(s.id));
-        const present = records.filter((r) => r?.status === 'present').length;
-        const absent = records.filter((r) => r?.status === 'absent').length;
-        const late = records.filter((r) => r?.status === 'late').length;
+        let present = 0, absent = 0, late = 0;
+        for (const student of courseStudents) {
+            const record = attendanceMap.get(student.id);
+            if (record?.status === 'present') present++;
+            else if (record?.status === 'absent') absent++;
+            else if (record?.status === 'late') late++;
+        }
         const unmarked = courseStudents.length - present - absent - late;
 
         return { present, absent, late, unmarked, total: courseStudents.length };
-    };
-
-    const stats = getStats();
+    }, [courseStudents, attendanceMap, selectedCourse]);
 
     return (
         <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>

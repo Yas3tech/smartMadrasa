@@ -12,3 +12,6 @@
 
 **Learning:** Found an O(N²) anti-pattern inside a `useMemo` block in `useMessages.ts` that maps over `users` and then loops over the same array to find parent's children. Large user arrays would cause severe UI lagging.
 **Action:** When filtering or linking related items within an array map over the same dataset, always build a lookup `Map` first (O(N)), so inner lookups are O(1), keeping overall complexity at O(N).
+## 2026-03-03 - [O(N²) Optimization in TeacherAttendance]
+**Learning:** Found an O(N²) anti-pattern in `TeacherAttendance.tsx` where a function `getAttendanceRecord` was defined in the render loop using `Array.prototype.find()`, and was called both in individual mapping iterations and multiple times during stats calculation using `.filter()`. This creates a severe performance bottleneck when scaling to larger classes.
+**Action:** Used `useMemo` to pre-compute an `attendanceMap` (O(N)), transforming all subsequent lookups within the render loop and stats aggregation into O(1) operations, dropping the complexity to O(A + S) where A is the number of attendance records and S is the number of students. Refactored stats calculation to perform a single iteration over the students list instead of multiple `.filter()` passes.
