@@ -178,14 +178,13 @@ export async function deleteAllUserData(
         const teacherRef = getDocumentRefById('teachers', userId);
         if (teacherRef) { refsToDelete.push(teacherRef); result.deletedCounts.teachers = 1; }
 
-        const homeworks = await getDocumentRefsWhere('homework', 'teacherId', userId);
+        const homeworks = await getDocumentRefsWhere('homeworks', 'teacherId', userId);
         refsToDelete.push(...homeworks); result.deletedCounts.homework = homeworks.length;
 
         const comments = await getDocumentRefsWhere('teacherComments', 'teacherId', userId);
         refsToDelete.push(...comments); result.deletedCounts.teacherComments = comments.length;
 
         // WARN-05: Handle orphaned courseGrades
-        const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
         const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
         courseGrades.forEach(ref => refsToUpdate.push({ ref, data: { teacherId: '', teacherName: 'Deleted Teacher' } }));
         result.deletedCounts.grades += courseGrades.length;
@@ -208,7 +207,7 @@ export async function deleteAllUserData(
 
     // 3. Messages (envoyés et reçus)
     const sentMessages = await getDocumentRefsWhere('messages', 'senderId', userId);
-    const receivedMessages = await getDocumentRefsWhere('messages', 'recipientId', userId);
+    const receivedMessages = await getDocumentRefsWhere('messages', 'receiverId', userId);
     refsToDelete.push(...sentMessages, ...receivedMessages);
     result.deletedCounts.messages = sentMessages.length + receivedMessages.length;
 

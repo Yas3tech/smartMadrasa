@@ -73,6 +73,13 @@ const FirstRunSetup: React.FC = () => {
         createdAt: new Date().toISOString(),
       });
 
+      // 3. Lock the setup completely
+      await setDoc(doc(db, '_setup', 'config'), {
+        setupCompletedAt: new Date().toISOString(),
+        completedBy: user.uid,
+        status: 'locked'
+      });
+
       // 4. Optionally seed basic system data
       if (seedData) {
         toast.loading(t('setup.seedingData', 'Initialisation des paramètres école...'), {

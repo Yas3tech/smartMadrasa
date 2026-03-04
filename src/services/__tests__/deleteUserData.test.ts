@@ -81,7 +81,7 @@ describe('deleteUserData', () => {
         expect(result.success).toBe(true);
 
         // Check teacher specific collections
-        expect(collection).toHaveBeenCalledWith(db, 'homework');
+        expect(collection).toHaveBeenCalledWith(db, 'homeworks');
         expect(collection).toHaveBeenCalledWith(db, 'teacherComments');
     });
 

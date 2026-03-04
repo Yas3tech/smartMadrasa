@@ -10,6 +10,8 @@ import {
   query,
   where,
   limit,
+  startAfter,
+  type QueryDocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { User } from '../types';
@@ -17,9 +19,12 @@ import { mapQuerySnapshot, mapDocumentSnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'users';
 
-export const getUsers = async (): Promise<User[]> => {
+export const getUsers = async (lastDocSnapshot?: QueryDocumentSnapshot): Promise<User[]> => {
   if (!db) return [];
-  const q = query(collection(db, COLLECTION_NAME), limit(500));
+  let q = query(collection(db, COLLECTION_NAME), limit(500));
+  if (lastDocSnapshot) {
+    q = query(collection(db, COLLECTION_NAME), startAfter(lastDocSnapshot), limit(500));
+  }
   const snapshot = await getDocs(q);
   return mapQuerySnapshot<User>(snapshot);
 };
@@ -229,14 +234,18 @@ export interface UserQueryFilters {
 
 export const subscribeToUsers = (
   callback: (users: User[]) => void,
-  queries: UserQueryFilters[] = []
+  queries: UserQueryFilters[] = [],
+  lastDocSnapshot?: QueryDocumentSnapshot
 ) => {
   const firestore = db;
   if (!firestore) return () => { };
 
   // If no queries provided, fallback to default (fetch up to 500)
   if (!queries || queries.length === 0) {
-    const defaultQuery = query(collection(firestore, COLLECTION_NAME), limit(500));
+    let defaultQuery = query(collection(firestore, COLLECTION_NAME), limit(500));
+    if (lastDocSnapshot) {
+      defaultQuery = query(collection(firestore, COLLECTION_NAME), startAfter(lastDocSnapshot), limit(500));
+    }
     return onSnapshot(defaultQuery, (snapshot) => {
       callback(mapQuerySnapshot<User>(snapshot));
     });
@@ -270,6 +279,10 @@ export const subscribeToUsers = (
       if (relatedClassIds.length > 0) {
         q = query(q, where('relatedClassIds', 'array-contains-any', relatedClassIds));
       }
+    }
+
+    if (lastDocSnapshot) {
+      q = query(q, startAfter(lastDocSnapshot));
     }
 
     const unsub = onSnapshot(q, (snapshot) => {
