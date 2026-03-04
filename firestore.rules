@@ -13,7 +13,9 @@ service cloud.firestore {
     }
     
     function isRole(role) {
-      return isAuthenticated() && getUserData().role == role;
+      // Uses Custom Claims (JWT token) instead of reading the user document.
+      // Custom Claims are set by the Cloud Function 'syncRoleToClaims'.
+      return isAuthenticated() && request.auth.token.role == role;
     }
     
     function isOwner(userId) {
@@ -110,11 +112,13 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid || 
         (isParent() && resource.data.studentId in getUserData().childrenIds) ||
-        isTeacher() || 
-        isDirector()
+        // SECURITY: Teachers only see grades for their own classes
+        (isTeacher() && isTeacherForClass(resource.data.classId)) || 
+        isDirector() ||
+        isSuperAdmin()
       );
       // Improved Write Rule: Validate Score Range and Class Access
-      allow write: if (isDirector() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
+      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
     }
 
     // CourseGrades (New Collection):
@@ -122,11 +126,13 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
         (isParent() && resource.data.studentId in getUserData().childrenIds) ||
-        isTeacher() ||
-        isDirector()
+        // SECURITY: Teachers only see grades for their own classes
+        (isTeacher() && isTeacherForClass(resource.data.classId)) ||
+        isDirector() ||
+        isSuperAdmin()
       );
       // Improved Write Rule: Validate Score Range and Class Access
-      allow write: if (isDirector() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
+      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
     }
 
     // Attendance:
@@ -204,9 +210,14 @@ service cloud.firestore {
     // - Teachers: all courses (filtered client-side by teacherId)
     // - Directors/Admins: all courses
     // Write: Only directors/superadmins can manage the schedule.
+    // Root-level courses collection (used by collectionGroup queries)
+    // SECURITY: Restricted to staff roles only — students/parents should
+    // access courses via the scoped subcollection classes/{classId}/courses.
     match /courses/{courseId} {
-      allow read: if isAuthenticated();
-      allow write: if isDirector() || isSuperAdmin() || isTeacher();
+      allow read: if isAuthenticated() && (
+        isTeacher() || isDirector() || isSuperAdmin()
+      );
+      allow write: if isDirector() || isSuperAdmin();
     }
 
     // Classes:

@@ -5,10 +5,11 @@
  * Contains UI for folder navigation, message list, and compose modal.
  */
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useCommunication, useUsers, useAcademics } from '../../context/DataContext';
+import { useThrottle } from '../../hooks/useThrottle';
 import type { Message, Parent, Student, User } from '../../types';
 import { Card, Button } from '../../components/UI';
 
@@ -187,7 +188,8 @@ const Messages = () => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSendMessage = () => {
+  // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
+  const handleSendMessage = useThrottle(useCallback(() => {
     if (!user || !recipient || !subject || !content) return;
     const selectedRecipient = filteredRecipients.find((r) => r.id === recipient);
     const attachmentUrls = attachments.map((file) => URL.createObjectURL(file));
@@ -246,7 +248,8 @@ const Messages = () => {
     setSubject('');
     setContent('');
     setAttachments([]);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, recipient, subject, content, filteredRecipients, classes, users, sendMessage, attachments]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);

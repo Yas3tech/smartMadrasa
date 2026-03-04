@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged, signOut, type User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/db';
 import type { User, Role } from '../types';
 
 interface AuthContextType {
@@ -25,12 +27,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         setLoading(true);
         try {
-          // Dynamic import firestore only when needed
-          const { doc, getDoc } = await import('firebase/firestore');
-          const { db: firestoreDb } = await import('../config/db');
-
-          if (firestoreDb) {
-            const userDoc = await getDoc(doc(firestoreDb, 'users', firebaseUser.uid));
+          if (db) {
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
             let userData = userDoc.exists() ? userDoc.data() : null;
 
             // Fallback: If no doc found by UID, try searching by email

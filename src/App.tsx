@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import { PageLoader } from './components/UI';
 import { Toaster } from 'react-hot-toast';
 
@@ -11,20 +12,22 @@ const ProtectedApp = lazy(() => import('./components/Auth/ProtectedApp'));
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Toaster position="top-right" />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/setup" element={<FirstRunSetup />} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Toaster position="top-right" />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/setup" element={<FirstRunSetup />} />
 
-            {/* All other routes are handled in ProtectedApp to isolate dependencies */}
-            <Route path="/*" element={<ProtectedApp />} />
-          </Routes>
-        </Suspense>
-      </Router>
-    </AuthProvider>
+              {/* All other routes are handled in ProtectedApp to isolate dependencies */}
+              <Route path="/*" element={<ProtectedApp />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
