@@ -255,11 +255,19 @@ const Resources = () => {
               <Button variant="primary" size="sm" icon={Download} className="flex-1">
                 {t('resources.download')}
               </Button>
-              <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+              <button
+                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                aria-label={t('resources.preview')}
+                title={t('resources.preview')}
+              >
                 <Eye size={18} />
               </button>
               {canUpload && (
-                <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                <button
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  aria-label={t('resources.delete')}
+                  title={t('resources.delete')}
+                >
                   <Trash2 size={18} />
                 </button>
               )}

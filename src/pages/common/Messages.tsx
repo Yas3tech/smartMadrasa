@@ -248,7 +248,7 @@ const Messages = () => {
     setSubject('');
     setContent('');
     setAttachments([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [user, recipient, subject, content, filteredRecipients, classes, users, sendMessage, attachments]), 2000);
 
   const handleSelectMessage = (msg: Message) => {

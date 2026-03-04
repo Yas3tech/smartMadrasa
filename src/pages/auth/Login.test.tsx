@@ -40,6 +40,7 @@ vi.mock('react-i18next', () => ({
     i18n: {
       language: 'fr',
       changeLanguage: vi.fn(),
+      t: (key: string, defaultValue?: string) => defaultValue || key,
     },
   }),
 }));

@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 /**
  * Hook that throttles a callback function — prevents it from being called
@@ -18,7 +18,10 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
 ): (...args: Parameters<T>) => ReturnType<T> | undefined {
     const lastCallRef = useRef<number>(0);
     const callbackRef = useRef(callback);
-    callbackRef.current = callback;
+
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
 
     return useCallback(
         (...args: Parameters<T>): ReturnType<T> | undefined => {
