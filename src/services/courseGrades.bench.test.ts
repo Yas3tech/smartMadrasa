@@ -11,6 +11,7 @@ vi.mock('firebase/firestore', () => {
     where: vi.fn(),
     orderBy: vi.fn(),
     onSnapshot: vi.fn(),
+    limit: vi.fn(() => ({ type: 'limit' })),
     getFirestore: vi.fn(),
     doc: vi.fn(),
     addDoc: vi.fn(),
@@ -89,7 +90,7 @@ describe('Course Grades Subscription Benchmark', () => {
         forEach: (cb: any) => gradesToReturn.forEach((g) => cb({ id: g.id, data: () => g })),
       };
       callback(snapshot);
-      return () => {};
+      return () => { };
     });
   });
 

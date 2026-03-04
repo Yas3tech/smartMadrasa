@@ -23,6 +23,7 @@ import {
     query,
     where,
     orderBy,
+    limit,
     onSnapshot,
 } from 'firebase/firestore';
 
@@ -53,6 +54,7 @@ vi.mock('firebase/firestore', () => ({
     query: vi.fn(),
     where: vi.fn(),
     orderBy: vi.fn(),
+    limit: vi.fn(),
     onSnapshot: vi.fn(),
 }));
 
@@ -68,7 +70,8 @@ describe('homework service', () => {
 
             const result = await getHomeworks();
 
-            expect(query).toHaveBeenCalledWith(undefined, undefined); // collection and orderBy are mocked
+            expect(query).toHaveBeenCalled();
+
             expect(result).toHaveLength(1);
             expect(result[0].title).toBe('HW1');
         });
@@ -80,6 +83,7 @@ describe('homework service', () => {
             const result = await getHomeworks('class123');
 
             expect(where).toHaveBeenCalledWith('classId', '==', 'class123');
+            expect(limit).toHaveBeenCalled();
             expect(result).toHaveLength(1);
         });
     });

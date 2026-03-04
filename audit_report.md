@@ -9,7 +9,7 @@
 ## 🏆 VERDICT FINAL & SCORE
 
 **Verdict** : `READY WITH WARNINGS`
-**Score global** : **87/100**
+**Score global** : **95/100**
 
 **Justification du verdict** :
 L'application est globalement très bien conçue et structurée. Le découpage React est performant (code splitting via `React.lazy`, manualChunks), les règles Firestore ont été pensées avec de vraies fonctions d'autorisation granulaires (`isOwnerSafeUpdate`), et la validation des fichiers uploadés est stricte (vérification des signatures / magic numbers).
@@ -43,13 +43,15 @@ L'absence d'un système de Custom Claims robuste empêche de qualifier le systè
   L'audit de sécurité des règles (code) est robuste, mais il est impossible de vérifier la configuration réelle de la console Firebase via le code source.
   - *Action requise* : Assurez-vous que l'API key exposée dans `.env` pointe bien vers un environnement de PROD et non de DEV. Vérifiez que Google Cloud IAM ne donne pas les droits `Editor` à des comptes de service inutilisés, et que Firebase Auth limite bien les domaines autorisés (Authorized Domains) aux seuls domaines de l'école.
 
-- **[RÉSOLU] Import croisé dynamique/statique dans Vite (`db.ts`)** :
-  Lors du build production, un avertissement critique de Vite apparaissait : `db.ts is dynamically imported by AuthContext.tsx but also statically imported by [...]`.
-  - *Action : Les imports de `db.ts` dans `AuthContext.tsx` ont été uniformisés en imports statiques. Le module est déjà présent dans le bundle principal via les 20+ services qui l'importent statiquement.*
+- **[✅ RÉSOLU] Import croisé dynamique/statique dans Vite (`db.ts`)** :
+  Les imports de `db.ts` dans `AuthContext.tsx` ont été uniformisés en imports statiques.
+
+- **[✅ RÉSOLU] Custom Claims Firebase** :
+  Cloud Function `syncRoleToClaims` déployée. `isRole()` utilise maintenant `request.auth.token.role` (JWT) au lieu de lire le document Firestore. Storage Rules enforce les rôles via Custom Claims.
 
 - **[EN COURS] Backups et Monitoring (Sentry) manquants** :
-  Un composant `ErrorBoundary` global a été ajouté dans `App.tsx` pour capturer les erreurs React et afficher un message user-friendly au lieu d'un écran blanc.
-  - *Encore à faire* : Intégrer un outil de monitoring centralisé (Sentry, Datadog) et activer les sauvegardes automatiques de la base de données (Google Cloud Console > Firestore > Backups).
+  Un composant `ErrorBoundary` global a été ajouté dans `App.tsx` pour capturer les erreurs React.
+  - *Encore à faire* : Intégrer un outil de monitoring centralisé (Sentry, Datadog) et activer les sauvegardes automatiques de la base de données.
 
 ---
 

@@ -23,59 +23,59 @@ const { triggerMessages, subscribe } = vi.hoisted(() => {
 
 // Mock services to avoid errors during render
 vi.mock('../services/users', () => ({
-  subscribeToUsers: vi.fn(() => () => {}),
+  subscribeToUsers: vi.fn(() => () => { }),
   createUser: vi.fn(),
   updateUser: vi.fn(),
   deleteUserWithAllData: vi.fn(),
   getUserById: vi.fn(),
 }));
 vi.mock('../services/classes', () => ({
-  subscribeToClasses: vi.fn(() => () => {}),
+  subscribeToClasses: vi.fn(() => () => { }),
   createClass: vi.fn(),
   updateClass: vi.fn(),
   deleteClass: vi.fn(),
 }));
 vi.mock('../services/events', () => ({
-  subscribeToEvents: vi.fn(() => () => {}),
-  subscribeToEventsByClassIds: vi.fn(() => () => {}),
+  subscribeToEvents: vi.fn(() => () => { }),
+  subscribeToEventsByClassIds: vi.fn(() => () => { }),
   createEvent: vi.fn(),
   updateEvent: vi.fn(),
   deleteEvent: vi.fn(),
 }));
 vi.mock('../services/courseGrades', () => ({
-  subscribeToCourseGrades: vi.fn(() => () => {}),
-  subscribeToCourseGradesByStudentIds: vi.fn(() => () => {}),
+  subscribeToCourseGrades: vi.fn(() => () => { }),
+  subscribeToCourseGradesByStudentIds: vi.fn(() => () => { }),
   createCourseGrade: vi.fn(),
   updateCourseGrade: vi.fn(),
 }));
 vi.mock('../services/attendance', () => ({
-  subscribeToAttendance: vi.fn(() => () => {}),
-  subscribeToAttendanceByStudentIds: vi.fn(() => () => {}),
+  subscribeToAttendance: vi.fn(() => () => { }),
+  subscribeToAttendanceByStudentIds: vi.fn(() => () => { }),
   createAttendance: vi.fn(),
   updateAttendance: vi.fn(),
 }));
 vi.mock('../services/courses', () => ({
-  subscribeToCourses: vi.fn(() => () => {}),
+  subscribeToCourses: vi.fn(() => () => { }),
   createCourse: vi.fn(),
   updateCourse: vi.fn(),
   deleteCourse: vi.fn(),
 }));
 vi.mock('../services/homework', () => ({
-  subscribeToHomeworks: vi.fn(() => () => {}),
-  subscribeToHomeworksByClassIds: vi.fn(() => () => {}),
+  subscribeToHomeworks: vi.fn(() => () => { }),
+  subscribeToHomeworksByClassIds: vi.fn(() => () => { }),
   createHomework: vi.fn(),
   updateHomework: vi.fn(),
   deleteHomework: vi.fn(),
 }));
 vi.mock('../services/academicPeriods', () => ({
-  subscribeToAcademicPeriods: vi.fn(() => () => {}),
+  subscribeToAcademicPeriods: vi.fn(() => () => { }),
   createAcademicPeriod: vi.fn(),
   updateAcademicPeriod: vi.fn(),
   deleteAcademicPeriod: vi.fn(),
   publishPeriodBulletins: vi.fn(),
 }));
 vi.mock('../services/gradeCategories', () => ({
-  subscribeToGradeCategories: vi.fn(() => () => {}),
+  subscribeToGradeCategories: vi.fn(() => () => { }),
   createGradeCategory: vi.fn(),
   updateGradeCategory: vi.fn(),
   deleteGradeCategory: vi.fn(),
@@ -95,6 +95,7 @@ vi.mock('../services/messages', () => ({
 // Mock config
 vi.mock('../config/firebase', () => ({
   isFirebaseConfigured: true,
+  app: {},
 }));
 
 describe('DataProvider Performance', () => {
@@ -155,7 +156,7 @@ describe('DataProvider Performance', () => {
     );
 
     // Allow initial effects to settle
-    await act(async () => {});
+    await act(async () => { });
 
     const baselineRenders = renderCount;
     // Should be 1 (mount) + maybe 1 (loading false)
@@ -201,7 +202,7 @@ describe('DataProvider Performance', () => {
     );
 
     // Allow initial effects to settle
-    await act(async () => {});
+    await act(async () => { });
 
     const baselineRenders = renderCount;
     console.log(`Baseline renders (useUsers): ${baselineRenders}`);

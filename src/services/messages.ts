@@ -10,6 +10,7 @@ import {
   Timestamp,
   onSnapshot,
   or,
+  limit,
 } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../config/db';
@@ -31,10 +32,11 @@ export const getMessages = async (userId?: string): Promise<Message[]> => {
   if (userId) {
     q = query(
       collection(db, COLLECTION_NAME),
-      or(where('senderId', '==', userId), where('receiverId', 'in', [userId, 'all']))
+      or(where('senderId', '==', userId), where('receiverId', 'in', [userId, 'all'])),
+      limit(200)
     );
   } else {
-    q = query(collection(db, COLLECTION_NAME));
+    q = query(collection(db, COLLECTION_NAME), limit(200));
   }
 
   const snapshot = await getDocs(q);
@@ -43,10 +45,23 @@ export const getMessages = async (userId?: string): Promise<Message[]> => {
   return messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
+const sanitizeText = (text: string): string => {
+  if (!text) return '';
+  // Basic sanitization: replace HTML tags and trim
+  return text.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
 export const sendMessage = async (message: Omit<Message, 'id' | 'timestamp'>): Promise<string> => {
   if (!db) throw new Error('Firebase not configured');
-  const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+
+  const sanitizedMessage = {
     ...message,
+    subject: sanitizeText(message.subject),
+    content: sanitizeText(message.content)
+  };
+
+  const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+    ...sanitizedMessage,
     timestamp: Timestamp.now(),
   });
   return docRef.id;
@@ -70,16 +85,17 @@ export const deleteMessage = async (id: string): Promise<void> => {
 };
 
 export const subscribeToMessages = (callback: (messages: Message[]) => void, userId?: string) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
 
   let q;
   if (userId) {
     q = query(
       collection(db, COLLECTION_NAME),
-      or(where('senderId', '==', userId), where('receiverId', 'in', [userId, 'all']))
+      or(where('senderId', '==', userId), where('receiverId', 'in', [userId, 'all'])),
+      limit(200)
     );
   } else {
-    q = query(collection(db, COLLECTION_NAME));
+    q = query(collection(db, COLLECTION_NAME), limit(200));
   }
 
   return onSnapshot(q, (snapshot) => {

@@ -1,0 +1,412 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Dev/smartMadrasa[39m
+
+[90mstdout[2m | src/services/courseGrades.bench.test.ts[2m > [22m[2mCourse Grades Subscription Benchmark[2m > [22m[2msubscribeToCourseGradesByPeriodIds fetches filtered grades (Optimized)
+[22m[39mOptimized: Fetched 999 grades (Current Year)
+Improvement: 3.00x reduction in document reads
+
+ [31m❯[39m src/services/courseGrades.bench.test.ts [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 15[2mms[22m[39m
+[31m     [31m×[31m subscribeToCourseGrades fetches ALL grades (Baseline)[39m[32m 5[2mms[22m[39m
+     [32m✓[39m subscribeToCourseGradesByPeriodIds fetches filtered grades (Optimized)[32m 9[2mms[22m[39m
+ [31m❯[39m src/services/__tests__/deleteUserData.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+[31m     [31m×[31m should successfully delete all data for a student[39m[32m 5[2mms[22m[39m
+[31m     [31m×[31m should successfully delete all data for a teacher[39m[32m 1[2mms[22m[39m
+     [32m✓[39m should return errors if operations fail[32m 0[2mms[22m[39m
+ [31m❯[39m src/services/messages.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 4[2mms[22m[39m
+[31m     [31m×[31m should use optimized query when userId is provided[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m should fallback to default query when userId is NOT provided[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m should sort messages client-side correctly[39m[32m 0[2mms[22m[39m
+ [31m❯[39m src/services/__tests__/users.test.ts [2m([22m[2m9 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 13[2mms[22m[39m
+[31m       [31m×[31m should get all users[39m[32m 6[2mms[22m[39m
+       [32m✓[39m should return true if no users exist[32m 1[2mms[22m[39m
+       [32m✓[39m should return a user if exists[32m 1[2mms[22m[39m
+       [32m✓[39m should query by email and return first doc[32m 1[2mms[22m[39m
+       [32m✓[39m should create auth account and set doc if email is provided[32m 1[2mms[22m[39m
+       [32m✓[39m should fallback to addDoc if no email is provided[32m 0[2mms[22m[39m
+       [32m✓[39m should update a user[32m 0[2mms[22m[39m
+       [32m✓[39m should delegate to deleteAllUserData[32m 0[2mms[22m[39m
+[31m       [31m×[31m should listen to users collection[39m[32m 1[2mms[22m[39m
+ [31m❯[39m src/services/users_perf.test.ts [2m([22m[2m2 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 4[2mms[22m[39m
+[31m     [31m×[31m subscribes to all users by default (Baseline)[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m optimizes subscription with filters[39m[32m 0[2mms[22m[39m
+ [31m❯[39m src/services/__tests__/homework.test.ts [2m([22m[2m8 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 8[2mms[22m[39m
+[31m       [31m×[31m should get all homeworks when no classId is provided[39m[32m 3[2mms[22m[39m
+[31m       [31m×[31m should get homeworks by classId[39m[32m 1[2mms[22m[39m
+       [32m✓[39m should add a new homework document[32m 1[2mms[22m[39m
+       [32m✓[39m should update an existing homework[32m 2[2mms[22m[39m
+       [32m✓[39m should delete a homework[32m 0[2mms[22m[39m
+       [32m✓[39m should get submissions for a homework[32m 1[2mms[22m[39m
+       [32m✓[39m should create a submission[32m 0[2mms[22m[39m
+       [32m✓[39m should update grade and feedback[32m 0[2mms[22m[39m
+ [32m✓[39m src/utils/fileValidation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/useDashboard.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/ErrorBoundary.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 93[2mms[22m[39m
+ [31m❯[39m src/context/DataContext.perf.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m src/components/Schedule/HomeworkDetailModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 155[2mms[22m[39m
+ [32m✓[39m src/components/Homework/SubmissionsModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 171[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/useTeacherGrades.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/useBulletinGrades.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/components/UI/LoadingStates.test.tsx [2m([22m[2m18 tests[22m[2m)[22m[32m 198[2mms[22m[39m
+ [31m❯[39m src/pages/auth/Login.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [32m✓[39m src/components/UI/FileUpload.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 228[2mms[22m[39m
+ [32m✓[39m src/components/UI/Input.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+ [32m✓[39m src/components/UI/Card.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/components/UI/Button.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[32m 133[2mms[22m[39m
+ [32m✓[39m src/components/UI/Modal.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 149[2mms[22m[39m
+ [32m✓[39m src/components/Homework/HomeworkCard.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 188[2mms[22m[39m
+ [32m✓[39m src/components/Homework/SubmitHomeworkModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 258[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/useHomework.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m src/services/__tests__/teacherComments.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/hooks/__tests__/useGradeStats.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/services/__tests__/attendance.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/utils/userImport.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/services/__tests__/announcements.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/services/__tests__/courses.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/services/__tests__/gradeCategories.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/utils/__tests__/academic.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/services/events.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/utils/pdfGenerator.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/services/users_optimization.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/utils/fileValidation_security.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/utils/lang.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/services/classes.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/services/__tests__/firebaseHelper.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/utils/security.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/utils/dateUtils.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/storage.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/App.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 1[2mms[22m[39m
+ [32m✓[39m src/utils/date.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/users.security.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/context/DataContext.perf.test.tsx[2m [ src/context/DataContext.perf.test.tsx ][22m
+[31m[1mError[22m: [vitest] No "app" export is defined on the "../config/firebase" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("../config/firebase"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m src/config/db.ts:[2m8:29[22m[39m
+    [90m  6| [39m[35mlet[39m storage[33m:[39m [33mFirebaseStorage[39m [33m|[39m undefined[33m;[39m
+    [90m  7| [39m
+    [90m  8| [39m[35mif[39m (isFirebaseConfigured [33m&&[39m app) {
+    [90m   | [39m                            [31m^[39m
+    [90m  9| [39m  [35mtry[39m {
+    [90m 10| [39m    db [33m=[39m [34mgetFirestore[39m(app)[33m;[39m
+[90m [2m❯[22m src/context/AuthContext.tsx:[2m5:1[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/auth/Login.test.tsx[2m [ src/pages/auth/Login.test.tsx ][22m
+[31m[1mError[22m: [vitest] No "app" export is defined on the "../../config/firebase" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("../../config/firebase"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m src/config/db.ts:[2m8:29[22m[39m
+    [90m  6| [39m[35mlet[39m storage[33m:[39m [33mFirebaseStorage[39m [33m|[39m undefined[33m;[39m
+    [90m  7| [39m
+    [90m  8| [39m[35mif[39m (isFirebaseConfigured [33m&&[39m app) {
+    [90m   | [39m                            [31m^[39m
+    [90m  9| [39m  [35mtry[39m {
+    [90m 10| [39m    db [33m=[39m [34mgetFirestore[39m(app)[33m;[39m
+[90m [2m❯[22m src/services/storage.ts:[2m11:1[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 12 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/services/courseGrades.bench.test.ts[2m > [22mCourse Grades Subscription Benchmark[2m > [22msubscribeToCourseGrades fetches ALL grades (Baseline)
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.subscribeToCourseGrades src/services/courseGrades.ts:[2m145:57[22m[39m
+    [90m143| [39m  callback[33m:[39m (grades[33m:[39m [33mCourseGrade[39m[]) [33m=>[39m [35mvoid[39m
+    [90m144| [39m)[33m:[39m (() [33m=>[39m [35mvoid[39m) [33m=>[39m {
+    [90m145| [39m  [35mconst[39m q [33m=[39m [34mquery[39m([34mcollection[39m([34mgetDb[39m()[33m,[39m [33mCOLLECTION_NAME[39m)[33m,[39m [34mlimit[39m([34m1000[39m))[33m;[39m
+    [90m   | [39m                                                        [31m^[39m
+    [90m146| [39m  [35mreturn[39m [34monSnapshot[39m(q[33m,[39m (snapshot) [33m=>[39m {
+    [90m147| [39m    [34mcallback[39m(mapQuerySnapshot[33m<[39m[33mCourseGrade[39m[33m>[39m(snapshot))[33m;[39m
+[90m [2m❯[22m src/services/courseGrades.bench.test.ts:[2m98:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/messages.test.ts[2m > [22msubscribeToMessages Performance & Logic[2m > [22mshould use optimized query when userId is provided
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.subscribeToMessages src/services/messages.ts:[2m95:7[22m[39m
+    [90m 93| [39m      [34mcollection[39m(db[33m,[39m [33mCOLLECTION_NAME[39m)[33m,[39m
+    [90m 94| [39m      or(where('senderId', '==', userId), where('receiverId', 'in', [u…
+    [90m 95| [39m      [34mlimit[39m([34m200[39m)
+    [90m   | [39m      [31m^[39m
+    [90m 96| [39m    )[33m;[39m
+    [90m 97| [39m  } [35melse[39m {
+[90m [2m❯[22m src/services/messages.test.ts:[2m46:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/messages.test.ts[2m > [22msubscribeToMessages Performance & Logic[2m > [22mshould fallback to default query when userId is NOT provided
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.subscribeToMessages src/services/messages.ts:[2m98:48[22m[39m
+    [90m 96| [39m    )[33m;[39m
+    [90m 97| [39m  } [35melse[39m {
+    [90m 98| [39m    q [33m=[39m [34mquery[39m([34mcollection[39m(db[33m,[39m [33mCOLLECTION_NAME[39m)[33m,[39m [34mlimit[39m([34m200[39m))[33m;[39m
+    [90m   | [39m                                               [31m^[39m
+    [90m 99| [39m  }
+    [90m100| [39m
+[90m [2m❯[22m src/services/messages.test.ts:[2m63:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/messages.test.ts[2m > [22msubscribeToMessages Performance & Logic[2m > [22mshould sort messages client-side correctly
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.subscribeToMessages src/services/messages.ts:[2m95:7[22m[39m
+    [90m 93| [39m      [34mcollection[39m(db[33m,[39m [33mCOLLECTION_NAME[39m)[33m,[39m
+    [90m 94| [39m      or(where('senderId', '==', userId), where('receiverId', 'in', [u…
+    [90m 95| [39m      [34mlimit[39m([34m200[39m)
+    [90m   | [39m      [31m^[39m
+    [90m 96| [39m    )[33m;[39m
+    [90m 97| [39m  } [35melse[39m {
+[90m [2m❯[22m src/services/messages.test.ts:[2m90:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/users_perf.test.ts[2m > [22msubscribeToUsers Performance[2m > [22msubscribes to all users by default (Baseline)
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.subscribeToUsers src/services/users.ts:[2m239:72[22m[39m
+    [90m237| [39m  [90m// If no queries provided, fallback to default (fetch up to 500)[39m
+    [90m238| [39m  [35mif[39m ([33m![39mqueries [33m||[39m queries[33m.[39mlength [33m===[39m [34m0[39m) {
+    [90m239| [39m    const defaultQuery = query(collection(firestore, COLLECTION_NAME),…
+    [90m   | [39m                                                                       [31m^[39m
+    [90m240| [39m    [35mreturn[39m [34monSnapshot[39m(defaultQuery[33m,[39m (snapshot) [33m=>[39m {
+    [90m241| [39m      [34mcallback[39m(mapQuerySnapshot[33m<[39m[33mUser[39m[33m>[39m(snapshot))[33m;[39m
+[90m [2m❯[22m src/services/users_perf.test.ts:[2m29:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/users_perf.test.ts[2m > [22msubscribeToUsers Performance[2m > [22moptimizes subscription with filters
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m src/services/users.ts:[2m250:59[22m[39m
+    [90m248| [39m
+    [90m249| [39m  queries[33m.[39m[34mforEach[39m((filter[33m,[39m index) [33m=>[39m {
+    [90m250| [39m    [35mlet[39m q [33m=[39m [34mquery[39m([34mcollection[39m(firestore[33m,[39m [33mCOLLECTION_NAME[39m)[33m,[39m [34mlimit[39m([34m500[39m))[33m;[39m
+    [90m   | [39m                                                          [31m^[39m
+    [90m251| [39m
+    [90m252| [39m    [35mif[39m (filter[33m.[39mrole) {
+[90m [2m❯[22m Module.subscribeToUsers src/services/users.ts:[2m249:11[22m[39m
+[90m [2m❯[22m src/services/users_perf.test.ts:[2m43:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/__tests__/deleteUserData.test.ts[2m > [22mdeleteUserData[2m > [22mshould successfully delete all data for a student
+[31m[1mAssertionError[22m: expected +0 to be 1 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m src/services/__tests__/deleteUserData.test.ts:[2m65:44[22m[39m
+    [90m 63| [39m
+    [90m 64| [39m        [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m 65| [39m        expect(result.deletedCounts.users).toBe(1); // from deleteDocu…
+    [90m   | [39m                                           [31m^[39m
+    [90m 66| [39m
+    [90m 67| [39m        [90m// Check if relevant collections were queried[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/__tests__/deleteUserData.test.ts[2m > [22mdeleteUserData[2m > [22mshould successfully delete all data for a teacher
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/services/__tests__/deleteUserData.test.ts:[2m81:32[22m[39m
+    [90m 79| [39m        const result = await deleteAllUserData('teacher123', 'teacher'…
+    [90m 80| [39m
+    [90m 81| [39m        [34mexpect[39m(result[33m.[39msuccess)[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+    [90m   | [39m                               [31m^[39m
+    [90m 82| [39m
+    [90m 83| [39m        [90m// Check teacher specific collections[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/__tests__/homework.test.ts[2m > [22mhomework service[2m > [22mgetHomeworks[2m > [22mshould get all homeworks when no classId is provided
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.getHomeworks src/services/homework.ts:[2m40:75[22m[39m
+    [90m 38| [39m    )[33m;[39m
+    [90m 39| [39m  } [35melse[39m {
+    [90m 40| [39m    q = query(collection(db, COLLECTION_NAME), orderBy('dueDate', 'asc…
+    [90m   | [39m                                                                          [31m^[39m
+    [90m 41| [39m  }
+    [90m 42| [39m
+[90m [2m❯[22m src/services/__tests__/homework.test.ts:[2m69:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/__tests__/homework.test.ts[2m > [22mhomework service[2m > [22mgetHomeworks[2m > [22mshould get homeworks by classId
+[31m[1mError[22m: [vitest] No "limit" export is defined on the "firebase/firestore" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+[39m
+vi.mock(import("firebase/firestore"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+[36m [2m❯[22m Module.getHomeworks src/services/homework.ts:[2m37:7[22m[39m
+    [90m 35| [39m      [34mwhere[39m([32m'classId'[39m[33m,[39m [32m'=='[39m[33m,[39m classId)[33m,[39m
+    [90m 36| [39m      [34morderBy[39m([32m'dueDate'[39m[33m,[39m [32m'asc'[39m)[33m,[39m
+    [90m 37| [39m      [34mlimit[39m([34m100[39m)
+    [90m   | [39m      [31m^[39m
+    [90m 38| [39m    )[33m;[39m
+    [90m 39| [39m  } [35melse[39m {
+[90m [2m❯[22m src/services/__tests__/homework.test.ts:[2m80:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/__tests__/users.test.ts[2m > [22musers service[2m > [22mgetUsers[2m > [22mshould get all users
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ 'collectionRef' ][90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[32m-   "collectionRef",[90m
+[31m+   undefined,[90m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/services/__tests__/users.test.ts:[2m97:29[22m[39m
+    [90m 95| [39m
+    [90m 96| [39m            [34mexpect[39m(collection)[33m.[39m[34mtoHaveBeenCalledWith[39m(db[33m,[39m [32m'users'[39m)[33m;[39m
+    [90m 97| [39m            [34mexpect[39m(getDocs)[33m.[39m[34mtoHaveBeenCalledWith[39m([32m'collectionRef'[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m 98| [39m            [34mexpect[39m(result)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m 99| [39m        })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/14]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/services/__tests__/users.test.ts[2m > [22musers service[2m > [22msubscribeToUsers[2m > [22mshould listen to users collection
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ 'colRef', Any<Function> ][90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[32m-   "colRef",[90m
+[32m-   Any<Function>,[90m
+[31m+   "queryRef",[90m
+[31m+   [Function anonymous],[90m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m src/services/__tests__/users.test.ts:[2m222:32[22m[39m
+    [90m220| [39m
+    [90m221| [39m            [34mexpect[39m(collection)[33m.[39m[34mtoHaveBeenCalledWith[39m(db[33m,[39m [32m'users'[39m)[33m;[39m
+    [90m222| [39m            expect(onSnapshot).toHaveBeenCalledWith('colRef', expect.a…
+    [90m   | [39m                               [31m^[39m
+    [90m223| [39m        })[33m;[39m
+    [90m224| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/14]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m37 passed[39m[22m[90m (45)[39m
+[2m      Tests [22m [1m[31m12 failed[39m[22m[2m | [22m[1m[32m204 passed[39m[22m[90m (216)[39m
+[2m   Start at [22m 15:31:12
+[2m   Duration [22m 2.93s[2m (transform 3.68s, setup 3.52s, import 8.54s, tests 1.87s, environment 37.00s)[22m
+

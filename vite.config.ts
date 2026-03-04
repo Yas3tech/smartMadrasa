@@ -35,7 +35,6 @@ export default defineConfig({
           'vendor-icons': ['lucide-react'],
           'vendor-i18n': ['i18next', 'react-i18next'],
           'vendor-pdf': ['jspdf', 'jspdf-autotable'],
-          'vendor-sanitize': ['dompurify', 'html2canvas'],
         },
       },
     },

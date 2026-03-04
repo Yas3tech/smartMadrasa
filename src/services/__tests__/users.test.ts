@@ -88,13 +88,15 @@ describe('users service', () => {
     describe('getUsers', () => {
         it('should get all users', async () => {
             (collection as any).mockReturnValue('collectionRef');
+            (query as any).mockReturnValue('queryRef');
             const mockDocs = [{ id: '1', data: () => ({ name: 'John' }) }];
             (getDocs as any).mockResolvedValue({ docs: mockDocs });
 
             const result = await getUsers();
 
             expect(collection).toHaveBeenCalledWith(db, 'users');
-            expect(getDocs).toHaveBeenCalledWith('collectionRef');
+            expect(limit).toHaveBeenCalledWith(500);
+            expect(getDocs).toHaveBeenCalledWith('queryRef');
             expect(result).toHaveLength(1);
         });
     });
@@ -214,12 +216,14 @@ describe('users service', () => {
     describe('subscribeToUsers', () => {
         it('should listen to users collection', () => {
             (collection as any).mockReturnValue('colRef');
+            (query as any).mockReturnValue('queryRef');
             const callback = vi.fn();
 
             subscribeToUsers(callback);
 
             expect(collection).toHaveBeenCalledWith(db, 'users');
-            expect(onSnapshot).toHaveBeenCalledWith('colRef', expect.any(Function));
+            expect(limit).toHaveBeenCalledWith(500);
+            expect(onSnapshot).toHaveBeenCalledWith('queryRef', expect.any(Function));
         });
     });
 });

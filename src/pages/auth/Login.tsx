@@ -111,9 +111,38 @@ const Login = () => {
     setError('');
 
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account',
+    });
 
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+
+      // Verification: Does the user exist in our system?
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { db } = await import('../../config/db');
+
+      if (db) {
+        const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+        let isAuthorized = userDoc.exists();
+
+        if (!isAuthorized && result.user.email) {
+          const { getUserByEmail } = await import('../../services/users');
+          const userByEmail = await getUserByEmail(result.user.email);
+          if (userByEmail) {
+            isAuthorized = true;
+          }
+        }
+
+        if (!isAuthorized) {
+          await auth.signOut();
+          setError(
+            t('auth.errors.unauthorizedGoogleAccount', "Ce compte Google n'est pas autorisé. Veuillez contacter l'administration.")
+          );
+          setLoading(false);
+          return;
+        }
+      }
     } catch {
       setError(t('auth.errors.googleLoginFailed', 'Échec de la connexion avec Google.'));
       setLoading(false);

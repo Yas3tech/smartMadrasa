@@ -118,7 +118,8 @@ service cloud.firestore {
         isSuperAdmin()
       );
       // Improved Write Rule: Validate Score Range and Class Access
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
+      // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
+      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
     }
 
     // CourseGrades (New Collection):
@@ -132,7 +133,8 @@ service cloud.firestore {
         isSuperAdmin()
       );
       // Improved Write Rule: Validate Score Range and Class Access
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
+      // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
+      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
     }
 
     // Attendance:

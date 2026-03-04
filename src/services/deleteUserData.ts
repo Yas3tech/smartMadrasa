@@ -1,5 +1,5 @@
 import { db, storage } from '../config/db';
-import { collection, query, where, getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, writeBatch } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { deleteUser, type User } from 'firebase/auth';
 
@@ -28,46 +28,61 @@ interface DeleteUserDataResult {
 }
 
 /**
- * Supprime tous les documents d'une collection où un champ correspond à une valeur
+ * Recueille les références des documents où un champ correspond à une valeur
  */
-async function deleteDocumentsWhere(
+async function getDocumentRefsWhere(
   collectionName: string,
   field: string,
   value: string
-): Promise<number> {
-  if (!db) return 0;
+): Promise<any[]> {
+  if (!db) return [];
   const q = query(collection(db, collectionName), where(field, '==', value));
   const snapshot = await getDocs(q);
-
-  if (snapshot.empty) return 0;
-
-  const batch = writeBatch(db);
-  let count = 0;
-
-  snapshot.docs.forEach((docSnapshot) => {
-    batch.delete(docSnapshot.ref);
-    count++;
-  });
-
-  await batch.commit();
-  return count;
+  return snapshot.docs.map((d) => d.ref);
 }
 
 /**
- * Supprime un document par son ID
+ * Exécute une série d'opérations en lots (batches) de 500 maximum (limite Firestore)
  */
-async function deleteDocumentById(collectionName: string, docId: string): Promise<boolean> {
-  if (!db) return false;
-  try {
-    await deleteDoc(doc(db, collectionName, docId));
-    return true;
-  } catch {
-    return false;
+async function executeBatchOperations(
+  deletes: any[],
+  updates: { ref: any; data: any }[] = []
+): Promise<void> {
+  if (!db) return;
+  const CHUNK_SIZE = 500;
+
+  // Combine all operations
+  const operations = [
+    ...deletes.map(ref => ({ type: 'delete' as const, ref })),
+    ...updates.map(u => ({ type: 'update' as const, ref: u.ref, data: u.data }))
+  ];
+
+  for (let i = 0; i < operations.length; i += CHUNK_SIZE) {
+    const chunk = operations.slice(i, i + CHUNK_SIZE);
+    const batch = writeBatch(db);
+
+    chunk.forEach(op => {
+      if (op.type === 'delete') {
+        batch.delete(op.ref);
+      } else {
+        batch.update(op.ref, op.data);
+      }
+    });
+
+    await batch.commit();
   }
 }
 
 /**
- * Supprime tous les fichiers d'un dossier Storage
+ * Supprime un document par son ID (renvoie l'objet ref au lieu de supprimer)
+ */
+function getDocumentRefById(collectionName: string, docId: string): any | null {
+  if (!db) return null;
+  return doc(db, collectionName, docId);
+}
+
+/**
+ * Supprime tous les fichiers d'un dossier Storage (Inchangé car Storage est séparé de Firestore)
  */
 async function deleteStorageFolder(folderPath: string): Promise<number> {
   if (!storage) return 0;
@@ -122,79 +137,90 @@ export async function deleteAllUserData(
   };
 
   try {
-    // 1. Supprimer le document utilisateur principal
-    if (await deleteDocumentById('users', userId)) {
+    const refsToDelete: any[] = [];
+    const refsToUpdate: { ref: any; data: any }[] = [];
+
+    // Phase 1: Collect all references (Reads) to ensure atomic-like failure model
+    // --------------------------------------------------------------------------
+
+    // 1. Utilisateur principal
+    const userRef = getDocumentRefById('users', userId);
+    if (userRef) {
+      refsToDelete.push(userRef);
       result.deletedCounts.users = 1;
     }
 
-    // 2. Supprimer les données spécifiques au rôle
+    // 2. Données spécifiques au rôle
     switch (userRole) {
-      case 'student':
-        // Supprimer le profil étudiant
-        if (await deleteDocumentById('students', userId)) {
-          result.deletedCounts.students = 1;
-        }
-        // Supprimer les notes de l'étudiant
-        result.deletedCounts.grades = await deleteDocumentsWhere('grades', 'studentId', userId);
-        // Supprimer les présences
-        result.deletedCounts.attendance = await deleteDocumentsWhere(
-          'attendance',
-          'studentId',
-          userId
-        );
-        // Supprimer les soumissions de devoirs
-        result.deletedCounts.homeworkSubmissions = await deleteDocumentsWhere(
-          'homeworkSubmissions',
-          'studentId',
-          userId
-        );
-        // Supprimer les commentaires enseignants sur cet étudiant
-        result.deletedCounts.teacherComments = await deleteDocumentsWhere(
-          'teacherComments',
-          'studentId',
-          userId
-        );
-        break;
+      case 'student': {
+        const studentRef = getDocumentRefById('students', userId);
+        if (studentRef) { refsToDelete.push(studentRef); result.deletedCounts.students = 1; }
 
-      case 'parent':
-        // Supprimer le profil parent
-        if (await deleteDocumentById('parents', userId)) {
-          result.deletedCounts.parents = 1;
-        }
-        break;
+        const grades = await getDocumentRefsWhere('grades', 'studentId', userId);
+        refsToDelete.push(...grades); result.deletedCounts.grades = grades.length;
 
-      case 'teacher':
-        // Supprimer le profil enseignant
-        if (await deleteDocumentById('teachers', userId)) {
-          result.deletedCounts.teachers = 1;
-        }
-        // Supprimer les devoirs créés par l'enseignant (optionnel - peut-être garder)
-        result.deletedCounts.homework = await deleteDocumentsWhere('homework', 'teacherId', userId);
-        // Supprimer les commentaires de l'enseignant
-        result.deletedCounts.teacherComments += await deleteDocumentsWhere(
-          'teacherComments',
-          'teacherId',
-          userId
-        );
-        break;
+        const attendance = await getDocumentRefsWhere('attendance', 'studentId', userId);
+        refsToDelete.push(...attendance); result.deletedCounts.attendance = attendance.length;
 
+        const submissions = await getDocumentRefsWhere('homeworkSubmissions', 'studentId', userId);
+        refsToDelete.push(...submissions); result.deletedCounts.homeworkSubmissions = submissions.length;
+
+        const comments = await getDocumentRefsWhere('teacherComments', 'studentId', userId);
+        refsToDelete.push(...comments); result.deletedCounts.teacherComments = comments.length;
+        break;
+      }
+      case 'parent': {
+        const parentRef = getDocumentRefById('parents', userId);
+        if (parentRef) { refsToDelete.push(parentRef); result.deletedCounts.parents = 1; }
+        break;
+      }
+      case 'teacher': {
+        const teacherRef = getDocumentRefById('teachers', userId);
+        if (teacherRef) { refsToDelete.push(teacherRef); result.deletedCounts.teachers = 1; }
+
+        const homeworks = await getDocumentRefsWhere('homework', 'teacherId', userId);
+        refsToDelete.push(...homeworks); result.deletedCounts.homework = homeworks.length;
+
+        const comments = await getDocumentRefsWhere('teacherComments', 'teacherId', userId);
+        refsToDelete.push(...comments); result.deletedCounts.teacherComments = comments.length;
+
+        // WARN-05: Handle orphaned courseGrades
+        const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
+        refsToDelete.push(...courseGrades); result.deletedCounts.grades += courseGrades.length;
+
+        // WARN-05: Handle orphaned courses
+        const courses = await getDocumentRefsWhere('courses', 'teacherId', userId);
+        refsToDelete.push(...courses);
+
+        // WARN-05: Handle orphaned classes (reset teacherId instead of deleting class)
+        const classes = await getDocumentRefsWhere('classes', 'teacherId', userId);
+        classes.forEach(classRef => {
+          refsToUpdate.push({ ref: classRef, data: { teacherId: '', teacherName: '' } });
+        });
+        break;
+      }
       case 'director':
       case 'superadmin':
-        // Pour les admins, ne supprimer que le profil
         break;
     }
 
-    // 3. Supprimer les messages (envoyés et reçus)
-    const sentMessages = await deleteDocumentsWhere('messages', 'senderId', userId);
-    const receivedMessages = await deleteDocumentsWhere('messages', 'recipientId', userId);
-    result.deletedCounts.messages = sentMessages + receivedMessages;
+    // 3. Messages (envoyés et reçus)
+    const sentMessages = await getDocumentRefsWhere('messages', 'senderId', userId);
+    const receivedMessages = await getDocumentRefsWhere('messages', 'recipientId', userId);
+    refsToDelete.push(...sentMessages, ...receivedMessages);
+    result.deletedCounts.messages = sentMessages.length + receivedMessages.length;
 
-    // 4. Supprimer les notifications
-    result.deletedCounts.notifications = await deleteDocumentsWhere(
-      'notifications',
-      'userId',
-      userId
-    );
+    // 4. Notifications
+    const notifications = await getDocumentRefsWhere('notifications', 'userId', userId);
+    refsToDelete.push(...notifications);
+    result.deletedCounts.notifications = notifications.length;
+
+    // Phase 2: Execute all Firestore writes in batches (limit 500 per batch)
+    // ----------------------------------------------------------------------
+    await executeBatchOperations(refsToDelete, refsToUpdate);
+
+    // Phase 3: External systems (Storage & Auth) which cannot be batched with Firestore
+    // ---------------------------------------------------------------------------------
 
     // 5. Supprimer les fichiers Storage
     result.deletedCounts.storageFiles = await deleteStorageFolder(`users/${userId}`);

@@ -1,14 +1,12 @@
-import { initializeApp } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
-import { firebaseConfig, isFirebaseConfigured } from './firebase';
+import { isFirebaseConfigured, app } from './firebase';
 
 let db: Firestore | undefined;
 let storage: FirebaseStorage | undefined;
 
-if (isFirebaseConfigured) {
+if (isFirebaseConfigured && app) {
   try {
-    const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     storage = getStorage(app);
   } catch {
