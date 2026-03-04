@@ -18,6 +18,7 @@ export function useThrottle<T extends (...args: unknown[]) => unknown>(
 ): (...args: Parameters<T>) => ReturnType<T> | undefined {
     const lastCallRef = useRef<number>(0);
     const callbackRef = useRef(callback);
+    const callbackRef = useRef(callback);
 
     useEffect(() => {
         callbackRef.current = callback;
