@@ -186,7 +186,9 @@ export async function deleteAllUserData(
 
         // WARN-05: Handle orphaned courseGrades
         const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
-        refsToDelete.push(...courseGrades); result.deletedCounts.grades += courseGrades.length;
+        const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
+        courseGrades.forEach(ref => refsToUpdate.push({ ref, data: { teacherId: '', teacherName: 'Deleted Teacher' } }));
+        result.deletedCounts.grades += courseGrades.length;
 
         // WARN-05: Handle orphaned courses
         const courses = await getDocumentRefsWhere('courses', 'teacherId', userId);
