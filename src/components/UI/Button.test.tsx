@@ -63,7 +63,7 @@ describe('Button', () => {
   });
 
   it('does not show icon when isLoading is true', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     render(
       <Button isLoading icon={MockIcon as any}>
         Loading

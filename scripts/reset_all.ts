@@ -69,7 +69,7 @@ async function deleteCollection(collectionPath: string): Promise<number> {
     let deleted = 0;
 
     const collectionRef = db.collection(collectionPath);
-    let query = collectionRef.limit(batchSize);
+    const query = collectionRef.limit(batchSize);
 
     while (true) {
         const snapshot = await query.get();
