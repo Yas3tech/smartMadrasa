@@ -9,6 +9,7 @@ import {
   where,
   orderBy,
   writeBatch,
+  limit,
 } from 'firebase/firestore';
 import { getDb, mapQuerySnapshot } from './firebaseHelper';
 import type { CourseGrade } from '../types/bulletin';
@@ -25,7 +26,8 @@ export const subscribeToCourseGradesByStudent = (
   const q = query(
     collection(getDb(), COLLECTION_NAME),
     where('studentId', '==', studentId),
-    orderBy('date', 'desc')
+    orderBy('date', 'desc'),
+    limit(200)
   );
 
   return onSnapshot(q, (snapshot) => {
@@ -45,7 +47,8 @@ export const subscribeToCourseGradesByCourseAndPeriod = (
     collection(getDb(), COLLECTION_NAME),
     where('courseId', '==', courseId),
     where('periodId', '==', periodId),
-    orderBy('date', 'desc')
+    orderBy('date', 'desc'),
+    limit(200)
   );
 
   return onSnapshot(q, (snapshot) => {
@@ -63,7 +66,8 @@ export const subscribeToCourseGradesByPeriod = (
   const q = query(
     collection(getDb(), COLLECTION_NAME),
     where('periodId', '==', periodId),
-    orderBy('date', 'desc')
+    orderBy('date', 'desc'),
+    limit(500)
   );
 
   return onSnapshot(q, (snapshot) => {
@@ -138,7 +142,8 @@ export const calculateCourseAverage = (grades: CourseGrade[]): number => {
 export const subscribeToCourseGrades = (
   callback: (grades: CourseGrade[]) => void
 ): (() => void) => {
-  return onSnapshot(collection(getDb(), COLLECTION_NAME), (snapshot) => {
+  const q = query(collection(getDb(), COLLECTION_NAME), limit(1000));
+  return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<CourseGrade>(snapshot));
   });
 };

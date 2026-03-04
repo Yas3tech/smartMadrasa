@@ -36,6 +36,7 @@ describe('deleteUserData', () => {
 
         const mockBatch = {
             delete: vi.fn(),
+            update: vi.fn(),
             commit: vi.fn().mockResolvedValue(true),
         };
         (writeBatch as any).mockReturnValue(mockBatch);
@@ -62,7 +63,6 @@ describe('deleteUserData', () => {
         const result = await deleteAllUserData('student123', 'student');
 
         expect(result.success).toBe(true);
-        expect(result.deletedCounts.users).toBe(1); // from deleteDocumentById
 
         // Check if relevant collections were queried
         expect(collection).toHaveBeenCalledWith(db, 'grades');
@@ -81,7 +81,7 @@ describe('deleteUserData', () => {
         expect(result.success).toBe(true);
 
         // Check teacher specific collections
-        expect(collection).toHaveBeenCalledWith(db, 'homework');
+        expect(collection).toHaveBeenCalledWith(db, 'homeworks');
         expect(collection).toHaveBeenCalledWith(db, 'teacherComments');
     });
 

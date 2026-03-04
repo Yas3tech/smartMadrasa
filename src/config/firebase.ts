@@ -26,4 +26,4 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { auth, isFirebaseConfigured, firebaseConfig };
+export { app, auth, isFirebaseConfigured, firebaseConfig };

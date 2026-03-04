@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -9,6 +9,7 @@ import { UserPlus, Settings, CheckCircle, ShieldCheck, ArrowRight } from 'lucide
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { seedSystemBasics } from '../../services/initFirebase';
+import { checkIfDatabaseEmpty } from '../../services/setup';
 
 const FirstRunSetup: React.FC = () => {
   const { t } = useTranslation();
@@ -16,12 +17,33 @@ const FirstRunSetup: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [seedData, setSeedData] = useState(true);
+  const [isChecking, setIsChecking] = useState(true);
 
   // Admin account state
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // 🛡️ SECURITY: Prevent setup on already-configured instances
+  useEffect(() => {
+    const verifyEmpty = async () => {
+      try {
+        const isEmpty = await checkIfDatabaseEmpty();
+        if (!isEmpty) {
+          // Database already has users — redirect to login
+          navigate('/login', { replace: true });
+          return;
+        }
+      } catch {
+        // If check fails, block setup for safety
+        navigate('/login', { replace: true });
+        return;
+      }
+      setIsChecking(false);
+    };
+    verifyEmpty();
+  }, [navigate]);
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +73,13 @@ const FirstRunSetup: React.FC = () => {
         createdAt: new Date().toISOString(),
       });
 
+      // 3. Lock the setup completely
+      await setDoc(doc(db, '_setup', 'config'), {
+        setupCompletedAt: new Date().toISOString(),
+        completedBy: user.uid,
+        status: 'locked'
+      });
+
       // 4. Optionally seed basic system data
       if (seedData) {
         toast.loading(t('setup.seedingData', 'Initialisation des paramètres école...'), {
@@ -70,6 +99,14 @@ const FirstRunSetup: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -92,9 +129,7 @@ const FirstRunSetup: React.FC = () => {
             {[1, 2, 3].map((s) => (
               <div
                 key={s}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
-                  step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'
-                }`}
+className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'}`}
               >
                 {step > s ? <CheckCircle size={20} /> : s}
               </div>

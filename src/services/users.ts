@@ -9,6 +9,9 @@ import {
   onSnapshot,
   query,
   where,
+  limit,
+  startAfter,
+  type QueryDocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { User } from '../types';
@@ -16,9 +19,13 @@ import { mapQuerySnapshot, mapDocumentSnapshot } from './firebaseHelper';
 
 const COLLECTION_NAME = 'users';
 
-export const getUsers = async (): Promise<User[]> => {
+export const getUsers = async (lastDocSnapshot?: QueryDocumentSnapshot): Promise<User[]> => {
   if (!db) return [];
-  const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+  let q = query(collection(db, COLLECTION_NAME), limit(500));
+  if (lastDocSnapshot) {
+    q = query(collection(db, COLLECTION_NAME), startAfter(lastDocSnapshot), limit(500));
+  }
+  const snapshot = await getDocs(q);
   return mapQuerySnapshot<User>(snapshot);
 };
 
@@ -214,7 +221,7 @@ export const previewUserDeletion = async (id: string, role: string) => {
  * Supprime uniquement le document utilisateur (ancienne méthode)
  * @deprecated Utiliser deleteUserWithAllData pour la conformité RGPD
  */
-export const deleteUser = async (id: string): Promise<void> => {
+export const deleteUserAccount = async (id: string): Promise<void> => {
   if (!db) throw new Error('Firebase not configured');
   await deleteDoc(doc(db, COLLECTION_NAME, id));
 };
@@ -227,14 +234,19 @@ export interface UserQueryFilters {
 
 export const subscribeToUsers = (
   callback: (users: User[]) => void,
-  queries: UserQueryFilters[] = []
+  queries: UserQueryFilters[] = [],
+  lastDocSnapshot?: QueryDocumentSnapshot
 ) => {
   const firestore = db;
   if (!firestore) return () => { };
 
-  // If no queries provided, fallback to default (fetch all)
+  // If no queries provided, fallback to default (fetch up to 500)
   if (!queries || queries.length === 0) {
-    return onSnapshot(collection(firestore, COLLECTION_NAME), (snapshot) => {
+    let defaultQuery = query(collection(firestore, COLLECTION_NAME), limit(500));
+    if (lastDocSnapshot) {
+      defaultQuery = query(collection(firestore, COLLECTION_NAME), startAfter(lastDocSnapshot), limit(500));
+    }
+    return onSnapshot(defaultQuery, (snapshot) => {
       callback(mapQuerySnapshot<User>(snapshot));
     });
   }
@@ -244,7 +256,7 @@ export const subscribeToUsers = (
   const results = new Map<number, User[]>(); // Map query index to results
 
   queries.forEach((filter, index) => {
-    let q = query(collection(firestore, COLLECTION_NAME));
+    let q = query(collection(firestore, COLLECTION_NAME), limit(500));
 
     if (filter.role) {
       const roles = Array.isArray(filter.role) ? filter.role : [filter.role];
@@ -267,6 +279,10 @@ export const subscribeToUsers = (
       if (relatedClassIds.length > 0) {
         q = query(q, where('relatedClassIds', 'array-contains-any', relatedClassIds));
       }
+    }
+
+    if (lastDocSnapshot) {
+      q = query(q, startAfter(lastDocSnapshot));
     }
 
     const unsub = onSnapshot(q, (snapshot) => {

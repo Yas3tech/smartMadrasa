@@ -9,6 +9,7 @@ import {
   where,
   orderBy,
   onSnapshot,
+  limit,
 } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 import { db } from '../config/db';
@@ -32,10 +33,11 @@ export const getHomeworks = async (classId?: string): Promise<Homework[]> => {
     q = query(
       collection(db, COLLECTION_NAME),
       where('classId', '==', classId),
-      orderBy('dueDate', 'asc')
+      orderBy('dueDate', 'asc'),
+      limit(100)
     );
   } else {
-    q = query(collection(db, COLLECTION_NAME), orderBy('dueDate', 'asc'));
+    q = query(collection(db, COLLECTION_NAME), orderBy('dueDate', 'asc'), limit(200));
   }
 
   const snapshot = await getDocs(q);
@@ -60,7 +62,7 @@ export const deleteHomework = async (id: string): Promise<void> => {
 };
 
 export const subscribeToHomeworks = (callback: (homeworks: Homework[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME), orderBy('dueDate', 'asc'));
   return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<Homework>(snapshot, transformHomework));
@@ -71,7 +73,7 @@ export const subscribeToHomeworksByClassIds = (
   classIds: string[],
   callback: (homeworks: Homework[]) => void
 ) => {
-  if (!db || classIds.length === 0) return () => {};
+  if (!db || classIds.length === 0) return () => { };
 
   // Note: We cannot use orderBy with 'in' query without a composite index.
   // We will sort client-side.
@@ -136,7 +138,7 @@ export const subscribeToSubmissions = (
   homeworkId: string,
   callback: (submissions: Submission[]) => void
 ) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   const q = query(collection(db, COLLECTION_NAME, homeworkId, SUBMISSIONS_COLLECTION));
   return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<Submission>(snapshot, transformSubmission));

@@ -11,6 +11,7 @@ vi.mock('firebase/firestore', () => ({
   or: vi.fn(),
   orderBy: vi.fn(),
   onSnapshot: vi.fn(),
+  limit: vi.fn(),
   doc: vi.fn(),
   getDocs: vi.fn(),
   addDoc: vi.fn(),
@@ -83,7 +84,7 @@ describe('subscribeToMessages Performance & Logic', () => {
 
         // Pass the mock snapshot
         snapshotCallback({ docs: mockDocs });
-        return () => {};
+        return () => { };
       }
     );
 

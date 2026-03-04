@@ -22,6 +22,11 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function isSetupOpen() {
+      // Allow setup if the specific setup document doesn't exist
+      return !exists(/databases/$(database)/documents/_setup/config);
+    }
+
     // Helper to ensure user only updates their own non-sensitive fields
     function isOwnerSafeUpdate(userId) {
       return isOwner(userId) &&
@@ -97,12 +102,21 @@ service cloud.firestore {
         (isStudent() && getUserData().classId == resource.data.classId)
       );
 
-      allow create, delete: if isDirector() || isSuperAdmin();
+      allow delete: if isDirector() || isSuperAdmin();
 
       // 🛡️ SECURITY: Prevent Privilege Escalation
+      // Allow superadmin creation ONLY if setup is open.
+      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin');
       // Only allow users to update their own profile fields.
       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
+    }
+
+    // Setup Document Status
+    // Unrestricted read, but can only be created once when setting up the system
+    match /_setup/{docId} {
+      allow read: if true;
+      allow create: if !exists(/databases/$(database)/documents/_setup/config);
     }
 
     // Grades (Legacy Collection Group):
@@ -118,7 +132,8 @@ service cloud.firestore {
         isSuperAdmin()
       );
       // Improved Write Rule: Validate Score Range and Class Access
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
+      // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
+      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
     }
 
     // CourseGrades (New Collection):
@@ -132,7 +147,8 @@ service cloud.firestore {
         isSuperAdmin()
       );
       // Improved Write Rule: Validate Score Range and Class Access
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && request.resource.data.classId in getUserData().classIds)) && isValidGrade();
+      // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
+      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
     }
 
     // Attendance:

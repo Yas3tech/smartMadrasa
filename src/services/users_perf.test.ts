@@ -9,6 +9,7 @@ vi.mock('firebase/firestore', () => {
     collection: vi.fn(() => 'mock-collection-ref'),
     query: vi.fn(() => 'mock-query-ref'),
     where: vi.fn(() => 'mock-where-constraint'),
+    limit: vi.fn(),
     onSnapshot: vi.fn(() => vi.fn()), // Returns unsubscribe function
     doc: vi.fn(),
   };
@@ -29,10 +30,10 @@ describe('subscribeToUsers Performance', () => {
     subscribeToUsers(callback);
 
     expect(firestore.collection).toHaveBeenCalledWith(expect.anything(), 'users');
-    // Should NOT call query or where
-    expect(firestore.query).not.toHaveBeenCalled();
+    expect(firestore.collection).toHaveBeenCalledWith(expect.anything(), 'users');
+    expect(firestore.query).toHaveBeenCalled();
     expect(firestore.where).not.toHaveBeenCalled();
-    expect(firestore.onSnapshot).toHaveBeenCalledWith('mock-collection-ref', expect.any(Function));
+    expect(firestore.onSnapshot).toHaveBeenCalledWith('mock-query-ref', expect.any(Function));
   });
 
   it('optimizes subscription with filters', () => {
