@@ -158,14 +158,15 @@ git clone <repo-url>
 cd smartschool
 
 # 2. Installer
-npm install
+corepack enable
+pnpm install --frozen-lockfile
 
 # 3. Configurer
-cp .env.example .env
-# Éditer .env avec vos credentials Firebase
+cp .env.development.example .env
+# Éditer .env avec vos credentials Firebase dev
 
 # 4. Lancer
-npm run dev
+pnpm dev
 ```
 
 ---
@@ -230,7 +231,12 @@ VITE_FIREBASE_PROJECT_ID=xxx
 VITE_FIREBASE_STORAGE_BUCKET=xxx.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=xxx
 VITE_FIREBASE_APP_ID=xxx
+VITE_ERROR_WEBHOOK_URL=https://your-monitoring-endpoint.example.com
 ```
+
+Fichiers conseilles:
+- `.env.development.example`
+- `.env.production.example`
 
 ### Configuration Firebase (firebase.ts)
 
@@ -484,11 +490,24 @@ Variantes Badge: `success`, `warning`, `error`, `info`, `neutral`
 ## 🧪 Commandes
 
 ```bash
-npm run dev      # Développement
-npm run build    # Production
-npm run preview  # Aperçu build
-npm run lint     # Vérification code
+pnpm dev                 # Développement
+pnpm build               # Production
+pnpm preview             # Aperçu build
+pnpm lint                # Vérification code
+pnpm test:run            # Tests unitaires
+pnpm verify-rules:all    # Vérification logique des règles
+pnpm predeploy:prod      # Gate complet pré-déploiement
 ```
+
+## 🚀 Déploiement
+
+1. Configurer `.firebaserc` avec les IDs projets réels (`dev`, `staging`, `prod`)
+2. Configurer les secrets GitHub Actions (workflow `Deploy Firebase`)
+3. Valider la checklist:
+   - `docs/security/deployment_checklist.md`
+   - `docs/security/threat_model.md`
+   - `docs/security/backup_recovery.md`
+   - `docs/security/iam_baseline.md`
 
 ---
 

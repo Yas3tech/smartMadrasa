@@ -92,9 +92,9 @@ const FirstRunSetup: React.FC = () => {
       }
 
       setStep(3); // Go to success step
-    } catch (error) {
-      const errMsg = error instanceof Error ? error.message : t('auth.errors.generic');
-      toast.error(errMsg);
+    } catch {
+      // Do not expose technical backend details during setup failures.
+      toast.error(t('auth.errors.generic'));
     } finally {
       setLoading(false);
     }

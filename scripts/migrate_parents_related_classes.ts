@@ -23,6 +23,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+interface MigrationUser {
+  id: string;
+  name?: string;
+  role: string;
+  childrenIds?: string[];
+  relatedClassIds?: string[];
+  classId?: string;
+}
+
 async function migrate() {
   // Authenticate
   const email = process.env.ADMIN_EMAIL;
@@ -47,11 +56,11 @@ async function migrate() {
   // Fetch all users
   console.log('Fetching users...');
   const usersSnapshot = await getDocs(collection(db, 'users'));
-  const users = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as any[];
+  const users = usersSnapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as MigrationUser[];
 
   const parents = users.filter((u) => u.role === 'parent');
   const students = users.filter((u) => u.role === 'student');
-  const studentMap = new Map(students.map((s) => [s.id, s]));
+  const studentMap = new Map(students.map((s) => [s.id as string, s]));
 
   console.log(`Found ${parents.length} parents and ${students.length} students.`);
 
@@ -98,7 +107,7 @@ async function migrate() {
   process.exit(0);
 }
 
-function arraysEqual(a: any[], b: any[]) {
+function arraysEqual(a: string[], b: string[]) {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; ++i) {
     if (a[i] !== b[i]) return false;

@@ -1,0 +1,31 @@
+{
+  "projects": {
+    "default": "smartmadrasa-dev",
+    "dev": "smartmadrasa-dev",
+    "staging": "smartmadrasa-staging",
+    "prod": "smartmadrasa-prod"
+  },
+  "targets": {
+    "smartmadrasa-dev": {
+      "hosting": {
+        "app": [
+          "smartmadrasa-dev-site"
+        ]
+      }
+    },
+    "smartmadrasa-staging": {
+      "hosting": {
+        "app": [
+          "smartmadrasa-staging-site"
+        ]
+      }
+    },
+    "smartmadrasa-prod": {
+      "hosting": {
+        "app": [
+          "smartmadrasa-prod-site"
+        ]
+      }
+    }
+  }
+}

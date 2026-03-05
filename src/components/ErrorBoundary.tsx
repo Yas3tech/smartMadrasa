@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { reportClientError } from '../services/monitoring';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -27,6 +28,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
         // Logged in dev — stripped in production by Terser (drop_console: true)
         console.error('[ErrorBoundary] Uncaught error:', error, errorInfo);
+        void reportClientError('error', error, {
+            componentStack: errorInfo.componentStack,
+        });
     }
 
     handleReload = (): void => {

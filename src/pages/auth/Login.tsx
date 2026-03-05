@@ -8,7 +8,7 @@ import {
   type AuthError,
 } from 'firebase/auth';
 import { useTranslation } from 'react-i18next';
-import { auth } from '../../config/firebase';
+import { auth, isUnsafeProductionConfig } from '../../config/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Input, Card } from '../../components/UI';
 import { LogIn, AlertCircle, ArrowLeft, Send, Sparkles } from 'lucide-react';
@@ -49,8 +49,12 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUnsafeProductionConfig) {
+      setError(t('auth.errors.generic'));
+      return;
+    }
     if (!auth) {
-      setError('Firebase is not initialized');
+      setError(t('auth.errors.generic'));
       return;
     }
 

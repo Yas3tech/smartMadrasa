@@ -1,17 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { Card, Button } from '../UI';
 import { Check, X, Clock, Users as UsersIcon, Calendar, BookOpen, AlertCircle } from 'lucide-react';
-import type { User, Course, Student } from '../../types';
+import type { User, Course, Student, ClassGroup, Attendance } from '../../types';
 
 interface TeacherAttendanceProps {
     user: User;
     students: User[];
     courses: Course[];
-    classes: any[];
-    attendance: any[];
-    markAttendance: any;
-    updateAttendance: any;
-    t: any;
+    classes: ClassGroup[];
+    attendance: Attendance[];
+    markAttendance: (data: Omit<Attendance, 'id'>) => Promise<void>;
+    updateAttendance: (id: string, status: 'present' | 'absent' | 'late', justification?: string) => Promise<void>;
+    t: (key: string) => string;
     isRTL: boolean;
 }
 

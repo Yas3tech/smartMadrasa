@@ -2,16 +2,16 @@ import React from 'react';
 import { Card } from '../UI';
 import { Check, X, Clock, Calendar, AlertCircle } from 'lucide-react';
 import StudentSelector from '../Common/StudentSelector';
-import type { User, Course } from '../../types';
+import type { User, Course, Attendance } from '../../types';
 
 interface StudentAttendanceProps {
     user: User;
-    attendance: any[];
+    attendance: Attendance[];
     courses: Course[];
     selectedChild: { id: string; name: string; classId: string } | null;
-    setSelectedChild: (child: any) => void;
-    t: any;
-    i18n: any;
+    setSelectedChild: (child: { id: string; name: string; classId: string } | null) => void;
+    t: (key: string) => string;
+    i18n: { language: string };
 }
 
 const StudentAttendance: React.FC<StudentAttendanceProps> = ({
