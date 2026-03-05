@@ -89,6 +89,13 @@ service cloud.firestore {
         get(/databases/$(database)/documents/classes/$(classId)).data.teacherId == request.auth.uid;
     }
 
+    // Ensure teachers can only comment students from classes they teach.
+    function canTeacherCommentStudent(studentId) {
+      return exists(/databases/$(database)/documents/users/$(studentId)) &&
+        get(/databases/$(database)/documents/users/$(studentId)).data.role == 'student' &&
+        isTeacherForClass(get(/databases/$(database)/documents/users/$(studentId)).data.classId);
+    }
+
     // --- Collection Rules ---
 
     // Users:
@@ -388,7 +395,9 @@ service cloud.firestore {
       // LOGIC-02: Prevent identity spoofing
       // Teachers can only create/update comments for themselves
       allow create: if isDirector() || isSuperAdmin() || 
-                      (isTeacher() && request.resource.data.teacherId == request.auth.uid);
+                      (isTeacher() &&
+                       request.resource.data.teacherId == request.auth.uid &&
+                       canTeacherCommentStudent(request.resource.data.studentId));
       allow update: if isAuthenticated() && (
         (isTeacher() && resource.data.teacherId == request.auth.uid) ||
         isDirector() ||
