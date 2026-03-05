@@ -12,6 +12,7 @@ Configurer ces secrets dans les environnements GitHub (`staging`, `prod`):
 - `VITE_ERROR_WEBHOOK_URL` (optionnel mais recommande)
 
 ## Notes
+
 - Utiliser des valeurs differentes par environnement.
 - Restreindre l'acces aux maintainers autorises.
 - Rotation reguliere des tokens/secrets.

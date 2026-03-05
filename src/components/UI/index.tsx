@@ -20,4 +20,3 @@ export {
 
 // Export FileUpload component
 export { FileUpload } from './FileUpload';
-

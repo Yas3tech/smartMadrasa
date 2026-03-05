@@ -13,25 +13,25 @@ import { useRef, useCallback, useEffect } from 'react';
  * // throttledSend() can only fire once every 2 seconds
  */
 export function useThrottle<T extends (...args: unknown[]) => unknown>(
-    callback: T,
-    delayMs: number
+  callback: T,
+  delayMs: number
 ): (...args: Parameters<T>) => ReturnType<T> | undefined {
-    const lastCallRef = useRef<number>(0);
-    const callbackRef = useRef(callback);
+  const lastCallRef = useRef<number>(0);
+  const callbackRef = useRef(callback);
 
-    useEffect(() => {
-        callbackRef.current = callback;
-    }, [callback]);
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
-    return useCallback(
-        (...args: Parameters<T>): ReturnType<T> | undefined => {
-            const now = Date.now();
-            if (now - lastCallRef.current >= delayMs) {
-                lastCallRef.current = now;
-                return callbackRef.current(...args) as ReturnType<T>;
-            }
-            return undefined;
-        },
-        [delayMs]
-    );
+  return useCallback(
+    (...args: Parameters<T>): ReturnType<T> | undefined => {
+      const now = Date.now();
+      if (now - lastCallRef.current >= delayMs) {
+        lastCallRef.current = now;
+        return callbackRef.current(...args) as ReturnType<T>;
+      }
+      return undefined;
+    },
+    [delayMs]
+  );
 }

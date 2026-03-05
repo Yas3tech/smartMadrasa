@@ -92,8 +92,8 @@ export function useDashboard(): UseDashboardReturn {
   const avgGrade = useMemo(() => {
     return allGrades.length > 0
       ? (
-        allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
-      ).toFixed(1)
+          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
+        ).toFixed(1)
       : 0;
   }, [allGrades]);
 
@@ -126,8 +126,8 @@ export function useDashboard(): UseDashboardReturn {
   const myAvg = useMemo(() => {
     return myGrades.length > 0
       ? (
-        myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
-      ).toFixed(1)
+          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
+        ).toFixed(1)
       : 0;
   }, [myGrades]);
 

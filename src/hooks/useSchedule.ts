@@ -47,7 +47,11 @@ export interface UseScheduleDataReturn {
   canEdit: boolean;
 }
 
-export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProps): UseScheduleDataReturn {
+export function useSchedule({
+  weekOffset,
+  mobileDate,
+  classId,
+}: UseScheduleProps): UseScheduleDataReturn {
   const { i18n } = useTranslation();
   const { user } = useAuth();
   const { courses, classes } = useAcademics();
@@ -222,7 +226,10 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
       exams: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] },
     }));
 
-    const courseInfoMap = new Map<string, { startSlotIdx: number; rowSpan: number; course: Course }>();
+    const courseInfoMap = new Map<
+      string,
+      { startSlotIdx: number; rowSpan: number; course: Course }
+    >();
 
     weekCourses.forEach((course) => {
       const courseStartMin = timeToMinutes(course.startTime);
@@ -230,7 +237,10 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
 
       let startSlotIdx = -1;
       for (let i = 0; i < slotBoundaries.length; i++) {
-        if (courseStartMin >= slotBoundaries[i].startMin && courseStartMin < slotBoundaries[i].endMin) {
+        if (
+          courseStartMin >= slotBoundaries[i].startMin &&
+          courseStartMin < slotBoundaries[i].endMin
+        ) {
           startSlotIdx = i;
           break;
         }
@@ -257,7 +267,10 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
       courseInfoMap.set(course.id, { startSlotIdx, rowSpan, course });
     });
 
-    const coursesByDay: Map<number, Array<{ courseId: string; startMin: number; endMin: number }>> = new Map();
+    const coursesByDay: Map<
+      number,
+      Array<{ courseId: string; startMin: number; endMin: number }>
+    > = new Map();
     weekCourses.forEach((course) => {
       if (!coursesByDay.has(course.dayOfWeek)) coursesByDay.set(course.dayOfWeek, []);
       coursesByDay.get(course.dayOfWeek)!.push({
@@ -355,7 +368,8 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
 
   const subjectColors = SUBJECT_COLORS;
   const currentDay = new Date().getDay() || 7;
-  const canEdit = user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin';
+  const canEdit =
+    user?.role === 'teacher' || user?.role === 'director' || user?.role === 'superadmin';
 
   return {
     weekStart,

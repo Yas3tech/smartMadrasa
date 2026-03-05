@@ -238,13 +238,17 @@ export const subscribeToUsers = (
   lastDocSnapshot?: QueryDocumentSnapshot
 ) => {
   const firestore = db;
-  if (!firestore) return () => { };
+  if (!firestore) return () => {};
 
   // If no queries provided, fallback to default (fetch up to 500)
   if (!queries || queries.length === 0) {
     let defaultQuery = query(collection(firestore, COLLECTION_NAME), limit(500));
     if (lastDocSnapshot) {
-      defaultQuery = query(collection(firestore, COLLECTION_NAME), startAfter(lastDocSnapshot), limit(500));
+      defaultQuery = query(
+        collection(firestore, COLLECTION_NAME),
+        startAfter(lastDocSnapshot),
+        limit(500)
+      );
     }
     return onSnapshot(defaultQuery, (snapshot) => {
       callback(mapQuerySnapshot<User>(snapshot));

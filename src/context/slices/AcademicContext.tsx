@@ -76,8 +76,8 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubClasses = () => { };
-      let unsubCourses = () => { };
+      let unsubClasses = () => {};
+      let unsubCourses = () => {};
       const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
       const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
 

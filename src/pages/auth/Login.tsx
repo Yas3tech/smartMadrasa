@@ -141,7 +141,10 @@ const Login = () => {
         if (!isAuthorized) {
           await auth.signOut();
           setError(
-            t('auth.errors.unauthorizedGoogleAccount', "Ce compte Google n'est pas autorisé. Veuillez contacter l'administration.")
+            t(
+              'auth.errors.unauthorizedGoogleAccount',
+              "Ce compte Google n'est pas autorisé. Veuillez contacter l'administration."
+            )
           );
           setLoading(false);
           return;

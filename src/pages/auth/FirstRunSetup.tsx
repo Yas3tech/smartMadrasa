@@ -77,7 +77,7 @@ const FirstRunSetup: React.FC = () => {
       await setDoc(doc(db, '_setup', 'config'), {
         setupCompletedAt: new Date().toISOString(),
         completedBy: user.uid,
-        status: 'locked'
+        status: 'locked',
       });
 
       // 4. Optionally seed basic system data
@@ -129,7 +129,7 @@ const FirstRunSetup: React.FC = () => {
             {[1, 2, 3].map((s) => (
               <div
                 key={s}
-className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${step >= s ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'}`}
               >
                 {step > s ? <CheckCircle size={20} /> : s}
               </div>

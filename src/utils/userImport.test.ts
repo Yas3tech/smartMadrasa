@@ -16,33 +16,42 @@ vi.mock('exceljs', () => {
     },
     worksheets: [
       {
-        eachRow: vi.fn((cb: (row: { eachCell: (fn: (cell: { value: string }, col: number) => void) => void }, rowNumber: number) => void) => {
-          // Header row
-          const headerRow = {
-            eachCell: (fn: (cell: { value: string }, col: number) => void) => {
-              fn({ value: 'name' }, 1);
-              fn({ value: 'email' }, 2);
-              fn({ value: 'role' }, 3);
-            },
-          };
-          cb(headerRow, 1);
-          // Data row
-          const dataRow = {
-            eachCell: (fn: (cell: { value: string }, col: number) => void) => {
-              fn({ value: 'Test' }, 1);
-              fn({ value: 'test@example.com' }, 2);
-              fn({ value: 'student' }, 3);
-            },
-          };
-          cb(dataRow, 2);
-        }),
+        eachRow: vi.fn(
+          (
+            cb: (
+              row: { eachCell: (fn: (cell: { value: string }, col: number) => void) => void },
+              rowNumber: number
+            ) => void
+          ) => {
+            // Header row
+            const headerRow = {
+              eachCell: (fn: (cell: { value: string }, col: number) => void) => {
+                fn({ value: 'name' }, 1);
+                fn({ value: 'email' }, 2);
+                fn({ value: 'role' }, 3);
+              },
+            };
+            cb(headerRow, 1);
+            // Data row
+            const dataRow = {
+              eachCell: (fn: (cell: { value: string }, col: number) => void) => {
+                fn({ value: 'Test' }, 1);
+                fn({ value: 'test@example.com' }, 2);
+                fn({ value: 'student' }, 3);
+              },
+            };
+            cb(dataRow, 2);
+          }
+        ),
       },
     ],
   };
   return {
     default: {
       // Must use 'function' (not arrow) so it can be called with 'new'
-      Workbook: vi.fn(function () { return mockWorkbook; }),
+      Workbook: vi.fn(function () {
+        return mockWorkbook;
+      }),
     },
   };
 });

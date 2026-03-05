@@ -81,7 +81,7 @@ export function HomeworkForm({
             <select
               value={formState.selectedClassId}
               onChange={(e) => setFormField('selectedClassId', e.target.value)}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600"
+              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600 transition-all duration-200"
             >
               <option value="">{t('grades.selectClass')}</option>
               {teacherClasses.map((c) => (
@@ -108,7 +108,7 @@ export function HomeworkForm({
             <select
               value={formState.subject}
               onChange={(e) => setFormField('subject', e.target.value)}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600"
+              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600 transition-all duration-200"
             >
               <option value="">{t('grades.selectSubject')}</option>
               {availableSubjects.map((subj) => (
@@ -128,7 +128,7 @@ export function HomeworkForm({
               value={formState.description}
               onChange={(e) => setFormField('description', e.target.value)}
               rows={4}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600"
+              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600 transition-all duration-200"
               placeholder={t('homework.form.descriptionPlaceholder')}
             />
           </div>

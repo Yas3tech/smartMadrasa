@@ -13,12 +13,7 @@ import { useThrottle } from '../../hooks/useThrottle';
 import type { Message, Parent, Student, User } from '../../types';
 import { Card, Button } from '../../components/UI';
 
-import {
-  PenSquare,
-  Inbox,
-  Send,
-  Archive,
-} from 'lucide-react';
+import { PenSquare, Inbox, Send, Archive } from 'lucide-react';
 import ComposeModal from '../../components/Messages/ComposeModal';
 import MessageList from '../../components/Messages/MessageList';
 import MessageDetail from '../../components/Messages/MessageDetail';
@@ -26,7 +21,8 @@ import MessageDetail from '../../components/Messages/MessageDetail';
 const Messages = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage } = useCommunication();
+  const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage } =
+    useCommunication();
   const { users } = useUsers();
   const { classes } = useAcademics();
 
@@ -189,67 +185,79 @@ const Messages = () => {
   };
 
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
-  const handleSendMessage = useThrottle(useCallback(() => {
-    if (!user || !recipient || !subject || !content) return;
-    const selectedRecipient = filteredRecipients.find((r) => r.id === recipient);
-    const attachmentUrls = attachments.map((file) => URL.createObjectURL(file));
+  const handleSendMessage = useThrottle(
+    useCallback(() => {
+      if (!user || !recipient || !subject || !content) return;
+      const selectedRecipient = filteredRecipients.find((r) => r.id === recipient);
+      const attachmentUrls = attachments.map((file) => URL.createObjectURL(file));
 
-    if (selectedRecipient?.type === 'class') {
-      const selectedClass = classes.find((c) => c.id === recipient);
-      if (selectedClass) {
-        const classStudents = users.filter(
-          (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
-        );
-        const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
-        classStudents.forEach((student) => {
-          sendMessage({
-            senderId: user.id,
-            senderName: user.name,
-            senderRole: user.role,
-            receiverId: student.id,
-            subject: `[${selectedClass.name}] ${subject}`,
-            content,
-            read: false,
-            type: 'group',
-            attachments: attachmentUrls,
+      if (selectedRecipient?.type === 'class') {
+        const selectedClass = classes.find((c) => c.id === recipient);
+        if (selectedClass) {
+          const classStudents = users.filter(
+            (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
+          );
+          const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+          classStudents.forEach((student) => {
+            sendMessage({
+              senderId: user.id,
+              senderName: user.name,
+              senderRole: user.role,
+              receiverId: student.id,
+              subject: `[${selectedClass.name}] ${subject}`,
+              content,
+              read: false,
+              type: 'group',
+              attachments: attachmentUrls,
+            });
           });
-        });
-        if (classTeacher) {
-          sendMessage({
-            senderId: user.id,
-            senderName: user.name,
-            senderRole: user.role,
-            receiverId: classTeacher.id,
-            subject: `[${selectedClass.name}] ${subject}`,
-            content,
-            read: false,
-            type: 'group',
-            attachments: attachmentUrls,
-          });
+          if (classTeacher) {
+            sendMessage({
+              senderId: user.id,
+              senderName: user.name,
+              senderRole: user.role,
+              receiverId: classTeacher.id,
+              subject: `[${selectedClass.name}] ${subject}`,
+              content,
+              read: false,
+              type: 'group',
+              attachments: attachmentUrls,
+            });
+          }
         }
+      } else {
+        sendMessage({
+          senderId: user.id,
+          senderName: user.name,
+          senderRole: user.role,
+          receiverId: recipient,
+          subject,
+          content,
+          read: false,
+          type: recipient === 'all' ? 'broadcast' : 'individual',
+          attachments: attachmentUrls,
+        });
       }
-    } else {
-      sendMessage({
-        senderId: user.id,
-        senderName: user.name,
-        senderRole: user.role,
-        receiverId: recipient,
-        subject,
-        content,
-        read: false,
-        type: recipient === 'all' ? 'broadcast' : 'individual',
-        attachments: attachmentUrls,
-      });
-    }
 
-    setIsComposeOpen(false);
-    setRecipient('');
-    setRecipientSearch('');
-    setSubject('');
-    setContent('');
-    setAttachments([]);
-
-  }, [user, recipient, subject, content, filteredRecipients, classes, users, sendMessage, attachments]), 2000);
+      setIsComposeOpen(false);
+      setRecipient('');
+      setRecipientSearch('');
+      setSubject('');
+      setContent('');
+      setAttachments([]);
+    }, [
+      user,
+      recipient,
+      subject,
+      content,
+      filteredRecipients,
+      classes,
+      users,
+      sendMessage,
+      attachments,
+    ]),
+    2000
+  );
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
@@ -275,12 +283,13 @@ const Messages = () => {
       <Card className="flex-1 flex overflow-hidden !p-0 border-0 shadow-xl">
         {/* Left Sidebar - Folders */}
         <div
-          className={`${isMobile
-            ? mobileView === 'folders'
-              ? 'flex-1 w-full bg-white dark:bg-slate-800'
-              : 'hidden'
-            : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
-            }`}
+          className={`${
+            isMobile
+              ? mobileView === 'folders'
+                ? 'flex-1 w-full bg-white dark:bg-slate-800'
+                : 'hidden'
+              : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+          }`}
         >
           <div className="p-4">
             <div className="flex items-center gap-3 mb-6 px-2">
@@ -304,10 +313,11 @@ const Messages = () => {
                     setSelectedFolder(folder.id);
                     if (isMobile) setMobileView('list');
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedFolder === folder.id
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
-                    }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    selectedFolder === folder.id
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
                 >
                   <folder.icon size={18} />
                   {folder.label}

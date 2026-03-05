@@ -41,7 +41,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubUsers = () => { };
+      let unsubUsers = () => {};
 
       // SECURITY: Each role only subscribes to the users it needs.
       // Do NOT replace these scoped queries with a generic fetch-all.
@@ -58,13 +58,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         // Chained subscription: first get teacher's classIds from 'classes' collection
         // (queried by teacherId), then subscribe to users scoped to those classIds.
         // This avoids relying on user.classIds which may not be synced.
-        let innerUnsubUsers = () => { };
+        let innerUnsubUsers = () => {};
         const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
           innerUnsubUsers();
           const classIds = teacherClasses.map((c) => c.id);
-          const queries: UserQueryFilters[] = [
-            { role: ['teacher', 'director', 'superadmin'] },
-          ];
+          const queries: UserQueryFilters[] = [{ role: ['teacher', 'director', 'superadmin'] }];
           if (classIds.length > 0) {
             queries.push({ classId: classIds });
           }

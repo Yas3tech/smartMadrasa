@@ -132,10 +132,13 @@ const UserManagement = () => {
         if (result.emailSent) {
           toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
         } else if (result.password) {
-          toast.success(`${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`, {
-            duration: 30000,
-            icon: '🔑',
-          });
+          toast.success(
+            `${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`,
+            {
+              duration: 30000,
+              icon: '🔑',
+            }
+          );
         } else {
           toast.success(t('users.userCreated'));
         }
@@ -164,7 +167,10 @@ const UserManagement = () => {
         if (result.success) {
           const counts = result.deletedCounts as Record<string, number>;
           const totalDeleted = Object.values(counts).reduce((a, b) => a + b, 0);
-          toast.success(t('users.userDeletedComplete', { count: totalDeleted }), { duration: 5000, icon: '🗑️' });
+          toast.success(t('users.userDeletedComplete', { count: totalDeleted }), {
+            duration: 5000,
+            icon: '🗑️',
+          });
         } else {
           toast.error(t('users.deleteError'));
         }
@@ -186,9 +192,18 @@ const UserManagement = () => {
       { header: 'birthDate', key: 'birthDate', width: 15 },
       { header: 'studentEmail', key: 'studentEmail', width: 25 },
     ];
-    ws.addRow({ name: 'Jean Dupont', email: 'jean@school.ma', role: 'student', phone: '', birthDate: '2010-01-01', studentEmail: '' });
+    ws.addRow({
+      name: 'Jean Dupont',
+      email: 'jean@school.ma',
+      role: 'student',
+      phone: '',
+      birthDate: '2010-01-01',
+      studentEmail: '',
+    });
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -202,7 +217,10 @@ const UserManagement = () => {
     if (!file) return;
     try {
       const jsonData = await parseUserFile(file);
-      const { importedUsers, count: countNonParents } = await processNonParentUsers(jsonData, addUser);
+      const { importedUsers, count: countNonParents } = await processNonParentUsers(
+        jsonData,
+        addUser
+      );
       const countParents = await processParentUsers(jsonData, users, importedUsers, addUser);
       toast.success(t('users.importSuccess', { count: countNonParents + countParents }));
       if (fileInputRef.current) fileInputRef.current.value = '';

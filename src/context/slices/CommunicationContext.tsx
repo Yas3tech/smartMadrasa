@@ -53,7 +53,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   useEffect(() => {
     if (useFirebase) {
       const unsubMessages = subscribeToMessages(setMessages, user?.id);
-      let unsubEvents = () => { };
+      let unsubEvents = () => {};
 
       // SECURITY: Each role only subscribes to events it is authorized to see.
       // Do NOT replace these scoped queries with a generic fetch-all.
@@ -68,7 +68,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       } else if (user?.role === 'student') {
         // Student: only events for their own class
         const student = user as Student;
-        unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => { };
+        unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => {};
       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
         // Admin and Teacher roles: full access to all events
         // Fix for LOGIC-01: Teachers should see all events in the school

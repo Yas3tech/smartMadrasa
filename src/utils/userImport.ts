@@ -31,7 +31,9 @@ export const parseUserFile = async (file: File): Promise<UserImportRow[]> => {
     if (rowNumber === 1) {
       // Header row — map column indices to field names
       row.eachCell((cell, colNumber) => {
-        headers[colNumber] = String(cell.value || '').trim().toLowerCase();
+        headers[colNumber] = String(cell.value || '')
+          .trim()
+          .toLowerCase();
       });
     } else {
       // Data rows

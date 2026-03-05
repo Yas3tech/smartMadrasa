@@ -30,14 +30,28 @@ const Schedule = () => {
   const [editingExam, setEditingExam] = useState<Event | null>(null);
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
 
-  const [deleteMenu, setDeleteMenu] = useState<{ courseId: string; date: string; x: number; y: number } | null>(null);
-  const [selectedChild, setSelectedChild] = useState<{ id: string; name: string; classId: string } | null>(null);
+  const [deleteMenu, setDeleteMenu] = useState<{
+    courseId: string;
+    date: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [selectedChild, setSelectedChild] = useState<{
+    id: string;
+    name: string;
+    classId: string;
+  } | null>(null);
 
   const { courses, addCourse, updateCourse, deleteCourse } = useAcademics();
   const { events, addEvent, updateEvent, deleteEvent } = useCommunication();
   const { homeworks } = usePerformance();
 
-  const classId = user?.role === 'student' ? (user as { classId?: string }).classId : user?.role === 'parent' ? selectedChild?.classId : null;
+  const classId =
+    user?.role === 'student'
+      ? (user as { classId?: string }).classId
+      : user?.role === 'parent'
+        ? selectedChild?.classId
+        : null;
   const scheduleData = useSchedule({ weekOffset, mobileDate, classId });
 
   const handlePrevDay = () => {
@@ -121,24 +135,43 @@ const Schedule = () => {
 
   const schedule = {
     ...scheduleData,
-    weekOffset, setWeekOffset,
-    mobileDate, setMobileDate,
-    isFabOpen, setIsFabOpen,
-    showCourseModal, setShowCourseModal,
-    showExamModal, setShowExamModal,
-    showUpcomingModal, setShowUpcomingModal,
-    showHomeworkDetail, setShowHomeworkDetail,
-    editingCourse, setEditingCourse,
-    editingExam, setEditingExam,
-    selectedHomework, setSelectedHomework,
-    deleteMenu, setDeleteMenu,
-    selectedChild, setSelectedChild,
-    handlePrevDay, handleNextDay,
-    handleAddCourse, handleAddExam,
-    handleEditCourse, handleEditExam,
-    handleSaveCourse, handleSaveExam,
-    showDeleteMenu, closeDeleteMenu,
-    handleDeleteThisOccurrence, handleDeleteEntireCourse, handleDeleteExam,
+    weekOffset,
+    setWeekOffset,
+    mobileDate,
+    setMobileDate,
+    isFabOpen,
+    setIsFabOpen,
+    showCourseModal,
+    setShowCourseModal,
+    showExamModal,
+    setShowExamModal,
+    showUpcomingModal,
+    setShowUpcomingModal,
+    showHomeworkDetail,
+    setShowHomeworkDetail,
+    editingCourse,
+    setEditingCourse,
+    editingExam,
+    setEditingExam,
+    selectedHomework,
+    setSelectedHomework,
+    deleteMenu,
+    setDeleteMenu,
+    selectedChild,
+    setSelectedChild,
+    handlePrevDay,
+    handleNextDay,
+    handleAddCourse,
+    handleAddExam,
+    handleEditCourse,
+    handleEditExam,
+    handleSaveCourse,
+    handleSaveExam,
+    showDeleteMenu,
+    closeDeleteMenu,
+    handleDeleteThisOccurrence,
+    handleDeleteEntireCourse,
+    handleDeleteExam,
   };
 
   const days = [

@@ -1,4 +1,5 @@
 # SecureByDesign Audit Report v1.1
+
 Date: 2026-03-05
 System: smartMadrasa
 Tier: REGULATED
@@ -6,19 +7,22 @@ Language: FR
 Skill version: 1.1.0 — verify latest at https://github.com/securebydesign/skill
 
 ## Version Check
+
 Running SecureByDesign v1.1.0. Verifier la derniere version sur: https://github.com/securebydesign/skill
 
 ## Resume
+
 - Score global: **88/100**
 - Verdict: **READY WITH WARNINGS**
 - Blocants code corrigeables: **0 restants**
 - Warnings operationnels: **3**
 
 | Controls | Pass | Partial | Fail | N/A |
-|---|---|---|---|---|
-| 25 | 21 | 4 | 0 | 0 |
+| -------- | ---- | ------- | ---- | --- |
+| 25       | 21   | 4       | 0    | 0   |
 
 ## Correctifs realises
+
 1. Durcissement Firestore RBAC et isolation par classe:
    - role valide via custom claim + document Firestore
    - lecture `users` enseignant restreinte
@@ -42,11 +46,13 @@ Running SecureByDesign v1.1.0. Verifier la derniere version sur: https://github.
    - threat model, IAM baseline, backup/recovery, checklist deploiement
 
 ## Warnings restants (a valider avant go-live)
+
 1. IAM GCP/Firebase doit etre confirme en console (least privilege, MFA, rotation cles).
 2. Secrets GitHub Actions staging/prod doivent etre renseignes.
 3. Drill de restauration backup doit etre execute et signe.
 
 ## Fichiers ajoutes/majeurs
+
 - `.firebaserc`
 - `.github/workflows/ci.yml`
 - `.github/workflows/deploy.yml`
@@ -58,10 +64,12 @@ Running SecureByDesign v1.1.0. Verifier la derniere version sur: https://github.
 - `src/services/monitoring.ts`
 
 ## Commande predeploy
+
 ```bash
 pnpm predeploy:prod
 ```
 
 ## Scope of Assurance
+
 This analysis covers known vulnerability patterns in the code and architecture provided.
 It does not replace penetration testing, formal threat modeling, or a certified security audit for systems handling sensitive or regulated data.

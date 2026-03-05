@@ -235,6 +235,7 @@ VITE_ERROR_WEBHOOK_URL=https://your-monitoring-endpoint.example.com
 ```
 
 Fichiers conseilles:
+
 - `.env.development.example`
 - `.env.production.example`
 

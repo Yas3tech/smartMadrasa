@@ -72,9 +72,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (useFirebase) {
-      let unsubGrades = () => { };
-      let unsubAttendance = () => { };
-      let unsubHomeworks = () => { };
+      let unsubGrades = () => {};
+      let unsubAttendance = () => {};
+      let unsubHomeworks = () => {};
 
       const handleGradesUpdate = (courseGrades: CourseGrade[]) => {
         const grades = courseGrades.map((cg) => ({
@@ -127,7 +127,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           } else {
             // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
             // We avoid subscribing to EVERYTHING to prevent performance issues.
-            unsubGrades = () => { };
+            unsubGrades = () => {};
           }
 
           unsubAttendance = subscribeToAttendance(setAttendance);

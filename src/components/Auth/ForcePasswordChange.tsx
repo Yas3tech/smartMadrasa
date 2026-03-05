@@ -34,9 +34,13 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
     }
 
     // SECURITY: Enforce password complexity — uppercase, lowercase, number, special char
-    const complexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    const complexityRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
     if (!complexityRegex.test(newPassword)) {
-      setError(t('auth.passwordComplexity') || 'Le mot de passe doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial');
+      setError(
+        t('auth.passwordComplexity') ||
+          'Le mot de passe doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial'
+      );
       return;
     }
 
@@ -75,7 +79,7 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={() => { }}>
+    <Modal isOpen={isOpen} onClose={() => {}}>
       <div className="p-6 max-w-md mx-auto">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">

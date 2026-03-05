@@ -155,7 +155,7 @@ export const subscribeToCourseGradesByStudentIds = (
   studentIds: string[],
   callback: (grades: CourseGrade[]) => void
 ): (() => void) => {
-  if (studentIds.length === 0) return () => { };
+  if (studentIds.length === 0) return () => {};
 
   // Note: We cannot use orderBy with 'in' query without a composite index.
   // We will sort client-side.
@@ -180,7 +180,7 @@ export const subscribeToCourseGradesByPeriodIds = (
 ): (() => void) => {
   if (periodIds.length === 0) {
     callback([]);
-    return () => { };
+    return () => {};
   }
 
   // Note: 'in' queries are limited to 30 items.
