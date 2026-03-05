@@ -13,14 +13,12 @@ import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToClasses,
-  subscribeToClassesByTeacherId,
   createClass as fbCreateClass,
   updateClass as fbUpdateClass,
   deleteClass as fbDeleteClass,
 } from '../../services/classes';
 import {
   subscribeToCourses,
-  subscribeToCoursesByTeacherId,
   createCourse as fbCreateCourse,
   updateCourse as fbUpdateCourse,
   deleteCourse as fbDeleteCourse,
@@ -100,15 +98,10 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
         const student = user as Student;
         unsubClasses = subscribeToClasses(setClasses, student.classId ? [student.classId] : []);
         unsubCourses = subscribeToCourses(setCourses);
-      } else if (user?.role === 'teacher') {
-        // SECURITY: Teacher only sees classes where teacherId === user.id,
-        // and only courses they teach. We query by teacherId (server-side)
-        // because user.classIds on the Teacher doc may not be synced.
-        // TODO: Consider syncing user.classIds when classes are created/updated.
-        unsubClasses = subscribeToClassesByTeacherId(user.id, setClasses);
-        unsubCourses = subscribeToCoursesByTeacherId(user.id, setCourses);
-      } else if (user && ['director', 'superadmin'].includes(user.role)) {
-        // Admin roles: full access to all academic data
+      } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
+        // Admin and Teacher roles: full access to all academic data
+        // Fix for LOGIC-01: Teachers should see all classes/courses in the school,
+        // not just their own classes.
         unsubClasses = subscribeToClasses(setClasses);
         unsubCourses = subscribeToCourses(setCourses);
       }

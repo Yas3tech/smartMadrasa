@@ -24,7 +24,6 @@ import {
   updateEvent as fbUpdateEvent,
   deleteEvent as fbDeleteEvent,
 } from '../../services/events';
-import { subscribeToClassesByTeacherId } from '../../services/classes';
 
 export interface CommunicationContextType {
   messages: Message[];
@@ -70,27 +69,9 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
         // Student: only events for their own class
         const student = user as Student;
         unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => { };
-      } else if (user?.role === 'teacher') {
-        // SECURITY: Teacher only sees events for classes they teach.
-        // Chained subscription: first get teacher's classIds from 'classes' collection
-        // (queried by teacherId), then subscribe to events scoped to those classIds.
-        // This avoids relying on user.classIds which may not be synced.
-        let innerUnsubEvents = () => { };
-        const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
-          innerUnsubEvents();
-          const classIds = teacherClasses.map((c) => c.id);
-          if (classIds.length > 0) {
-            innerUnsubEvents = subscribeToEvents(setEvents, classIds);
-          } else {
-            setEvents([]);
-          }
-        });
-        unsubEvents = () => {
-          unsubTeacherClasses();
-          innerUnsubEvents();
-        };
-      } else if (user && ['director', 'superadmin'].includes(user.role)) {
-        // Admin roles: full access to all events
+      } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
+        // Admin and Teacher roles: full access to all events
+        // Fix for LOGIC-01: Teachers should see all events in the school
         unsubEvents = subscribeToEvents(setEvents);
       }
 

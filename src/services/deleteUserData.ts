@@ -107,6 +107,35 @@ async function deleteStorageFolder(folderPath: string): Promise<number> {
 }
 
 /**
+ * Deletes all homework submission files for a specific student.
+ * Storage layout: homework/{homeworkId}/{studentId}/{fileName}
+ */
+async function deleteStudentHomeworkFiles(studentId: string): Promise<number> {
+  if (!storage) return 0;
+
+  try {
+    const homeworkRootRef = ref(storage, 'homework');
+    const homeworkRoot = await listAll(homeworkRootRef);
+    let deletedCount = 0;
+
+    for (const homeworkFolder of homeworkRoot.prefixes) {
+      const perHomework = await listAll(homeworkFolder);
+      for (const studentFolder of perHomework.prefixes) {
+        const segments = studentFolder.fullPath.split('/');
+        const folderStudentId = segments[segments.length - 1];
+        if (folderStudentId === studentId) {
+          deletedCount += await deleteStorageFolder(studentFolder.fullPath);
+        }
+      }
+    }
+
+    return deletedCount;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Supprime toutes les données associées à un utilisateur
  * @param userId - L'ID Firebase de l'utilisateur
  * @param userRole - Le rôle de l'utilisateur (student, parent, teacher, director, superadmin)
@@ -184,9 +213,11 @@ export async function deleteAllUserData(
         const comments = await getDocumentRefsWhere('teacherComments', 'teacherId', userId);
         refsToDelete.push(...comments); result.deletedCounts.teacherComments = comments.length;
 
-        // WARN-05: Handle orphaned courseGrades
+        // WARN-05/LOGIC-06: Handle orphaned courseGrades
+        // Using 'deleted_teacher' instead of empty string maintains a valid key format,
+        // and provides a clear signal to the frontend to render the 'Utilisateur Supprimé' state.
         const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
-        courseGrades.forEach(ref => refsToUpdate.push({ ref, data: { teacherId: '', teacherName: 'Deleted Teacher' } }));
+        courseGrades.forEach(ref => refsToUpdate.push({ ref, data: { teacherId: 'deleted_teacher', teacherName: 'Utilisateur Supprimé' } }));
         result.deletedCounts.grades += courseGrades.length;
 
         // WARN-05: Handle orphaned courses
@@ -196,7 +227,7 @@ export async function deleteAllUserData(
         // WARN-05: Handle orphaned classes (reset teacherId instead of deleting class)
         const classes = await getDocumentRefsWhere('classes', 'teacherId', userId);
         classes.forEach(classRef => {
-          refsToUpdate.push({ ref: classRef, data: { teacherId: '', teacherName: '' } });
+          refsToUpdate.push({ ref: classRef, data: { teacherId: 'deleted_teacher', teacherName: '' } });
         });
         break;
       }
@@ -225,7 +256,10 @@ export async function deleteAllUserData(
 
     // 5. Supprimer les fichiers Storage
     result.deletedCounts.storageFiles = await deleteStorageFolder(`users/${userId}`);
-    result.deletedCounts.storageFiles += await deleteStorageFolder(`homework/${userId}`);
+    result.deletedCounts.storageFiles += await deleteStorageFolder(`profiles/${userId}`);
+    if (userRole === 'student') {
+      result.deletedCounts.storageFiles += await deleteStudentHomeworkFiles(userId);
+    }
 
     // 6. Supprimer le compte Firebase Auth (si fourni)
     if (authUser) {

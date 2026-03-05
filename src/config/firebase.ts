@@ -14,10 +14,18 @@ const isFirebaseConfigured = Object.values(firebaseConfig).every(
   (value) => value && value !== 'your-api-key-here' && !value.includes('your-')
 );
 
+const isUnsafeProductionConfig = (() => {
+  if (!import.meta.env.PROD) return false;
+  const projectId = (firebaseConfig.projectId || '').toLowerCase();
+  return ['test', 'dev', 'demo', 'staging', 'sandbox'].some((marker) =>
+    projectId.includes(marker)
+  );
+})();
+
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 
-if (isFirebaseConfigured) {
+if (isFirebaseConfigured && !isUnsafeProductionConfig) {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
@@ -26,4 +34,4 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { app, auth, isFirebaseConfigured, firebaseConfig };
+export { app, auth, isFirebaseConfigured, isUnsafeProductionConfig, firebaseConfig };

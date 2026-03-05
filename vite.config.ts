@@ -35,6 +35,8 @@ export default defineConfig({
           'vendor-icons': ['lucide-react'],
           'vendor-i18n': ['i18next', 'react-i18next'],
           'vendor-pdf': ['jspdf', 'jspdf-autotable'],
+          // WARN-01/LOGIC-05: Removed unused dompurify/html2canvas and 
+          // removed manual exceljs chunk to let Vite handle the dynamic import perfectly
         },
       },
     },

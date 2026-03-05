@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import './i18n';
 import App from './App.tsx';
+import { reportClientError } from './services/monitoring';
 
 const initializeTheme = () => {
   try {
@@ -29,6 +30,18 @@ const initializeTheme = () => {
 };
 
 initializeTheme();
+
+window.addEventListener('error', (event) => {
+  void reportClientError('error', event.error || event.message, {
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+  });
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  void reportClientError('unhandledrejection', event.reason);
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

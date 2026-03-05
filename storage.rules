@@ -19,25 +19,42 @@ service firebase.storage {
     }
 
     // Homework submissions: homework/{homeworkId}/{studentId}/...
-    // Read: Only the student who submitted. Teachers read via signed download URLs
-    //        stored in Firestore (which has its own role-based rules).
-    // Write: Only the student themselves.
+    // Read/Delete: Student owner, director, superadmin.
+    // Write: Only the student themselves with strict file type/size checks.
     match /homework/{homeworkId}/{studentId}/{fileName} {
       allow read: if request.auth != null
-        && request.auth.uid == studentId;
+        && (
+          request.auth.uid == studentId ||
+          request.auth.token.role in ['director', 'superadmin']
+        );
       allow write: if request.auth != null 
         && request.auth.uid == studentId
-        && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+        && request.resource.size < 25 * 1024 * 1024  // Max 25MB
+        && (
+          request.resource.contentType.matches('image/.*')
+          || request.resource.contentType == 'application/pdf'
+          || request.resource.contentType.matches('application/vnd\\..*')
+          || request.resource.contentType.matches('application/.*zip.*')
+          || request.resource.contentType == 'application/x-rar-compressed'
+          || request.resource.contentType == 'text/plain'
+        );
+      allow delete: if request.auth != null
+        && (
+          request.auth.uid == studentId ||
+          request.auth.token.role in ['director', 'superadmin']
+        );
     }
 
-    // Message attachments: messages/{senderId}/...
-    // Read: Only the sender who uploaded. The receiver accesses files via signed
-    //        download URLs stored in the Firestore message document (protected by
-    //        Firestore rules that verify sender/receiver identity).
+    // Message attachments: messages/{senderId}/{fileName}
+    // Read: Sender can read. Receiver can read if they have the signed URL OR
+    //       if the file metadata contains their receiverId (which the sender should set on upload).
     // Write: Only the sender themselves.
     match /messages/{senderId}/{fileName} {
-      allow read: if request.auth != null
-        && request.auth.uid == senderId;
+      allow read: if request.auth != null && (
+        request.auth.uid == senderId || 
+        (resource.metadata != null && resource.metadata.receiverId == request.auth.uid) ||
+        (resource.metadata != null && resource.metadata.receiverId == 'all')
+      );
       allow write: if request.auth != null
         && request.auth.uid == senderId
         && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
@@ -76,15 +93,22 @@ service firebase.storage {
     }
 
     // User data folder (used for deleteUserData cleanup)
-    // Read/Write/Delete: Only the user themselves.
+    // Read/Delete: user owner + director/superadmin for compliant data cleanup.
+    // Write: only user owner.
     match /users/{userId}/{allPaths=**} {
       allow read: if request.auth != null
-        && request.auth.uid == userId;
+        && (
+          request.auth.uid == userId ||
+          request.auth.token.role in ['director', 'superadmin']
+        );
       allow write: if request.auth != null
         && request.auth.uid == userId
         && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
       allow delete: if request.auth != null
-        && request.auth.uid == userId;
+        && (
+          request.auth.uid == userId ||
+          request.auth.token.role in ['director', 'superadmin']
+        );
     }
   }
 }

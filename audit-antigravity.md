@@ -282,6 +282,44 @@ La ligne `import { deleteUser } from 'firebase/auth'` (ligne 4 de `deleteUserDat
 
 ---
 
+## 2.5 FAILLES FONCTIONNELLES ET DE LOGIQUE MÉTIER
+
+Ces failles ont été identifiées lors de la revue d'architecture croisée avec les spécifications :
+
+### 🟡 LOGIC-01 : Incohérence des abonnements Professeurs (Visibilité Globale vs Restreinte)
+**Fichiers** : `src/context/slices/AcademicContext.tsx`, `src/context/slices/CommunicationContext.tsx`
+**Problème** : Les règles générales de l'école stipulent qu'un `teacher` devrait avoir accès à tous les événements, classes et cours de l'établissement. Cependant, le code actuel restreint l'abonnement des professeurs uniquement aux données de **leurs propres classes**. C'est une divergence fonctionnelle majeure par rapport au comportement attendu.
+
+### 🟡 LOGIC-02 : Usurpation d'identité sur les `teacherComments` et `events`
+**Fichier** : `firestore.rules`
+**Problème** :
+- `teacherComments` : La règle `allow create` autorise un `isTeacher()` à créer un commentaire, mais ne valide pas que le champ `teacherId` du document correspond à `request.auth.uid`. Un enseignant pourrait forger un commentaire au nom d'un collègue.
+- `events` : Même problème. Un enseignant peut créer un événement dans SA classe, mais rien n'empêche de mettre l'ID d'un autre enseignant comme créateur.
+**Solution requise** : Ajouter la condition explicite : `&& request.resource.data.teacherId == request.auth.uid` pour toute création par un rôle `teacher`.
+
+### 🟡 LOGIC-03 : Isolation Storage bloquante pour les pièces jointes (`messages`)
+**Fichier** : `storage.rules`
+**Problème** : Les pièces jointes des messages sont sauvées sous `messages/{senderId}/{fileName}` et protégées par `allow read: if request.auth.uid == senderId`. Le destinataire ne peut pas lire le fichier via le SDK Client. S'il utilise une URL signée générée temporairement, cette URL expirera. Le destinataire perdra définitivement l'accès à la pièce jointe à terme.
+**Solution requise** :
+- Créer un backend (Cloud Function) servant de proxy pour vérifier que le demandeur est bien le destinataire dans Firestore.
+- Ou intégrer le `receiverId` dans les métadonnées du fichier Storage pour faire correspondre la règle.
+
+### 🟡 LOGIC-04 : Exposition inutile du statut d'installation (`_setup`)
+**Fichier** : `firestore.rules`
+**Problème** : La règle `match /_setup/{docId} { allow read: if true; }` permet à quiconque sur internet de lire l'état de configuration de l'école. Bien que non-sensible en soi, cela donne des indications sur la structure backend à un attaquant potentiel en phase de reconnaissance.
+
+### 🟡 LOGIC-05 : TTI (Time to Interactive) dégradé par `exceljs`
+**Fichier** : Bundle Vite / Production
+**Problème** : La librairie d'export PDF/Excel asynchrone est chargée statiquement au démarrage ou mal lazy-loadée, pesant excessivement sur le fil d'exécution principal.
+**Solution requise** : Vérifier que l'importation est strictement encapsulée dans la fonction d'export (ex: `const ExcelJS = await import('exceljs');`).
+
+### 🟡 LOGIC-06 : Gestion partielle des professeurs supprimés (Foreign Keys)
+**Fichier** : `src/services/deleteUserData.ts`
+**Problème** : Lors de la suppression d'un enseignant, des collections liées (comme `courseGrades`) sont modifiées pour porter un `teacherId: ''` et un nom générique. C'est une source de bugs critiques en front-end si l'application s'attend à une jointure valide sur la collection `users` pour y trouver ce statut.
+**Solution requise** : Aligner l'UI pour qu'elle gère gracieusement le cas `teacherId === ''` via des "Null Objects", ou conserver un profil "Utilisateur Supprimé" dans Firestore pour maintenir l'intégrité référentielle apparente.
+
+---
+
 ## 3. POINTS POSITIFS ✅
 
 ### ✅ SEC-01 : Custom Claims Firebase correctement implémentés

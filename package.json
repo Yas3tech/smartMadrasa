@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@10.10.0",
+  "engines": {
+    "node": ">=20 <23",
+    "pnpm": ">=10"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -11,7 +16,14 @@
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "test": "vitest",
-    "verify-rules": "node scripts/verify_rules_mock.js"
+    "test:run": "vitest --run",
+    "verify-rules": "node scripts/verify_rules_mock.js",
+    "verify-rules:all": "node scripts/verify_rules_mock.js && node scripts/verify_grade_rules.js && node scripts/verify_homework_rules.js && node scripts/verify_message_rules.js && node scripts/verify_submission_rules.js",
+    "audit:deps": "pnpm audit --audit-level high",
+    "validate:env:prod": "node scripts/validate_env.js production",
+    "ci:quality": "pnpm type-check && pnpm lint && pnpm test:run",
+    "ci:security": "pnpm verify-rules:all && pnpm audit:deps",
+    "predeploy:prod": "pnpm validate:env:prod && pnpm ci:quality && pnpm build"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
