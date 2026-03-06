@@ -55,6 +55,8 @@ const Messages = () => {
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const MIN_RECIPIENT_SEARCH_CHARS = 2;
+  const isDirectorOrSuperAdmin = user?.role === 'director' || user?.role === 'superadmin';
 
   const filteredMessages = useMemo(() => {
     return messages.filter((msg) => {
@@ -78,20 +80,29 @@ const Messages = () => {
     });
   }, [messages, searchQuery, selectedFolder, user?.id]);
 
-  const filteredRecipients = useMemo(() => {
+  const allRecipientOptions = useMemo(() => {
     const studentMap = new Map<string, User>();
     users.forEach((u) => {
       if (u.role === 'student') studentMap.set(u.id, u);
     });
 
-    const allRecipients = [
-      {
-        type: 'all',
-        id: 'all',
-        label: `👥 ${t('messages.allUsers')}`,
-        searchText: t('messages.allUsers').toLowerCase(),
-      },
-      ...users.map((u) => {
+    const visibleUsers = users.filter((u) => {
+      if (u.role === 'superadmin' && !isDirectorOrSuperAdmin) return false;
+      return true;
+    });
+
+    return [
+      ...(isDirectorOrSuperAdmin
+        ? [
+            {
+              type: 'all',
+              id: 'all',
+              label: `👥 ${t('messages.allUsers')}`,
+              searchText: t('messages.allUsers').toLowerCase(),
+            },
+          ]
+        : []),
+      ...visibleUsers.map((u) => {
         let label = '';
         let searchText = '';
         if (u.role === 'parent') {
@@ -123,18 +134,19 @@ const Messages = () => {
         searchText: `${c.name} ${t('common.classes')}`.toLowerCase(),
       })),
     ];
-    return allRecipients.filter((item) => {
-      if (recipientSearch === '') return true;
-      return item.searchText.includes(recipientSearch.toLowerCase());
-    });
-  }, [users, classes, recipientSearch, t]);
+  }, [users, classes, t, isDirectorOrSuperAdmin]);
+
+  const filteredRecipients = useMemo(() => {
+    const query = recipientSearch.trim().toLowerCase();
+    if (query.length < MIN_RECIPIENT_SEARCH_CHARS) return [];
+    return allRecipientOptions.filter((item) => item.searchText.includes(query));
+  }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS]);
 
   const selectedRecipientLabel = useMemo(() => {
     return recipient
-      ? filteredRecipients.find((r) => r.id === recipient)?.label || recipientSearch
+      ? allRecipientOptions.find((r) => r.id === recipient)?.label || recipientSearch
       : '';
-  }, [recipient, filteredRecipients, recipientSearch]);
-
+  }, [recipient, allRecipientOptions, recipientSearch]);
   const handleArchiveMessage = async (messageId: string | number) => {
     const message = messages.find((m) => m.id === messageId);
     if (!message) return;
@@ -163,7 +175,7 @@ const Messages = () => {
     setRecipient(msg.senderId.toString());
     setSubject(`Re: ${msg.subject}`);
     setContent(
-      `\n\n---\nLe ${new Date(msg.timestamp).toLocaleDateString()} à ${new Date(msg.timestamp).toLocaleTimeString()}, ${msg.senderName} a écrit:\n> ${msg.content.split('\n').join('\n> ')}`
+      `\n\n---\nLe ${new Date(msg.timestamp).toLocaleDateString()} a ${new Date(msg.timestamp).toLocaleTimeString()}, ${msg.senderName} a ecrit:\n> ${msg.content.split('\n').join('\n> ')}`
     );
     setAttachments([]);
     setIsComposeOpen(true);
@@ -173,7 +185,7 @@ const Messages = () => {
     setComposeMode('forward');
     setRecipient('');
     setSubject(`Fwd: ${msg.subject}`);
-    setContent(`\n\n---\nMessage transféré de ${msg.senderName}:\n\n${msg.content}`);
+    setContent(`\n\n---\nMessage transfere de ${msg.senderName}:\n\n${msg.content}`);
     setAttachments([]);
     setIsComposeOpen(true);
   };
@@ -191,7 +203,11 @@ const Messages = () => {
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
   const handleSendMessage = useThrottle(useCallback(() => {
     if (!user || !recipient || !subject || !content) return;
-    const selectedRecipient = filteredRecipients.find((r) => r.id === recipient);
+    const selectedRecipient = allRecipientOptions.find((r) => r.id === recipient);
+    const selectedRecipientUser = users.find((u) => u.id === recipient);
+    const isSendingToSuperAdmin = selectedRecipientUser?.role === 'superadmin';
+    if (isSendingToSuperAdmin && !isDirectorOrSuperAdmin) return;
+
     const attachmentUrls = attachments.map((file) => URL.createObjectURL(file));
 
     if (selectedRecipient?.type === 'class') {
@@ -249,7 +265,7 @@ const Messages = () => {
     setContent('');
     setAttachments([]);
 
-  }, [user, recipient, subject, content, filteredRecipients, classes, users, sendMessage, attachments]), 2000);
+  }, [user, recipient, subject, content, allRecipientOptions, classes, users, sendMessage, attachments, isDirectorOrSuperAdmin]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
@@ -355,6 +371,7 @@ const Messages = () => {
         showRecipientDropdown={showRecipientDropdown}
         setShowRecipientDropdown={setShowRecipientDropdown}
         filteredRecipients={filteredRecipients}
+        recipientSearchMinChars={MIN_RECIPIENT_SEARCH_CHARS}
         selectedRecipientLabel={selectedRecipientLabel}
         subject={subject}
         setSubject={setSubject}

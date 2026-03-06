@@ -59,6 +59,11 @@ service cloud.firestore {
     function isParent() { return isRole('parent'); }
     function isStudent() { return isRole('student'); }
     function isSuperAdmin() { return isRole('superadmin'); }
+    function isReceiverSuperAdmin() {
+      return request.resource.data.receiverId is string &&
+        exists(/databases/$(database)/documents/users/$(request.resource.data.receiverId)) &&
+        get(/databases/$(database)/documents/users/$(request.resource.data.receiverId)).data.role == 'superadmin';
+    }
 
     // New Helper: Check if score is valid (0 <= score <= maxScore)
     function isValidGrade() {
@@ -320,6 +325,11 @@ service cloud.firestore {
         request.resource.data.senderId == request.auth.uid &&
         (
           request.resource.data.receiverId != 'all' ||
+          isDirector() ||
+          isSuperAdmin()
+        ) &&
+        (
+          !isReceiverSuperAdmin() ||
           isDirector() ||
           isSuperAdmin()
         );

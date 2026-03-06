@@ -14,6 +14,7 @@ interface ComposeModalProps {
     showRecipientDropdown: boolean;
     setShowRecipientDropdown: (val: boolean) => void;
     filteredRecipients: Array<{ id: string; label: string; type: string }>;
+    recipientSearchMinChars: number;
     selectedRecipientLabel: string;
     subject: string;
     setSubject: (val: string) => void;
@@ -37,6 +38,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
     showRecipientDropdown,
     setShowRecipientDropdown,
     filteredRecipients,
+    recipientSearchMinChars,
     selectedRecipientLabel,
     subject,
     setSubject,
@@ -49,6 +51,13 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
     handleSendMessage,
 }) => {
     const { t } = useTranslation();
+    const recipientSearchLength = recipientSearch.trim().length;
+    const showMinCharsHint =
+        composeMode !== 'reply' &&
+        !recipient &&
+        showRecipientDropdown &&
+        recipientSearchLength > 0 &&
+        recipientSearchLength < recipientSearchMinChars;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -105,6 +114,11 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                                     </button>
                                 ))}
                             </div>
+                        )}
+                        {showMinCharsHint && (
+                            <p className="mt-2 text-xs text-gray-500">
+                                Tapez au moins {recipientSearchMinChars} caractères.
+                            </p>
                         )}
                     </div>
 

@@ -5,24 +5,24 @@
  * Contains UI for user listing, filtering, and CRUD operations.
  */
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
 import type { User, Role } from '../../types';
-import { parseUserFile, processNonParentUsers, processParentUsers } from '../../utils/userImport';
 import toast from 'react-hot-toast';
 import { deleteUserWithAllData, previewUserDeletion } from '../../services/users';
+import UserImportWizard from '../../components/Users/UserImportWizard';
 
 const UserManagement = () => {
   const { t, i18n } = useTranslation();
   const { user: currentUser } = useAuth();
   const { users, students, addUser, updateUser } = useUsers();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<Role | 'all'>('all');
@@ -177,6 +177,33 @@ const UserManagement = () => {
   const handleDownloadTemplate = async () => {
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
+    const guideSheet = workbook.addWorksheet('Guide');
+    guideSheet.columns = [
+      { header: 'Section', key: 'section', width: 22 },
+      { header: 'Details', key: 'details', width: 85 },
+    ];
+    guideSheet.addRows([
+      {
+        section: 'Format',
+        details:
+          'Colonnes supportees: name, email, role, phone, birthDate, studentEmail. birthDate doit etre au format YYYY-MM-DD.',
+      },
+      {
+        section: 'Roles',
+        details: 'Valeurs autorisees: student, teacher, parent, director, superadmin.',
+      },
+      {
+        section: 'Parent',
+        details:
+          'Pour un parent, studentEmail doit contenir l email d un eleve existant ou present dans le meme import.',
+      },
+      {
+        section: 'Wizard',
+        details:
+          'Le wizard de l application permet de corriger les cellules en erreur avant creation definitive.',
+      },
+    ]);
+
     const ws = workbook.addWorksheet('Template');
     ws.columns = [
       { header: 'name', key: 'name', width: 20 },
@@ -186,7 +213,32 @@ const UserManagement = () => {
       { header: 'birthDate', key: 'birthDate', width: 15 },
       { header: 'studentEmail', key: 'studentEmail', width: 25 },
     ];
-    ws.addRow({ name: 'Jean Dupont', email: 'jean@school.ma', role: 'student', phone: '', birthDate: '2010-01-01', studentEmail: '' });
+    ws.addRows([
+      {
+        name: 'Jean Dupont',
+        email: 'jean@school.ma',
+        role: 'student',
+        phone: '',
+        birthDate: '2010-01-01',
+        studentEmail: '',
+      },
+      {
+        name: 'Meryem El Idrissi',
+        email: 'meryem@school.ma',
+        role: 'teacher',
+        phone: '+212600000001',
+        birthDate: '',
+        studentEmail: '',
+      },
+      {
+        name: 'Fatima Dupont',
+        email: 'fatima.parent@school.ma',
+        role: 'parent',
+        phone: '+212600000002',
+        birthDate: '',
+        studentEmail: 'jean@school.ma',
+      },
+    ]);
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
@@ -195,20 +247,6 @@ const UserManagement = () => {
     a.download = 'smartmadrassa_users_template.xlsx';
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const jsonData = await parseUserFile(file);
-      const { importedUsers, count: countNonParents } = await processNonParentUsers(jsonData, addUser);
-      const countParents = await processParentUsers(jsonData, users, importedUsers, addUser);
-      toast.success(t('users.importSuccess', { count: countNonParents + countParents }));
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch {
-      toast.error(t('users.importError'));
-    }
   };
   if (currentUser?.role !== 'director' && currentUser?.role !== 'superadmin') {
     return (
@@ -226,22 +264,15 @@ const UserManagement = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
         <div className="flex gap-2">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".xlsx,.xls,.csv"
-            className="hidden"
-          />
           <Button variant="secondary" icon={FileDown} onClick={handleDownloadTemplate}>
             {t('users.downloadTemplate')}
           </Button>
           <Button
             variant="secondary"
             icon={FileSpreadsheet}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setIsImportWizardOpen(true)}
           >
-            {t('users.importExcel')}
+            Assistant d'import
           </Button>
           <Button variant="primary" icon={Plus} onClick={handleOpenNew}>
             {t('users.newUser')}
@@ -465,6 +496,15 @@ const UserManagement = () => {
           </div>
         </div>
       </Modal>
+
+      <UserImportWizard
+        isOpen={isImportWizardOpen}
+        onClose={() => setIsImportWizardOpen(false)}
+        users={users}
+        students={students}
+        addUser={addUser}
+        canImportSuperadmin={currentUser?.role === 'superadmin'}
+      />
     </div>
   );
 };

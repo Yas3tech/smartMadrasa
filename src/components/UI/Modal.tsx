@@ -5,10 +5,11 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     title?: string;
+    className?: string;
     children: ReactNode;
 }
 
-export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+export const Modal = ({ isOpen, onClose, title, className = '', children }: ModalProps) => {
     const { t } = useTranslation();
     const titleId = useId();
 
@@ -41,7 +42,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
                 className="absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
-            <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in">
+            <div className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-fade-in ${className}`}>
                 {title && (
                     <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
                         <h3 id={titleId} className="font-bold text-lg text-gray-800 dark:text-slate-100">

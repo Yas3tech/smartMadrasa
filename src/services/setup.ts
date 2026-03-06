@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/db';
 
 /**
@@ -7,9 +7,11 @@ import { db } from '../config/db';
 export const checkIfDatabaseEmpty = async (): Promise<boolean> => {
   if (!db) return true;
   try {
-    const snapshot = await getDocs(collection(db, 'users'));
-    return snapshot.empty;
-  } catch {
+    const setupDoc = await getDoc(doc(db, '_setup', 'config'));
+    return !setupDoc.exists();
+  } catch (err) {
+    // If we get permission denied, it means the doc exists and we can't read it
+    // because isSetupOpen() in firestore rules returned false.
     return false;
   }
 };
