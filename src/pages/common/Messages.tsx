@@ -7,11 +7,13 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useCommunication, useUsers, useAcademics } from '../../context/DataContext';
 import { useThrottle } from '../../hooks/useThrottle';
 import type { Message, Parent, Student, User } from '../../types';
 import { Card, Button } from '../../components/UI';
+import { generateMessagePath, uploadFile } from '../../services/storage';
 
 import {
   PenSquare,
@@ -54,6 +56,7 @@ const Messages = () => {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const MIN_RECIPIENT_SEARCH_CHARS = 2;
   const isDirectorOrSuperAdmin = user?.role === 'director' || user?.role === 'superadmin';
@@ -201,71 +204,86 @@ const Messages = () => {
   };
 
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
-  const handleSendMessage = useThrottle(useCallback(() => {
-    if (!user || !recipient || !subject || !content) return;
+  const handleSendMessage = useThrottle(useCallback(async () => {
+    if (!user || !recipient || !subject || !content || isSending) return;
     const selectedRecipient = allRecipientOptions.find((r) => r.id === recipient);
     const selectedRecipientUser = users.find((u) => u.id === recipient);
     const isSendingToSuperAdmin = selectedRecipientUser?.role === 'superadmin';
     if (isSendingToSuperAdmin && !isDirectorOrSuperAdmin) return;
 
-    const attachmentUrls = attachments.map((file) => URL.createObjectURL(file));
+    setIsSending(true);
 
-    if (selectedRecipient?.type === 'class') {
-      const selectedClass = classes.find((c) => c.id === recipient);
-      if (selectedClass) {
-        const classStudents = users.filter(
-          (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
-        );
-        const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
-        classStudents.forEach((student) => {
-          sendMessage({
-            senderId: user.id,
-            senderName: user.name,
-            senderRole: user.role,
-            receiverId: student.id,
-            subject: `[${selectedClass.name}] ${subject}`,
-            content,
-            read: false,
-            type: 'group',
-            attachments: attachmentUrls,
-          });
-        });
-        if (classTeacher) {
-          sendMessage({
-            senderId: user.id,
-            senderName: user.name,
-            senderRole: user.role,
-            receiverId: classTeacher.id,
-            subject: `[${selectedClass.name}] ${subject}`,
-            content,
-            read: false,
-            type: 'group',
-            attachments: attachmentUrls,
-          });
+    try {
+      const attachmentUrls = await Promise.all(
+        attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
+      );
+
+      if (selectedRecipient?.type === 'class') {
+        const selectedClass = classes.find((c) => c.id === recipient);
+        if (selectedClass) {
+          const classStudents = users.filter(
+            (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
+          );
+          const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+          const outboundMessages = classStudents.map((student) =>
+            sendMessage({
+              senderId: user.id,
+              senderName: user.name,
+              senderRole: user.role,
+              receiverId: student.id,
+              subject: `[${selectedClass.name}] ${subject}`,
+              content,
+              read: false,
+              type: 'group',
+              attachments: attachmentUrls,
+            })
+          );
+
+          if (classTeacher) {
+            outboundMessages.push(
+              sendMessage({
+                senderId: user.id,
+                senderName: user.name,
+                senderRole: user.role,
+                receiverId: classTeacher.id,
+                subject: `[${selectedClass.name}] ${subject}`,
+                content,
+                read: false,
+                type: 'group',
+                attachments: attachmentUrls,
+              })
+            );
+          }
+
+          await Promise.all(outboundMessages);
         }
+      } else {
+        await sendMessage({
+          senderId: user.id,
+          senderName: user.name,
+          senderRole: user.role,
+          receiverId: recipient,
+          subject,
+          content,
+          read: false,
+          type: recipient === 'all' ? 'broadcast' : 'individual',
+          attachments: attachmentUrls,
+        });
       }
-    } else {
-      sendMessage({
-        senderId: user.id,
-        senderName: user.name,
-        senderRole: user.role,
-        receiverId: recipient,
-        subject,
-        content,
-        read: false,
-        type: recipient === 'all' ? 'broadcast' : 'individual',
-        attachments: attachmentUrls,
-      });
+
+      setIsComposeOpen(false);
+      setRecipient('');
+      setRecipientSearch('');
+      setSubject('');
+      setContent('');
+      setAttachments([]);
+    } catch (error) {
+      console.error('Failed to upload message attachments or send message', error);
+      toast.error(t('common.error'));
+    } finally {
+      setIsSending(false);
     }
-
-    setIsComposeOpen(false);
-    setRecipient('');
-    setRecipientSearch('');
-    setSubject('');
-    setContent('');
-    setAttachments([]);
-
-  }, [user, recipient, subject, content, allRecipientOptions, classes, users, sendMessage, attachments, isDirectorOrSuperAdmin]), 2000);
+  }, [user, recipient, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, isDirectorOrSuperAdmin, t]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
@@ -382,6 +400,7 @@ const Messages = () => {
         handleFileSelect={handleFileSelect}
         removeAttachment={removeAttachment}
         handleSendMessage={handleSendMessage}
+        isSending={isSending}
       />
     </div>
   );

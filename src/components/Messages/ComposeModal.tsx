@@ -24,7 +24,8 @@ interface ComposeModalProps {
     fileInputRef: React.RefObject<HTMLInputElement | null>;
     handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
     removeAttachment: (index: number) => void;
-    handleSendMessage: () => void;
+    handleSendMessage: () => void | Promise<void>;
+    isSending: boolean;
 }
 
 const ComposeModal: React.FC<ComposeModalProps> = ({
@@ -49,6 +50,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
     handleFileSelect,
     removeAttachment,
     handleSendMessage,
+    isSending,
 }) => {
     const { t } = useTranslation();
     const recipientSearchLength = recipientSearch.trim().length;
@@ -74,6 +76,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600"
                         aria-label={t('common.close')}
+                        disabled={isSending}
                     >
                         <X size={24} />
                     </button>
@@ -95,7 +98,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                             onFocus={() => setShowRecipientDropdown(true)}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                             placeholder={t('messages.searchRecipientPlaceholder')}
-                            disabled={composeMode === 'reply'}
+                            disabled={composeMode === 'reply' || isSending}
                         />
                         {showRecipientDropdown && !recipient && filteredRecipients.length > 0 && (
                             <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl shadow-lg max-h-60 overflow-y-auto">
@@ -127,6 +130,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         placeholder={t('messages.subjectPlaceholder')}
+                        disabled={isSending}
                     />
 
                     <div>
@@ -139,6 +143,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                             rows={8}
                             className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none resize-none"
                             placeholder={t('messages.messagePlaceholder')}
+                            disabled={isSending}
                         />
                     </div>
 
@@ -151,6 +156,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                             <button
                                 onClick={() => fileInputRef.current?.click()}
                                 className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                                disabled={isSending}
                             >
                                 <Paperclip size={16} />
                                 {t('messages.addAttachment')}
@@ -161,6 +167,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                                 onChange={handleFileSelect}
                                 className="hidden"
                                 multiple
+                                disabled={isSending}
                             />
                         </div>
                         {attachments.length > 0 && (
@@ -183,6 +190,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                                             onClick={() => removeAttachment(index)}
                                             className="text-gray-400 hover:text-red-500 p-1"
                                             aria-label={t('common.delete')}
+                                            disabled={isSending}
                                         >
                                             <X size={16} />
                                         </button>
@@ -193,10 +201,15 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">
-                        <Button variant="secondary" onClick={onClose}>
+                        <Button variant="secondary" onClick={onClose} disabled={isSending}>
                             {t('common.cancel')}
                         </Button>
-                        <Button variant="primary" onClick={handleSendMessage} icon={Send}>
+                        <Button
+                            variant="primary"
+                            onClick={handleSendMessage}
+                            icon={Send}
+                            isLoading={isSending}
+                        >
                             {t('messages.send')}
                         </Button>
                     </div>
