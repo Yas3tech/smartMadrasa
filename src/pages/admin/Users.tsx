@@ -345,6 +345,7 @@ const UserManagement = () => {
                       <button
                         onClick={() => handleEdit(user)}
                         className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        aria-label={t('common.edit')}
                       >
                         <Edit2 size={18} />
                       </button>
@@ -352,6 +353,7 @@ const UserManagement = () => {
                         onClick={() => handleDelete(user.id, user.role)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         disabled={user.id === currentUser?.id}
+                        aria-label={t('common.delete')}
                       >
                         <Trash2 size={18} />
                       </button>
