@@ -1,19 +1,26 @@
 import { useState } from 'react';
 import { Card, Button } from '../../components/UI';
-import { Database, Trash2, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Database,
+  Trash2,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  ArrowRightCircle,
+} from 'lucide-react';
 import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
+import { advanceToNextAcademicYear } from '../../services/systemMaintenance';
+import { useAcademics } from '../../context/DataContext';
 
 const DatabaseAdmin = () => {
+  const { academicPeriods } = useAcademics();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSeedModal, setShowSeedModal] = useState(false);
+  const [showYearModal, setShowYearModal] = useState(false);
 
-  const handleResetClick = () => {
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirmReset = async () => {
-    setShowConfirmModal(false);
+  const handleConfirmSeed = async () => {
+    setShowSeedModal(false);
     setLoading(true);
     setMessage(null);
 
@@ -21,12 +28,12 @@ const DatabaseAdmin = () => {
       await seedSystemBasics();
       setMessage({
         type: 'success',
-        text: '✅ Base de données initialisée avec succès !',
+        text: 'Base de donnees initialisee avec succes.',
       });
     } catch (error) {
       setMessage({
         type: 'error',
-        text: `❌ Erreur: ${error}`,
+        text: `Erreur: ${error}`,
       });
     } finally {
       setLoading(false);
@@ -34,7 +41,7 @@ const DatabaseAdmin = () => {
   };
 
   const handleClear = async () => {
-    if (!confirm('⚠️ Ceci va supprimer TOUTES les données. Continuer ?')) {
+    if (!window.confirm('Ceci va supprimer toutes les donnees Firestore. Continuer ?')) {
       return;
     }
 
@@ -45,12 +52,39 @@ const DatabaseAdmin = () => {
       await clearAllData();
       setMessage({
         type: 'success',
-        text: '✅ Toutes les données ont été supprimées.',
+        text: 'Toutes les donnees Firestore ont ete supprimees.',
       });
     } catch (error) {
       setMessage({
         type: 'error',
-        text: `❌ Erreur: ${error}`,
+        text: `Erreur: ${error}`,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdvanceYear = async () => {
+    setShowYearModal(false);
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const result = await advanceToNextAcademicYear(academicPeriods);
+      setMessage({
+        type: 'success',
+        text:
+          `Annee ${result.nextAcademicYear} creee. ` +
+          `${result.deletedDocs.messages || 0} messages, ` +
+          `${result.deletedDocs.homeworks || 0} devoirs, ` +
+          `${result.deletedDocs.announcements || 0} annonces, ` +
+          `${result.deletedDocs.notifications || 0} notifications et ` +
+          `${result.deletedStorageFiles} fichiers storage supprimes.`,
+      });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: `Erreur: ${error}`,
       });
     } finally {
       setLoading(false);
@@ -65,10 +99,10 @@ const DatabaseAdmin = () => {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Administration Base de Données
+            Administration base de donnees
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Gérer les données de la plateforme
+            Outils de maintenance et de reinitialisation
           </p>
         </div>
       </div>
@@ -94,13 +128,13 @@ const DatabaseAdmin = () => {
         <div className="space-y-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              🔄 Initialiser les Paramètres
+              Initialiser les parametres
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Configure les périodes académiques et les catégories de notes par défaut.
+              Recree les periodes academiques et categories de notes par defaut.
             </p>
             <Button
-              onClick={handleResetClick}
+              onClick={() => setShowSeedModal(true)}
               disabled={loading}
               icon={RefreshCw}
               className="bg-gradient-to-r from-orange-500 to-orange-600"
@@ -111,10 +145,29 @@ const DatabaseAdmin = () => {
 
           <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              🗑️ Supprimer Toutes les Données
+              Passer a l annee suivante
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Supprime toutes les collections Firestore. ⚠️ Action irréversible !
+              Cree les nouvelles periodes academiques puis nettoie les donnees annuelles:
+              messages, devoirs, annonces, notifications, evenements, soumissions et fichiers
+              storage geres par l application.
+            </p>
+            <Button
+              onClick={() => setShowYearModal(true)}
+              disabled={loading || academicPeriods.length === 0}
+              icon={ArrowRightCircle}
+              className="bg-gradient-to-r from-blue-600 to-blue-700"
+            >
+              {loading ? 'Traitement...' : 'Passer a l annee suivante'}
+            </Button>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Supprimer toutes les donnees
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Supprime toutes les collections Firestore. Action irreversible.
             </p>
             <Button
               onClick={handleClear}
@@ -122,37 +175,65 @@ const DatabaseAdmin = () => {
               icon={Trash2}
               className="bg-red-500 hover:bg-red-600"
             >
-              {loading ? 'Suppression...' : 'Supprimer Tout'}
+              {loading ? 'Suppression...' : 'Supprimer tout'}
             </Button>
           </div>
         </div>
       </Card>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
+      {showSeedModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
             <div className="flex items-center gap-3 text-orange-600 mb-4">
               <AlertCircle size={28} />
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Confirmation Requise
+                Confirmation requise
               </h3>
             </div>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Êtes-vous sûr de vouloir initialiser la base de données ?
-              <br />
-              <br />
-              ⚠️ Les paramètres par défaut seront recréés.
+              Les parametres par defaut seront recrees.
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+              <Button variant="secondary" onClick={() => setShowSeedModal(false)}>
                 Annuler
               </Button>
               <Button
-                onClick={handleConfirmReset}
+                onClick={handleConfirmSeed}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
-                Oui, Initialiser
+                Oui, initialiser
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showYearModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-center gap-3 text-blue-600 mb-4">
+              <AlertCircle size={28} />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Confirmation requise
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Cette action va creer l annee suivante et supprimer les donnees operationnelles de
+              l annee en cours.
+              <br />
+              <br />
+              Seront effaces: messages, devoirs, annonces, notifications, evenements, soumissions
+              et fichiers storage geres par l application.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setShowYearModal(false)}>
+                Annuler
+              </Button>
+              <Button
+                onClick={handleAdvanceYear}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Oui, passer a l annee suivante
               </Button>
             </div>
           </div>

@@ -22,6 +22,11 @@ service firebase.storage {
         && request.auth.uid == userId
         && request.resource.size < 25 * 1024 * 1024  // Max 25MB
         && request.resource.contentType.matches('image/.*');  // Images only
+      allow delete: if request.auth != null
+        && (
+          request.auth.uid == userId ||
+          request.auth.token.role in ['director', 'superadmin']
+        );
     }
 
     // Homework submissions: homework/{homeworkId}/{studentId}/...
@@ -29,6 +34,11 @@ service firebase.storage {
     // Write: Only the student themselves with strict file type/size checks.
     // List: director/superadmin (needed for compliant deletion workflows).
     match /homework/{allPaths=**} {
+      allow list: if request.auth != null
+        && request.auth.token.role in ['director', 'superadmin'];
+    }
+
+    match /messages/{allPaths=**} {
       allow list: if request.auth != null
         && request.auth.token.role in ['director', 'superadmin'];
     }
@@ -65,11 +75,22 @@ service firebase.storage {
       allow read: if request.auth != null && (
         request.auth.uid == senderId || 
         (resource.metadata != null && resource.metadata.receiverId == request.auth.uid) ||
-        (resource.metadata != null && resource.metadata.receiverId == 'all')
+        (resource.metadata != null && resource.metadata.receiverId == 'all') ||
+        request.auth.token.role in ['director', 'superadmin']
       );
       allow write: if request.auth != null
-        && request.auth.uid == senderId
+        && (request.auth.uid == senderId || request.auth.token.role in ['director', 'superadmin'])
         && request.resource.size < 25 * 1024 * 1024;  // Max 25MB
+      allow delete: if request.auth != null
+        && (
+          request.auth.uid == senderId ||
+          request.auth.token.role in ['director', 'superadmin']
+        );
+    }
+
+    match /events/{allPaths=**} {
+      allow list: if request.auth != null
+        && request.auth.token.role in ['director', 'superadmin'];
     }
 
     // Event attachments: events/{eventId}/...
@@ -86,12 +107,19 @@ service firebase.storage {
             || request.resource.contentType.matches('application/vnd\\..*')
             || request.resource.contentType.matches('application/.*zip.*')
             || request.resource.contentType == 'text/plain');
+      allow delete: if request.auth != null
+        && request.auth.token.role in ['director', 'superadmin'];
     }
 
     // General school documents
     // Read: All authenticated users (school-wide documents).
     // Write: Only directors and superadmins can upload official school documents.
     // SECURITY: Uses Custom Claims to restrict by role.
+    match /documents/{allPaths=**} {
+      allow list: if request.auth != null
+        && request.auth.token.role in ['director', 'superadmin'];
+    }
+
     match /documents/{fileName} {
       allow read: if request.auth != null;
       allow write: if request.auth != null
@@ -102,12 +130,16 @@ service firebase.storage {
             || request.resource.contentType.matches('application/vnd\\..*')
             || request.resource.contentType.matches('application/.*zip.*')
             || request.resource.contentType == 'text/plain');
+      allow delete: if request.auth != null
+        && request.auth.token.role in ['director', 'superadmin'];
     }
 
     // User data folder (used for deleteUserData cleanup)
     // Read/Delete: user owner + director/superadmin for compliant data cleanup.
     // Write: only user owner.
     match /users/{userId}/{allPaths=**} {
+      allow list: if request.auth != null
+        && request.auth.token.role in ['director', 'superadmin'];
       allow read: if request.auth != null
         && (
           request.auth.uid == userId ||

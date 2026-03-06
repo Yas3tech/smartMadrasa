@@ -266,6 +266,13 @@ service cloud.firestore {
         ) ||
         (isTeacher() || isDirector() || isSuperAdmin())
       );
+      allow delete: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        (isParent() && resource.data.studentId in getUserData().childrenIds) ||
+        isTeacher() ||
+        isDirector() ||
+        isSuperAdmin()
+      );
     }
 
     // Courses/Schedule (subcollection under classes):
@@ -339,8 +346,12 @@ service cloud.firestore {
       // - Receiver can mark as read/archived (but not change content)
       allow update: if isAuthenticated() && (isMessageSenderUpdate() || isMessageReceiverUpdate());
 
-      // Only sender can delete (hard delete)
-      allow delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+      // Sender or school admins can delete
+      allow delete: if isAuthenticated() && (
+        resource.data.senderId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
     }
     
     // Events:
@@ -391,6 +402,29 @@ service cloud.firestore {
       allow create: if isDirector() || isSuperAdmin();
       allow update: if isDirector() || isSuperAdmin();
       allow delete: if isDirector() || isSuperAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isDirector() ||
+        isSuperAdmin()
+      );
     }
 
     // Comments

@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useCommunication, usePerformance } from '../../context/DataContext';
-import { Bell, MessageSquare, GraduationCap, Calendar, Users, X } from 'lucide-react';
+import { Bell, MessageSquare, GraduationCap, Calendar, Users, X, Megaphone } from 'lucide-react';
+import { subscribeToAnnouncements, type Announcement } from '../../services/announcements';
+import {
+  USER_SETTINGS_CHANGED_EVENT,
+  loadUserSettings,
+  type UserSettings,
+} from '../../services/userSettings';
 
 interface Notification {
   id: string;
@@ -24,6 +30,8 @@ const NotificationBell = () => {
   const navigate = useNavigate();
   const isRTL = i18n.language === 'ar';
   const [isOpen, setIsOpen] = useState(false);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [settings, setSettings] = useState<UserSettings>(() => loadUserSettings());
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [readNotificationIds, setReadNotificationIds] = useState<string[]>(() => {
     const saved = localStorage.getItem('readNotificationIds');
@@ -35,27 +43,52 @@ const NotificationBell = () => {
     localStorage.setItem('readNotificationIds', JSON.stringify(readNotificationIds));
   }, [readNotificationIds]);
 
+  useEffect(() => {
+    const unsubscribe = subscribeToAnnouncements(setAnnouncements);
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const handleSettingsChange = () => {
+      setSettings(loadUserSettings());
+    };
+
+    window.addEventListener(USER_SETTINGS_CHANGED_EVENT, handleSettingsChange);
+    window.addEventListener('storage', handleSettingsChange);
+
+    return () => {
+      window.removeEventListener(USER_SETTINGS_CHANGED_EVENT, handleSettingsChange);
+      window.removeEventListener('storage', handleSettingsChange);
+    };
+  }, []);
+
   // Generate notifications from app data
   const generateNotifications = (): Notification[] => {
+    if (!settings.notifications.push) {
+      return [];
+    }
+
     const notifications: Notification[] = [];
 
     // Message notifications (only unread ones)
-    const unreadMessages = messages.filter((m) => m.receiverId === user?.id && !m.read);
-    unreadMessages.slice(0, 3).forEach((msg) => {
-      notifications.push({
-        id: `msg-${msg.id}`,
-        originalId: msg.id,
-        type: 'message',
-        title: t('notificationCenter.newMessage'),
-        message: `${msg.senderName}: ${msg.subject}`,
-        timestamp: msg.timestamp,
-        read: false,
-        actionUrl: '/messages',
+    if (settings.notifications.messages) {
+      const unreadMessages = messages.filter((m) => m.receiverId === user?.id && !m.read);
+      unreadMessages.slice(0, 3).forEach((msg) => {
+        notifications.push({
+          id: `msg-${msg.id}`,
+          originalId: msg.id,
+          type: 'message',
+          title: t('notificationCenter.newMessage'),
+          message: `${msg.senderName}: ${msg.subject}`,
+          timestamp: msg.timestamp,
+          read: false,
+          actionUrl: '/messages',
+        });
       });
-    });
+    }
 
     // Grade notifications (recent grades for students)
-    if (user?.role === 'student') {
+    if (settings.notifications.grades && user?.role === 'student') {
       const recentGrades = grades
         .filter((g) => g.studentId === user.id)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -79,26 +112,61 @@ const NotificationBell = () => {
     }
 
     // Event notifications (upcoming events)
-    const upcomingEvents = events
-      .filter((e) => new Date(e.start) > new Date())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-      .slice(0, 5);
+    if (settings.notifications.events) {
+      const upcomingEvents = events
+        .filter((e) => new Date(e.start) > new Date())
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+        .slice(0, 5);
 
-    upcomingEvents.forEach((event) => {
-      const notifId = `event-${event.id}`;
-      if (!readNotificationIds.includes(notifId)) {
-        notifications.push({
-          id: notifId,
-          originalId: event.id,
-          type: 'event',
-          title: t('notificationCenter.upcomingEvent'),
-          message: `${event.title} - ${new Date(event.start).toLocaleDateString('fr-FR')}`,
-          timestamp: event.start,
-          read: false,
-          actionUrl: '/calendar',
+      upcomingEvents.forEach((event) => {
+        const notifId = `event-${event.id}`;
+        if (!readNotificationIds.includes(notifId)) {
+          notifications.push({
+            id: notifId,
+            originalId: event.id,
+            type: 'event',
+            title: t('notificationCenter.upcomingEvent'),
+            message: `${event.title} - ${new Date(event.start).toLocaleDateString('fr-FR')}`,
+            timestamp: event.start,
+            read: false,
+            actionUrl: '/calendar',
+          });
+        }
+      });
+    }
+
+    if (settings.notifications.announcements) {
+      const userTarget =
+        user?.role === 'student'
+          ? 'students'
+          : user?.role === 'parent'
+            ? 'parents'
+            : user?.role === 'teacher'
+              ? 'teachers'
+              : 'all';
+
+      announcements
+        .filter((announcement) => {
+          if (user?.role === 'director' || user?.role === 'superadmin') return true;
+          return announcement.target === 'all' || announcement.target === userTarget;
+        })
+        .slice(0, 5)
+        .forEach((announcement) => {
+          const notifId = `announcement-${announcement.id}`;
+          if (!readNotificationIds.includes(notifId)) {
+            notifications.push({
+              id: notifId,
+              originalId: announcement.id,
+              type: 'announcement',
+              title: announcement.title,
+              message: announcement.content,
+              timestamp: announcement.date,
+              read: false,
+              actionUrl: '/announcements',
+            });
+          }
         });
-      }
-    });
+    }
 
     return notifications
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -125,7 +193,7 @@ const NotificationBell = () => {
     if (notification.type === 'message' && notification.originalId) {
       await markMessageAsRead(notification.originalId);
     } else {
-      setReadNotificationIds((prev) => [...prev, notification.id]);
+      setReadNotificationIds((prev) => Array.from(new Set([...prev, notification.id])));
     }
 
     // Navigate
@@ -145,7 +213,7 @@ const NotificationBell = () => {
     // Mark other notifications as read locally
     const otherNotifIds = notifications.filter((n) => n.type !== 'message').map((n) => n.id);
 
-    setReadNotificationIds((prev) => [...prev, ...otherNotifIds]);
+    setReadNotificationIds((prev) => Array.from(new Set([...prev, ...otherNotifIds])));
     setIsOpen(false);
   };
 
@@ -159,6 +227,8 @@ const NotificationBell = () => {
         return <Calendar size={18} className="text-purple-600" />;
       case 'attendance':
         return <Users size={18} className="text-green-600" />;
+      case 'announcement':
+        return <Megaphone size={18} className="text-orange-600" />;
       default:
         return <Bell size={18} className="text-gray-600" />;
     }

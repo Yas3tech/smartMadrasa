@@ -8,55 +8,18 @@ import {
   Moon,
   Sun,
   Monitor,
-  Mail,
   MessageSquare,
   Calendar,
   GraduationCap,
+  Megaphone,
   Save,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-interface UserSettings {
-  notifications: {
-    email: boolean;
-    push: boolean;
-    messages: boolean;
-    grades: boolean;
-    attendance: boolean;
-    events: boolean;
-  };
-  display: {
-    language: string;
-    theme: 'light' | 'dark' | 'auto';
-  };
-}
-
-const defaultSettings: UserSettings = {
-  notifications: {
-    email: true,
-    push: true,
-    messages: true,
-    grades: true,
-    attendance: true,
-    events: true,
-  },
-  display: {
-    language: 'fr',
-    theme: 'light',
-  },
-};
-
-const loadSettings = (): UserSettings => {
-  try {
-    const saved = localStorage.getItem('smartmadrassa_settings');
-    if (saved) {
-      return { ...defaultSettings, ...JSON.parse(saved) };
-    }
-  } catch {
-    // Ignore malformed stored settings; defaults will be used
-  }
-  return defaultSettings;
-};
+import {
+  loadUserSettings,
+  saveUserSettings,
+  type UserSettings,
+} from '../../services/userSettings';
 
 const applyTheme = (theme: 'light' | 'dark' | 'auto') => {
   const root = document.documentElement;
@@ -78,9 +41,8 @@ const Settings = () => {
   const { t, i18n } = useTranslation();
   useAuth();
 
-  const savedSettings = loadSettings();
+  const savedSettings = loadUserSettings();
 
-  const [emailNotifications, setEmailNotifications] = useState(savedSettings.notifications.email);
   const [pushNotifications, setPushNotifications] = useState(savedSettings.notifications.push);
   const [messageNotifications, setMessageNotifications] = useState(
     savedSettings.notifications.messages
@@ -90,6 +52,9 @@ const Settings = () => {
     savedSettings.notifications.attendance
   );
   const [eventNotifications, setEventNotifications] = useState(savedSettings.notifications.events);
+  const [announcementNotifications, setAnnouncementNotifications] = useState(
+    savedSettings.notifications.announcements
+  );
 
   const [language, setLanguage] = useState(i18n.language || savedSettings.display.language);
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>(savedSettings.display.theme);
@@ -111,12 +76,12 @@ const Settings = () => {
   const handleSaveSettings = () => {
     const settings: UserSettings = {
       notifications: {
-        email: emailNotifications,
         push: pushNotifications,
         messages: messageNotifications,
         grades: gradeNotifications,
         attendance: attendanceNotifications,
         events: eventNotifications,
+        announcements: announcementNotifications,
       },
       display: {
         language,
@@ -124,7 +89,7 @@ const Settings = () => {
       },
     };
 
-    localStorage.setItem('smartmadrassa_settings', JSON.stringify(settings));
+    saveUserSettings(settings);
 
     applyTheme(theme);
 
@@ -184,30 +149,6 @@ const Settings = () => {
             </div>
 
             <div className="space-y-4">
-              {/* Email Notifications */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <Mail className="text-gray-600 dark:text-slate-400" size={20} />
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {t('settings.emailNotifications')}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-slate-400">
-                      {t('settings.emailNotificationsDesc')}
-                    </p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={emailNotifications}
-                    onChange={(e) => setEmailNotifications(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
-                </label>
-              </div>
-
               {/* Push Notifications */}
               <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
                 <div className="flex items-center gap-3">
@@ -279,6 +220,20 @@ const Settings = () => {
                       type="checkbox"
                       checked={eventNotifications}
                       onChange={(e) => setEventNotifications(e.target.checked)}
+                      className="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-200"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Megaphone className="text-gray-500" size={16} />
+                      <span className="text-sm text-gray-700">
+                        {t('settings.announcementNotifications')}
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={announcementNotifications}
+                      onChange={(e) => setAnnouncementNotifications(e.target.checked)}
                       className="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-200"
                     />
                   </div>
