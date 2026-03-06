@@ -59,3 +59,9 @@
 **Vulnerability:** Students could submit homework to assignments from other classes by manipulating the `homeworkId` in the path, as the security rules only checked if the user was a student but failed to verify that the student belonged to the class of the target homework.
 **Learning:** Checking user role (e.g., `isStudent()`) is insufficient for multi-tenant data (like classes). Relationships must be explicitly validated in `create` rules by reading the parent resource (e.g., `get(...).data.classId`).
 **Prevention:** Always validate foreign key relationships in Firestore Rules, especially for write operations that link a user to a resource (like `submissions` to `homework`).
+
+## 2025-03-06 - Unsafe use of Object URLs for Message Attachments
+
+**Vulnerability:** The `Messages` component used `URL.createObjectURL()` to generate local blob URLs for file attachments and sent those local URLs as the message content to recipients. This resulted in recipients receiving links (e.g. `blob:http://localhost:3000/...`) that they could not open because blob URLs are strictly local to the sender's browser session. While not directly exploitable for code execution, this represents a severe denial-of-service/broken functionality security issue where intended data transmission silently fails.
+**Learning:** `URL.createObjectURL` is for local preview only and should never be persisted to a database or sent to other users over the network. Distributed file sharing must use a centralized storage mechanism (like Firebase Storage).
+**Prevention:** Always upload attachments to remote storage (e.g., Firebase Storage) and use the resulting signed/public URLs when sharing files between users via the database.

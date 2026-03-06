@@ -189,10 +189,22 @@ const Messages = () => {
   };
 
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
-  const handleSendMessage = useThrottle(useCallback(() => {
+  const handleSendMessage = useThrottle(useCallback(async () => {
     if (!user || !recipient || !subject || !content) return;
     const selectedRecipient = filteredRecipients.find((r) => r.id === recipient);
-    const attachmentUrls = attachments.map((file) => URL.createObjectURL(file));
+
+    // 🛡️ SECURITY: Upload attachments to Firebase Storage instead of using local blob URLs
+    // Blob URLs are not accessible to message recipients
+    const attachmentUrls = await Promise.all(
+      attachments.map(async (file) => {
+        const path = generateMessagePath(user.id, file.name);
+        return await uploadFile(file, path, {
+          customMetadata: {
+            receiverId: recipient
+          }
+        });
+      })
+    );
 
     if (selectedRecipient?.type === 'class') {
       const selectedClass = classes.find((c) => c.id === recipient);
