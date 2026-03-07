@@ -45,43 +45,43 @@ export function DirectorDashboard({
   const quickActions = [
     {
       icon: UserPlus,
-      label: t('actions.addStudent'),
+      label: t('dashboard.actions.addStudent'),
       color: 'bg-blue-500',
       onClick: () => navigate('/users?action=add&role=student'),
     },
     {
       icon: GraduationCap,
-      label: t('actions.addTeacher'),
+      label: t('dashboard.actions.addTeacher'),
       color: 'bg-orange-500',
       onClick: () => navigate('/users?action=add&role=teacher'),
     },
     {
       icon: School,
-      label: t('actions.createClass'),
+      label: t('dashboard.actions.createClass'),
       color: 'bg-green-500',
       onClick: () => navigate('/classes?action=add'),
     },
     {
       icon: ClipboardCheck,
-      label: t('actions.takeAttendance'),
+      label: t('dashboard.actions.takeAttendance'),
       color: 'bg-purple-500',
       onClick: () => navigate('/attendance'),
     },
     {
       icon: BookOpen,
-      label: t('actions.enterGrades'),
+      label: t('dashboard.actions.enterGrades'),
       color: 'bg-red-500',
       onClick: () => navigate('/grades'),
     },
     {
       icon: MessageSquare,
-      label: t('actions.sendMessage'),
+      label: t('dashboard.actions.sendMessage'),
       color: 'bg-indigo-500',
       onClick: () => navigate('/messages?action=compose'),
     },
     {
       icon: CalendarPlus,
-      label: t('actions.addEvent'),
+      label: t('dashboard.actions.addEvent'),
       color: 'bg-pink-500',
       onClick: () => navigate('/announcements'),
     },
@@ -149,7 +149,7 @@ export function DirectorDashboard({
         {/* Quick Actions */}
         <Card className="p-6">
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900">{t('actions.title')}</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('dashboard.actions.title')}</h2>
             <p className="text-sm text-gray-500">{t('dashboard.header.subtitle')}</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
