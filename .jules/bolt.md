@@ -15,3 +15,7 @@
 ## 2026-03-03 - [O(N²) Optimization in TeacherAttendance]
 **Learning:** Found an O(N²) anti-pattern in `TeacherAttendance.tsx` where a function `getAttendanceRecord` was defined in the render loop using `Array.prototype.find()`, and was called both in individual mapping iterations and multiple times during stats calculation using `.filter()`. This creates a severe performance bottleneck when scaling to larger classes.
 **Action:** Used `useMemo` to pre-compute an `attendanceMap` (O(N)), transforming all subsequent lookups within the render loop and stats aggregation into O(1) operations, dropping the complexity to O(A + S) where A is the number of attendance records and S is the number of students. Refactored stats calculation to perform a single iteration over the students list instead of multiple `.filter()` passes.
+
+## 2026-03-03 - [Nested Loop O(N²) Optimization in Dashboard Stats]
+**Learning:** Found a severe performance bottleneck in `BulletinDashboard.tsx` where an `Array.prototype.find()` lookup over `periodComments` was executed inside a doubly nested loop (Students x Courses x Comments). This created an O(S*C*K) operation during critical UI rendering for directors computing class validation statistics.
+**Action:** Replaced the inner `find()` search with an O(1) `Map.prototype.get()` lookup by pre-computing a `commentMap` in O(K) time using a composite key (`${studentId}::${courseId}`). Always prefer pre-computing lookup maps outside nested iterations, especially in statistics aggregation.

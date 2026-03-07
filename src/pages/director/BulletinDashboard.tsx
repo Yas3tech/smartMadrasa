@@ -46,6 +46,9 @@ const BulletinDashboard: React.FC = () => {
     const stats: Record<string, { total: number; validated: number; isFullyValidated: boolean }> =
       {};
 
+    // Optimization: Pre-compute comments lookup map (O(C) instead of O(S*C*K))
+    const commentMap = new Map<string, TeacherComment>(periodComments.map((c) => [`${c.studentId}::${c.courseId}`, c]));
+
     classes.forEach((cls) => {
       // Find students in this class
       const classStudents = students.filter((s) => (s as Student).classId === cls.id);
@@ -59,9 +62,7 @@ const BulletinDashboard: React.FC = () => {
       classStudents.forEach((student) => {
         classCourses.forEach((course) => {
           totalExpected++;
-          const comment = periodComments.find(
-            (c) => c.studentId === student.id && c.courseId === course.id
-          );
+          const comment = commentMap.get(`${student.id}::${course.id}`);
           if (comment?.isValidated) {
             validatedCount++;
           }

@@ -53,7 +53,7 @@ const MessageDetail: React.FC<MessageDetailProps> = ({
               {isMobile && (
                 <button
                   onClick={() => setMobileView('list')}
-                  className="p-2 mr-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+                  className="p-2 mr-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   aria-label={t('common.back')}
                 >
                   <ChevronLeft size={24} />
@@ -61,21 +61,23 @@ const MessageDetail: React.FC<MessageDetailProps> = ({
               )}
               <div className="flex gap-2">
                 <button
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   onClick={() => handleReply(selectedMessage)}
                   title={t('messages.reply')}
+                  aria-label={t('messages.reply')}
                 >
                   <ReplyIcon size={18} />
                 </button>
                 <button
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   onClick={() => handleForward(selectedMessage)}
                   title={t('messages.forward')}
+                  aria-label={t('messages.forward')}
                 >
                   <ForwardIcon size={18} />
                 </button>
                 <button
-                  className={`p-2 transition-colors rounded-lg ${
+                  className={`p-2 transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                     selectedMessage.archived
                       ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
                       : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
@@ -84,13 +86,17 @@ const MessageDetail: React.FC<MessageDetailProps> = ({
                   title={
                     selectedMessage.archived ? t('messages.unarchive') : t('messages.archive')
                   }
+                  aria-label={
+                    selectedMessage.archived ? t('messages.unarchive') : t('messages.archive')
+                  }
                 >
                   <Archive size={18} />
                 </button>
                 <button
-                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   onClick={() => handleDeleteMessage(selectedMessage.id)}
                   title={t('common.delete')}
+                  aria-label={t('common.delete')}
                 >
                   <Trash2 size={18} />
                 </button>
