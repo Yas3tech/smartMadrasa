@@ -15,7 +15,7 @@ import { LogIn, AlertCircle, ArrowLeft, Send, Sparkles } from 'lucide-react';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
 
 const Login = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,18 +24,76 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [isDatabaseEmpty, setIsDatabaseEmpty] = useState(false);
+  const copy = i18n.language.startsWith('nl')
+    ? {
+        title: 'Log in om door te gaan',
+        resetTitle: 'Wachtwoord opnieuw instellen',
+        invalidCredentials: 'Ongeldig e-mailadres of wachtwoord',
+        tooManyRequests: 'Te veel pogingen. Probeer het later opnieuw.',
+        genericError: 'Er is een fout opgetreden bij het inloggen',
+        emailRequired: 'Voer uw e-mailadres in.',
+        resetEmailSent: 'Er is een e-mail voor wachtwoordherstel verzonden.',
+        unauthorizedGoogleAccount:
+          'Dit Google-account is niet toegestaan. Neem contact op met de administratie.',
+        googleLoginFailed: 'Inloggen met Google mislukt.',
+        sendResetLink: 'Link verzenden',
+        or: 'OF',
+        continueWithGoogle: 'Doorgaan met Google',
+        backToLogin: 'Terug naar aanmelden',
+        firstRunTitle: 'Eerste gebruik?',
+        firstRunDesc: 'Er is nog geen school geconfigureerd. Maak eerst uw beheerdersaccount aan.',
+        setupSchool: 'School configureren',
+      }
+    : i18n.language.startsWith('ar')
+      ? {
+          title: 'قم بتسجيل الدخول للمتابعة',
+          resetTitle: 'اعادة تعيين كلمة المرور',
+          invalidCredentials: 'بريد الكتروني او كلمة مرور غير صحيحة',
+          tooManyRequests: 'عدد كبير جدا من المحاولات. يرجى المحاولة لاحقا.',
+          genericError: 'حدث خطأ اثناء تسجيل الدخول',
+          emailRequired: 'يرجى ادخال بريدك الالكتروني.',
+          resetEmailSent: 'تم ارسال رسالة اعادة تعيين كلمة المرور.',
+          unauthorizedGoogleAccount: 'حساب Google هذا غير مصرح له. يرجى التواصل مع الادارة.',
+          googleLoginFailed: 'فشل تسجيل الدخول باستخدام Google.',
+          sendResetLink: 'ارسال الرابط',
+          or: 'او',
+          continueWithGoogle: 'المتابعة باستخدام Google',
+          backToLogin: 'العودة الى تسجيل الدخول',
+          firstRunTitle: 'اول استخدام؟',
+          firstRunDesc: 'لم يتم اعداد اي مدرسة بعد. ابدأ بإنشاء حساب المدير.',
+          setupSchool: 'اعداد المدرسة',
+        }
+      : {
+          title: 'Connectez-vous pour continuer',
+          resetTitle: 'Reinitialiser le mot de passe',
+          invalidCredentials: 'Email ou mot de passe incorrect',
+          tooManyRequests: 'Trop de tentatives. Reessayez plus tard.',
+          genericError: "Une erreur s'est produite",
+          emailRequired: 'Veuillez saisir votre email.',
+          resetEmailSent: 'Un email de reinitialisation a ete envoye.',
+          unauthorizedGoogleAccount:
+            "Ce compte Google n'est pas autorise. Veuillez contacter l'administration.",
+          googleLoginFailed: 'Echec de la connexion avec Google.',
+          sendResetLink: 'Envoyer le lien',
+          or: 'OU',
+          continueWithGoogle: 'Continuer avec Google',
+          backToLogin: 'Retour a la connexion',
+          firstRunTitle: 'Premiere utilisation ?',
+          firstRunDesc:
+            "Aucune ecole n'est configuree. Commencez par creer votre compte administrateur.",
+          setupSchool: "Configurer l'ecole",
+        };
 
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    // Check setup status after initial paint using dynamic import to save bundle size
     const checkSetup = async () => {
       try {
         const { checkIfDatabaseEmpty: check } = await import('../../services/setup');
         const isEmpty = await check();
         setIsDatabaseEmpty(isEmpty);
       } catch {
-        // Silently fail if firestore is blocked or fails to load
+        // Ignore setup probe failures on login.
       }
     };
     checkSetup();
@@ -49,12 +107,8 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isUnsafeProductionConfig) {
-      setError(t('auth.errors.generic'));
-      return;
-    }
-    if (!auth) {
-      setError(t('auth.errors.generic'));
+    if (isUnsafeProductionConfig || !auth) {
+      setError(copy.genericError);
       return;
     }
 
@@ -63,18 +117,14 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // We don't set loading(false) here because if it succeeds,
-      // the useEffect will navigate away.
-      // However, if the profile lookup fails, we'll be stuck.
-      // Let's add a timeout or check authLoading in the UI.
     } catch (err) {
       const authError = err as AuthError;
       if (authError.code === 'auth/invalid-credential') {
-        setError(t('auth.errors.invalidCredentials'));
+        setError(copy.invalidCredentials);
       } else if (authError.code === 'auth/too-many-requests') {
-        setError(t('auth.errors.tooManyRequests'));
+        setError(copy.tooManyRequests);
       } else {
-        setError(t('auth.errors.generic'));
+        setError(copy.genericError);
       }
       setLoading(false);
     }
@@ -85,7 +135,7 @@ const Login = () => {
     if (!auth) return;
 
     if (!email) {
-      setError(t('auth.errors.emailRequired'));
+      setError(copy.emailRequired);
       return;
     }
 
@@ -95,15 +145,14 @@ const Login = () => {
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setMessage(t('auth.resetEmailSent', 'Un email de réinitialisation a été envoyé.'));
+      setMessage(copy.resetEmailSent);
       setLoading(false);
     } catch (err) {
       const authError = err as AuthError;
       if (authError.code === 'auth/user-not-found') {
-        // Prevent username enumeration by showing success message even if user not found
-        setMessage(t('auth.resetEmailSent', 'Un email de réinitialisation a été envoyé.'));
+        setMessage(copy.resetEmailSent);
       } else {
-        setError(t('auth.errors.generic', 'Une erreur est survenue.'));
+        setError(copy.genericError);
       }
       setLoading(false);
     }
@@ -121,8 +170,6 @@ const Login = () => {
 
     try {
       const result = await signInWithPopup(auth, provider);
-
-      // Verification: Does the user exist in our system?
       const { doc, getDoc } = await import('firebase/firestore');
       const { db } = await import('../../config/db');
 
@@ -140,15 +187,13 @@ const Login = () => {
 
         if (!isAuthorized) {
           await auth.signOut();
-          setError(
-            t('auth.errors.unauthorizedGoogleAccount', "Ce compte Google n'est pas autorisé. Veuillez contacter l'administration.")
-          );
+          setError(copy.unauthorizedGoogleAccount);
           setLoading(false);
           return;
         }
       }
     } catch {
-      setError(t('auth.errors.googleLoginFailed', 'Échec de la connexion avec Google.'));
+      setError(copy.googleLoginFailed);
       setLoading(false);
     }
   };
@@ -178,13 +223,12 @@ const Login = () => {
           />
           <h1 className="text-3xl font-bold text-gray-900">SmartMadrassa</h1>
           <p className="text-gray-500 mt-2">
-            {isResetMode ? t('auth.resetPasswordTitle') : t('auth.signInToContinue')}
+            {isResetMode ? copy.resetTitle : copy.title}
           </p>
         </div>
 
         <Card className="p-8 shadow-xl border-0 min-h-[500px] flex flex-col justify-center">
           <form onSubmit={isResetMode ? handleResetPassword : handleLogin} className="space-y-6">
-            {/* Reserve space for errors and messages to avoid shift */}
             {(error || message) && (
               <div className="animate-in fade-in duration-300">
                 {error && (
@@ -219,7 +263,7 @@ const Login = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="********"
                   required
                 />
               )}
@@ -234,7 +278,7 @@ const Login = () => {
               {loading
                 ? t('auth.loading')
                 : isResetMode
-                  ? t('auth.sendResetLink', 'Envoyer le lien')
+                  ? copy.sendResetLink
                   : t('auth.login')}
             </Button>
 
@@ -244,9 +288,7 @@ const Login = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200"></div>
                   </div>
-                  <div className="relative bg-white px-4 text-sm text-gray-500">
-                    {t('auth.or', 'OU')}
-                  </div>
+                  <div className="relative bg-white px-4 text-sm text-gray-500">{copy.or}</div>
                 </div>
 
                 <button
@@ -260,7 +302,7 @@ const Login = () => {
                     alt="Google"
                     className="w-5 h-5"
                   />
-                  <span>{t('auth.continueWithGoogle', 'Continuer avec Google')}</span>
+                  <span>{copy.continueWithGoogle}</span>
                 </button>
               </>
             )}
@@ -278,7 +320,7 @@ const Login = () => {
                 {isResetMode ? (
                   <>
                     <ArrowLeft size={16} />
-                    {t('auth.backToLogin', 'Retour à la connexion')}
+                    {copy.backToLogin}
                   </>
                 ) : (
                   t('auth.forgotPassword')
@@ -286,21 +328,15 @@ const Login = () => {
               </button>
             </div>
 
-            {/* First Run Prompt moved to bottom for stability */}
             {isDatabaseEmpty && !isResetMode && !error && !message && (
               <div className="mt-6 pt-6 border-t border-gray-100 animate-in slide-in-from-bottom-2 duration-500">
                 <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
                   <div className="flex items-center gap-3 text-orange-800 font-semibold">
                     <Sparkles size={18} className="text-orange-500" />
-                    <span className="text-sm">
-                      {t('auth.firstRunTitle', 'Première utilisation ?')}
-                    </span>
+                    <span className="text-sm">{copy.firstRunTitle}</span>
                   </div>
                   <p className="text-xs text-orange-700 leading-relaxed">
-                    {t(
-                      'auth.firstRunDesc',
-                      "Aucune école n'est configurée. Commencez par créer votre compte administrateur."
-                    )}
+                    {copy.firstRunDesc}
                   </p>
                   <Button
                     onClick={() => navigate('/setup')}
@@ -308,7 +344,7 @@ const Login = () => {
                     size="sm"
                     className="w-full py-2 bg-white text-orange-600 border-orange-200 hover:bg-orange-50 shadow-none text-xs"
                   >
-                    {t('auth.setupSchool', "Configurer l'école")}
+                    {copy.setupSchool}
                   </Button>
                 </div>
               </div>

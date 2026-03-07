@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal } from '../../components/UI';
@@ -33,23 +33,43 @@ const Resources = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const isRTL = i18n.language === 'ar';
+  const copy = useMemo(() => {
+    if (i18n.language.startsWith('nl')) {
+      return {
+        defaultSubject: 'Wiskunde',
+        subjects: ['Wiskunde', 'Frans', 'Arabisch', 'Wetenschappen', 'Geschiedenis'],
+        samples: ['Oefeningen hoofdrekenen', 'Werkwoordengids', 'Periodiek systeem'],
+        classes: { c1: 'Klas 1A', c2: 'Klas 1B', c3: 'Klas 2A' },
+      };
+    }
+    if (i18n.language.startsWith('ar')) {
+      return {
+        defaultSubject: 'الرياضيات',
+        subjects: ['الرياضيات', 'الفرنسية', 'العربية', 'العلوم', 'التاريخ'],
+        samples: ['تمارين الحساب الذهني', 'دليل تصريف الافعال', 'الجدول الدوري'],
+        classes: { c1: 'الفصل 1A', c2: 'الفصل 1B', c3: 'الفصل 2A' },
+      };
+    }
+    return {
+      defaultSubject: 'Mathematiques',
+      subjects: ['Mathematiques', 'Francais', 'Arabe', 'Sciences', 'Histoire'],
+      samples: ['Exercices de calcul mental', 'Guide de conjugaison', 'Tableau periodique'],
+      classes: { c1: 'Classe 1A', c2: 'Classe 1B', c3: 'Classe 2A' },
+    };
+  }, [i18n.language]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Form state
   const [fileName, setFileName] = useState('');
-  const [subject, setSubject] = useState('Mathématiques');
+  const [subject, setSubject] = useState(copy.defaultSubject);
   const [classLevel, setClassLevel] = useState('c1');
-
-  // Sample resources
   const [resources, setResources] = useState<Resource[]>([
     {
       id: '1',
-      name: 'Exercices de calcul mental',
+      name: copy.samples[0],
       type: 'pdf',
-      subject: 'Mathématiques',
+      subject: copy.subjects[0],
       class: 'c1',
       uploadedBy: 'Prof. Martin',
       uploadedAt: '2024-12-06T10:00:00.000Z',
@@ -58,9 +78,9 @@ const Resources = () => {
     },
     {
       id: '2',
-      name: 'Guide de conjugaison',
+      name: copy.samples[1],
       type: 'pdf',
-      subject: 'Français',
+      subject: copy.subjects[1],
       class: 'c1',
       uploadedBy: 'Prof. Dupont',
       uploadedAt: '2024-12-03T10:00:00.000Z',
@@ -69,9 +89,9 @@ const Resources = () => {
     },
     {
       id: '3',
-      name: 'Tableau périodique',
+      name: copy.samples[2],
       type: 'image',
-      subject: 'Sciences',
+      subject: copy.subjects[3],
       class: 'c1',
       uploadedBy: 'Prof. Bernard',
       uploadedAt: '2024-11-28T10:00:00.000Z',
@@ -79,8 +99,6 @@ const Resources = () => {
       downloads: 38,
     },
   ]);
-
-  const subjects = ['Mathématiques', 'Français', 'Arabe', 'Sciences', 'Histoire'];
 
   const filteredResources = resources.filter((r) => {
     const matchesSubject = selectedSubject === 'all' || r.subject === selectedSubject;
@@ -139,7 +157,6 @@ const Resources = () => {
         )}
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
@@ -193,7 +210,6 @@ const Resources = () => {
         </Card>
       </div>
 
-      {/* Filters */}
       <Card className="p-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -215,7 +231,7 @@ const Resources = () => {
             className="px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
           >
             <option value="all">{t('resources.allSubjects')}</option>
-            {subjects.map((s) => (
+            {copy.subjects.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
@@ -224,7 +240,6 @@ const Resources = () => {
         </div>
       </Card>
 
-      {/* Resources Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredResources.map((resource) => (
           <Card key={resource.id} className="p-6 hover:shadow-lg transition-shadow">
@@ -284,7 +299,6 @@ const Resources = () => {
         </Card>
       )}
 
-      {/* Upload Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -320,7 +334,7 @@ const Resources = () => {
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
               >
-                {subjects.map((s) => (
+                {copy.subjects.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -337,9 +351,9 @@ const Resources = () => {
                 onChange={(e) => setClassLevel(e.target.value)}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
               >
-                <option value="c1">Classe 1A</option>
-                <option value="c2">Classe 1B</option>
-                <option value="c3">Classe 2A</option>
+                <option value="c1">{copy.classes.c1}</option>
+                <option value="c2">{copy.classes.c2}</option>
+                <option value="c3">{copy.classes.c3}</option>
               </select>
             </div>
 

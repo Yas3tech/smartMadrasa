@@ -13,6 +13,7 @@ import {
   type UserImportReviewRow,
   validateUserImportRows,
 } from '../../utils/userImport';
+import { useTranslation } from 'react-i18next';
 
 interface UserImportWizardProps {
   isOpen: boolean;
@@ -23,21 +24,6 @@ interface UserImportWizardProps {
   canImportSuperadmin: boolean;
 }
 
-const editableFields: Array<{ key: UserImportField; label: string; placeholder: string }> = [
-  { key: 'name', label: 'Nom', placeholder: 'Jean Dupont' },
-  { key: 'email', label: 'Email', placeholder: 'jean@school.ma' },
-  { key: 'role', label: 'Role', placeholder: 'student' },
-  { key: 'phone', label: 'Telephone', placeholder: '+2126...' },
-  { key: 'birthDate', label: 'Date naissance', placeholder: '2010-01-01' },
-  { key: 'studentEmail', label: 'Email eleve', placeholder: 'eleve@school.ma' },
-];
-
-const stepTitles = [
-  '1. Import',
-  '2. Revue et correction',
-  '3. Import final',
-];
-
 export default function UserImportWizard({
   isOpen,
   onClose,
@@ -46,6 +32,7 @@ export default function UserImportWizard({
   addUser,
   canImportSuperadmin,
 }: UserImportWizardProps) {
+  const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [pastedData, setPastedData] = useState('');
@@ -53,7 +40,158 @@ export default function UserImportWizard({
   const [rows, setRows] = useState<UserImportReviewRow[]>([]);
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-
+  const copy = i18n.language.startsWith('nl')
+    ? {
+        fields: ['Naam', 'E-mail', 'Rol', 'Telefoon', 'Geboortedatum', 'Leerling e-mail'],
+        stepTitles: ['1. Import', '2. Controle en correctie', '3. Definitieve import'],
+        noUsableRows: 'Geen bruikbare rijen gevonden.',
+        invalidFile: 'Kan dit bestand niet lezen. Gebruik .xlsx of .csv.',
+        pasteSource: 'Plakken',
+        noValidRows: 'Geen geldige rijen om te importeren.',
+        partialSuccess: (count: number, invalid: number) =>
+          `${count} gebruikers geimporteerd. ${invalid} rij(en) genegeerd.`,
+        success: (count: number) => `${count} gebruikers succesvol geimporteerd.`,
+        importError: 'Import mislukt. Controleer de gegevens en probeer opnieuw.',
+        importFile: 'Bestand importeren',
+        importFileDesc:
+          'Laad een .xlsx- of .csv-bestand. De wizard maakt nog niets aan en opent eerst een controlescherm.',
+        readingFile: 'Bestand lezen...',
+        chooseFile: 'Bestand kiezen',
+        pasteData: 'Gegevens plakken',
+        pasteDataDesc:
+          'Plak een tabel met headers name,email,role,phone,birthDate,studentEmail.',
+        previewPasted: 'Geplakte rijen bekijken',
+        source: 'Bron',
+        loadedRows: 'Geladen rijen',
+        valid: 'Geldig',
+        fix: 'Te corrigeren',
+        reviewHint: 'Klik in rode cellen om direct te corrigeren zonder terug te gaan naar het bestand.',
+        row: 'Rij',
+        status: 'Status',
+        ready: 'Klaar',
+        summaryTitle: 'Samenvatting voor import',
+        summaryDesc:
+          'Alleen geldige rijen worden aangemaakt. Rijen met fouten blijven zichtbaar voor latere correctie.',
+        validRows: 'Geldige rijen',
+        excludedRows: 'Uitgesloten rijen',
+        controlTitle: 'Controle',
+        controlDesc:
+          'De wizard valideert rollen, e-mails, doublures en ouder-leerling koppelingen voor het aanmaken.',
+        title: 'Wizard gebruikersimport',
+        subtitle: 'Importeer, corrigeer direct en start daarna alleen geldige rijen.',
+        progressReview: (valid: number, invalid: number) => `${valid} geldig / ${invalid} corrigeren`,
+        progressFinalize: (valid: number) => `${valid} rij(en) worden geimporteerd`,
+        continueImport: 'Verder naar import',
+        importing: 'Import bezig...',
+        importRows: (count: number) => `${count} rij(en) importeren`,
+        cancel: 'Annuleren',
+        back: 'Terug',
+        reset: 'Opnieuw instellen',
+      }
+    : i18n.language.startsWith('ar')
+      ? {
+          fields: ['الاسم', 'البريد', 'الدور', 'الهاتف', 'تاريخ الميلاد', 'بريد التلميذ'],
+          stepTitles: ['1. استيراد', '2. مراجعة وتصحيح', '3. استيراد نهائي'],
+          noUsableRows: 'لم يتم العثور على اسطر قابلة للاستعمال.',
+          invalidFile: 'تعذر قراءة هذا الملف. استخدم .xlsx او .csv.',
+          pasteSource: 'لصق',
+          noValidRows: 'لا توجد اسطر صالحة للاستيراد.',
+          partialSuccess: (count: number, invalid: number) =>
+            `تم استيراد ${count} مستخدمين. تم تجاهل ${invalid} سطر(اسطر).`,
+          success: (count: number) => `تم استيراد ${count} مستخدمين بنجاح.`,
+          importError: 'فشل الاستيراد. تحقق من البيانات ثم اعد المحاولة.',
+          importFile: 'استيراد ملف',
+          importFileDesc:
+            'حمّل ملف .xlsx او .csv. المعالج لا ينشئ شيئا مباشرة ويفتح اولا خطوة مراجعة.',
+          readingFile: 'جار قراءة الملف...',
+          chooseFile: 'اختيار ملف',
+          pasteData: 'لصق بيانات',
+          pasteDataDesc:
+            'الصق جدولا بعناوين name,email,role,phone,birthDate,studentEmail.',
+          previewPasted: 'معاينة الاسطر الملصقة',
+          source: 'المصدر',
+          loadedRows: 'الاسطر المحملة',
+          valid: 'صالحة',
+          fix: 'للتصحيح',
+          reviewHint: 'انقر في الخلايا الحمراء للتصحيح مباشرة دون الرجوع الى الملف.',
+          row: 'السطر',
+          status: 'الحالة',
+          ready: 'جاهز',
+          summaryTitle: 'ملخص قبل الاستيراد',
+          summaryDesc:
+            'سيتم انشاء الاسطر الصالحة فقط. وستبقى الاسطر الخاطئة ظاهرة لتصحيحها لاحقا.',
+          validRows: 'الاسطر الصالحة',
+          excludedRows: 'الاسطر المستبعدة',
+          controlTitle: 'التحقق',
+          controlDesc:
+            'يتحقق المعالج من الادوار والبريد والتكرار وربط الولي بالتلميذ قبل الانشاء.',
+          title: 'معالج استيراد المستخدمين',
+          subtitle: 'استورد وصحح مباشرة ثم شغل فقط الاسطر الصالحة.',
+          progressReview: (valid: number, invalid: number) => `${valid} صالح / ${invalid} للتصحيح`,
+          progressFinalize: (valid: number) => `سيتم استيراد ${valid} سطر(اسطر)`,
+          continueImport: 'المتابعة الى الاستيراد',
+          importing: 'جار الاستيراد...',
+          importRows: (count: number) => `استيراد ${count} سطر(اسطر)`,
+          cancel: 'الغاء',
+          back: 'رجوع',
+          reset: 'اعادة ضبط',
+        }
+      : {
+          fields: ['Nom', 'Email', 'Role', 'Telephone', 'Date naissance', 'Email eleve'],
+          stepTitles: ['1. Import', '2. Revue et correction', '3. Import final'],
+          noUsableRows: 'Aucune ligne exploitable trouvee.',
+          invalidFile: 'Impossible de lire ce fichier. Utilisez .xlsx ou .csv.',
+          pasteSource: 'Copier-coller',
+          noValidRows: 'Aucune ligne valide a importer.',
+          partialSuccess: (count: number, invalid: number) =>
+            `${count} utilisateurs importes. ${invalid} ligne(s) ignoree(s).`,
+          success: (count: number) => `${count} utilisateurs importes avec succes.`,
+          importError: "L'import a echoue. Verifiez les donnees puis reessayez.",
+          importFile: 'Importer un fichier',
+          importFileDesc:
+            "Chargez un fichier .xlsx ou .csv. Le wizard ne cree rien tout de suite et ouvre d'abord une etape de revue.",
+          readingFile: 'Lecture du fichier...',
+          chooseFile: 'Choisir un fichier',
+          pasteData: 'Coller des donnees',
+          pasteDataDesc:
+            'Collez un tableau avec en-tetes name,email,role,phone,birthDate,studentEmail.',
+          previewPasted: 'Previsualiser les lignes collees',
+          source: 'Source',
+          loadedRows: 'Lignes chargees',
+          valid: 'Valides',
+          fix: 'A corriger',
+          reviewHint: 'Cliquez dans les cellules rouges pour corriger directement, sans revenir au fichier.',
+          row: 'Ligne',
+          status: 'Statut',
+          ready: 'Pret',
+          summaryTitle: 'Resume avant import',
+          summaryDesc:
+            'Seules les lignes valides seront creees. Les lignes en erreur resteront dans le tableau pour correction ulterieure.',
+          validRows: 'Lignes valides',
+          excludedRows: 'Lignes exclues',
+          controlTitle: 'Controle',
+          controlDesc:
+            'Le wizard valide les roles, les emails, les doublons et le lien parent-eleve avant creation.',
+          title: "Assistant d'import utilisateurs",
+          subtitle: 'Importez, corrigez en direct, puis lancez uniquement les lignes valides.',
+          progressReview: (valid: number, invalid: number) => `${valid} valide(s) / ${invalid} a corriger`,
+          progressFinalize: (valid: number) => `${valid} ligne(s) seront importees`,
+          continueImport: "Continuer vers l'import",
+          importing: 'Import en cours...',
+          importRows: (count: number) => `Importer ${count} ligne(s)`,
+          cancel: 'Annuler',
+          back: 'Retour',
+          reset: 'Reinitialiser',
+        };
+  const editableFields: Array<{ key: UserImportField; label: string; placeholder: string }> = [
+    { key: 'name', label: copy.fields[0], placeholder: 'Jean Dupont' },
+    { key: 'email', label: copy.fields[1], placeholder: 'jean@school.ma' },
+    { key: 'role', label: copy.fields[2], placeholder: 'student' },
+    { key: 'phone', label: copy.fields[3], placeholder: '+2126...' },
+    { key: 'birthDate', label: copy.fields[4], placeholder: '2010-01-01' },
+    { key: 'studentEmail', label: copy.fields[5], placeholder: 'eleve@school.ma' },
+  ];
+  const stepTitles = copy.stepTitles;
   const summary = useMemo(() => getUserImportSummary(rows), [rows]);
 
   const resetWizard = () => {
@@ -89,7 +227,7 @@ export default function UserImportWizard({
     });
 
     if (reviewedRows.length === 0) {
-      toast.error('Aucune ligne exploitable trouvee.');
+      toast.error(copy.noUsableRows);
       return;
     }
 
@@ -107,7 +245,7 @@ export default function UserImportWizard({
       const parsedRows = await parseUserFile(file);
       loadRows(parsedRows, file.name);
     } catch {
-      toast.error("Impossible de lire ce fichier. Utilisez .xlsx ou .csv.");
+      toast.error(copy.invalidFile);
     } finally {
       setIsParsing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -116,7 +254,7 @@ export default function UserImportWizard({
 
   const handlePastePreview = () => {
     const parsedRows = parseUserText(pastedData);
-    loadRows(parsedRows, 'Copier-coller');
+    loadRows(parsedRows, copy.pasteSource);
   };
 
   const handleCellChange = (rowNumber: number, field: UserImportField, value: string) => {
@@ -134,7 +272,7 @@ export default function UserImportWizard({
   const handleImport = async () => {
     const validCount = rows.filter((row) => row.isValid).length;
     if (validCount === 0) {
-      toast.error('Aucune ligne valide a importer.');
+      toast.error(copy.noValidRows);
       return;
     }
 
@@ -142,15 +280,15 @@ export default function UserImportWizard({
     try {
       const result = await importValidatedUserRows(rows, users, addUser);
       if (summary.invalid > 0) {
-        toast.success(`${result.count} utilisateurs importes. ${summary.invalid} ligne(s) ignoree(s).`, {
+        toast.success(copy.partialSuccess(result.count, summary.invalid), {
           duration: 5000,
         });
       } else {
-        toast.success(`${result.count} utilisateurs importes avec succes.`);
+        toast.success(copy.success(result.count));
       }
       handleClose();
     } catch {
-      toast.error("L'import a echoue. Verifiez les donnees puis reessayez.");
+      toast.error(copy.importError);
     } finally {
       setIsImporting(false);
     }
@@ -165,10 +303,9 @@ export default function UserImportWizard({
           </div>
           <div className="space-y-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Importer un fichier</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{copy.importFile}</h3>
               <p className="text-sm text-gray-600">
-                Chargez un fichier `.xlsx` ou `.csv`. Le wizard ne cree rien tout de suite: il
-                ouvre d'abord une etape de revue.
+                {copy.importFileDesc}
               </p>
             </div>
             <input
@@ -184,7 +321,7 @@ export default function UserImportWizard({
               onClick={() => fileInputRef.current?.click()}
               disabled={isParsing}
             >
-              {isParsing ? 'Lecture du fichier...' : 'Choisir un fichier'}
+              {isParsing ? copy.readingFile : copy.chooseFile}
             </Button>
           </div>
         </div>
@@ -197,9 +334,9 @@ export default function UserImportWizard({
           </div>
           <div className="w-full space-y-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Coller des donnees</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{copy.pasteData}</h3>
               <p className="text-sm text-gray-600">
-                Collez un tableau avec en-tetes `name,email,role,phone,birthDate,studentEmail`.
+                {copy.pasteDataDesc}
               </p>
             </div>
             <textarea
@@ -215,7 +352,7 @@ export default function UserImportWizard({
               onClick={handlePastePreview}
               disabled={!pastedData.trim()}
             >
-              Previsualiser les lignes collees
+              {copy.previewPasted}
             </Button>
           </div>
         </div>
@@ -227,33 +364,33 @@ export default function UserImportWizard({
     <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="p-4">
-          <p className="text-sm text-gray-500">Source</p>
+          <p className="text-sm text-gray-500">{copy.source}</p>
           <p className="mt-1 font-semibold text-gray-900">{sourceLabel}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-gray-500">Lignes chargees</p>
+          <p className="text-sm text-gray-500">{copy.loadedRows}</p>
           <p className="mt-1 text-2xl font-bold text-gray-900">{summary.total}</p>
         </Card>
         <Card className="p-4 border border-green-100 bg-green-50">
-          <p className="text-sm text-green-700">Valides</p>
+          <p className="text-sm text-green-700">{copy.valid}</p>
           <p className="mt-1 text-2xl font-bold text-green-800">{summary.valid}</p>
         </Card>
         <Card className="p-4 border border-red-100 bg-red-50">
-          <p className="text-sm text-red-700">A corriger</p>
+          <p className="text-sm text-red-700">{copy.fix}</p>
           <p className="mt-1 text-2xl font-bold text-red-800">{summary.invalid}</p>
         </Card>
       </div>
 
       <div className="rounded-2xl border border-gray-200">
         <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
-          Cliquez dans les cellules rouges pour corriger directement, sans revenir au fichier.
+          {copy.reviewHint}
         </div>
         <div className="max-h-[48vh] overflow-auto">
           <table className="min-w-[1100px] w-full">
             <thead className="sticky top-0 bg-white shadow-sm">
               <tr className="border-b border-gray-200">
                 <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Ligne
+                  {copy.row}
                 </th>
                 {editableFields.map((field) => (
                   <th
@@ -264,7 +401,7 @@ export default function UserImportWizard({
                   </th>
                 ))}
                 <th className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Statut
+                  {copy.status}
                 </th>
               </tr>
             </thead>
@@ -296,7 +433,7 @@ export default function UserImportWizard({
                   })}
                   <td className="px-3 py-3">
                     <Badge variant={row.isValid ? 'success' : 'error'}>
-                      {row.isValid ? 'Pret' : 'Erreur'}
+                      {row.isValid ? copy.ready : t('common.error')}
                     </Badge>
                     {row.generalErrors.length > 0 && (
                       <p className="mt-2 text-xs text-red-600">{row.generalErrors[0]}</p>
@@ -320,19 +457,18 @@ export default function UserImportWizard({
           </div>
           <div className="space-y-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Resume avant import</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{copy.summaryTitle}</h3>
               <p className="text-sm text-gray-600">
-                Seules les lignes valides seront creees. Les lignes en erreur resteront dans le
-                tableau pour correction ulterieure.
+                {copy.summaryDesc}
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl bg-gray-50 p-4">
-                <p className="text-sm text-gray-500">Lignes valides</p>
+                <p className="text-sm text-gray-500">{copy.validRows}</p>
                 <p className="text-3xl font-bold text-gray-900">{summary.valid}</p>
               </div>
               <div className="rounded-2xl bg-red-50 p-4">
-                <p className="text-sm text-red-700">Lignes exclues</p>
+                <p className="text-sm text-red-700">{copy.excludedRows}</p>
                 <p className="text-3xl font-bold text-red-800">{summary.invalid}</p>
               </div>
             </div>
@@ -347,10 +483,9 @@ export default function UserImportWizard({
           </div>
           <div className="space-y-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Controle</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{copy.controlTitle}</h3>
               <p className="text-sm text-gray-600">
-                Le wizard valide les roles, les emails, les doublons et le lien parent-eleve avant
-                creation.
+                {copy.controlDesc}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -371,9 +506,9 @@ export default function UserImportWizard({
       <div className="p-6">
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 pb-5">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Assistant d'import utilisateurs</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{copy.title}</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Importez, corrigez en direct, puis lancez uniquement les lignes valides.
+              {copy.subtitle}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -407,26 +542,26 @@ export default function UserImportWizard({
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5">
           <div className="text-sm text-gray-500">
-            {step === 2 && `${summary.valid} valide(s) / ${summary.invalid} a corriger`}
-            {step === 3 && `${summary.valid} ligne(s) seront importees`}
+            {step === 2 && copy.progressReview(summary.valid, summary.invalid)}
+            {step === 3 && copy.progressFinalize(summary.valid)}
           </div>
           <div className="flex flex-wrap gap-3">
             <Button variant="secondary" onClick={handleClose}>
-              Annuler
+              {copy.cancel}
             </Button>
             {step > 1 && (
               <Button variant="secondary" onClick={() => setStep(step - 1)}>
-                Retour
+                {copy.back}
               </Button>
             )}
             {step === 1 && (
               <Button variant="secondary" onClick={resetWizard}>
-                Reinitialiser
+                {copy.reset}
               </Button>
             )}
             {step === 2 && (
               <Button variant="primary" onClick={() => setStep(3)} disabled={rows.length === 0}>
-                Continuer vers l'import
+                {copy.continueImport}
               </Button>
             )}
             {step === 3 && (
@@ -436,7 +571,7 @@ export default function UserImportWizard({
                 onClick={handleImport}
                 disabled={isImporting || summary.valid === 0}
               >
-                {isImporting ? 'Import en cours...' : `Importer ${summary.valid} ligne(s)`}
+                {isImporting ? copy.importing : copy.importRows(summary.valid)}
               </Button>
             )}
           </div>

@@ -1,14 +1,112 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-// PERFORMANCE: Use specific hooks instead of deprecated useData
 import { useAcademics } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Calendar, Plus, Edit2, Trash2, Check, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { AcademicPeriod } from '../../types/bulletin';
 
+const translations = {
+  fr: {
+    restrictedAccess: 'Acces reserve aux directeurs',
+    title: 'Configuration academique',
+    subtitle: 'Gerez les periodes scolaires et les dates de publication des bulletins',
+    newPeriod: 'Nouvelle periode',
+    editPeriod: 'Modifier la periode',
+    newAcademicPeriod: 'Nouvelle periode scolaire',
+    periodName: 'Nom de la periode',
+    periodNamePlaceholder: 'Trimestre 1, Semestre 1...',
+    academicYear: 'Annee scolaire',
+    startDate: 'Date de debut',
+    endDate: 'Date de fin',
+    gradeEntryStartDate: 'Ouverture saisie notes',
+    gradeEntryEndDate: 'Fermeture saisie notes',
+    bulletinPublishDate: 'Date de publication bulletins',
+    order: 'Ordre',
+    confirmDelete: 'Etes-vous sur de vouloir supprimer cette periode ?',
+    update: 'Mettre a jour',
+    create: 'Creer',
+    noPeriods: 'Aucune periode configuree',
+    noPeriodsDescription: 'Creez votre premiere periode scolaire pour commencer',
+    published: 'Publie',
+    periodRange: 'Periode',
+    gradeEntryWindow: 'Saisie des notes',
+    bulletinPublication: 'Publication bulletins',
+    notDefined: 'Non definie',
+    periodUpdated: 'Periode mise a jour',
+    periodAdded: 'Periode ajoutee',
+    saveError: "Erreur lors de l'enregistrement",
+    periodDeleted: 'Periode supprimee',
+    deleteError: 'Erreur lors de la suppression',
+  },
+  nl: {
+    restrictedAccess: 'Toegang voorbehouden aan directeurs',
+    title: 'Academische configuratie',
+    subtitle: 'Beheer schoolperiodes en publicatiedata van rapporten',
+    newPeriod: 'Nieuwe periode',
+    editPeriod: 'Periode bewerken',
+    newAcademicPeriod: 'Nieuwe schoolperiode',
+    periodName: 'Periode naam',
+    periodNamePlaceholder: 'Trimester 1, Semester 1...',
+    academicYear: 'Schooljaar',
+    startDate: 'Startdatum',
+    endDate: 'Einddatum',
+    gradeEntryStartDate: 'Start cijferinvoer',
+    gradeEntryEndDate: 'Einde cijferinvoer',
+    bulletinPublishDate: 'Publicatiedatum rapporten',
+    order: 'Volgorde',
+    confirmDelete: 'Weet u zeker dat u deze periode wilt verwijderen?',
+    update: 'Bijwerken',
+    create: 'Aanmaken',
+    noPeriods: 'Geen periodes geconfigureerd',
+    noPeriodsDescription: 'Maak uw eerste schoolperiode aan om te beginnen',
+    published: 'Gepubliceerd',
+    periodRange: 'Periode',
+    gradeEntryWindow: 'Cijferinvoer',
+    bulletinPublication: 'Publicatie rapporten',
+    notDefined: 'Niet ingesteld',
+    periodUpdated: 'Periode bijgewerkt',
+    periodAdded: 'Periode toegevoegd',
+    saveError: 'Fout bij opslaan',
+    periodDeleted: 'Periode verwijderd',
+    deleteError: 'Fout bij verwijderen',
+  },
+  ar: {
+    restrictedAccess: 'الوصول مخصص للمديرين',
+    title: 'الاعداد الاكاديمي',
+    subtitle: 'ادارة الفترات الدراسية ومواعيد نشر الكشوف',
+    newPeriod: 'فترة جديدة',
+    editPeriod: 'تعديل الفترة',
+    newAcademicPeriod: 'فترة دراسية جديدة',
+    periodName: 'اسم الفترة',
+    periodNamePlaceholder: 'الفصل الاول، السمسٹر الاول...',
+    academicYear: 'السنة الدراسية',
+    startDate: 'تاريخ البدء',
+    endDate: 'تاريخ النهاية',
+    gradeEntryStartDate: 'بداية ادخال الدرجات',
+    gradeEntryEndDate: 'نهاية ادخال الدرجات',
+    bulletinPublishDate: 'تاريخ نشر الكشوف',
+    order: 'الترتيب',
+    confirmDelete: 'هل انت متأكد من حذف هذه الفترة؟',
+    update: 'تحديث',
+    create: 'انشاء',
+    noPeriods: 'لا توجد فترات معدة',
+    noPeriodsDescription: 'انشئ اول فترة دراسية للبدء',
+    published: 'منشور',
+    periodRange: 'الفترة',
+    gradeEntryWindow: 'ادخال الدرجات',
+    bulletinPublication: 'نشر الكشوف',
+    notDefined: 'غير محدد',
+    periodUpdated: 'تم تحديث الفترة',
+    periodAdded: 'تمت اضافة الفترة',
+    saveError: 'خطأ اثناء الحفظ',
+    periodDeleted: 'تم حذف الفترة',
+    deleteError: 'خطأ اثناء الحذف',
+  },
+} as const;
+
 const AcademicYearConfig: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { academicPeriods, addAcademicPeriod, updateAcademicPeriod, deleteAcademicPeriod } =
     useAcademics();
   const { user } = useAuth();
@@ -26,11 +124,19 @@ const AcademicYearConfig: React.FC = () => {
     order: 1,
   });
 
-  // Only directors can access this page
+  const copy = useMemo(() => {
+    const lang = i18n.language.startsWith('nl')
+      ? 'nl'
+      : i18n.language.startsWith('ar')
+        ? 'ar'
+        : 'fr';
+    return translations[lang];
+  }, [i18n.language]);
+
   if (user?.role !== 'director' && user?.role !== 'superadmin') {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Accès réservé aux directeurs</p>
+        <p className="text-gray-500">{copy.restrictedAccess}</p>
       </div>
     );
   }
@@ -40,16 +146,16 @@ const AcademicYearConfig: React.FC = () => {
     try {
       if (editingId) {
         await updateAcademicPeriod(editingId, formData);
-        toast.success(t('academicYearConfig.periodUpdated'));
+        toast.success(copy.periodUpdated);
         setEditingId(null);
       } else {
         await addAcademicPeriod(formData);
-        toast.success(t('academicYearConfig.periodAdded'));
+        toast.success(copy.periodAdded);
         setIsAdding(false);
       }
       resetForm();
     } catch {
-      toast.error(t('academicYearConfig.saveError'));
+      toast.error(copy.saveError);
     }
   };
 
@@ -70,12 +176,12 @@ const AcademicYearConfig: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette période ?')) {
+    if (window.confirm(copy.confirmDelete)) {
       try {
         await deleteAcademicPeriod(id);
-        toast.success(t('academicYearConfig.periodDeleted'));
+        toast.success(copy.periodDeleted);
       } catch {
-        toast.error(t('academicYearConfig.deleteError'));
+        toast.error(copy.deleteError);
       }
     }
   };
@@ -100,16 +206,14 @@ const AcademicYearConfig: React.FC = () => {
     resetForm();
   };
 
+  const formatDate = (date: string) => new Date(date).toLocaleDateString(i18n.language);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            Configuration Année Scolaire
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Gérez les périodes scolaires et les dates de publication des bulletins
-          </p>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{copy.title}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{copy.subtitle}</p>
         </div>
         {!isAdding && !editingId && (
           <button
@@ -117,35 +221,34 @@ const AcademicYearConfig: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <Plus size={20} />
-            Nouvelle Période
+            {copy.newPeriod}
           </button>
         )}
       </div>
 
-      {/* Form for adding/editing */}
       {(isAdding || editingId) && (
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 dark:text-white">
-            {editingId ? 'Modifier la période' : 'Nouvelle période scolaire'}
+            {editingId ? copy.editPeriod : copy.newAcademicPeriod}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Nom de la période *
+                  {copy.periodName} *
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Trimestre 1, Semestre 1..."
+                  placeholder={copy.periodNamePlaceholder}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Année scolaire *
+                  {copy.academicYear} *
                 </label>
                 <input
                   type="text"
@@ -158,7 +261,7 @@ const AcademicYearConfig: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date de début *
+                  {copy.startDate} *
                 </label>
                 <input
                   type="date"
@@ -170,7 +273,7 @@ const AcademicYearConfig: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date de fin *
+                  {copy.endDate} *
                 </label>
                 <input
                   type="date"
@@ -182,7 +285,7 @@ const AcademicYearConfig: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ouverture saisie notes *
+                  {copy.gradeEntryStartDate} *
                 </label>
                 <input
                   type="date"
@@ -196,7 +299,7 @@ const AcademicYearConfig: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fermeture saisie notes *
+                  {copy.gradeEntryEndDate} *
                 </label>
                 <input
                   type="date"
@@ -208,7 +311,7 @@ const AcademicYearConfig: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date de publication bulletins
+                  {copy.bulletinPublishDate}
                 </label>
                 <input
                   type="date"
@@ -220,7 +323,9 @@ const AcademicYearConfig: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ordre *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {copy.order} *
+                </label>
                 <input
                   type="number"
                   required
@@ -238,29 +343,26 @@ const AcademicYearConfig: React.FC = () => {
                 className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
               >
                 <X size={18} />
-                Annuler
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
               >
                 <Save size={18} />
-                {editingId ? 'Mettre à jour' : 'Créer'}
+                {editingId ? copy.update : copy.create}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Periods list */}
       <div className="grid gap-4">
         {academicPeriods.length === 0 ? (
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-12 text-center">
             <Calendar size={48} className="mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 text-lg">Aucune période configurée</p>
-            <p className="text-gray-400 dark:text-gray-500 mt-2">
-              Créez votre première période scolaire pour commencer
-            </p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">{copy.noPeriods}</p>
+            <p className="text-gray-400 dark:text-gray-500 mt-2">{copy.noPeriodsDescription}</p>
           </div>
         ) : (
           academicPeriods.map((period) => (
@@ -280,31 +382,30 @@ const AcademicYearConfig: React.FC = () => {
                     {period.isPublished && (
                       <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm font-medium flex items-center gap-1">
                         <Check size={14} />
-                        Publié
+                        {copy.published}
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400">Période</p>
+                      <p className="text-gray-500 dark:text-gray-400">{copy.periodRange}</p>
                       <p className="font-medium dark:text-white">
-                        {new Date(period.startDate).toLocaleDateString()} -{' '}
-                        {new Date(period.endDate).toLocaleDateString()}
+                        {formatDate(period.startDate)} - {formatDate(period.endDate)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400">Saisie des notes</p>
+                      <p className="text-gray-500 dark:text-gray-400">{copy.gradeEntryWindow}</p>
                       <p className="font-medium dark:text-white">
-                        {new Date(period.gradeEntryStartDate).toLocaleDateString()} -{' '}
-                        {new Date(period.gradeEntryEndDate).toLocaleDateString()}
+                        {formatDate(period.gradeEntryStartDate)} -{' '}
+                        {formatDate(period.gradeEntryEndDate)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400">Publication bulletins</p>
+                      <p className="text-gray-500 dark:text-gray-400">{copy.bulletinPublication}</p>
                       <p className="font-medium dark:text-white">
                         {period.bulletinPublishDate
-                          ? new Date(period.bulletinPublishDate).toLocaleDateString()
-                          : 'Non définie'}
+                          ? formatDate(period.bulletinPublishDate)
+                          : copy.notDefined}
                       </p>
                     </div>
                   </div>
@@ -313,14 +414,14 @@ const AcademicYearConfig: React.FC = () => {
                   <button
                     onClick={() => handleEdit(period)}
                     className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                    title="Modifier"
+                    title={t('common.edit')}
                   >
                     <Edit2 size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(period.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Supprimer"
+                    title={t('common.delete')}
                   >
                     <Trash2 size={18} />
                   </button>

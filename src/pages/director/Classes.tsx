@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-// PERFORMANCE: Use specific hooks instead of deprecated useData
 import { useUsers, useAcademics } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Users, GraduationCap, X, UserPlus, UserMinus, Search } from 'lucide-react';
@@ -15,6 +14,11 @@ const Classes = () => {
   const { users, students } = useUsers();
   const { classes, addClass, updateClass, deleteClass } = useAcademics();
   const isRTL = i18n.language === 'ar';
+  const placeholders = i18n.language.startsWith('nl')
+    ? { className: 'Klas 1A', grade: '1e jaar' }
+    : i18n.language.startsWith('ar')
+      ? { className: 'الفصل 1A', grade: 'السنة الاولى' }
+      : { className: 'Classe 1A', grade: '1ere annee' };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassGroup | null>(null);
@@ -22,13 +26,11 @@ const Classes = () => {
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
   const [managingClass, setManagingClass] = useState<ClassGroup | null>(null);
   const [studentSearch, setStudentSearch] = useState('');
-
-  // Form state
   const [name, setName] = useState('');
   const [grade, setGrade] = useState('');
   const [teacherId, setTeacherId] = useState('');
 
-  const teachers = users.filter((u) => u.role === 'teacher');
+  const teachers = users.filter((entry) => entry.role === 'teacher');
 
   const handleOpenNew = () => {
     setEditingClass(null);
@@ -52,24 +54,20 @@ const Classes = () => {
     if (editingClass) {
       await updateClass(editingClass.id, { name, grade, teacherId });
     } else {
-      const newClass: ClassGroup = {
+      await addClass({
         id: `c${Date.now()}`,
         name,
         grade,
         teacherId,
-      };
-      await addClass(newClass);
+      });
     }
+
     setIsModalOpen(false);
   };
 
-  const getClassTeacher = (teacherId: string) => {
-    return users.find((u) => u.id === teacherId);
-  };
-
-  const getClassStudents = (classId: string) => {
-    return students.filter((s) => (s as Student).classId === classId);
-  };
+  const getClassTeacher = (id: string) => users.find((entry) => entry.id === id);
+  const getClassStudents = (classId: string) =>
+    students.filter((student) => (student as Student).classId === classId);
 
   const handleManageStudents = (classGroup: ClassGroup) => {
     setManagingClass(classGroup);
@@ -79,8 +77,8 @@ const Classes = () => {
 
   const handleAddStudentToClass = async (studentId: string) => {
     if (!managingClass) return;
+
     try {
-      // classId is specific to Student type, so we cast the update
       await updateUser(studentId, { classId: managingClass.id } as Partial<Student>);
       toast.success(t('classes.studentAdded'));
     } catch {
@@ -97,16 +95,16 @@ const Classes = () => {
     }
   };
 
-  // Get students available to add (only those WITHOUT a class)
   const getAvailableStudents = () => {
     if (!managingClass) return [];
-    return students.filter((s) => {
-      const student = s as Student;
-      // Only show students who don't have a class assigned
+
+    return students.filter((entry) => {
+      const student = entry as Student;
       const hasNoClass = !student.classId || student.classId === '';
       const matchesSearch =
         student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
         student.email.toLowerCase().includes(studentSearch.toLowerCase());
+
       return hasNoClass && (studentSearch === '' || matchesSearch);
     });
   };
@@ -132,7 +130,6 @@ const Classes = () => {
         </Button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6">
           <div className="flex items-center gap-4">
@@ -169,7 +166,6 @@ const Classes = () => {
         </Card>
       </div>
 
-      {/* Classes Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {classes.map((classGroup) => {
           const teacher = getClassTeacher(classGroup.teacherId || '');
@@ -191,7 +187,6 @@ const Classes = () => {
               </div>
 
               <div className="space-y-3">
-                {/* Teacher */}
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                     {teacher ? teacher.name.charAt(0) : '?'}
@@ -204,7 +199,6 @@ const Classes = () => {
                   </div>
                 </div>
 
-                {/* Students Count - Clickable */}
                 <button
                   onClick={() => handleManageStudents(classGroup)}
                   className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
@@ -221,7 +215,6 @@ const Classes = () => {
                   </div>
                 </button>
 
-                {/* Actions */}
                 <div className="flex gap-2 pt-2">
                   <Button
                     variant="secondary"
@@ -235,8 +228,8 @@ const Classes = () => {
                     variant="danger"
                     size="sm"
                     className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={(event) => {
+                      event.stopPropagation();
                       setDeletingClass(classGroup);
                     }}
                   >
@@ -249,7 +242,6 @@ const Classes = () => {
         })}
       </div>
 
-      {/* Create/Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -269,14 +261,14 @@ const Classes = () => {
               label={t('classes.className')}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Classe 1A"
+              placeholder={placeholders.className}
             />
 
             <Input
               label={t('classes.grade')}
               value={grade}
               onChange={(e) => setGrade(e.target.value)}
-              placeholder="1ère année"
+              placeholder={placeholders.grade}
             />
 
             <div>
@@ -309,7 +301,6 @@ const Classes = () => {
         </div>
       </Modal>
 
-      {/* Student Management Modal */}
       <Modal isOpen={isStudentModalOpen} onClose={() => setIsStudentModalOpen(false)}>
         <div className="p-6 max-h-[80vh] overflow-hidden flex flex-col">
           <div className="flex justify-between items-center mb-6">
@@ -326,7 +317,6 @@ const Classes = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-6">
-            {/* Current Students */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <Users size={16} />
@@ -364,14 +354,12 @@ const Classes = () => {
               </div>
             </div>
 
-            {/* Add Students */}
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                 <UserPlus size={16} />
                 {t('classes.addStudents')}
               </h3>
 
-              {/* Search */}
               <div className="relative mb-3">
                 <Search
                   size={18}
@@ -431,7 +419,6 @@ const Classes = () => {
         </div>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal isOpen={!!deletingClass} onClose={() => setDeletingClass(null)}>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -455,10 +442,9 @@ const Classes = () => {
             <Button
               variant="danger"
               onClick={async () => {
-                if (deletingClass) {
-                  await deleteClass(deletingClass.id);
-                  setDeletingClass(null);
-                }
+                if (!deletingClass) return;
+                await deleteClass(deletingClass.id);
+                setDeletingClass(null);
               }}
             >
               {t('classes.deletePermanently')}

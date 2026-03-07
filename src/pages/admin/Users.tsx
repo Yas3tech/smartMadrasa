@@ -272,7 +272,11 @@ const UserManagement = () => {
             icon={FileSpreadsheet}
             onClick={() => setIsImportWizardOpen(true)}
           >
-            Assistant d'import
+            {i18n.language.startsWith('nl')
+              ? 'Importwizard'
+              : i18n.language.startsWith('ar')
+                ? 'معالج الاستيراد'
+                : "Assistant d'import"}
           </Button>
           <Button variant="primary" icon={Plus} onClick={handleOpenNew}>
             {t('users.newUser')}

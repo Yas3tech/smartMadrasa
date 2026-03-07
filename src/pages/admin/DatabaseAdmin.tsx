@@ -1,40 +1,142 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Button } from '../../components/UI';
-import { Database, Trash2, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Database,
+  Trash2,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  ArrowRightCircle,
+} from 'lucide-react';
 import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
+import { advanceToNextAcademicYear } from '../../services/systemMaintenance';
+import { useAcademics } from '../../context/DataContext';
+
+const translations = {
+  fr: {
+    title: 'Administration base de donnees',
+    subtitle: 'Operations de maintenance systeme',
+    seedTitle: 'Initialiser les donnees de base',
+    seedDescription:
+      "Cree les donnees academiques par defaut si elles n'existent pas encore.",
+    seedAction: 'Initialiser',
+    seeding: 'Initialisation...',
+    seedSuccess: 'Donnees de base initialisees avec succes',
+    advanceYearTitle: "Passer a l'annee suivante",
+    advanceYearDescription:
+      'Cree la nouvelle annee scolaire et efface les donnees annuelles.',
+    advanceYearAction: "Passer a l'annee suivante",
+    processing: 'Traitement...',
+    advanceYearConfirmBody:
+      'Cette action va creer la nouvelle annee scolaire et supprimer messages, devoirs, annonces, notifications et fichiers associes. Continuer ?',
+    advanceYearConfirmAction: 'Confirmer et continuer',
+    deleteAllTitle: 'Tout effacer',
+    deleteAllDescription: 'Supprime toutes les donnees applicatives.',
+    deleteAllAction: 'Tout effacer',
+    deleting: 'Suppression...',
+    deleteAllSuccess: 'Toutes les donnees ont ete supprimees',
+    confirmDeleteAll: 'Voulez-vous vraiment supprimer toutes les donnees ?',
+    confirmationTitle: 'Confirmation',
+    seedConfirmBody:
+      "Cette action va initialiser les donnees de base de l'application. Continuer ?",
+    seedConfirmAction: 'Confirmer',
+    advanceYearResult:
+      "Annee scolaire {{year}} creee. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimes.",
+  },
+  nl: {
+    title: 'Databasebeheer',
+    subtitle: 'Systeemonderhoud',
+    seedTitle: 'Basisgegevens initialiseren',
+    seedDescription: 'Maakt standaard academische gegevens aan als ze nog niet bestaan.',
+    seedAction: 'Initialiseren',
+    seeding: 'Initialiseren...',
+    seedSuccess: 'Basisgegevens succesvol geinitialiseerd',
+    advanceYearTitle: 'Naar volgend schooljaar gaan',
+    advanceYearDescription: 'Maakt het nieuwe schooljaar aan en wist jaarlijkse gegevens.',
+    advanceYearAction: 'Naar volgend schooljaar',
+    processing: 'Verwerken...',
+    advanceYearConfirmBody:
+      'Deze actie maakt een nieuw schooljaar aan en verwijdert berichten, huiswerken, aankondigingen, meldingen en gekoppelde bestanden. Doorgaan?',
+    advanceYearConfirmAction: 'Bevestigen en doorgaan',
+    deleteAllTitle: 'Alles wissen',
+    deleteAllDescription: 'Verwijdert alle applicatiegegevens.',
+    deleteAllAction: 'Alles wissen',
+    deleting: 'Verwijderen...',
+    deleteAllSuccess: 'Alle gegevens zijn verwijderd',
+    confirmDeleteAll: 'Wilt u echt alle gegevens verwijderen?',
+    confirmationTitle: 'Bevestiging',
+    seedConfirmBody: 'Deze actie initialiseert de basisgegevens van de applicatie. Doorgaan?',
+    seedConfirmAction: 'Bevestigen',
+    advanceYearResult:
+      'Schooljaar {{year}} aangemaakt. {{messages}} berichten, {{homeworks}} huiswerken, {{announcements}} aankondigingen, {{notifications}} meldingen en {{files}} opslagbestanden verwijderd.',
+  },
+  ar: {
+    title: 'ادارة قاعدة البيانات',
+    subtitle: 'عمليات صيانة النظام',
+    seedTitle: 'تهيئة البيانات الاساسية',
+    seedDescription: 'ينشئ البيانات الاكاديمية الافتراضية اذا لم تكن موجودة.',
+    seedAction: 'تهيئة',
+    seeding: 'جار التهيئة...',
+    seedSuccess: 'تمت تهيئة البيانات الاساسية بنجاح',
+    advanceYearTitle: 'الانتقال الى العام التالي',
+    advanceYearDescription: 'ينشئ العام الدراسي الجديد ويمسح بيانات السنة.',
+    advanceYearAction: 'الانتقال الى العام التالي',
+    processing: 'جار المعالجة...',
+    advanceYearConfirmBody:
+      'سيتم انشاء عام دراسي جديد وحذف الرسائل والواجبات والاعلانات والاشعارات والملفات المرتبطة. هل تريد المتابعة؟',
+    advanceYearConfirmAction: 'تأكيد والمتابعة',
+    deleteAllTitle: 'مسح الكل',
+    deleteAllDescription: 'يحذف جميع بيانات التطبيق.',
+    deleteAllAction: 'مسح الكل',
+    deleting: 'جار الحذف...',
+    deleteAllSuccess: 'تم حذف جميع البيانات',
+    confirmDeleteAll: 'هل تريد فعلا حذف جميع البيانات؟',
+    confirmationTitle: 'تأكيد',
+    seedConfirmBody: 'سيؤدي هذا الى تهيئة البيانات الاساسية للتطبيق. متابعة؟',
+    seedConfirmAction: 'تأكيد',
+    advanceYearResult:
+      'تم انشاء العام الدراسي {{year}}. تم حذف {{messages}} رسائل و{{homeworks}} واجبات و{{announcements}} اعلانات و{{notifications}} اشعارات و{{files}} ملفات تخزين.',
+  },
+} as const;
+
+const interpolate = (template: string, values: Record<string, string | number>) =>
+  template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => String(values[key] ?? ''));
 
 const DatabaseAdmin = () => {
+  const { t, i18n } = useTranslation();
+  const { academicPeriods } = useAcademics();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSeedModal, setShowSeedModal] = useState(false);
+  const [showYearModal, setShowYearModal] = useState(false);
 
-  const handleResetClick = () => {
-    setShowConfirmModal(true);
-  };
+  const copy = useMemo(() => {
+    const lang = i18n.language.startsWith('nl')
+      ? 'nl'
+      : i18n.language.startsWith('ar')
+        ? 'ar'
+        : 'fr';
+    return translations[lang];
+  }, [i18n.language]);
 
-  const handleConfirmReset = async () => {
-    setShowConfirmModal(false);
+  const handleConfirmSeed = async () => {
+    setShowSeedModal(false);
     setLoading(true);
     setMessage(null);
 
     try {
       await seedSystemBasics();
-      setMessage({
-        type: 'success',
-        text: '✅ Base de données initialisée avec succès !',
-      });
+      setMessage({ type: 'success', text: copy.seedSuccess });
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: `❌ Erreur: ${error}`,
-      });
+      setMessage({ type: 'error', text: `${t('common.error')}: ${error}` });
     } finally {
       setLoading(false);
     }
   };
 
   const handleClear = async () => {
-    if (!confirm('⚠️ Ceci va supprimer TOUTES les données. Continuer ?')) {
+    if (!window.confirm(copy.confirmDeleteAll)) {
       return;
     }
 
@@ -43,15 +145,34 @@ const DatabaseAdmin = () => {
 
     try {
       await clearAllData();
+      setMessage({ type: 'success', text: copy.deleteAllSuccess });
+    } catch (error) {
+      setMessage({ type: 'error', text: `${t('common.error')}: ${error}` });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdvanceYear = async () => {
+    setShowYearModal(false);
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const result = await advanceToNextAcademicYear(academicPeriods);
       setMessage({
         type: 'success',
-        text: '✅ Toutes les données ont été supprimées.',
+        text: interpolate(copy.advanceYearResult, {
+          year: result.nextAcademicYear,
+          messages: result.deletedDocs.messages || 0,
+          homeworks: result.deletedDocs.homeworks || 0,
+          announcements: result.deletedDocs.announcements || 0,
+          notifications: result.deletedDocs.notifications || 0,
+          files: result.deletedStorageFiles,
+        }),
       });
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: `❌ Erreur: ${error}`,
-      });
+      setMessage({ type: 'error', text: `${t('common.error')}: ${error}` });
     } finally {
       setLoading(false);
     }
@@ -64,12 +185,8 @@ const DatabaseAdmin = () => {
           <Database size={20} />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Administration Base de Données
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Gérer les données de la plateforme
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{copy.title}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{copy.subtitle}</p>
         </div>
       </div>
 
@@ -94,27 +211,42 @@ const DatabaseAdmin = () => {
         <div className="space-y-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              🔄 Initialiser les Paramètres
+              {copy.seedTitle}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Configure les périodes académiques et les catégories de notes par défaut.
-            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{copy.seedDescription}</p>
             <Button
-              onClick={handleResetClick}
+              onClick={() => setShowSeedModal(true)}
               disabled={loading}
               icon={RefreshCw}
               className="bg-gradient-to-r from-orange-500 to-orange-600"
             >
-              {loading ? 'Initialisation...' : 'Initialiser'}
+              {loading ? copy.seeding : copy.seedAction}
             </Button>
           </div>
 
           <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              🗑️ Supprimer Toutes les Données
+              {copy.advanceYearTitle}
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Supprime toutes les collections Firestore. ⚠️ Action irréversible !
+              {copy.advanceYearDescription}
+            </p>
+            <Button
+              onClick={() => setShowYearModal(true)}
+              disabled={loading || academicPeriods.length === 0}
+              icon={ArrowRightCircle}
+              className="bg-gradient-to-r from-blue-600 to-blue-700"
+            >
+              {loading ? copy.processing : copy.advanceYearAction}
+            </Button>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              {copy.deleteAllTitle}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              {copy.deleteAllDescription}
             </p>
             <Button
               onClick={handleClear}
@@ -122,37 +254,56 @@ const DatabaseAdmin = () => {
               icon={Trash2}
               className="bg-red-500 hover:bg-red-600"
             >
-              {loading ? 'Suppression...' : 'Supprimer Tout'}
+              {loading ? copy.deleting : copy.deleteAllAction}
             </Button>
           </div>
         </div>
       </Card>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
+      {showSeedModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
             <div className="flex items-center gap-3 text-orange-600 mb-4">
               <AlertCircle size={28} />
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Confirmation Requise
+                {copy.confirmationTitle}
               </h3>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Êtes-vous sûr de vouloir initialiser la base de données ?
-              <br />
-              <br />
-              ⚠️ Les paramètres par défaut seront recréés.
-            </p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.seedConfirmBody}</p>
             <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
-                Annuler
+              <Button variant="secondary" onClick={() => setShowSeedModal(false)}>
+                {t('common.cancel')}
               </Button>
               <Button
-                onClick={handleConfirmReset}
+                onClick={handleConfirmSeed}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
-                Oui, Initialiser
+                {copy.seedConfirmAction}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showYearModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-center gap-3 text-blue-600 mb-4">
+              <AlertCircle size={28} />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                {copy.confirmationTitle}
+              </h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.advanceYearConfirmBody}</p>
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setShowYearModal(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                onClick={handleAdvanceYear}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {copy.advanceYearConfirmAction}
               </Button>
             </div>
           </div>
