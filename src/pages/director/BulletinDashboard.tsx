@@ -47,10 +47,7 @@ const BulletinDashboard: React.FC = () => {
       {};
 
     // Optimization: Pre-compute comments lookup map (O(C) instead of O(S*C*K))
-    const commentMap = new Map<string, TeacherComment>();
-    periodComments.forEach((c) => {
-      commentMap.set(`${c.studentId}::${c.courseId}`, c);
-    });
+    const commentMap = new Map<string, TeacherComment>(periodComments.map((c) => [`${c.studentId}::${c.courseId}`, c]));
 
     classes.forEach((cls) => {
       // Find students in this class
