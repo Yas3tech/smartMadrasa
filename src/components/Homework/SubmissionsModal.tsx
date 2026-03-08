@@ -158,14 +158,15 @@ export function SubmissionsModal({
                       max={homework.maxGrade || 20}
                     />
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor={`feedback-${submission.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                         {t('homework.feedback')}
                       </label>
                       <textarea
+                        id={`feedback-${submission.id}`}
                         value={feedbackValue}
                         onChange={(e) => setFeedbackValue(e.target.value)}
                         rows={3}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none transition-all duration-200"
                         placeholder={t('homework.form.feedbackPlaceholder')}
                       />
                     </div>

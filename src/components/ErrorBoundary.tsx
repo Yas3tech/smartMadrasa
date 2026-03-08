@@ -39,9 +39,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         return this.props.fallback;
       }
 
-      const language = this.props.i18n.language.startsWith('nl')
+      const lang = this.props.i18n?.language || 'fr';
+      const language = lang.startsWith('nl')
         ? 'nl'
-        : this.props.i18n.language.startsWith('ar')
+        : lang.startsWith('ar')
           ? 'ar'
           : 'fr';
       const copy = {
