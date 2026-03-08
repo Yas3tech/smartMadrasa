@@ -24,7 +24,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [isDatabaseEmpty, setIsDatabaseEmpty] = useState(false);
-  const copy = i18n.language.startsWith('nl')
+
+  const lang = i18n?.language || 'fr';
+  const copy = lang.startsWith('nl')
     ? {
         title: 'Log in om door te gaan',
         resetTitle: 'Wachtwoord opnieuw instellen',
@@ -44,7 +46,7 @@ const Login = () => {
         firstRunDesc: 'Er is nog geen school geconfigureerd. Maak eerst uw beheerdersaccount aan.',
         setupSchool: 'School configureren',
       }
-    : i18n.language.startsWith('ar')
+    : lang.startsWith('ar')
       ? {
           title: 'قم بتسجيل الدخول للمتابعة',
           resetTitle: 'اعادة تعيين كلمة المرور',
