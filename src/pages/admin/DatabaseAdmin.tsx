@@ -42,7 +42,20 @@ const translations = {
       "Cette action va initialiser les donnees de base de l'application. Continuer ?",
     seedConfirmAction: 'Confirmer',
     advanceYearResult:
-      "Annee scolaire {{year}} creee. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimes.",
+      "Année scolaire {{year}} créée. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimés.",
+    tags: {
+      deleted: "Supprimé :",
+      messages: "Messages",
+      homeworks: "Devoirs",
+      announcements: "Annonces",
+      notifications: "Notifications",
+      events: "Événements",
+      attendance: "Absences",
+      courseGrades: "Notes",
+      teacherComments: "Appréciations",
+      files: "Fichiers joints",
+      all: "Toute la base de données",
+    },
   },
   nl: {
     title: 'Databasebeheer',
@@ -70,6 +83,19 @@ const translations = {
     seedConfirmAction: 'Bevestigen',
     advanceYearResult:
       'Schooljaar {{year}} aangemaakt. {{messages}} berichten, {{homeworks}} huiswerken, {{announcements}} aankondigingen, {{notifications}} meldingen en {{files}} opslagbestanden verwijderd.',
+    tags: {
+      deleted: "Verwijderd:",
+      messages: "Berichten",
+      homeworks: "Huiswerk",
+      announcements: "Aankondigingen",
+      notifications: "Meldingen",
+      events: "Evenementen",
+      attendance: "Aanwezigheid",
+      courseGrades: "Cijfers",
+      teacherComments: "Opmerkingen docent",
+      files: "Bijlagen",
+      all: "Gehele database",
+    },
   },
   ar: {
     title: 'ادارة قاعدة البيانات',
@@ -97,6 +123,19 @@ const translations = {
     seedConfirmAction: 'تأكيد',
     advanceYearResult:
       'تم انشاء العام الدراسي {{year}}. تم حذف {{messages}} رسائل و{{homeworks}} واجبات و{{announcements}} اعلانات و{{notifications}} اشعارات و{{files}} ملفات تخزين.',
+    tags: {
+      deleted: "سيتم حذف:",
+      messages: "رسائل",
+      homeworks: "واجبات",
+      announcements: "إعلانات",
+      notifications: "إشعارات",
+      events: "أحداث",
+      attendance: "غياب",
+      courseGrades: "علامات",
+      teacherComments: "ملاحظات المعلمين",
+      files: "ملفات",
+      all: "كل قاعدة البيانات",
+    },
   },
 } as const;
 
@@ -192,9 +231,8 @@ const DatabaseAdmin = () => {
 
       {message && (
         <div
-          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
-            message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-          }`}
+          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            }`}
         >
           {message.type === 'success' ? (
             <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
@@ -228,9 +266,17 @@ const DatabaseAdmin = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               {copy.advanceYearTitle}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
               {copy.advanceYearDescription}
             </p>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs text-gray-500 font-medium mr-1">{copy.tags.deleted}</span>
+              {(['messages', 'homeworks', 'announcements', 'notifications', 'events', 'attendance', 'courseGrades', 'teacherComments', 'files'] as const).map(tag => (
+                <span key={tag} className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-md border border-red-200 dark:border-red-800/50">
+                  {copy.tags[tag]}
+                </span>
+              ))}
+            </div>
             <Button
               onClick={() => setShowYearModal(true)}
               disabled={loading || academicPeriods.length === 0}
@@ -245,9 +291,15 @@ const DatabaseAdmin = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               {copy.deleteAllTitle}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
               {copy.deleteAllDescription}
             </p>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs text-gray-500 font-medium mr-1">{copy.tags.deleted}</span>
+              <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold rounded-md border border-red-200 dark:border-red-800/50">
+                {copy.tags.all}
+              </span>
+            </div>
             <Button
               onClick={handleClear}
               disabled={loading}

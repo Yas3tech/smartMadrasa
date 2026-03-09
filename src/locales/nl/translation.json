@@ -103,6 +103,7 @@
     "settings": "Instellingen",
     "profile": "Profiel",
     "preferences": "Voorkeuren",
+    "database": "Database",
     "logout": "Uitloggen"
   },
   "dashboard": {
@@ -830,7 +831,11 @@
     "selectStudent": "Selecteer een leerling...",
     "selectStudentHelp": "Selecteer de leerling waarvoor deze ouder verantwoordelijk is.",
     "restrictedAccess": "Beperkte toegang",
-    "restrictedAccessDesc": "Deze pagina is voorbehouden aan directeuren en superadministrators."
+    "restrictedAccessDesc": "Deze pagina is voorbehouden aan directeuren en superadministrators.",
+    "forcePasswordChange": "Wachtwoordwijziging afdwingen",
+    "confirmForcePasswordChange": "Weet je zeker dat je een wachtwoordwijziging wilt afdwingen voor {{name}}?",
+    "forcePasswordChangeSuccess": "De gebruiker moet zijn wachtwoord wijzigen bij de volgende keer inloggen",
+    "forcePasswordChangeError": "Fout bij het afdwingen van wachtwoordwijziging"
   },
   "analytics": {
     "title": "Analytisch Dashboard",

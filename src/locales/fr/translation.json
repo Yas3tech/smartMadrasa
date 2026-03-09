@@ -134,6 +134,7 @@
     "settings": "Paramètres",
     "profile": "Profil",
     "preferences": "Préférences",
+    "database": "Base de données",
     "logout": "Déconnexion"
   },
   "dashboard": {
@@ -190,9 +191,14 @@
     },
     "actions": {
       "title": "Actions rapides",
+      "addStudent": "Ajouter un élève",
+      "addTeacher": "Ajouter un enseignant",
+      "createClass": "Créer une classe",
+      "viewReports": "Voir les rapports",
       "takeAttendance": "Marquer la présence",
       "enterGrades": "Saisir les notes",
-      "sendMessage": "Envoyer un message"
+      "sendMessage": "Envoyer un message",
+      "addEvent": "Ajouter un événement"
     },
     "events": {
       "upcoming": "Événements à venir",
@@ -870,7 +876,11 @@
     "selectStudent": "Sélectionner un élève...",
     "selectStudentHelp": "Sélectionnez l'élève dont ce parent est responsable.",
     "restrictedAccess": "Accès restreint",
-    "restrictedAccessDesc": "Cette page est réservée aux directeurs et super-administrateurs."
+    "restrictedAccessDesc": "Cette page est réservée aux directeurs et super-administrateurs.",
+    "forcePasswordChange": "Forcer le changement de mot de passe",
+    "confirmForcePasswordChange": "Êtes-vous sûr de vouloir forcer le changement de mot de passe pour {{name}} ?",
+    "forcePasswordChangeSuccess": "L'utilisateur devra changer son mot de passe à la prochaine connexion",
+    "forcePasswordChangeError": "Erreur lors du forçage du changement de mot de passe"
   },
   "analytics": {
     "title": "Tableau de bord analytique",
