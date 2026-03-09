@@ -160,10 +160,11 @@ const ExamModal = ({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="exam-description" className="block text-sm font-medium text-gray-700 mb-1">
               {t('common.description')}
             </label>
             <textarea
+              id="exam-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}

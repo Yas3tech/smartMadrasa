@@ -135,10 +135,11 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="compose-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('messages.message')}
             </label>
             <textarea
+              id="compose-message"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={8}
