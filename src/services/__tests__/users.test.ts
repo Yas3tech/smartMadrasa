@@ -168,7 +168,7 @@ describe('users service', () => {
             expect(signOut).toHaveBeenCalled();
             expect(firestore.setDoc).toHaveBeenCalledWith(
                 expect.anything(),
-                expect.objectContaining({ name: 'John', mustChangePassword: false })
+                expect.objectContaining({ name: 'John', mustChangePassword: true })
             );
 
             expect(result).toHaveProperty('uid', 'auth-uid');
@@ -184,7 +184,7 @@ describe('users service', () => {
             expect(createUserWithEmailAndPassword).not.toHaveBeenCalled();
             expect(addDoc).toHaveBeenCalledWith(
                 expect.anything(),
-                expect.objectContaining({ name: 'NoEmail', mustChangePassword: false })
+                expect.objectContaining({ name: 'NoEmail', mustChangePassword: true })
             );
 
             expect(result).toBe('firestore-uid');

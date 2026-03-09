@@ -124,7 +124,7 @@ export const createUser = async (
   // 2. Create Firestore Document with mustChangePassword flag
   const userWithPasswordFlag = {
     ...user,
-    mustChangePassword: false, // Set to false since the only way to login is by resetting the pwd
+    mustChangePassword: true, // Force password rotation on first login
   };
 
   if (uid) {

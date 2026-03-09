@@ -12,6 +12,7 @@ import {
 import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
 import { advanceToNextAcademicYear } from '../../services/systemMaintenance';
 import { useAcademics } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 
 const translations = {
   fr: {
@@ -145,6 +146,7 @@ const interpolate = (template: string, values: Record<string, string | number>) 
 const DatabaseAdmin = () => {
   const { t, i18n } = useTranslation();
   const { academicPeriods } = useAcademics();
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showSeedModal, setShowSeedModal] = useState(false);
@@ -216,6 +218,17 @@ const DatabaseAdmin = () => {
       setLoading(false);
     }
   };
+
+  if (currentUser?.role !== 'superadmin') {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="p-8 text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('users.restrictedAccess')}</h2>
+          <p className="text-gray-600">{t('users.restrictedAccessDesc')}</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
