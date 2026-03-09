@@ -28,6 +28,13 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
   const { t } = useTranslation();
   const componentRef = useRef<HTMLDivElement>(null);
 
+  // Pre-compute comments map for O(1) lookups
+  const studentPeriodCommentsMap = new Map(
+    comments
+      .filter((c) => c.studentId === student.id && c.periodId === period.id)
+      .map((c) => [c.courseId, c])
+  );
+
   // Calculate averages for display - group by subject to avoid duplicates
   const coursesBySubject = courses.reduce(
     (acc, course) => {
@@ -57,15 +64,10 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
         ? allPeriodGrades.reduce((acc, g) => acc + g.score, 0) / allPeriodGrades.length
         : null;
 
-    // Get comment for any course with this subject
+    // Get comment for any course with this subject using O(1) map lookup
     const comment =
       subjectCourses
-        .map((course) =>
-          comments.find(
-            (c) =>
-              c.courseId === course.id && c.periodId === period.id && c.studentId === student.id
-          )
-        )
+        .map((course) => studentPeriodCommentsMap.get(course.id))
         .find((c) => c)?.comment || '';
 
     return {
