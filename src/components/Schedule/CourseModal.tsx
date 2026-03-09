@@ -347,10 +347,11 @@ const CourseModal = ({
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="course-notes" className="block text-sm font-medium text-gray-700 mb-1">
               {t('schedule.notesOptional')}
             </label>
             <textarea
+              id="course-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}

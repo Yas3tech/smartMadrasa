@@ -198,10 +198,11 @@ const GradeModal = ({
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="grade-feedback" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('grades.comment')} (optionnel)
             </label>
             <textarea
+              id="grade-feedback"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               rows={3}

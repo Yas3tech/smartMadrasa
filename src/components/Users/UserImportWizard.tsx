@@ -334,12 +334,13 @@ export default function UserImportWizard({
           </div>
           <div className="w-full space-y-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{copy.pasteData}</h3>
+              <h3 id="import-paste-data-title" className="text-lg font-semibold text-gray-900">{copy.pasteData}</h3>
               <p className="text-sm text-gray-600">
                 {copy.pasteDataDesc}
               </p>
             </div>
             <textarea
+              aria-labelledby="import-paste-data-title"
               value={pastedData}
               onChange={(event) => setPastedData(event.target.value)}
               rows={10}
