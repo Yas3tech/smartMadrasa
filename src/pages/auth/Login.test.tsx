@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom" />
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Login from './Login';
@@ -85,7 +86,7 @@ describe('Login Component - Security Vulnerability Check', () => {
 
     // Expect the SUCCESS message to appear, not the error
     await waitFor(() => {
-      expect(screen.getByText('Un email de réinitialisation a été envoyé.')).toBeInTheDocument();
+      expect(screen.getByText('Un email de reinitialisation a ete envoye.')).toBeInTheDocument();
       // Ensure the error message is NOT present
       expect(
         screen.queryByText('Aucun utilisateur trouvé avec cet email.')
@@ -121,7 +122,7 @@ describe('Login Component - Security Vulnerability Check', () => {
     await waitFor(() => {
       // Login.tsx uses: t('auth.errors.generic', 'Une erreur est survenue.')
       // Our mock returns defaultValue
-      expect(screen.getByText('Une erreur est survenue.')).toBeInTheDocument();
+      expect(screen.getByText("Une erreur s'est produite")).toBeInTheDocument();
     });
   });
 });

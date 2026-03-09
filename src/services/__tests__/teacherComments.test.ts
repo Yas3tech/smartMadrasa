@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
     createTeacherComment,
     batchCreateTeacherComments,
@@ -58,12 +58,12 @@ describe('teacherComments service', () => {
         it('should create a new teacher comment', async () => {
             (addDoc as any).mockResolvedValue({ id: 'new-comment' });
 
-            const catData: any = { content: 'Good' };
+            const catData: any = { comment: 'Good' };
 
             const id = await createTeacherComment(catData);
 
             expect(addDoc).toHaveBeenCalledWith(undefined, {
-                content: 'Good',
+                comment: 'Good',
                 createdAt: '2023-01-01T10:00:00.000Z',
                 updatedAt: '2023-01-01T10:00:00.000Z',
             });
@@ -80,14 +80,14 @@ describe('teacherComments service', () => {
             (writeBatch as any).mockReturnValue(mockBatch);
             (doc as any).mockReturnValue('docRef');
 
-            const comments: any[] = [{ content: 'c1' }, { content: 'c2' }];
+            const comments: any[] = [{ comment: 'c1' }, { comment: 'c2' }];
 
             await batchCreateTeacherComments(comments);
 
             expect(writeBatch).toHaveBeenCalled();
             expect(mockBatch.set).toHaveBeenCalledTimes(2);
             expect(mockBatch.set).toHaveBeenCalledWith('docRef', {
-                content: 'c1',
+                comment: 'c1',
                 createdAt: '2023-01-01T10:00:00.000Z',
                 updatedAt: '2023-01-01T10:00:00.000Z',
             });
@@ -99,11 +99,11 @@ describe('teacherComments service', () => {
         it('should update a comment', async () => {
             (doc as any).mockReturnValue('docRef');
 
-            await updateTeacherComment('cid', { content: 'updated' });
+            await updateTeacherComment('cid', { comment: 'updated' });
 
             expect(doc).toHaveBeenCalled();
             expect(updateDoc).toHaveBeenCalledWith('docRef', {
-                content: 'updated',
+                comment: 'updated',
                 updatedAt: '2023-01-01T10:00:00.000Z',
             });
         });
