@@ -83,14 +83,15 @@ export function SubmitHomeworkModal({
         {/* Answer Form */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="submissionContent" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('homework.yourAnswer')}
             </label>
             <textarea
+              id="submissionContent"
               value={submissionContent}
               onChange={(e) => setSubmissionContent(e.target.value)}
               rows={6}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600"
+              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600 transition-all duration-200"
               placeholder={t('homework.form.answerPlaceholder')}
             />
           </div>
