@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Button } from '../../components/UI';
+import { Card, Button, Modal } from '../../components/UI';
 import {
   Database,
   Trash2,
@@ -151,6 +151,7 @@ const DatabaseAdmin = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showSeedModal, setShowSeedModal] = useState(false);
   const [showYearModal, setShowYearModal] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   const copy = useMemo(() => {
     const lang = i18n.language.startsWith('nl')
@@ -176,11 +177,8 @@ const DatabaseAdmin = () => {
     }
   };
 
-  const handleClear = async () => {
-    if (!window.confirm(copy.confirmDeleteAll)) {
-      return;
-    }
-
+  const handleConfirmClear = async () => {
+    setShowClearModal(false);
     setLoading(true);
     setMessage(null);
 
@@ -314,7 +312,7 @@ const DatabaseAdmin = () => {
               </span>
             </div>
             <Button
-              onClick={handleClear}
+              onClick={() => setShowClearModal(true)}
               disabled={loading}
               icon={Trash2}
               className="bg-red-500 hover:bg-red-600"
@@ -325,55 +323,74 @@ const DatabaseAdmin = () => {
         </div>
       </Card>
 
-      {showSeedModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-orange-600 mb-4">
-              <AlertCircle size={28} />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {copy.confirmationTitle}
-              </h3>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.seedConfirmBody}</p>
-            <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowSeedModal(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={handleConfirmSeed}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                {copy.seedConfirmAction}
-              </Button>
-            </div>
+      <Modal isOpen={showSeedModal} onClose={() => setShowSeedModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-orange-600 mb-4">
+            <AlertCircle size={28} />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.confirmationTitle}
+            </h3>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.seedConfirmBody}</p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowSeedModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleConfirmSeed}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {copy.seedConfirmAction}
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
 
-      {showYearModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-blue-600 mb-4">
-              <AlertCircle size={28} />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {copy.confirmationTitle}
-              </h3>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.advanceYearConfirmBody}</p>
-            <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowYearModal(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={handleAdvanceYear}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {copy.advanceYearConfirmAction}
-              </Button>
-            </div>
+      <Modal isOpen={showYearModal} onClose={() => setShowYearModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-blue-600 mb-4">
+            <AlertCircle size={28} />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.confirmationTitle}
+            </h3>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.advanceYearConfirmBody}</p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowYearModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleAdvanceYear}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {copy.advanceYearConfirmAction}
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
+
+      <Modal isOpen={showClearModal} onClose={() => setShowClearModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-red-600 mb-4">
+            <AlertCircle size={28} />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.confirmationTitle}
+            </h3>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.confirmDeleteAll}</p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowClearModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleConfirmClear}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {copy.deleteAllAction}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
