@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Button } from '../../components/UI';
+import { Card, Button, Modal } from '../../components/UI';
 import {
   Database,
   Trash2,
@@ -12,6 +12,7 @@ import {
 import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
 import { advanceToNextAcademicYear } from '../../services/systemMaintenance';
 import { useAcademics } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 
 const translations = {
   fr: {
@@ -42,7 +43,20 @@ const translations = {
       "Cette action va initialiser les donnees de base de l'application. Continuer ?",
     seedConfirmAction: 'Confirmer',
     advanceYearResult:
-      "Annee scolaire {{year}} creee. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimes.",
+      "Année scolaire {{year}} créée. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimés.",
+    tags: {
+      deleted: "Supprimé :",
+      messages: "Messages",
+      homeworks: "Devoirs",
+      announcements: "Annonces",
+      notifications: "Notifications",
+      events: "Événements",
+      attendance: "Absences",
+      courseGrades: "Notes",
+      teacherComments: "Appréciations",
+      files: "Fichiers joints",
+      all: "Toute la base de données",
+    },
   },
   nl: {
     title: 'Databasebeheer',
@@ -70,6 +84,19 @@ const translations = {
     seedConfirmAction: 'Bevestigen',
     advanceYearResult:
       'Schooljaar {{year}} aangemaakt. {{messages}} berichten, {{homeworks}} huiswerken, {{announcements}} aankondigingen, {{notifications}} meldingen en {{files}} opslagbestanden verwijderd.',
+    tags: {
+      deleted: "Verwijderd:",
+      messages: "Berichten",
+      homeworks: "Huiswerk",
+      announcements: "Aankondigingen",
+      notifications: "Meldingen",
+      events: "Evenementen",
+      attendance: "Aanwezigheid",
+      courseGrades: "Cijfers",
+      teacherComments: "Opmerkingen docent",
+      files: "Bijlagen",
+      all: "Gehele database",
+    },
   },
   ar: {
     title: 'ادارة قاعدة البيانات',
@@ -97,6 +124,19 @@ const translations = {
     seedConfirmAction: 'تأكيد',
     advanceYearResult:
       'تم انشاء العام الدراسي {{year}}. تم حذف {{messages}} رسائل و{{homeworks}} واجبات و{{announcements}} اعلانات و{{notifications}} اشعارات و{{files}} ملفات تخزين.',
+    tags: {
+      deleted: "سيتم حذف:",
+      messages: "رسائل",
+      homeworks: "واجبات",
+      announcements: "إعلانات",
+      notifications: "إشعارات",
+      events: "أحداث",
+      attendance: "غياب",
+      courseGrades: "علامات",
+      teacherComments: "ملاحظات المعلمين",
+      files: "ملفات",
+      all: "كل قاعدة البيانات",
+    },
   },
 } as const;
 
@@ -106,10 +146,12 @@ const interpolate = (template: string, values: Record<string, string | number>) 
 const DatabaseAdmin = () => {
   const { t, i18n } = useTranslation();
   const { academicPeriods } = useAcademics();
+  const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showSeedModal, setShowSeedModal] = useState(false);
   const [showYearModal, setShowYearModal] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   const copy = useMemo(() => {
     const lang = i18n.language.startsWith('nl')
@@ -135,11 +177,8 @@ const DatabaseAdmin = () => {
     }
   };
 
-  const handleClear = async () => {
-    if (!window.confirm(copy.confirmDeleteAll)) {
-      return;
-    }
-
+  const handleConfirmClear = async () => {
+    setShowClearModal(false);
     setLoading(true);
     setMessage(null);
 
@@ -178,6 +217,17 @@ const DatabaseAdmin = () => {
     }
   };
 
+  if (currentUser?.role !== 'superadmin') {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="p-8 text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('users.restrictedAccess')}</h2>
+          <p className="text-gray-600">{t('users.restrictedAccessDesc')}</p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -192,9 +242,8 @@ const DatabaseAdmin = () => {
 
       {message && (
         <div
-          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
-            message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-          }`}
+          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            }`}
         >
           {message.type === 'success' ? (
             <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
@@ -228,9 +277,17 @@ const DatabaseAdmin = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               {copy.advanceYearTitle}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
               {copy.advanceYearDescription}
             </p>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs text-gray-500 font-medium mr-1">{copy.tags.deleted}</span>
+              {(['messages', 'homeworks', 'announcements', 'notifications', 'events', 'attendance', 'courseGrades', 'teacherComments', 'files'] as const).map(tag => (
+                <span key={tag} className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-md border border-red-200 dark:border-red-800/50">
+                  {copy.tags[tag]}
+                </span>
+              ))}
+            </div>
             <Button
               onClick={() => setShowYearModal(true)}
               disabled={loading || academicPeriods.length === 0}
@@ -245,11 +302,17 @@ const DatabaseAdmin = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               {copy.deleteAllTitle}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
               {copy.deleteAllDescription}
             </p>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-xs text-gray-500 font-medium mr-1">{copy.tags.deleted}</span>
+              <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold rounded-md border border-red-200 dark:border-red-800/50">
+                {copy.tags.all}
+              </span>
+            </div>
             <Button
-              onClick={handleClear}
+              onClick={() => setShowClearModal(true)}
               disabled={loading}
               icon={Trash2}
               className="bg-red-500 hover:bg-red-600"
@@ -260,55 +323,74 @@ const DatabaseAdmin = () => {
         </div>
       </Card>
 
-      {showSeedModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-orange-600 mb-4">
-              <AlertCircle size={28} />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {copy.confirmationTitle}
-              </h3>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.seedConfirmBody}</p>
-            <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowSeedModal(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={handleConfirmSeed}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                {copy.seedConfirmAction}
-              </Button>
-            </div>
+      <Modal isOpen={showSeedModal} onClose={() => setShowSeedModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-orange-600 mb-4">
+            <AlertCircle size={28} />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.confirmationTitle}
+            </h3>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.seedConfirmBody}</p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowSeedModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleConfirmSeed}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {copy.seedConfirmAction}
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
 
-      {showYearModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full p-6 shadow-xl">
-            <div className="flex items-center gap-3 text-blue-600 mb-4">
-              <AlertCircle size={28} />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {copy.confirmationTitle}
-              </h3>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.advanceYearConfirmBody}</p>
-            <div className="flex justify-end gap-3">
-              <Button variant="secondary" onClick={() => setShowYearModal(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                onClick={handleAdvanceYear}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {copy.advanceYearConfirmAction}
-              </Button>
-            </div>
+      <Modal isOpen={showYearModal} onClose={() => setShowYearModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-blue-600 mb-4">
+            <AlertCircle size={28} />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.confirmationTitle}
+            </h3>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.advanceYearConfirmBody}</p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowYearModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleAdvanceYear}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {copy.advanceYearConfirmAction}
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
+
+      <Modal isOpen={showClearModal} onClose={() => setShowClearModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-red-600 mb-4">
+            <AlertCircle size={28} />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {copy.confirmationTitle}
+            </h3>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{copy.confirmDeleteAll}</p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowClearModal(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleConfirmClear}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {copy.deleteAllAction}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

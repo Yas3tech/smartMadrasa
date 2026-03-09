@@ -22,7 +22,10 @@ describe('getRelevantPeriodIds', () => {
             academicYear: '2023-2024',
             startDate: '2023-09-01',
             endDate: '2024-01-31',
-            type: 'semester',
+            gradeEntryStartDate: '2023-09-01',
+            gradeEntryEndDate: '2024-01-31',
+            isPublished: true,
+            order: 1,
         },
         {
             id: 'p2',
@@ -30,7 +33,10 @@ describe('getRelevantPeriodIds', () => {
             academicYear: '2023-2024',
             startDate: '2024-02-01',
             endDate: '2024-06-30',
-            type: 'semester',
+            gradeEntryStartDate: '2024-02-01',
+            gradeEntryEndDate: '2024-06-30',
+            isPublished: true,
+            order: 2,
         },
         {
             id: 'p3',
@@ -38,7 +44,10 @@ describe('getRelevantPeriodIds', () => {
             academicYear: '2024-2025',
             startDate: '2024-09-01',
             endDate: '2025-01-31',
-            type: 'semester',
+            gradeEntryStartDate: '2024-09-01',
+            gradeEntryEndDate: '2025-01-31',
+            isPublished: true,
+            order: 1,
         },
         {
             id: 'p4',
@@ -46,7 +55,10 @@ describe('getRelevantPeriodIds', () => {
             academicYear: '2024-2025',
             startDate: '2025-02-01',
             endDate: '2025-06-30',
-            type: 'semester',
+            gradeEntryStartDate: '2025-02-01',
+            gradeEntryEndDate: '2025-06-30',
+            isPublished: true,
+            order: 2,
         },
     ];
 

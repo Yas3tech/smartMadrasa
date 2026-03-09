@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Card } from '../UI';
 import { StatCard } from './StatCard';
 import {
@@ -11,6 +12,7 @@ import {
   BookOpen,
   MessageSquare,
   CalendarPlus,
+  Database,
 } from 'lucide-react';
 import {
   LineChart,
@@ -41,6 +43,7 @@ export function DirectorDashboard({
 }: DirectorDashboardProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const quickActions = [
     {
@@ -86,6 +89,15 @@ export function DirectorDashboard({
       onClick: () => navigate('/announcements'),
     },
   ];
+
+  if (user?.role === 'superadmin') {
+    quickActions.push({
+      icon: Database,
+      label: t('sidebar.database', 'Base de données'),
+      color: 'bg-teal-500',
+      onClick: () => navigate('/admin/database'),
+    });
+  }
 
   return (
     <>

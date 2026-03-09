@@ -115,6 +115,7 @@
     "settings": "الإعدادات",
     "profile": "الملف الشخصي",
     "preferences": "تفضيلات",
+    "database": "قاعدة البيانات",
     "logout": "تسجيل الخروج"
   },
   "dashboard": {
@@ -844,7 +845,11 @@
     "selectStudent": "اختر طالباً...",
     "selectStudentHelp": "اختر الطالب الذي هذا الوالد مسؤول عنه.",
     "restrictedAccess": "وصول مقيد",
-    "restrictedAccessDesc": "هذه الصفحة مخصصة للمديرين والمشرفين الرئيسيين فقط."
+    "restrictedAccessDesc": "هذه الصفحة مخصصة للمديرين والمشرفين الرئيسيين فقط.",
+    "forcePasswordChange": "فرض تغيير كلمة المرور",
+    "confirmForcePasswordChange": "هل أنت متأكد أنك تريد فرض تغيير كلمة المرور للمستخدم {{name}}؟",
+    "forcePasswordChangeSuccess": "سيُطلب من المستخدم تغيير كلمة مروره عند تسجيل الدخول القادم",
+    "forcePasswordChangeError": "خطأ أثناء فرض تغيير كلمة المرور"
   },
   "analytics": {
     "title": "لوحة المعلومات التحليلية",

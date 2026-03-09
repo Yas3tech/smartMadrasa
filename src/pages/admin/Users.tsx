@@ -9,7 +9,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
-import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown, Key } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
 import type { User, Role } from '../../types';
 import toast from 'react-hot-toast';
@@ -170,6 +170,17 @@ const UserManagement = () => {
         }
       } catch {
         toast.error(t('users.deleteError'));
+      }
+    }
+  };
+
+  const handleForcePasswordChange = async (userId: string, userName: string) => {
+    if (confirm(t('users.confirmForcePasswordChange', { name: userName }))) {
+      try {
+        await updateUser(userId, { mustChangePassword: true });
+        toast.success(t('users.forcePasswordChangeSuccess'));
+      } catch {
+        toast.error(t('users.forcePasswordChangeError'));
       }
     }
   };
@@ -378,6 +389,14 @@ const UserManagement = () => {
                   <td className="px-6 py-4">
                     <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} gap-2`}>
                       <button
+                        onClick={() => handleForcePasswordChange(user.id, user.name)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title={t('users.forcePasswordChange')}
+                        aria-label={t('users.forcePasswordChange')}
+                      >
+                        <Key size={18} />
+                      </button>
+                      <button
                         onClick={() => handleEdit(user)}
                         className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                         aria-label={t('common.edit')}
@@ -501,7 +520,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal >
 
       <UserImportWizard
         isOpen={isImportWizardOpen}
@@ -511,7 +530,7 @@ const UserManagement = () => {
         addUser={addUser}
         canImportSuperadmin={currentUser?.role === 'superadmin'}
       />
-    </div>
+    </div >
   );
 };
 
