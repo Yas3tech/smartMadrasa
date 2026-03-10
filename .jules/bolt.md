@@ -23,3 +23,7 @@
 ## 2025-03-03 - [Nested Loop O(C*K) Optimization in Bulletin Generation]
 **Learning:** Found a performance bottleneck in both `BulletinPreview.tsx` and `pdfGenerator.ts` where an `Array.prototype.find()` lookup over `comments` was executed inside a nested loop mapping over courses. This created an O(C*K) operation during bulletin rendering and PDF generation.
 **Action:** Replaced the inner `find()` search with an O(1) `Map.prototype.get()` lookup by pre-computing a `studentPeriodCommentsMap` in O(K) time. Always pre-compute lookup maps before mapping over arrays to resolve related items.
+
+## 2025-03-03 - [Nested Loop O(S*C*K) Optimization in useBulletinGrades]
+**Learning:** Found a severe performance bottleneck in `useBulletinGrades.ts` where an `Array.prototype.find()` lookup over `classComments` and `teacherComments` was executed inside nested loops (mapping over Students and then Courses). This created an O(S*C*K) operation during critical validations and stat calculations (`classValidationStats`, `handleValidateAll`, `handleValidateStudentBulletin`).
+**Action:** Replaced the inner `find()` searches with O(1) `Map.prototype.get()` lookups by pre-computing a `commentMap` in O(K) time using composite keys (`${studentId}::${courseId}`) or single keys. Always prefer pre-computing lookup maps outside nested iterations to keep time complexity linear.
