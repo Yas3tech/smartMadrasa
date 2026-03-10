@@ -253,6 +253,7 @@ const Login = () => {
               <Input
                 label={t('auth.email')}
                 type="email"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="exemple@ecole.com"
@@ -263,6 +264,7 @@ const Login = () => {
                 <Input
                   label={t('auth.password')}
                   type="password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="********"

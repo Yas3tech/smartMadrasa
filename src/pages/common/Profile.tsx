@@ -235,6 +235,7 @@ const Profile = () => {
                 onChange={(e) => setName(e.target.value)}
                 disabled={!isEditing}
                 icon={UserIcon}
+                autoComplete="name"
               />
 
               <Input
@@ -244,6 +245,7 @@ const Profile = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={!isEditing}
                 icon={Mail}
+                autoComplete="email"
               />
 
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">

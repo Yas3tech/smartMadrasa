@@ -248,6 +248,7 @@ const FirstRunSetup: React.FC = () => {
                   value={adminName}
                   onChange={(e) => setAdminName(e.target.value)}
                   placeholder="ex: Dr. Hassan El Fassi"
+                  autoComplete="name"
                 />
                 <Input
                   label={copy.workEmail}
@@ -256,6 +257,7 @@ const FirstRunSetup: React.FC = () => {
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="admin@ecole.com"
+                  autoComplete="username"
                 />
                 <Input
                   label={t('auth.password')}
@@ -264,6 +266,7 @@ const FirstRunSetup: React.FC = () => {
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   placeholder="********"
+                  autoComplete="new-password"
                 />
                 <Input
                   label={t('auth.confirmPassword')}
@@ -272,6 +275,7 @@ const FirstRunSetup: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="********"
+                  autoComplete="new-password"
                 />
               </div>
 
