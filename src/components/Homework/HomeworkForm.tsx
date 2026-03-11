@@ -75,10 +75,11 @@ export function HomeworkForm({
         >
           {/* Class Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="homeworkClass" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('homework.class')} *
             </label>
             <select
+              id="homeworkClass"
               value={formState.selectedClassId}
               onChange={(e) => setFormField('selectedClassId', e.target.value)}
               className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600"
@@ -102,10 +103,11 @@ export function HomeworkForm({
 
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="homeworkSubject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('homework.subject')}
             </label>
             <select
+              id="homeworkSubject"
               value={formState.subject}
               onChange={(e) => setFormField('subject', e.target.value)}
               className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-700 dark:text-white dark:border-slate-600"

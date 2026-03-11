@@ -170,6 +170,7 @@ const TeacherGradesView = () => {
                 />
                 <input
                   type="text"
+                  aria-label={t('common.search')}
                   placeholder={t('common.search')}
                   value={tg.searchTerm}
                   onChange={(e) => tg.setSearchTerm(e.target.value)}
@@ -244,6 +245,7 @@ const TeacherGradesView = () => {
                             <div className="flex items-center gap-2">
                               <input
                                 type="number"
+                                aria-label={t('grades.gradeTitlePlaceholder')}
                                 value={tg.editValue}
                                 onChange={(e) => tg.setEditValue(e.target.value)}
                                 className="w-20 px-2 py-1 border rounded bg-white dark:bg-slate-800"
@@ -384,6 +386,7 @@ const TeacherGradesView = () => {
                               <div className="flex items-center gap-2">
                                 <input
                                   type="number"
+                                  aria-label={t('grades.gradeTitlePlaceholder')}
                                   value={tg.editValue}
                                   onChange={(e) => tg.setEditValue(e.target.value)}
                                   className="w-20 px-2 py-1 border rounded bg-white dark:bg-slate-800"

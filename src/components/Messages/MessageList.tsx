@@ -69,6 +69,7 @@ const MessageList: React.FC<MessageListProps> = ({
                         <input
                             type="text"
                             placeholder={t('messages.searchPlaceholder')}
+                            aria-label={t('messages.searchPlaceholder')}
                             className="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-slate-700 border-none rounded-lg text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900/30 outline-none"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}

@@ -89,10 +89,11 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
 
         <div className="space-y-4">
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="compose-recipient" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('messages.recipient')}
             </label>
             <input
+              id="compose-recipient"
               type="text"
               value={recipient ? selectedRecipientLabel : recipientSearch}
               onChange={(e) => {
@@ -151,9 +152,9 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {t('messages.attachments')}
-              </label>
+              </span>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"

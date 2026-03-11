@@ -130,13 +130,14 @@ export function SubmitHomeworkModal({
 
           {/* File Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <span className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('homework.attachFiles')} ({t('homework.maxFileSize')})
-            </label>
-            <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-orange-400 transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-offset-2">
+            </span>
+            <label htmlFor="homework-file-upload" className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-orange-400 transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-offset-2">
               <Upload size={20} className="text-gray-400" />
               <span className="text-sm text-gray-500">{t('homework.form.attachFileHelp')}</span>
               <input
+                id="homework-file-upload"
                 type="file"
                 multiple
                 onChange={onFileSelect}
