@@ -224,9 +224,7 @@ const Login = () => {
             className="w-24 h-24 mx-auto mb-4 object-contain"
           />
           <h1 className="text-3xl font-bold text-gray-900">SmartMadrassa</h1>
-          <p className="text-gray-500 mt-2">
-            {isResetMode ? copy.resetTitle : copy.title}
-          </p>
+          <p className="text-gray-500 mt-2">{isResetMode ? copy.resetTitle : copy.title}</p>
         </div>
 
         <Card className="p-8 shadow-xl border-0 min-h-[500px] flex flex-col justify-center">
@@ -256,6 +254,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="exemple@ecole.com"
+                autoComplete="username"
                 required
               />
 
@@ -266,6 +265,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="********"
+                  autoComplete="current-password"
                   required
                 />
               )}
@@ -277,11 +277,7 @@ const Login = () => {
               disabled={loading}
               icon={isResetMode ? Send : LogIn}
             >
-              {loading
-                ? t('auth.loading')
-                : isResetMode
-                  ? copy.sendResetLink
-                  : t('auth.login')}
+              {loading ? t('auth.loading') : isResetMode ? copy.sendResetLink : t('auth.login')}
             </Button>
 
             {!isResetMode && (
@@ -337,9 +333,7 @@ const Login = () => {
                     <Sparkles size={18} className="text-orange-500" />
                     <span className="text-sm">{copy.firstRunTitle}</span>
                   </div>
-                  <p className="text-xs text-orange-700 leading-relaxed">
-                    {copy.firstRunDesc}
-                  </p>
+                  <p className="text-xs text-orange-700 leading-relaxed">{copy.firstRunDesc}</p>
                   <Button
                     onClick={() => navigate('/setup')}
                     variant="secondary"

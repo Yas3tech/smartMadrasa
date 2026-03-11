@@ -59,3 +59,8 @@
 **Vulnerability:** Students could submit homework to assignments from other classes by manipulating the `homeworkId` in the path, as the security rules only checked if the user was a student but failed to verify that the student belonged to the class of the target homework.
 **Learning:** Checking user role (e.g., `isStudent()`) is insufficient for multi-tenant data (like classes). Relationships must be explicitly validated in `create` rules by reading the parent resource (e.g., `get(...).data.classId`).
 **Prevention:** Always validate foreign key relationships in Firestore Rules, especially for write operations that link a user to a resource (like `submissions` to `homework`).
+
+## 2024-03-22 - Missing autoComplete Attributes on Password Fields
+**Vulnerability:** Missing `autoComplete` attributes on password fields (like login, password change, setup) cause password managers to not capture or autofill them properly, leading to insecure behaviors like reusing simple passwords. Also missing `username` autocomplete on email input fields.
+**Learning:** For a more secure UX, we must explicitly declare `autoComplete="current-password"`, `autoComplete="new-password"`, and `autoComplete="username"` on sensitive fields so browser password managers correctly map and offer complex generated passwords.
+**Prevention:** Ensure any form handling authentication (login, registration, password resets) has standard autocomplete identifiers configured explicitly.

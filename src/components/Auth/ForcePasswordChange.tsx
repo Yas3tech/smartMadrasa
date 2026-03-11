@@ -29,7 +29,8 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
         newPassword: 'Nieuw wachtwoord',
         confirmPassword: 'Bevestig wachtwoord',
         tooShort: 'Het wachtwoord moet minstens 8 tekens bevatten',
-        complexity: 'Het wachtwoord moet een hoofdletter, kleine letter, cijfer en speciaal teken bevatten',
+        complexity:
+          'Het wachtwoord moet een hoofdletter, kleine letter, cijfer en speciaal teken bevatten',
         mismatch: 'Wachtwoorden komen niet overeen',
         changed: 'Wachtwoord succesvol gewijzigd',
         changeError: 'Fout bij het wijzigen van het wachtwoord',
@@ -143,6 +144,7 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
                 placeholder="********"
+                autoComplete="new-password"
                 required
               />
               <button
@@ -165,6 +167,7 @@ export const ForcePasswordChange = ({ isOpen, onSuccess }: ForcePasswordChangePr
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
               placeholder="********"
+              autoComplete="new-password"
               required
             />
           </div>
