@@ -73,6 +73,7 @@ export interface Event {
   classId?: string;
   className?: string; // Denormalized
   courseId?: string; // Lien vers un cours spécifique de la classe
+  teacherId?: string; // ID de l'enseignant créateur (requis par les règles Firestore)
   attachments?: string[]; // URLs of attached files (for announcements/event details)
 }
 export interface Grade {
@@ -91,6 +92,7 @@ export interface Grade {
   classId?: string;
   teacherId?: string;
   status?: 'present' | 'absent'; // Statut de présence
+  eventId?: string; // Lien vers l'événement du calendrier (examen/devoir)
 }
 
 export interface Attendance {
@@ -145,9 +147,11 @@ export interface Homework {
   dueDate: string;
   assignedBy: string;
   classId: string;
+  courseId?: string;
   attachments?: string[];
-  maxGrade?: number; // Optional now
-  allowOnlineSubmission?: boolean; // New field
+  isGraded?: boolean;
+  maxScore?: number;
+  allowOnlineSubmission?: boolean;
 }
 
 export interface Submission {

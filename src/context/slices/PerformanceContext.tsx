@@ -71,11 +71,13 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
 
   useEffect(() => {
-    if (useFirebase) {
-      let unsubGrades = () => { };
-      let unsubAttendance = () => { };
-      let unsubHomeworks = () => { };
+    let timeoutId: NodeJS.Timeout;
 
+    let unsubGrades = () => { };
+    let unsubAttendance = () => { };
+    let unsubHomeworks = () => { };
+
+    if (useFirebase && user) {
       const handleGradesUpdate = (courseGrades: CourseGrade[]) => {
         const grades = courseGrades.map((cg) => ({
           id: cg.id,
@@ -93,57 +95,68 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         setGrades(grades as Grade[]);
       };
 
-      if (user?.role === 'parent') {
-        const parentUser = user as Parent;
-        const childIds = parentUser.childrenIds || [];
-        const childrenData = parentUser.children || [];
-        const classIds = childrenData.map((c) => c.classId).filter(Boolean);
+      timeoutId = setTimeout(() => {
+        if (user?.role === 'parent') {
+          const parentUser = user as Parent;
+          const childIds = parentUser.childrenIds || [];
+          const childrenData = parentUser.children || [];
+          const classIds = childrenData.map((c) => c.classId).filter(Boolean);
 
-        if (childIds.length > 0) {
-          unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);
-          unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
-        }
-
-        if (classIds.length > 0) {
-          unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
-        }
-      } else if (user?.role === 'student') {
-        const studentUser = user as Student;
-        // Fetch only relevant data for the student
-        unsubGrades = subscribeToCourseGradesByStudentIds([user.id], handleGradesUpdate);
-        unsubAttendance = subscribeToAttendanceByStudentIds([user.id], setAttendance);
-
-        if (studentUser.classId) {
-          unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
-        }
-      } else {
-        const setupDefaultSubs = () => {
-          // Optimized subscription: fetch only grades for the relevant academic periods (current year)
-          // instead of fetching all grades ever created.
-          const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
-
-          if (relevantPeriodIds.length > 0) {
-            unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
-          } else {
-            // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
-            // We avoid subscribing to EVERYTHING to prevent performance issues.
-            unsubGrades = () => { };
+          if (childIds.length > 0) {
+            unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);
+            unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
           }
 
-          unsubAttendance = subscribeToAttendance(setAttendance);
-          unsubHomeworks = subscribeToHomeworks(setHomeworks);
-        };
+          if (classIds.length > 0) {
+            unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
+          }
+        } else if (user?.role === 'student') {
+          const studentUser = user as Student;
+          // Fetch only relevant data for the student
+          unsubGrades = subscribeToCourseGradesByStudentIds([user.id], handleGradesUpdate);
+          unsubAttendance = subscribeToAttendanceByStudentIds([user.id], setAttendance);
 
-        // For teacher, director, superadmin - fetch filtered data
-        setupDefaultSubs();
-      }
+          if (studentUser.classId) {
+            unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
+          }
+        } else {
+          const setupDefaultSubs = () => {
+            // Optimized subscription: fetch only grades for the relevant academic periods (current year)
+            // instead of fetching all grades ever created.
+            const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
 
-      setIsLoading(false);
+            if (relevantPeriodIds.length > 0) {
+              unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+            } else {
+              // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
+              // We avoid subscribing to EVERYTHING to prevent performance issues.
+              unsubGrades = () => { };
+            }
+
+            unsubAttendance = subscribeToAttendance(setAttendance);
+            unsubHomeworks = subscribeToHomeworks(setHomeworks);
+          };
+
+          // For teacher, director, superadmin - fetch filtered data
+          setupDefaultSubs();
+        }
+
+        setIsLoading(false);
+      }, 800);
+
+      const handleWipe = () => {
+        if (unsubGrades) unsubGrades();
+        if (unsubAttendance) unsubAttendance();
+        if (unsubHomeworks) unsubHomeworks();
+      };
+      window.addEventListener('app:wipeData', handleWipe);
 
       return () => {
-        unsubGrades();
-        unsubAttendance();
-        unsubHomeworks();
+        clearTimeout(timeoutId);
+        if (unsubGrades) unsubGrades();
+        if (unsubAttendance) unsubAttendance();
+        if (unsubHomeworks) unsubHomeworks();
+        window.removeEventListener('app:wipeData', handleWipe);
       };
     } else {
       setIsLoading(false);
@@ -195,6 +208,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           weight: 1,
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
+          classId: grade.classId,
+          eventId: grade.eventId,
         };
 
         await fbCreateCourseGrade(courseGrade);
@@ -246,6 +261,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           weight: 1,
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
+          classId: grade.classId,
+          eventId: grade.eventId,
         };
       });
 

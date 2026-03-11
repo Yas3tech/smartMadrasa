@@ -28,10 +28,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(true);
         try {
           if (db) {
-            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            let userData = userDoc.exists() ? userDoc.data() : null;
+            let userData = null;
 
-            // Fallback: If no doc found by UID, try searching by email
+            try {
+              const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+              userData = userDoc.exists() ? userDoc.data() : null;
+            } catch (docError: any) {
+              console.warn('Initial doc fetch failed (likely mismatched UID permissions):', docError.message);
+            }
+
+            // Fallback: If no doc found by UID or permission denied, search by email
             if (!userData && firebaseUser.email) {
               const { getUserByEmail } = await import('../services/users');
               const userByEmail = await getUserByEmail(firebaseUser.email);
@@ -41,18 +47,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
 
             if (userData) {
+              console.log('Firebase user found in Firestore:', userData);
               setUser({
-                id: firebaseUser.uid,
+                ...userData,
+                id: userData.id || firebaseUser.uid,
                 email: firebaseUser.email || '',
                 name: userData.name || 'Utilisateur',
                 role: userData.role as Role,
-                ...userData,
               });
             } else {
+              console.warn('Firebase user logged in but no Firestore document found for UID or Email:', firebaseUser.uid, firebaseUser.email);
               setUser(null);
             }
           }
-        } catch {
+        } catch (error) {
+          console.error('Error fetching user document in AuthContext:', error);
           setUser(null);
         }
       } else {

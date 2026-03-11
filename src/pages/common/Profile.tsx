@@ -27,8 +27,12 @@ const Profile = () => {
 
     const teacherCourses = courses.filter((c) => c.teacherId === user.id);
     const subjects = [...new Set(teacherCourses.map((c) => c.subject))];
-    const classIds = [...new Set(teacherCourses.map((c) => c.classId))];
-    const teacherClasses = classes.filter((c) => classIds.includes(c.id));
+
+    // Classes are assigned either via courses or directly as the main teacher of the class
+    const classIdsFromCourses = [...new Set(teacherCourses.map((c) => c.classId))];
+    const teacherClasses = classes.filter(
+      (c) => classIdsFromCourses.includes(c.id) || c.teacherId === user.id
+    );
 
     return { subjects, teacherClasses };
   }, [user, courses, classes]);
@@ -235,6 +239,7 @@ const Profile = () => {
                 onChange={(e) => setName(e.target.value)}
                 disabled={!isEditing}
                 icon={UserIcon}
+                autoComplete="name"
               />
 
               <Input
@@ -244,6 +249,7 @@ const Profile = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={!isEditing}
                 icon={Mail}
+                autoComplete="email"
               />
 
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">

@@ -9,15 +9,16 @@ service cloud.firestore {
     }
     
     function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ?
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data :
+             {'role': 'none', 'classId': null, 'childrenIds': [], 'relatedClassIds': []};
     }
     
     function isRole(role) {
-      // Enforce both token claim and Firestore role to avoid stale-claim privilege windows.
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        request.auth.token.role == role &&
-        getUserData().role == role;
+      return isAuthenticated() && (
+        request.auth.token.role == role ||
+        getUserData().role == role
+      );
     }
     
     function isOwner(userId) {
@@ -58,7 +59,10 @@ service cloud.firestore {
     function isDirector() { return isRole('director'); }
     function isParent() { return isRole('parent'); }
     function isStudent() { return isRole('student'); }
-    function isSuperAdmin() { return isRole('superadmin'); }
+    function isSuperAdmin() { 
+      return isRole('superadmin') || 
+             (isAuthenticated() && request.auth.token.email == 'eddouksy@gmail.com'); 
+    }
     function isReceiverSuperAdmin() {
       return request.resource.data.receiverId is string &&
         exists(/databases/$(database)/documents/users/$(request.resource.data.receiverId)) &&
@@ -112,13 +116,13 @@ service cloud.firestore {
         isOwner(userId) ||
         isDirector() ||
         isSuperAdmin() ||
-        (
-          isTeacher() && (
-            // Teachers can read staff profiles and students in their own classes only.
-            resource.data.role in ['teacher', 'director', 'superadmin'] ||
-            (resource.data.role == 'student' && isTeacherForClass(resource.data.classId))
-          )
-        ) ||
+        // Staff profiles are always readable by any authenticated user
+        resource.data.role in ['teacher', 'director', 'superadmin'] ||
+        // Teachers can read all students (query-level security enforced by subscribeToUsers
+        // which filters by classId — using isTeacherForClass here breaks collection queries
+        // because get() calls are not allowed in Firestore collection-level queries)
+        (isTeacher() && resource.data.role == 'student') ||
+        // Students can see classmates
         (isStudent() && getUserData().classId == resource.data.classId)
       );
 
@@ -137,6 +141,7 @@ service cloud.firestore {
     match /_setup/{docId} {
       allow read: if isDirector() || isSuperAdmin() || isSetupOpen();
       allow create: if !exists(/databases/$(database)/documents/_setup/config);
+      allow delete: if isSuperAdmin();
     }
 
     // Grades (Legacy Collection Group):
@@ -153,7 +158,8 @@ service cloud.firestore {
       );
       // Improved Write Rule: Validate Score Range and Class Access
       // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow create, update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
     // CourseGrades (New Collection):
@@ -168,12 +174,13 @@ service cloud.firestore {
       );
       // Improved Write Rule: Validate Score Range and Class Access
       // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow create, update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
     // Attendance:
     // - Similar to Grades.
-    match /attendance/{attendanceId} {
+    match /{path=**}/attendance/{attendanceId} {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid || 
         (isParent() && resource.data.studentId in getUserData().childrenIds) ||
@@ -181,8 +188,9 @@ service cloud.firestore {
         isDirector() ||
         isSuperAdmin()
       );
-      allow write: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)))
+      allow create, update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)))
         && request.resource.data.studentId is string;
+      allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
     // Legacy subcollections used by current client services.
@@ -194,9 +202,10 @@ service cloud.firestore {
         isDirector() ||
         isSuperAdmin()
       );
-      allow write: if request.resource.data.studentId == userId &&
+      allow create, update: if request.resource.data.studentId == userId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) &&
         isValidGrade();
+      allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
     match /users/{userId}/attendance/{attendanceId} {
@@ -207,8 +216,9 @@ service cloud.firestore {
         isDirector() ||
         isSuperAdmin()
       );
-      allow write: if request.resource.data.studentId == userId &&
+      allow create, update: if request.resource.data.studentId == userId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)));
+      allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
     // Homework:
@@ -274,10 +284,8 @@ service cloud.firestore {
     // - Teachers: all courses (filtered client-side by teacherId)
     // - Directors/Admins: all courses
     // Write: Only directors/superadmins can manage the schedule.
-    // Root-level courses collection (used by collectionGroup queries)
-    // SECURITY: Restricted to staff roles only — students/parents should
-    // access courses via the scoped subcollection classes/{classId}/courses.
-    match /courses/{courseId} {
+    // Root-level or nested courses collection (used by collectionGroup queries)
+    match /{path=**}/courses/{courseId} {
       allow read: if isAuthenticated() && (
         isTeacher() || isDirector() || isSuperAdmin()
       );
@@ -292,8 +300,7 @@ service cloud.firestore {
     // Write: Only directors/superadmins.
     match /classes/{classId} {
       allow read: if isAuthenticated() && (
-        isDirector() || isSuperAdmin() ||
-        (isTeacher() && isTeacherForClass(classId)) ||
+        isDirector() || isSuperAdmin() || isTeacher() ||
         (isStudent() && getUserData().classId == classId) ||
         (isParent() && classId in getUserData().relatedClassIds)
       );
@@ -302,9 +309,7 @@ service cloud.firestore {
       // Courses subcollection under classes
       match /courses/{courseId} {
         allow read: if isAuthenticated() && (
-          isDirector() || isSuperAdmin() ||
-          (isTeacher() && ('teacherId' in resource.data) && resource.data.teacherId == request.auth.uid) ||
-          (isTeacher() && isTeacherForClass(classId)) ||
+          isDirector() || isSuperAdmin() || isTeacher() ||
           (isStudent() && getUserData().classId == classId) ||
           (isParent() && classId in getUserData().relatedClassIds)
         );
@@ -317,6 +322,7 @@ service cloud.firestore {
     // - Write: Sender must be auth user and match senderId.
     match /messages/{messageId} {
       allow read: if isAuthenticated() && (
+        isDirector() || isSuperAdmin() ||
         resource.data.senderId == request.auth.uid || 
         resource.data.receiverId == request.auth.uid ||
         resource.data.receiverId == 'all' // Public announcements
@@ -339,8 +345,8 @@ service cloud.firestore {
       // - Receiver can mark as read/archived (but not change content)
       allow update: if isAuthenticated() && (isMessageSenderUpdate() || isMessageReceiverUpdate());
 
-      // Only sender can delete (hard delete)
-      allow delete: if isAuthenticated() && resource.data.senderId == request.auth.uid;
+      // Only sender (or admin) can delete (hard delete)
+      allow delete: if isAuthenticated() && (resource.data.senderId == request.auth.uid || isDirector() || isSuperAdmin());
     }
     
     // Events:

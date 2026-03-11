@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Sidebar from './Sidebar';
 import NotificationBell from './NotificationBell';
 import LanguageSwitcher from '../LanguageSwitcher';
-import ForcePasswordChange from '../Auth/ForcePasswordChange';
 import { useAuth } from '../../context/AuthContext';
 import { Menu, X } from 'lucide-react';
 
@@ -19,15 +18,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const isRTL = i18n.language === 'ar';
-
-  // Check if user must change password
-  useEffect(() => {
-    if (user?.mustChangePassword) {
-      setShowPasswordModal(true);
-    }
-  }, [user?.mustChangePassword]);
 
   // Track mobile state and auto-collapse on mobile
   useEffect(() => {
@@ -69,13 +60,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Sidebar - hidden on mobile by default, shown as overlay when menu open */}
       <div
         className={`
-                ${
-                  isMobile
-                    ? isMobileMenuOpen
-                      ? `fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 transform transition-transform duration-300 ease-out translate-x-0`
-                      : 'hidden'
-                    : ''
-                }
+                ${isMobile
+            ? isMobileMenuOpen
+              ? `fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 transform transition-transform duration-300 ease-out translate-x-0`
+              : 'hidden'
+            : ''
+          }
             `}
       >
         <Sidebar isCollapsed={isMobile ? false : isSidebarCollapsed} />
@@ -83,8 +73,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          isMobile
+        className={`flex-1 flex flex-col transition-all duration-300 ${isMobile
             ? ''
             : isSidebarCollapsed
               ? isRTL
@@ -93,7 +82,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               : isRTL
                 ? 'mr-64'
                 : 'ml-64'
-        }`}
+          }`}
       >
         {/* Header */}
         <header
@@ -145,12 +134,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
-
-      {/* Force Password Change Modal */}
-      <ForcePasswordChange
-        isOpen={showPasswordModal}
-        onSuccess={() => setShowPasswordModal(false)}
-      />
     </div>
   );
 };

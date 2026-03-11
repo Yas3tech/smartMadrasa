@@ -9,7 +9,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
-import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown, Key } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
 import type { User, Role } from '../../types';
 import toast from 'react-hot-toast';
@@ -108,14 +108,15 @@ const UserManagement = () => {
       toast.error(t('users.fillRequired'));
       return;
     }
-    const userData: Omit<User, 'id'> & { childrenIds?: string[]; relatedClassIds?: string[] } = {
+    const userData: Record<string, any> = {
       name,
       email: email.toLowerCase().trim(),
       role,
-      phone: role === 'teacher' || role === 'parent' ? phone : undefined,
-      birthDate: role === 'student' ? birthDate : undefined,
       avatar: name.charAt(0).toUpperCase(),
     };
+    if (role === 'teacher' || role === 'parent') userData.phone = phone;
+    if (role === 'student') userData.birthDate = birthDate;
+
     if (role === 'parent' && selectedStudentId) {
       userData.childrenIds = [selectedStudentId];
       const student = students.find((s) => s.id === selectedStudentId);
@@ -123,27 +124,38 @@ const UserManagement = () => {
         userData.relatedClassIds = [(student as any).classId];
       }
     }
-    if (editingUser) {
-      updateUser(editingUser.id, userData);
-      toast.success(t('users.userUpdated'));
-    } else {
-      const result = await addUser({ id: `u${Date.now()}`, ...userData });
-      if (result && typeof result === 'object' && 'emailSent' in result) {
-        if (result.emailSent) {
-          toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
-        } else if (result.password) {
-          toast.success(`${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`, {
-            duration: 30000,
-            icon: '🔑',
-          });
+    try {
+      if (editingUser) {
+        updateUser(editingUser.id, userData);
+        toast.success(t('users.userUpdated'));
+      } else {
+        const result = await addUser({ id: `u${Date.now()}`, ...userData });
+        if (result && typeof result === 'object' && 'emailSent' in result) {
+          if (result.emailSent) {
+            toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
+          } else if (result.password) {
+            toast.success(`${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`, {
+              duration: 30000,
+              icon: '🔑',
+            });
+          } else {
+            toast.success(t('users.userCreated'));
+          }
         } else {
           toast.success(t('users.userCreated'));
         }
+      }
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error('Error saving user:', error);
+      if (error?.code === 'auth/email-already-in-use') {
+        toast.error(t('users.emailInUse') || "Cette adresse e-mail est déjà utilisée.");
+      } else if (error?.code === 'auth/operation-not-allowed') {
+        toast.error("L'authentification par email/mot de passe n'est pas activée dans Firebase.");
       } else {
-        toast.success(t('users.userCreated'));
+        toast.error(error?.message || t('common.error') || "Une erreur s'est produite.");
       }
     }
-    setIsModalOpen(false);
   };
 
   const handleDelete = async (userId: string, userRole: Role) => {
@@ -174,16 +186,7 @@ const UserManagement = () => {
     }
   };
 
-  const handleForcePasswordChange = async (userId: string, userName: string) => {
-    if (confirm(t('users.confirmForcePasswordChange', { name: userName }))) {
-      try {
-        await updateUser(userId, { mustChangePassword: true });
-        toast.success(t('users.forcePasswordChangeSuccess'));
-      } catch {
-        toast.error(t('users.forcePasswordChangeError'));
-      }
-    }
-  };
+
 
   const handleDownloadTemplate = async () => {
     const ExcelJS = (await import('exceljs')).default;
@@ -304,6 +307,7 @@ const UserManagement = () => {
               key={roleFilterValue}
               className={`p-4 cursor-pointer transition-all ${filterRole === roleFilterValue ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:shadow-md'}`}
               onClick={() => setFilterRole(roleFilterValue)}
+              aria-pressed={filterRole === roleFilterValue}
             >
               <p className="text-xs text-gray-500 font-medium mb-1">
                 {getRoleLabel(roleFilterValue)}
@@ -323,6 +327,7 @@ const UserManagement = () => {
           <input
             type="text"
             placeholder={t('users.searchPlaceholder')}
+            aria-label={t('users.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none`}
@@ -388,14 +393,7 @@ const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} gap-2`}>
-                      <button
-                        onClick={() => handleForcePasswordChange(user.id, user.name)}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title={t('users.forcePasswordChange')}
-                        aria-label={t('users.forcePasswordChange')}
-                      >
-                        <Key size={18} />
-                      </button>
+
                       <button
                         onClick={() => handleEdit(user)}
                         className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"

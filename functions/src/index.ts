@@ -58,3 +58,65 @@ export const syncRoleToClaims = functions.firestore
             functions.logger.error(`Failed to set claims for ${userId}:`, err);
         }
     });
+
+/**
+ * Cloud Function HTTPS Callable
+ * Deletes all authentication accounts. Requires superadmin role.
+ */
+export const wipeAllAuthUsers = functions.https.onCall(async (data, context) => {
+    // 1. Check authentication
+    if (!context.auth) {
+        throw new functions.https.HttpsError(
+            "unauthenticated",
+            "You must be logged in to wipe the database."
+        );
+    }
+
+    // 2. Check authorization (superadmin)
+    // First check custom claims, fallback to Firestore if needed
+    let isSuperAdmin = context.auth.token.role === "superadmin";
+
+    // If claim is not present, check Firestore as fallback (for newly created superadmins)
+    if (!isSuperAdmin) {
+        const userDoc = await admin.firestore().collection("users").doc(context.auth.uid).get();
+        if (userDoc.exists && userDoc.data()?.role === "superadmin") {
+            isSuperAdmin = true;
+        }
+    }
+
+    if (!isSuperAdmin) {
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Only superadmins can wipe the authentication database."
+        );
+    }
+
+    try {
+        let nextPageToken;
+        let deletedCount = 0;
+        do {
+            const listUsersResult = await admin.auth().listUsers(1000, nextPageToken);
+            const uids = listUsersResult.users.map((userRecord) => userRecord.uid);
+
+            if (uids.length > 0) {
+                // Delete in batches to avoid timeout/limits
+                const deleteResult = await admin.auth().deleteUsers(uids);
+                deletedCount += deleteResult.successCount;
+                if (deleteResult.failureCount > 0) {
+                    functions.logger.warn(`Failed to delete ${deleteResult.failureCount} users`);
+                }
+            }
+            nextPageToken = listUsersResult.pageToken;
+        } while (nextPageToken);
+
+        functions.logger.info(`Successfully wiped ${deletedCount} authentication accounts.`);
+        return { success: true, count: deletedCount };
+    } catch (error: any) {
+        functions.logger.error("Error wiping auth users:", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            "An error occurred while wiping authentication accounts.",
+            error.message
+        );
+    }
+});

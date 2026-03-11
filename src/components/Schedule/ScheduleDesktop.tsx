@@ -158,47 +158,60 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                                 }
                                             }
 
+                                            // Each overlapping course is independently absolutely positioned.
+                                            const ROW_H = 49;
+                                            const tdHeightPx = maxRowSpan * ROW_H;
+
                                             return (
                                                 <td
                                                     key={dayIndex}
                                                     rowSpan={maxRowSpan}
+                                                    style={{ position: 'relative', height: `${tdHeightPx}px`, verticalAlign: 'top' }}
                                                     className={`py-1 px-1 align-top ${isToday ? 'bg-orange-50/50 dark:bg-orange-900/10' : ''}`}
                                                 >
-                                                    {/* Overlapping courses rendered side-by-side */}
-                                                    {visibleCourses.length > 0 && (
-                                                        <div className="flex gap-0.5 h-full">
-                                                            {visibleCourses.map((ci: any) => (
-                                                                <div
-                                                                    key={ci.course.id}
-                                                                    style={{ width: `${100 / ci.totalCols}%` }}
-                                                                    className={`p-1.5 rounded-lg text-xs border-l-4 cursor-pointer hover:shadow-md transition-shadow group relative min-h-full flex flex-col ${schedule.subjectColors[ci.course.subject] || 'bg-gray-500 text-white border-gray-600'}`}
-                                                                    onClick={() => schedule.canEdit && schedule.handleEditCourse(ci.course)}
-                                                                >
-                                                                    <div className="font-semibold truncate">{ci.course.subject}</div>
-                                                                    <div className="opacity-80 text-[10px]">
-                                                                        {ci.course.startTime} - {ci.course.endTime}
-                                                                    </div>
-                                                                    {ci.course.room && <div className="opacity-70 text-[10px]">{ci.course.room}</div>}
-                                                                    {/* Class name at bottom-right for teachers */}
-                                                                    {ci.course.className && (
-                                                                        <div className="flex justify-end mt-auto">
-                                                                            <span className="opacity-90 text-[10px] font-medium bg-white/20 px-1 rounded truncate">
-                                                                                {ci.course.className}
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
-                                                                    {schedule.canEdit && (
-                                                                        <button
-                                                                            className="absolute -top-1 -right-1 p-1 bg-white dark:bg-slate-700 rounded-full shadow opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500"
-                                                                            onClick={(e) => schedule.showDeleteMenu(e, ci.course.id, dateStr)}
-                                                                        >
-                                                                            <Trash2 size={12} />
-                                                                        </button>
-                                                                    )}
+                                                    {/* Each overlapping course card is independently positioned */}
+                                                    {visibleCourses.length > 0 && visibleCourses.map((ci: any) => {
+                                                        const ciTopOff = ci.topOffsetFraction * ROW_H;
+                                                        const ciBotCut = ci.bottomCutFraction * ROW_H;
+                                                        const ciHeight = ci.rowSpan * ROW_H - ciTopOff - ciBotCut - 8;
+                                                        const colW = 100 / ci.totalCols;
+                                                        return (
+                                                            <div
+                                                                key={ci.course.id}
+                                                                style={{
+                                                                    position: 'absolute',
+                                                                    top: `${ciTopOff + 4}px`,
+                                                                    height: `${ciHeight}px`,
+                                                                    left: `calc(4px + ${ci.colIndex * colW}%)`,
+                                                                    width: `calc(${colW}% - ${ci.totalCols > 1 ? 6 : 8}px)`,
+                                                                }}
+                                                                className={`p-1.5 rounded-lg text-xs border-l-4 cursor-pointer hover:shadow-md transition-shadow group flex flex-col overflow-hidden ${schedule.subjectColors[ci.course.subject] || 'bg-gray-500 text-white border-gray-600'}`}
+                                                                onClick={() => schedule.canEdit && schedule.handleEditCourse(ci.course)}
+                                                            >
+                                                                <div className="font-semibold truncate">{ci.course.subject}</div>
+                                                                <div className="opacity-80 text-[10px]">
+                                                                    {ci.course.startTime} - {ci.course.endTime}
                                                                 </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
+                                                                {ci.course.room && <div className="opacity-70 text-[10px]">{ci.course.room}</div>}
+                                                                {/* Class name at bottom-right for teachers */}
+                                                                {ci.course.className && (
+                                                                    <div className="flex justify-end mt-auto">
+                                                                        <span className="opacity-90 text-[10px] font-medium bg-white/20 px-1 rounded truncate">
+                                                                            {ci.course.className}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                                {schedule.canEdit && (
+                                                                    <button
+                                                                        className="absolute -top-1 -right-1 p-1 bg-white dark:bg-slate-700 rounded-full shadow opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500"
+                                                                        onClick={(e) => schedule.showDeleteMenu(e, ci.course.id, dateStr)}
+                                                                    >
+                                                                        <Trash2 size={12} />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
                                                     {/* Exams */}
                                                     {dayExams.map((exam: any) => (
                                                         <div

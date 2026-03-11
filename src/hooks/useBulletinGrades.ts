@@ -134,18 +134,22 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
       }
     });
 
+    // Optimization: Create a Map of comments for O(1) lookup
+    // Key: studentId::courseId
+    const commentsMap = new Map<string, TeacherComment>();
+    classComments.forEach(c => {
+      if (c.periodId === selectedPeriod) {
+        commentsMap.set(`${c.studentId}::${c.courseId}`, c);
+      }
+    });
+
     classStudents.forEach((student) => {
       teacherCoursesInClass.forEach((course) => {
         const hasGrades = activeGradeKeys.has(`${student.id}::${course.id}`);
 
         if (hasGrades) {
           total++;
-          const comment = classComments.find(
-            (c) =>
-              c.studentId === student.id &&
-              c.courseId === course.id &&
-              c.periodId === selectedPeriod
-          );
+          const comment = commentsMap.get(`${student.id}::${course.id}`);
           if (comment?.isValidated) {
             validated++;
           }
@@ -191,6 +195,14 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
       gradesByCourse.get(g.courseId)!.push(g);
     });
 
+    // Optimization: Create a Map of teacherComments for O(1) lookup
+    const commentsMap = new Map<string, TeacherComment>();
+    teacherComments.forEach(tc => {
+      if (tc.periodId === selectedPeriod && tc.studentId === selectedStudent) {
+        commentsMap.set(tc.courseId, tc);
+      }
+    });
+
     return teacherCourses
       .map((course) => {
         const periodGrades = gradesByCourse.get(course.id) || [];
@@ -201,12 +213,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
           average = sum / periodGrades.length;
         }
 
-        const existingComment = teacherComments.find(
-          (tc) =>
-            tc.studentId === selectedStudent &&
-            tc.courseId === course.id &&
-            tc.periodId === selectedPeriod
-        );
+        const existingComment = commentsMap.get(course.id);
 
         return {
           course,
@@ -300,12 +307,17 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     const commentsToUpdateIds: string[] = [];
     let count = 0;
 
+    // Optimization: Map lookups
+    const commentsMap = new Map<string, TeacherComment>();
+    classComments.forEach(c => {
+      if (c.periodId === selectedPeriod) {
+        commentsMap.set(`${c.studentId}::${c.courseId}`, c);
+      }
+    });
+
     classStudents.forEach((student) => {
       teacherCoursesInClass.forEach((course) => {
-        const comment = classComments.find(
-          (c) =>
-            c.studentId === student.id && c.courseId === course.id && c.periodId === selectedPeriod
-        );
+        const comment = commentsMap.get(`${student.id}::${course.id}`);
 
         if (comment) {
           if (!comment.isValidated) {
@@ -367,10 +379,16 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     const commentsToUpdateIds: string[] = [];
     let count = 0;
 
+    // Optimization: Map lookups
+    const commentsMap = new Map<string, TeacherComment>();
+    teacherComments.forEach(tc => {
+      if (tc.periodId === selectedPeriod && tc.studentId === selectedStudent) {
+        commentsMap.set(tc.courseId, tc);
+      }
+    });
+
     teacherCourses.forEach((course) => {
-      const comment = teacherComments.find(
-        (c) => c.courseId === course.id && c.periodId === selectedPeriod
-      );
+      const comment = commentsMap.get(course.id);
 
       if (comment) {
         if (!comment.isValidated) {

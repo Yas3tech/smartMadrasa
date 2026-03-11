@@ -1,4 +1,4 @@
-import type { Parent, Role, Student, User } from '../types';
+import type { Role, Student, User } from '../types';
 
 export interface ImportedUserSummary {
   id: string;
@@ -425,7 +425,7 @@ export const processParentUsers = async (
       }
     }
 
-    const newUser: Parent = {
+    const newUser: any = {
       id: crypto.randomUUID(),
       name: normalizeString(row.name),
       email: normalizeEmail(row.email),
@@ -434,8 +434,10 @@ export const processParentUsers = async (
       birthDate: normalizeString(row.birthDate),
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
       childrenIds,
-      relatedClassIds: relatedClassIds.length > 0 ? relatedClassIds : undefined,
     };
+    if (relatedClassIds.length > 0) {
+      newUser.relatedClassIds = relatedClassIds;
+    }
 
     await addUser(newUser);
     importedCount++;

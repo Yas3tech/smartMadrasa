@@ -21,7 +21,7 @@ export interface FormState {
   subject: string;
   description: string;
   dueDate: string;
-  maxGrade: number | undefined;
+  maxScore: number | undefined;
   allowOnlineSubmission: boolean;
   isGraded: boolean;
   selectedClassId: string;
@@ -114,9 +114,9 @@ export function useHomework(): UseHomeworkReturn {
     subject: '',
     description: '',
     dueDate: '',
-    maxGrade: undefined,
+    maxScore: 20,
     allowOnlineSubmission: true,
-    isGraded: false,
+    isGraded: true,
     selectedClassId: '',
   });
 
@@ -192,12 +192,12 @@ export function useHomework(): UseHomeworkReturn {
       subject,
       description,
       allowOnlineSubmission,
-      maxGrade,
+      maxScore,
     } = formState;
     if (!title || !dueDate || !selectedClassId) return;
 
     try {
-      const homeworkData: Omit<Homework, 'id'> & { maxGrade?: number } = {
+      const homeworkData: Omit<Homework, 'id'> = {
         title,
         subject,
         description,
@@ -205,11 +205,9 @@ export function useHomework(): UseHomeworkReturn {
         assignedBy: user?.name || '',
         classId: selectedClassId,
         allowOnlineSubmission,
+        isGraded: true,
+        maxScore: maxScore || 20,
       };
-
-      if (maxGrade !== undefined && maxGrade !== null) {
-        homeworkData.maxGrade = maxGrade;
-      }
 
       if (editingHomework) {
         await updateHomework(editingHomework.id, homeworkData);
@@ -231,8 +229,8 @@ export function useHomework(): UseHomeworkReturn {
       subject: homework.subject,
       description: homework.description,
       dueDate: homework.dueDate.split('T')[0],
-      isGraded: homework.maxGrade !== undefined && homework.maxGrade > 0,
-      maxGrade: homework.maxGrade,
+      isGraded: homework.isGraded ?? (homework.maxScore !== undefined && homework.maxScore > 0),
+      maxScore: homework.maxScore,
       allowOnlineSubmission: homework.allowOnlineSubmission ?? true,
       selectedClassId: homework.classId,
     });
@@ -256,8 +254,8 @@ export function useHomework(): UseHomeworkReturn {
       subject: '',
       description: '',
       dueDate: '',
-      isGraded: false,
-      maxGrade: undefined,
+      isGraded: true,
+      maxScore: 20,
       allowOnlineSubmission: true,
       selectedClassId: '',
     });

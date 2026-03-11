@@ -47,7 +47,6 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signOut,
-  sendPasswordResetEmail,
   type Auth,
 } from 'firebase/auth';
 import { firebaseConfig } from '../config/firebase';
@@ -110,30 +109,29 @@ export const createUser = async (
       authResult = await createAuthUser(user.email.toLowerCase().trim());
       uid = authResult.uid;
     } catch (error) {
-      const firebaseErr = error as { code?: string };
-      if (firebaseErr.code === 'auth/email-already-in-use') {
-        // If user exists in Auth but not in Firestore with correct ID,
-        // we might not have the UID here easily without Admin SDK.
-        // For client side, we'll try to proceed or handle via email lookup later.
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 
-  // 2. Create Firestore Document with mustChangePassword flag
-  const userWithPasswordFlag = {
-    ...user,
-    mustChangePassword: true, // Force password rotation on first login
-  };
-
   if (uid) {
-    // Sync Firestore ID with Auth UID
+    // Sync Firestore ID with Auth UID.
+    // IMPORTANT: Explicitly set `id` to the Auth UID to prevent the client-generated
+    // UUID (passed in via the `user` object) from being stored as the internal id,
+    // which would break Firestore security rules that look up users/{request.auth.uid}.
+    const userWithPasswordFlag = {
+      ...user,
+      id: uid,                  // ← Override any client-side UUID with the real Auth UID
+      mustChangePassword: true, // Force password rotation on first login
+    };
     const { setDoc } = await import('firebase/firestore');
     await setDoc(doc(db, COLLECTION_NAME, uid), userWithPasswordFlag);
     return authResult || uid;
   } else {
-    // Fallback to random ID if no Auth UID (e.g. email already in use or not provided)
+    // Fallback to random ID if no Auth UID (e.g. email not provided)
+    const userWithPasswordFlag = {
+      ...user,
+      mustChangePassword: true,
+    };
     const docRef = await addDoc(collection(db, COLLECTION_NAME), userWithPasswordFlag);
     return docRef.id;
   }
@@ -161,15 +159,10 @@ const createAuthUser = async (
   // Create user with a secure random password
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const uid = userCredential.user.uid;
-  let emailSent = false;
 
-  // Attempt to send password reset email
-  try {
-    await sendPasswordResetEmail(auth, email);
-    emailSent = true;
-  } catch (emailError) {
-    console.warn('Failed to send password reset email:', emailError);
-  }
+  // We no longer send the password reset email automatically here.
+  // The user will request it themselves from the Login page using the "S'inscrire" button.
+  const emailSent = false;
 
   // Sign out from secondary auth immediately
   await signOut(auth);
@@ -260,14 +253,18 @@ export const subscribeToUsers = (
 
     if (filter.role) {
       const roles = Array.isArray(filter.role) ? filter.role : [filter.role];
-      if (roles.length > 0) {
+      if (roles.length === 1) {
+        q = query(q, where('role', '==', roles[0]));
+      } else if (roles.length > 1) {
         q = query(q, where('role', 'in', roles));
       }
     }
 
     if (filter.classId) {
       const classIds = Array.isArray(filter.classId) ? filter.classId : [filter.classId];
-      if (classIds.length > 0) {
+      if (classIds.length === 1) {
+        q = query(q, where('classId', '==', classIds[0]));
+      } else if (classIds.length > 1) {
         q = query(q, where('classId', 'in', classIds));
       }
     }

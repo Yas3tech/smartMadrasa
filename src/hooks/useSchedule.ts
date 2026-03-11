@@ -11,6 +11,10 @@ export interface CourseSlotInfo {
   rowSpan: number;
   colIndex: number;
   totalCols: number;
+  /** 0–1: how far into the FIRST slot the course starts (for top offset) */
+  topOffsetFraction: number;
+  /** 0–1: how much of the LAST slot is NOT covered by the course (for bottom trim) */
+  bottomCutFraction: number;
 }
 
 export interface ScheduleSlot {
@@ -129,7 +133,8 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
         const courseTime = new Date(course.specificDate).getTime();
         return courseTime >= weekStartTs && courseTime <= weekEndTs;
       }
-      return false;
+      // Fallback: course has no recurrence info and no specific date → treat as always-recurring
+      return true;
     });
   }, [userCourses, weekStart]);
 
@@ -171,7 +176,8 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
         if (course.specificDate) {
           return new Date(course.specificDate).toDateString() === mobileDate.toDateString();
         }
-        return false;
+        // Fallback: course has no recurrence info and no specific date → treat as always-recurring
+        return true;
       })
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   }, [userCourses, mobileDate]);
@@ -298,12 +304,27 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
     courseInfoMap.forEach(({ startSlotIdx, rowSpan, course }) => {
       const cols = colAssignment.get(course.id) || { colIndex: 0, totalCols: 1 };
 
+      // Compute partial-slot fractions for precise visual height
+      const firstSlot = slotBoundaries[startSlotIdx];
+      const lastSlot = slotBoundaries[startSlotIdx + rowSpan - 1];
+      const courseStartMin = timeToMinutes(course.startTime);
+      const courseEndMin = timeToMinutes(course.endTime);
+
+      const topOffsetFraction = firstSlot
+        ? Math.max(0, Math.min(1, (courseStartMin - firstSlot.startMin) / (firstSlot.endMin - firstSlot.startMin)))
+        : 0;
+      const bottomCutFraction = lastSlot
+        ? Math.max(0, Math.min(1, 1 - (courseEndMin - lastSlot.startMin) / (lastSlot.endMin - lastSlot.startMin)))
+        : 0;
+
       slots[startSlotIdx].courses[course.dayOfWeek].push({
         course,
         isStart: true,
         rowSpan,
         colIndex: cols.colIndex,
         totalCols: cols.totalCols,
+        topOffsetFraction,
+        bottomCutFraction,
       });
 
       for (let i = 1; i < rowSpan; i++) {
@@ -315,6 +336,8 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
             rowSpan: 0,
             colIndex: cols.colIndex,
             totalCols: cols.totalCols,
+            topOffsetFraction: 0,
+            bottomCutFraction: 0,
           });
         }
       }

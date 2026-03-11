@@ -47,7 +47,9 @@
     "add": "Toevoegen",
     "unsafeFile": "Onveilig bestand",
     "showPassword": "Wachtwoord tonen",
-    "hidePassword": "Wachtwoord verbergen"
+    "hidePassword": "Wachtwoord verbergen",
+    "course": "Les",
+    "class": "Klas"
   },
   "subjects": {
     "Arabe": "Arabisch",
@@ -93,7 +95,7 @@
     "homework": "Huiswerk",
     "grades": "Cijfers",
     "bulletins": "Rapporten",
-    "bulletinGrades": "Cijfers invoeren",
+    "bulletinGrades": "Cijferinvoer",
     "bulletinConfig": "Configuratie",
     "bulletinDashboard": "Rapportbeheer",
     "attendance": "Aanwezigheid",
@@ -297,6 +299,7 @@
     "startTime": "Starttijd",
     "endTime": "Eindtijd",
     "noCourses": "Geen lessen",
+    "noCourse": "Geen les geselecteerd",
     "academicYear": "Schooljaar {{year}}",
     "backToCurrentWeek": "Terug naar deze week",
     "upcoming": "Aankomend",
@@ -401,6 +404,7 @@
     "gradeTitle": "Titel",
     "gradeTitlePlaceholder": "Bijv: Toets #1",
     "evaluation": "Evaluatie",
+    "noted": "Beoordeeld",
     "scoreArg": "Cijfer (/{{max}})",
     "feedbackPlaceholder": "Feedback...",
     "feedbackDescPlaceholder": "Opmerkingen over prestaties...",
