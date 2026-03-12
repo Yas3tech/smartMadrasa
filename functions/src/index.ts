@@ -116,7 +116,7 @@ export const wipeAllAuthUsers = functions.https.onCall(async (data, context) => 
         throw new functions.https.HttpsError(
             "internal",
             "An error occurred while wiping authentication accounts.",
-            (error as any).message
+            (error as Error).message
         );
     }
 });

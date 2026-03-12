@@ -128,7 +128,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                 // Key: `${slotIndex}-${dayIndex}`, value: number of remaining rows to skip
                                 const occupiedCells = new Map<string, number>();
 
-                                return schedule.scheduleSlots.map((slot: any, slotIndex: number) => (
+                                return schedule.scheduleSlots.map((slot, slotIndex) => (
                                     <tr
                                         key={slotIndex}
                                         className="border-b dark:border-slate-700 hover:bg-gray-50/50 dark:hover:bg-slate-800/50"
@@ -155,15 +155,15 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                             const dateStr = schedule.getDateForDayIndex(dayIndex);
 
                                             // Filter to only courses that start in this slot (for rendering)
-                                            const startingCourses = courseInfos.filter((ci: any) => ci.isStart);
+                                            const startingCourses = courseInfos.filter((ci) => ci.isStart);
                                             // Filter out excluded dates
                                             const visibleCourses = startingCourses.filter(
-                                                (ci: any) => !ci.course.excludedDates?.includes(dateStr)
+                                                (ci) => !ci.course.excludedDates?.includes(dateStr)
                                             );
 
                                             // Determine the max rowSpan for this cell (for the <td> rowSpan attribute)
                                             const maxRowSpan = visibleCourses.length > 0
-                                                ? Math.max(...visibleCourses.map((ci: any) => ci.rowSpan))
+                                                ? Math.max(...visibleCourses.map((ci) => ci.rowSpan))
                                                 : 1;
 
                                             // Mark future rows as occupied if we're spanning
@@ -185,7 +185,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                                     className={`py-1 px-1 align-top ${isToday ? 'bg-orange-50/50 dark:bg-orange-900/10' : ''}`}
                                                 >
                                                     {/* Each overlapping course card is independently positioned */}
-                                                    {visibleCourses.length > 0 && visibleCourses.map((ci: any) => {
+                                                    {visibleCourses.length > 0 && visibleCourses.map((ci) => {
                                                         const ciTopOff = ci.topOffsetFraction * ROW_H;
                                                         const ciBotCut = ci.bottomCutFraction * ROW_H;
                                                         const ciHeight = ci.rowSpan * ROW_H - ciTopOff - ciBotCut - 8;
@@ -228,7 +228,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                                         );
                                                     })}
                                                     {/* Exams */}
-                                                    {dayExams.map((exam: any) => (
+                                                    {dayExams.map((exam) => (
                                                         <div
                                                             key={exam.id}
                                                             className="p-2 rounded-lg text-xs bg-red-500 text-white border-l-4 border-red-600 mt-1 cursor-pointer hover:shadow-md"
@@ -262,7 +262,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
 
                 {schedule.weekHomeworks.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {schedule.weekHomeworks.map((hw: any) => (
+                        {schedule.weekHomeworks.map((hw) => (
                             <div
                                 key={hw.id}
                                 className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-l-4 border-orange-500 hover:shadow-md transition-shadow cursor-pointer"

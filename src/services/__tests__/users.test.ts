@@ -223,7 +223,7 @@ describe('users service', () => {
 
             expect(collection).toHaveBeenCalledWith(db, 'users');
             expect(limit).toHaveBeenCalledWith(500);
-            expect(onSnapshot).toHaveBeenCalledWith('queryRef', expect.any(Function));
+            expect(onSnapshot).toHaveBeenCalledWith('queryRef', expect.any(Function), expect.any(Function));
         });
     });
 });

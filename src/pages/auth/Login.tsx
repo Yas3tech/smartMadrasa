@@ -158,12 +158,12 @@ const Login = () => {
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setMessage(copy.resetEmailSentSuccess);
+      setMessage(copy.resetEmailSent);
       setLoading(false);
     } catch (err) {
       const authError = err as AuthError;
       if (authError.code === 'auth/user-not-found') {
-        setMessage(copy.resetEmailSentSuccess); // Prevent email sniffing
+        setMessage(copy.resetEmailSent); // Prevent email sniffing
       } else {
         setError(copy.genericError);
       }
@@ -236,7 +236,7 @@ const Login = () => {
           />
           <h1 className="text-3xl font-bold text-gray-900">SmartMadrassa</h1>
           <p className="text-gray-500 mt-2">
-            {isResetMode ? t('auth.resetTitle') : t('auth.title')}
+            {isResetMode ? t('auth.resetTitle', 'Réinitialiser le mot de passe') : t('auth.title', 'Connectez-vous pour continuer')}
           </p>
         </div>
 
