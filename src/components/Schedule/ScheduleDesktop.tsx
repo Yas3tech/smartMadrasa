@@ -1,11 +1,26 @@
 import React from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, GraduationCap, Clock, BookOpen, Trash2, Plus } from 'lucide-react';
 import { Card, Button, Badge } from '../UI';
+import type { UseScheduleDataReturn } from '../../hooks/useSchedule';
+import type { TFunction, i18n } from 'i18next';
+import type { Course, Event, Homework } from '../../types';
 
 interface ScheduleDesktopProps {
-    schedule: any; // Using any for the wrapper object for brevity in this refactor
-    t: any;
-    i18n: any;
+    schedule: UseScheduleDataReturn & {
+        setWeekOffset: (offset: number) => void;
+        weekOffset: number;
+        setShowUpcomingModal: (show: boolean) => void;
+        handleAddCourse: () => void;
+        handleAddExam: () => void;
+        handleEditCourse: (course: Course) => void;
+        handleEditExam: (exam: Event) => void;
+        showDeleteMenu: (e: React.MouseEvent, courseId: string, date: string) => void;
+        deleteMenu: { courseId: string; date: string; x: number; y: number } | null;
+        setSelectedHomework: (hw: Homework | null) => void;
+        setShowHomeworkDetail: (show: boolean) => void;
+    };
+    t: TFunction;
+    i18n: i18n;
     days: string[];
 }
 

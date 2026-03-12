@@ -287,6 +287,8 @@ export const subscribeToUsers = (
       const uniqueUsersMap = new Map(allUsers.map((u) => [u.id, u]));
 
       callback(Array.from(uniqueUsersMap.values()));
+    }, (error) => {
+      console.error(`[subscribeToUsers] Error in query ${index}:`, error, filter);
     });
 
     unsubscribes.push(unsub);

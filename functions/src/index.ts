@@ -111,12 +111,12 @@ export const wipeAllAuthUsers = functions.https.onCall(async (data, context) => 
 
         functions.logger.info(`Successfully wiped ${deletedCount} authentication accounts.`);
         return { success: true, count: deletedCount };
-    } catch (error: any) {
+    } catch (error: unknown) {
         functions.logger.error("Error wiping auth users:", error);
         throw new functions.https.HttpsError(
             "internal",
             "An error occurred while wiping authentication accounts.",
-            error.message
+            (error as any).message
         );
     }
 });

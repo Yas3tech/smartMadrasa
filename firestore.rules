@@ -118,10 +118,8 @@ service cloud.firestore {
         isSuperAdmin() ||
         // Staff profiles are always readable by any authenticated user
         resource.data.role in ['teacher', 'director', 'superadmin'] ||
-        // Teachers can read all students (query-level security enforced by subscribeToUsers
-        // which filters by classId — using isTeacherForClass here breaks collection queries
-        // because get() calls are not allowed in Firestore collection-level queries)
-        (isTeacher() && resource.data.role == 'student') ||
+        // Teachers can read all students and parents (query-level security)
+        (isTeacher() && (resource.data.role in ['student', 'parent'] || 'relatedClassIds' in resource.data)) ||
         // Students can see classmates
         (isStudent() && getUserData().classId == resource.data.classId)
       );

@@ -69,6 +69,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             ];
             if (classIds.length > 0) {
               queries.push({ role: 'student', classId: classIds });
+              // Fetch parents who have these classes in their relatedClassIds.
+              // Note: We omit role: 'parent' here to avoid requiring a composite index.
+              queries.push({ relatedClassIds: classIds });
             }
             innerUnsubUsers = subscribeToUsers(setUsers, queries);
           });

@@ -52,6 +52,7 @@ export interface Message {
   id: string | number;
   senderId: string | number;
   senderName: string;
+  senderEmail?: string;
   senderRole?: string;
   receiverId: string | number | 'group' | 'all';
   subject: string;
@@ -75,6 +76,8 @@ export interface Event {
   courseId?: string; // Lien vers un cours spécifique de la classe
   teacherId?: string; // ID de l'enseignant créateur (requis par les règles Firestore)
   attachments?: string[]; // URLs of attached files (for announcements/event details)
+  maxScore?: number; // Optional: linked to a graded homework or exam
+  isGraded?: boolean; // Optional: if this event represents a graded item
 }
 export interface Grade {
   id: string;

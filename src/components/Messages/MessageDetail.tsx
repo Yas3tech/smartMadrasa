@@ -38,13 +38,12 @@ const MessageDetail: React.FC<MessageDetailProps> = ({
 
   return (
     <div
-      className={`${
-        isMobile
+      className={`${isMobile
           ? mobileView === 'detail'
             ? 'flex-1 w-full bg-white dark:bg-slate-800 flex flex-col'
             : 'hidden'
           : 'flex-1 bg-white dark:bg-slate-800 flex flex-col'
-      }`}
+        }`}
     >
       {selectedMessage ? (
         <>
@@ -77,11 +76,10 @@ const MessageDetail: React.FC<MessageDetailProps> = ({
                   <ForwardIcon size={18} />
                 </button>
                 <button
-                  className={`p-2 transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    selectedMessage.archived
+                  className={`p-2 transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${selectedMessage.archived
                       ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'
                       : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
-                  }`}
+                    }`}
                   onClick={() => handleArchiveMessage(selectedMessage.id)}
                   title={
                     selectedMessage.archived ? t('messages.unarchive') : t('messages.archive')
@@ -115,7 +113,7 @@ const MessageDetail: React.FC<MessageDetailProps> = ({
                     {selectedMessage.senderName}
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-slate-400">
-                    {selectedMessage.senderRole}@smartmadrassa.com
+                    {selectedMessage.senderEmail || `${selectedMessage.senderRole}@smartmadrassa.com`}
                   </p>
                 </div>
               </div>

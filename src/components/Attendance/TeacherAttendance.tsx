@@ -98,7 +98,7 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                 success: t('attendance.saveSuccess') || 'Présence enregistrée',
                 error: () => t('attendance.saveError') || "Erreur lors de l'enregistrement",
             });
-        } catch (error) {
+        } catch {
             // Error handled by toast.promise
         }
     };

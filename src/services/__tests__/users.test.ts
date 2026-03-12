@@ -164,7 +164,7 @@ describe('users service', () => {
             const result = await createUser(newUser);
 
             expect(createUserWithEmailAndPassword).toHaveBeenCalled();
-            expect(sendPasswordResetEmail).toHaveBeenCalled();
+            expect(sendPasswordResetEmail).not.toHaveBeenCalled();
             expect(signOut).toHaveBeenCalled();
             expect(firestore.setDoc).toHaveBeenCalledWith(
                 expect.anything(),

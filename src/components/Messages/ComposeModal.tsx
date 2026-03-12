@@ -7,15 +7,15 @@ interface ComposeModalProps {
   isOpen: boolean;
   onClose: () => void;
   composeMode: 'new' | 'reply' | 'forward';
-  recipient: string;
-  setRecipient: (val: string) => void;
+  recipients: string[];
+  setRecipients: (val: string[] | ((prev: string[]) => string[])) => void;
   recipientSearch: string;
   setRecipientSearch: (val: string) => void;
   showRecipientDropdown: boolean;
   setShowRecipientDropdown: (val: boolean) => void;
   filteredRecipients: Array<{ id: string; label: string; type: string }>;
   recipientSearchMinChars: number;
-  selectedRecipientLabel: string;
+  selectedRecipientLabels: Array<{ id: string; label: string }>;
   subject: string;
   setSubject: (val: string) => void;
   content: string;
@@ -32,15 +32,15 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
   isOpen,
   onClose,
   composeMode,
-  recipient,
-  setRecipient,
+  recipients,
+  setRecipients,
   recipientSearch,
   setRecipientSearch,
   showRecipientDropdown,
   setShowRecipientDropdown,
   filteredRecipients,
   recipientSearchMinChars,
-  selectedRecipientLabel,
+  selectedRecipientLabels,
   subject,
   setSubject,
   content,
@@ -56,7 +56,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
   const recipientSearchLength = recipientSearch.trim().length;
   const showMinCharsHint =
     composeMode !== 'reply' &&
-    !recipient &&
+    recipients.length === 0 &&
     showRecipientDropdown &&
     recipientSearchLength > 0 &&
     recipientSearchLength < recipientSearchMinChars;
@@ -65,6 +65,10 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
     : i18n.language.startsWith('ar')
       ? `اكتب ${recipientSearchMinChars} احرف على الاقل.`
       : `Tapez au moins ${recipientSearchMinChars} caracteres.`;
+
+  const handleRemoveRecipient = (id: string) => {
+    setRecipients((prev) => prev.filter((r) => r !== id));
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -92,27 +96,44 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t('messages.recipient')}
             </label>
-            <input
-              type="text"
-              value={recipient ? selectedRecipientLabel : recipientSearch}
-              onChange={(e) => {
-                setRecipientSearch(e.target.value);
-                setRecipient('');
-                setShowRecipientDropdown(true);
-              }}
-              onFocus={() => setShowRecipientDropdown(true)}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-              placeholder={t('messages.searchRecipientPlaceholder')}
-              disabled={composeMode === 'reply' || isSending}
-            />
-            {showRecipientDropdown && !recipient && filteredRecipients.length > 0 && (
+            <div className="flex flex-wrap gap-2 p-2 min-h-[44px] rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-orange-100 focus-within:border-orange-500 bg-white dark:bg-slate-700">
+              {selectedRecipientLabels.map((item) => (
+                <span
+                  key={item.id}
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-lg text-sm transition-all animate-in fade-in zoom-in duration-200"
+                >
+                  {item.label}
+                  <button
+                    onClick={() => handleRemoveRecipient(item.id)}
+                    className="hover:text-orange-800 dark:hover:text-orange-200 transition-colors"
+                    disabled={isSending || (composeMode === 'reply' && recipients.length === 1)}
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+              <input
+                type="text"
+                value={recipientSearch}
+                onChange={(e) => {
+                  setRecipientSearch(e.target.value);
+                  setShowRecipientDropdown(true);
+                }}
+                onFocus={() => setShowRecipientDropdown(true)}
+                className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-gray-900 dark:text-white"
+                placeholder={recipients.length === 0 ? t('messages.searchRecipientPlaceholder') : ''}
+                disabled={composeMode === 'reply' || isSending}
+              />
+            </div>
+
+            {showRecipientDropdown && filteredRecipients.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                 {filteredRecipients.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => {
-                      setRecipient(item.id);
+                      setRecipients((prev) => [...prev, item.id]);
                       setRecipientSearch('');
                       setShowRecipientDropdown(false);
                     }}
@@ -142,7 +163,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={8}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none resize-none"
+              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none resize-none bg-white dark:bg-slate-700 dark:text-white"
               placeholder={t('messages.messagePlaceholder')}
               disabled={isSending}
             />
@@ -200,7 +221,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t dark:border-slate-700">
             <Button variant="secondary" onClick={onClose} disabled={isSending}>
               {t('common.cancel')}
             </Button>

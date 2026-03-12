@@ -74,7 +74,7 @@ const BulkGradeModal = ({
         }
 
         // Sync maxScore if available (e.g. from mapped homework)
-        const score = (selectedEvent as any).maxScore;
+        const score = selectedEvent.maxScore;
         if (score) setMaxScore(score);
       }
     }
@@ -184,7 +184,7 @@ const BulkGradeModal = ({
                   {events.map((e) => (
                     <option key={e.id} value={e.id}>
                       {new Date(e.start).toLocaleDateString()} - {t(`grades.${e.type}`, e.type)}: {e.title}
-                      {e.type === 'homework' && (e as any).isGraded && ` (${t('grades.noted', 'Noté')})`}
+                      {e.type === 'homework' && e.isGraded && ` (${t('grades.noted', 'Noté')})`}
                     </option>
                   ))}
                 </select>

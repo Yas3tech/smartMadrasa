@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeacherGrades } from '../useTeacherGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance, useCommunication } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -13,6 +13,7 @@ vi.mock('../../context/DataContext', () => ({
   useUsers: vi.fn(),
   useAcademics: vi.fn(),
   usePerformance: vi.fn(),
+  useCommunication: vi.fn(),
 }));
 
 vi.mock('react-hot-toast', () => ({
@@ -67,8 +68,14 @@ describe('useTeacherGrades', () => {
 
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
+      homeworks: [],
       addGrade: vi.fn(),
+      addGradesBatch: vi.fn(),
       updateGrade: vi.fn(),
+    } as any);
+
+    vi.mocked(useCommunication).mockReturnValue({
+      events: [],
     } as any);
   });
 

@@ -386,8 +386,10 @@ export const processNonParentUsers = async (
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
     };
 
-    await addUser(newUser);
-    importedUsers.push({ id: newUser.id, email: newUser.email, role: newUser.role });
+    const result = (await addUser(newUser)) as any;
+    const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
+
+    importedUsers.push({ id: finalId, email: newUser.email, role: newUser.role });
     importedCount++;
   }
 
