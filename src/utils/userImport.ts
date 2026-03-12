@@ -378,17 +378,34 @@ export const getUserImportSummary = (rows: UserImportReviewRow[]) => {
   };
 };
 
+/**
+ * Processes items in concurrent batches to improve performance
+ */
+async function processInBatches<T, R>(
+  items: T[],
+  batchSize: number,
+  processor: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(processor));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
 export const processNonParentUsers = async (
   data: UserImportRow[],
   addUser: (user: User) => Promise<unknown>
 ): Promise<{ importedUsers: ImportedUserSummary[]; count: number }> => {
-  const importedUsers: ImportedUserSummary[] = [];
-  let importedCount = 0;
-
-  for (const row of data) {
+  const filteredData = data.filter(row => {
     const role = normalizeRole(row.role) as Role;
-    if (!VALID_ROLES.includes(role) || role === 'parent') continue;
+    return VALID_ROLES.includes(role) && role !== 'parent';
+  });
 
+  const results = await processInBatches<UserImportRow, ImportedUserSummary>(filteredData, 5, async (row) => {
+    const role = normalizeRole(row.role) as Role;
     const newUser: User = {
       id: crypto.randomUUID(),
       name: normalizeString(row.name),
@@ -401,12 +418,10 @@ export const processNonParentUsers = async (
 
     const result = (await addUser(newUser)) as any;
     const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
+    return { id: finalId, email: newUser.email, role: newUser.role };
+  });
 
-    importedUsers.push({ id: finalId, email: newUser.email, role: newUser.role });
-    importedCount++;
-  }
-
-  return { importedUsers, count: importedCount };
+  return { importedUsers: results, count: results.length };
 };
 
 export const processParentUsers = async (
@@ -415,30 +430,29 @@ export const processParentUsers = async (
   importedUsers: ImportedUserSummary[],
   addUser: (user: User) => Promise<unknown>
 ): Promise<number> => {
-  let importedCount = 0;
+  const filteredData = data.filter(row => normalizeRole(row.role) === 'parent');
 
-  for (const row of data) {
-    if (normalizeRole(row.role) !== 'parent') continue;
-
+  const results = await processInBatches<UserImportRow, boolean>(filteredData, 5, async (row) => {
     const childrenIds: string[] = [];
     const relatedClassIds: string[] = [];
-    const studentEmails = (row.studentEmail || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+    // Deduplicate student emails to prevent duplicate childrenIds
+    const studentEmails = Array.from(new Set(
+      (row.studentEmail || '').split(',').map((e: string) => e.trim().toLowerCase()).filter(Boolean)
+    ));
 
     for (const studentEmail of studentEmails) {
-      if (studentEmail) {
-        const student = users.find(
-          (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
-        );
+      const student = users.find(
+        (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
+      );
 
-        if (student) {
-          childrenIds.push(student.id);
-          if (student.classId) relatedClassIds.push(student.classId);
-        } else {
-          const imported = importedUsers.find(
-            (user) => user.role === 'student' && normalizeEmail(user.email) === studentEmail
-          );
-          if (imported) childrenIds.push(imported.id);
-        }
+      if (student) {
+        childrenIds.push(student.id);
+        if (student.classId) relatedClassIds.push(student.classId);
+      } else {
+        const imported = importedUsers.find(
+          (user) => user.role === 'student' && normalizeEmail(user.email) === studentEmail
+        );
+        if (imported) childrenIds.push(imported.id);
       }
     }
 
@@ -453,15 +467,16 @@ export const processParentUsers = async (
       childrenIds,
     };
     if (relatedClassIds.length > 0) {
-      newUser.relatedClassIds = relatedClassIds;
+      newUser.relatedClassIds = Array.from(new Set(relatedClassIds));
     }
 
     await addUser(newUser);
-    importedCount++;
-  }
+    return true;
+  });
 
-  return importedCount;
+  return results.length;
 };
+
 
 export const importValidatedUserRows = async (
   rows: UserImportReviewRow[],

@@ -236,7 +236,7 @@ const Login = () => {
           />
           <h1 className="text-3xl font-bold text-gray-900">SmartMadrassa</h1>
           <p className="text-gray-500 mt-2">
-            {isResetMode ? copy.resetTitle : copy.title}
+            {isResetMode ? t('auth.resetTitle') : t('auth.title')}
           </p>
         </div>
 
@@ -303,7 +303,7 @@ const Login = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200"></div>
                   </div>
-                  <div className="relative bg-white px-4 text-sm text-gray-500">{copy.or}</div>
+                  <div className="relative bg-white px-4 text-sm text-gray-500">{t('common.or')}</div>
                 </div>
 
                 <button
@@ -317,7 +317,7 @@ const Login = () => {
                     alt="Google"
                     className="w-5 h-5"
                   />
-                  <span>{copy.continueWithGoogle}</span>
+                  <span>{t('auth.continueWithGoogle')}</span>
                 </button>
               </>
             )}
@@ -335,10 +335,10 @@ const Login = () => {
                 {isResetMode ? (
                   <>
                     <ArrowLeft size={16} />
-                    {copy.backToLogin}
+                    {t('auth.backToLogin')}
                   </>
                 ) : (
-                  copy.firstLogin
+                  t('auth.forgotPassword')
                 )}
               </button>
             </div>

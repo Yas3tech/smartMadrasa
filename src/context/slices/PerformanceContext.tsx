@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../AuthContext';
 import { useUsers } from './UserContext';
 import { useAcademics } from './AcademicContext';
-import type { Grade, Attendance, Homework, Parent, Student } from '../../types';
+import type { Grade, Attendance, Homework, Student } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -73,8 +73,6 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
     let unsubGrades = () => { };
     let unsubAttendance = () => { };
     let unsubHomeworks = () => { };
@@ -97,76 +95,64 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         setGrades(grades as Grade[]);
       };
 
-      timeoutId = setTimeout(() => {
-        if (user?.role === 'parent') {
-          const parentUser = user as Parent;
-          const childIds = parentUser.childrenIds || [];
-          const childrenData = parentUser.children || [];
-          const classIds = childrenData.map((c) => c.classId).filter(Boolean);
+      if (user?.role === 'parent') {
+        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
+        const childIds = parentUser.childrenIds || [];
+        const classIds = parentUser.relatedClassIds || [];
 
-          if (childIds.length > 0) {
-            unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);
-            unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
-          }
-
-          if (classIds.length > 0) {
-            unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
-          }
-        } else if (user?.role === 'student') {
-          const studentUser = user as Student;
-          // Fetch only relevant data for the student
-          unsubGrades = subscribeToCourseGradesByStudentIds([user.id], handleGradesUpdate);
-          unsubAttendance = subscribeToAttendanceByStudentIds([user.id], setAttendance);
-
-          if (studentUser.classId) {
-            unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
-          }
-        } else if (user?.role === 'teacher') {
-          // Teacher: only data for their classes
-          let innerUnsubAttendance = () => { };
-          let innerUnsubHomeworks = () => { };
-
-          const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
-            console.log(`[PerformanceContext] Teacher ${user.id} classes:`, teacherClasses.map(c => c.id));
-            innerUnsubAttendance();
-            innerUnsubHomeworks();
-            const classIds = teacherClasses.map((c) => c.id);
-
-            if (classIds.length > 0) {
-              innerUnsubAttendance = subscribeToAttendanceByClassIds(classIds, (data) => {
-                console.log(`[PerformanceContext] Received attendance for classes ${classIds}:`, data.length, "records");
-                setAttendance(data);
-              });
-              innerUnsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
-            }
-          });
-
-          const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
-          if (relevantPeriodIds.length > 0) {
-            unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
-          }
-
-          unsubAttendance = () => {
-            unsubTeacherClasses();
-            innerUnsubAttendance();
-          };
-          unsubHomeworks = () => {
-            innerUnsubHomeworks();
-          };
-        } else {
-          const setupDefaultSubs = () => {
-            const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
-            if (relevantPeriodIds.length > 0) {
-              unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
-            }
-            unsubAttendance = subscribeToAttendance(setAttendance);
-            unsubHomeworks = subscribeToHomeworks(setHomeworks);
-          };
-          setupDefaultSubs();
+        if (childIds.length > 0) {
+          unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);
+          unsubAttendance = subscribeToAttendanceByStudentIds(childIds, setAttendance);
         }
 
-        setIsLoading(false);
-      }, 800);
+        if (classIds.length > 0) {
+          unsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
+        }
+      } else if (user?.role === 'student') {
+        const studentUser = user as Student;
+        unsubGrades = subscribeToCourseGradesByStudentIds([user.id], handleGradesUpdate);
+        unsubAttendance = subscribeToAttendanceByStudentIds([user.id], setAttendance);
+
+        if (studentUser.classId) {
+          unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
+        }
+      } else if (user?.role === 'teacher') {
+        let innerUnsubAttendance = () => { };
+        let innerUnsubHomeworks = () => { };
+
+        const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
+          innerUnsubAttendance();
+          innerUnsubHomeworks();
+          const classIds = teacherClasses.map((c) => c.id);
+
+          if (classIds.length > 0) {
+            innerUnsubAttendance = subscribeToAttendanceByClassIds(classIds, setAttendance);
+            innerUnsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
+          }
+        });
+
+        const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+        if (relevantPeriodIds.length > 0) {
+          unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+        }
+
+        unsubAttendance = () => {
+          unsubTeacherClasses();
+          innerUnsubAttendance();
+        };
+        unsubHomeworks = () => {
+          innerUnsubHomeworks();
+        };
+      } else {
+        const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+        if (relevantPeriodIds.length > 0) {
+          unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+        }
+        unsubAttendance = subscribeToAttendance(setAttendance);
+        unsubHomeworks = subscribeToHomeworks(setHomeworks);
+      }
+
+      setIsLoading(false);
 
       const handleWipe = () => {
         if (unsubGrades) unsubGrades();
@@ -176,7 +162,6 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       window.addEventListener('app:wipeData', handleWipe);
 
       return () => {
-        clearTimeout(timeoutId);
         if (unsubGrades) unsubGrades();
         if (unsubAttendance) unsubAttendance();
         if (unsubHomeworks) unsubHomeworks();

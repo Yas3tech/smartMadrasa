@@ -219,6 +219,7 @@ export interface UserQueryFilters {
   role?: string | string[];
   classId?: string | string[];
   relatedClassIds?: string | string[];
+  id?: string | string[];
 }
 
 export const subscribeToUsers = (
@@ -237,6 +238,8 @@ export const subscribeToUsers = (
     }
     return onSnapshot(defaultQuery, (snapshot) => {
       callback(mapQuerySnapshot<User>(snapshot));
+    }, (error) => {
+      console.error('[subscribeToUsers] Error in default query:', error);
     });
   }
 
@@ -271,6 +274,17 @@ export const subscribeToUsers = (
         : [filter.relatedClassIds];
       if (relatedClassIds.length > 0) {
         q = query(q, where('relatedClassIds', 'array-contains-any', relatedClassIds));
+      }
+    }
+
+    if (filter.id) {
+      const ids = Array.isArray(filter.id) ? filter.id : [filter.id];
+      if (ids.length === 1) {
+        q = query(q, where('id', '==', ids[0]));
+      } else if (ids.length > 1) {
+        // Firestore 'in' operator limited to 10-30 items depending on version, 
+        // but for parent-child relationship (usually < 10) it's perfect.
+        q = query(q, where('id', 'in', ids));
       }
     }
 

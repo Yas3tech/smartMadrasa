@@ -60,8 +60,7 @@ service cloud.firestore {
     function isParent() { return isRole('parent'); }
     function isStudent() { return isRole('student'); }
     function isSuperAdmin() { 
-      return isRole('superadmin') || 
-             (isAuthenticated() && request.auth.token.email == 'eddouksy@gmail.com'); 
+      return isRole('superadmin'); 
     }
     function isReceiverSuperAdmin() {
       return request.resource.data.receiverId is string &&
