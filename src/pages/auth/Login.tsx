@@ -109,14 +109,14 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
-    } else if (!authLoading && loading) {
+      navigate('/', { replace: true });
+    } else if (!authLoading && loading && !isResetMode) {
       // If AuthContext finished loading but there's no user, 
       // the login failed (e.g., no Firestore doc or other mismatch)
       setLoading(false);
-      setError(copy.invalidCredentials || 'Utilisateur introuvable dans la base de données.');
+      setError(copy.invalidCredentials);
     }
-  }, [user, authLoading, loading, navigate, copy.invalidCredentials]);
+  }, [user, authLoading, loading, isResetMode, navigate, copy.invalidCredentials]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
