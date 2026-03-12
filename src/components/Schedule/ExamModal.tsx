@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 import { X, Save } from 'lucide-react';
-// PERFORMANCE: Use specific hook instead of deprecated useData
 import { useAcademics } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import type { Event } from '../../types';
 
@@ -25,13 +25,15 @@ const ExamModal = ({
   teacherId,
 }: ExamModalProps) => {
   const { t } = useTranslation();
-  const { classes } = useAcademics();
+  const { classes, courses } = useAcademics();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'exam' | 'evaluation'>('exam');
   const [classId, setClassId] = useState(propClassId || '');
+  const [courseId, setCourseId] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('10:00');
   const [endTime, setEndTime] = useState('12:00');
@@ -44,6 +46,7 @@ const ExamModal = ({
 
       setType(editingEvent.type === 'evaluation' ? 'evaluation' : 'exam');
       setClassId(editingEvent.classId || '');
+      setCourseId(editingEvent.courseId || '');
 
       const startDate = new Date(editingEvent.start);
       const endDate = new Date(editingEvent.end);
@@ -56,6 +59,7 @@ const ExamModal = ({
       setDescription('');
       setType('exam');
       if (!propClassId) setClassId('');
+      setCourseId('');
       setDate('');
       setStartTime('10:00');
       setEndTime('12:00');
@@ -82,6 +86,8 @@ const ExamModal = ({
         end: endDateTime.toISOString(),
         type,
         classId,
+        courseId: courseId || undefined,
+        teacherId: user?.id,
       };
 
       await onSave(eventData);
@@ -158,6 +164,36 @@ const ExamModal = ({
               </select>
             </div>
           )}
+
+          {/* Course selector — filters by selected class */}
+          {classId && (() => {
+            const classCourses = courses.filter((c) => c.classId === classId);
+            if (classCourses.length === 0) return null;
+            return (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t('common.course')} ({t('common.optional').toLowerCase()})
+                </label>
+                <select
+                  value={courseId}
+                  onChange={(e) => {
+                    const selected = classCourses.find((c) => c.id === e.target.value);
+                    setCourseId(e.target.value);
+                    // Auto-fill the title with the course subject if title is empty
+                    if (selected && !title) setTitle(selected.subject);
+                  }}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                >
+                  <option value="">{t('schedule.noCourse')}</option>
+                  {classCourses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.subject}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
 
           <div>
             <label htmlFor="exam-description" className="block text-sm font-medium text-gray-700 mb-1">

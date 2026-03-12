@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Card, Button } from '../UI';
+import toast from 'react-hot-toast';
 import { Check, X, Clock, Users as UsersIcon, Calendar, BookOpen, AlertCircle } from 'lucide-react';
 import type { User, Course, Student, ClassGroup, Attendance } from '../../types';
 
@@ -79,10 +80,9 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
         const justification =
             status === 'absent' || status === 'late' ? justificationMap[studentId] || '' : '';
 
-        if (existing) {
-            await updateAttendance(existing.id, status, justification);
-        } else {
-            await markAttendance({
+        const promise = existing
+            ? updateAttendance(existing.id, status, justification)
+            : markAttendance({
                 date: selectedDate,
                 studentId,
                 status,
@@ -91,6 +91,15 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                 justification,
                 isJustified: !!justification,
             });
+
+        try {
+            await toast.promise(promise, {
+                loading: t('attendance.saving') || 'Enregistrement...',
+                success: t('attendance.saveSuccess') || 'Présence enregistrée',
+                error: () => t('attendance.saveError') || "Erreur lors de l'enregistrement",
+            });
+        } catch {
+            // Error handled by toast.promise
         }
     };
 
@@ -102,12 +111,15 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
         if (!selectedCourse) return { present: 0, absent: 0, late: 0, unmarked: 0, total: 0 };
 
         let present = 0, absent = 0, late = 0;
-        for (const student of courseStudents) {
+
+        // Use a debug counter
+        courseStudents.forEach((student) => {
             const record = attendanceMap.get(student.id);
             if (record?.status === 'present') present++;
             else if (record?.status === 'absent') absent++;
             else if (record?.status === 'late') late++;
-        }
+        });
+
         const unmarked = courseStudents.length - present - absent - late;
 
         return { present, absent, late, unmarked, total: courseStudents.length };
@@ -293,7 +305,7 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                                                     onClick={() => handleMarkAttendance(student.id, 'present')}
                                                     className={
                                                         status === 'present'
-                                                            ? 'bg-green-600 hover:bg-green-700 border-green-600'
+                                                            ? '!bg-none !bg-green-600 hover:!bg-green-700 !border-green-600 !text-white'
                                                             : ''
                                                     }
                                                 >
@@ -306,7 +318,7 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                                                     onClick={() => handleMarkAttendance(student.id, 'late')}
                                                     className={
                                                         status === 'late'
-                                                            ? 'bg-yellow-500 hover:bg-yellow-600 border-yellow-500 text-white'
+                                                            ? '!bg-none !bg-yellow-500 hover:!bg-yellow-600 !border-yellow-500 !text-white'
                                                             : ''
                                                     }
                                                 >
@@ -318,7 +330,7 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                                                     icon={X}
                                                     onClick={() => handleMarkAttendance(student.id, 'absent')}
                                                     className={
-                                                        status === 'absent' ? 'bg-red-600 hover:bg-red-700 border-red-600' : ''
+                                                        status === 'absent' ? '!bg-none !bg-red-600 hover:!bg-red-700 !border-red-600 !text-white' : ''
                                                     }
                                                 >
                                                     {t('attendance.absentBtn')}

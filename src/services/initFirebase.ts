@@ -1,11 +1,35 @@
-import { collection, getDocs, deleteDoc, doc, setDoc, collectionGroup } from 'firebase/firestore';
+import { collection, doc, getDocs, deleteDoc, setDoc, collectionGroup, clearIndexedDbPersistence } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../config/db';
+import { auth } from '../config/firebase';
 
 export const clearAllData = async () => {
-  if (!db) return;
+  if (!db || !auth) return;
 
+  // 0. Dispatch event to unsubscribe all active listeners to prevent Firebase internals crash
+  window.dispatchEvent(new Event('app:wipeData'));
+
+  try {
+    // 1. Delete all Firebase Auth Accounts first via Cloud Function
+    const functions = getFunctions();
+    const wipeAuthUsers = httpsCallable(functions, 'wipeAllAuthUsers');
+    await wipeAuthUsers();
+    console.log('Successfully wiped all auth users');
+  } catch (error) {
+    console.error('Failed to wipe auth users:', error);
+    // Continue with Firestore deletion even if Auth wipe fails (e.g. timeout)
+  }
+
+  // Subcollections first
+  const subcollections = ['grades', 'attendance', 'courses'];
+  for (const subcol of subcollections) {
+    const querySnapshot = await getDocs(collectionGroup(db!, subcol));
+    const deletePromises = querySnapshot.docs.map((document) => deleteDoc(document.ref));
+    await Promise.all(deletePromises);
+  }
+
+  // Then main collections
   const collections = [
-    'users',
     'classes',
     'messages',
     'events',
@@ -13,6 +37,10 @@ export const clearAllData = async () => {
     'gradeCategories',
     'courseGrades',
     'teacherComments',
+    'homeworks',
+    'announcements',
+    'notifications',
+    '_setup',
   ];
 
   for (const collectionName of collections) {
@@ -23,11 +51,19 @@ export const clearAllData = async () => {
     await Promise.all(deletePromises);
   }
 
-  const subcollections = ['grades', 'attendance', 'courses'];
-  for (const subcol of subcollections) {
-    const querySnapshot = await getDocs(collectionGroup(db!, subcol));
-    const deletePromises = querySnapshot.docs.map((document) => deleteDoc(document.ref));
-    await Promise.all(deletePromises);
+  // Delete users VERY LAST so the superadmin doesn't lose privileges midway through script
+  const usersSnapshot = await getDocs(collection(db!, 'users'));
+  const usersDeletePromises = usersSnapshot.docs.map((document) =>
+    deleteDoc(doc(db!, 'users', document.id))
+  );
+  await Promise.all(usersDeletePromises);
+
+  // Obliterate the local IndexedDB cache so the JS SDK doesn't try to reconcile deleted documents
+  try {
+    await clearIndexedDbPersistence(db!);
+    console.log('Successfully cleared Firestore IndexedDB persistence');
+  } catch (e) {
+    console.warn('Failed to clear IndexedDB persistence. This is usually fine if persistence was not enabled.', e);
   }
 };
 

@@ -50,7 +50,7 @@ const Messages = () => {
   // Compose state
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [composeMode, setComposeMode] = useState<'new' | 'reply' | 'forward'>('new');
-  const [recipient, setRecipient] = useState('');
+  const [recipients, setRecipients] = useState<string[]>([]);
   const [recipientSearch, setRecipientSearch] = useState('');
   const [showRecipientDropdown, setShowRecipientDropdown] = useState(false);
   const [subject, setSubject] = useState('');
@@ -97,13 +97,13 @@ const Messages = () => {
     return [
       ...(isDirectorOrSuperAdmin
         ? [
-            {
-              type: 'all',
-              id: 'all',
-              label: `👥 ${t('messages.allUsers')}`,
-              searchText: t('messages.allUsers').toLowerCase(),
-            },
-          ]
+          {
+            type: 'all',
+            id: 'all',
+            label: `👥 ${t('messages.allUsers')}`,
+            searchText: t('messages.allUsers').toLowerCase(),
+          },
+        ]
         : []),
       ...visibleUsers.map((u) => {
         let label = '';
@@ -119,7 +119,7 @@ const Messages = () => {
           }
           const childrenNames = children.map((c) => c.name).join(', ');
           label = `👨‍👩‍👧 ${t('messages.parentOf')} ${childrenNames || t('roles.student')}`;
-          searchText = `${t('messages.parentOf')} ${childrenNames} ${u.name}`.toLowerCase();
+          searchText = `${t('messages.parentOf')} ${childrenNames} ${u.name} ${u.email}`.toLowerCase();
         } else if (u.role === 'student') {
           label = `🎓 ${u.name}`;
           searchText = `${u.name} ${t('roles.student')}`.toLowerCase();
@@ -142,14 +142,20 @@ const Messages = () => {
   const filteredRecipients = useMemo(() => {
     const query = recipientSearch.trim().toLowerCase();
     if (query.length < MIN_RECIPIENT_SEARCH_CHARS) return [];
-    return allRecipientOptions.filter((item) => item.searchText.includes(query));
-  }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS]);
+    // Filter out already selected recipients
+    return allRecipientOptions.filter((item) =>
+      !recipients.includes(item.id) && item.searchText.includes(query)
+    );
+  }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
-  const selectedRecipientLabel = useMemo(() => {
-    return recipient
-      ? allRecipientOptions.find((r) => r.id === recipient)?.label || recipientSearch
-      : '';
-  }, [recipient, allRecipientOptions, recipientSearch]);
+  const selectedRecipientLabels = useMemo(() => {
+    return recipients.map(id => {
+      const opt = allRecipientOptions.find(r => r.id === id);
+      return { id, label: opt?.label || id };
+    });
+  }, [recipients, allRecipientOptions]);
+
+
   const handleArchiveMessage = async (messageId: string | number) => {
     const message = messages.find((m) => m.id === messageId);
     if (!message) return;
@@ -165,7 +171,7 @@ const Messages = () => {
 
   const handleComposeNew = () => {
     setComposeMode('new');
-    setRecipient('');
+    setRecipients([]);
     setRecipientSearch('');
     setSubject('');
     setContent('');
@@ -175,7 +181,7 @@ const Messages = () => {
 
   const handleReply = (msg: Message) => {
     setComposeMode('reply');
-    setRecipient(msg.senderId.toString());
+    setRecipients([msg.senderId.toString()]);
     setSubject(`Re: ${msg.subject}`);
     setContent(
       `\n\n---\nLe ${new Date(msg.timestamp).toLocaleDateString()} a ${new Date(msg.timestamp).toLocaleTimeString()}, ${msg.senderName} a ecrit:\n> ${msg.content.split('\n').join('\n> ')}`
@@ -186,7 +192,7 @@ const Messages = () => {
 
   const handleForward = (msg: Message) => {
     setComposeMode('forward');
-    setRecipient('');
+    setRecipients([]);
     setSubject(`Fwd: ${msg.subject}`);
     setContent(`\n\n---\nMessage transfere de ${msg.senderName}:\n\n${msg.content}`);
     setAttachments([]);
@@ -205,11 +211,7 @@ const Messages = () => {
 
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
   const handleSendMessage = useThrottle(useCallback(async () => {
-    if (!user || !recipient || !subject || !content || isSending) return;
-    const selectedRecipient = allRecipientOptions.find((r) => r.id === recipient);
-    const selectedRecipientUser = users.find((u) => u.id === recipient);
-    const isSendingToSuperAdmin = selectedRecipientUser?.role === 'superadmin';
-    if (isSendingToSuperAdmin && !isDirectorOrSuperAdmin) return;
+    if (!user || recipients.length === 0 || !subject || !content || isSending) return;
 
     setIsSending(true);
 
@@ -218,34 +220,23 @@ const Messages = () => {
         attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
       );
 
-      if (selectedRecipient?.type === 'class') {
-        const selectedClass = classes.find((c) => c.id === recipient);
-        if (selectedClass) {
-          const classStudents = users.filter(
-            (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
-          );
-          const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
-          const outboundMessages = classStudents.map((student) =>
-            sendMessage({
-              senderId: user.id,
-              senderName: user.name,
-              senderRole: user.role,
-              receiverId: student.id,
-              subject: `[${selectedClass.name}] ${subject}`,
-              content,
-              read: false,
-              type: 'group',
-              attachments: attachmentUrls,
-            })
-          );
+      const allOutbound = recipients.map(async (recipientId) => {
+        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
 
-          if (classTeacher) {
-            outboundMessages.push(
+        if (selectedRecipient?.type === 'class') {
+          const selectedClass = classes.find((c) => c.id === recipientId);
+          if (selectedClass) {
+            const classStudents = users.filter(
+              (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
+            );
+            const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+            const classOutbound = classStudents.map((student) =>
               sendMessage({
                 senderId: user.id,
                 senderName: user.name,
+                senderEmail: user.email,
                 senderRole: user.role,
-                receiverId: classTeacher.id,
+                receiverId: student.id,
                 subject: `[${selectedClass.name}] ${subject}`,
                 content,
                 read: false,
@@ -253,26 +244,45 @@ const Messages = () => {
                 attachments: attachmentUrls,
               })
             );
-          }
 
-          await Promise.all(outboundMessages);
+            if (classTeacher) {
+              classOutbound.push(
+                sendMessage({
+                  senderId: user.id,
+                  senderName: user.name,
+                  senderEmail: user.email,
+                  senderRole: user.role,
+                  receiverId: classTeacher.id,
+                  subject: `[${selectedClass.name}] ${subject}`,
+                  content,
+                  read: false,
+                  type: 'group',
+                  attachments: attachmentUrls,
+                })
+              );
+            }
+            return Promise.all(classOutbound);
+          }
+        } else {
+          return sendMessage({
+            senderId: user.id,
+            senderName: user.name,
+            senderEmail: user.email,
+            senderRole: user.role,
+            receiverId: recipientId,
+            subject,
+            content,
+            read: false,
+            type: recipientId === 'all' ? 'broadcast' : 'individual',
+            attachments: attachmentUrls,
+          });
         }
-      } else {
-        await sendMessage({
-          senderId: user.id,
-          senderName: user.name,
-          senderRole: user.role,
-          receiverId: recipient,
-          subject,
-          content,
-          read: false,
-          type: recipient === 'all' ? 'broadcast' : 'individual',
-          attachments: attachmentUrls,
-        });
-      }
+      });
+
+      await Promise.all(allOutbound);
 
       setIsComposeOpen(false);
-      setRecipient('');
+      setRecipients([]);
       setRecipientSearch('');
       setSubject('');
       setContent('');
@@ -283,7 +293,7 @@ const Messages = () => {
     } finally {
       setIsSending(false);
     }
-  }, [user, recipient, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, isDirectorOrSuperAdmin, t]), 2000);
+  }, [user, recipients, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, t]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
@@ -382,15 +392,15 @@ const Messages = () => {
         isOpen={isComposeOpen}
         onClose={() => setIsComposeOpen(false)}
         composeMode={composeMode}
-        recipient={recipient}
-        setRecipient={setRecipient}
+        recipients={recipients}
+        setRecipients={setRecipients}
         recipientSearch={recipientSearch}
         setRecipientSearch={setRecipientSearch}
         showRecipientDropdown={showRecipientDropdown}
         setShowRecipientDropdown={setShowRecipientDropdown}
         filteredRecipients={filteredRecipients}
         recipientSearchMinChars={MIN_RECIPIENT_SEARCH_CHARS}
-        selectedRecipientLabel={selectedRecipientLabel}
+        selectedRecipientLabels={selectedRecipientLabels}
         subject={subject}
         setSubject={setSubject}
         content={content}

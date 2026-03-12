@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useUsers, useAcademics, usePerformance } from '../context/DataContext';
+import { useUsers, useAcademics, usePerformance, useCommunication } from '../context/DataContext';
 import toast from 'react-hot-toast';
-import type { Grade, Student, ClassGroup } from '../types';
+import type { Grade, Student, ClassGroup, Event } from '../types';
 
 export type ViewMode = 'byStudent' | 'bySubject' | null;
 
@@ -38,6 +38,7 @@ export interface UseTeacherGradesReturn {
   studentGrades: Grade[];
   subjectGrades: Grade[];
   subjectGradesByStudent: Record<string, Grade[]>;
+  classEvents: Event[];
 
   // Handlers
   startEditingGrade: (grade: Grade) => void;
@@ -54,7 +55,8 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
   // Optimization: Use specific hooks to avoid re-renders from unrelated context changes (e.g. messages)
   const { students } = useUsers();
   const { classes, courses } = useAcademics();
-  const { grades, addGrade, addGradesBatch, updateGrade } = usePerformance();
+  const { grades, homeworks, addGrade, addGradesBatch, updateGrade } = usePerformance();
+  const { events } = useCommunication();
 
   // Navigation States
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -139,6 +141,44 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
     });
     return grouped;
   }, [subjectGrades]);
+
+  const classEvents = useMemo(() => {
+    if (!selectedClassId) return [];
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    const filteredEvents = events.filter(
+      (e) =>
+        e.classId === selectedClassId &&
+        ['exam', 'homework', 'evaluation'].includes(e.type) &&
+        new Date(e.start) <= today
+    );
+
+    const filteredHomeworks = homeworks
+      .filter(
+        (h) =>
+          h.classId === selectedClassId &&
+          new Date(h.dueDate) <= today &&
+          (!selectedSubject || h.subject === selectedSubject) // Filter by selectedSubject
+      )
+      .map((h) => ({
+        id: h.id,
+        title: h.title,
+        description: h.description || '',
+        type: 'homework' as const,
+        start: h.dueDate,
+        end: h.dueDate,
+        classId: h.classId,
+        subject: h.subject,
+        courseId: h.courseId,
+        teacherId: h.assignedBy,
+        isGraded: h.isGraded,
+      }));
+
+    return ([...filteredEvents, ...filteredHomeworks] as Event[]).sort(
+      (a, b) => new Date(b.start).getTime() - new Date(a.start).getTime()
+    );
+  }, [events, homeworks, selectedClassId, selectedSubject, classes]);
 
   // Handlers
   const startEditingGrade = (grade: Grade) => {
@@ -249,6 +289,7 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
     studentGrades,
     subjectGrades,
     subjectGradesByStudent,
+    classEvents,
     startEditingGrade,
     cancelEditing,
     handleUpdateGrade,

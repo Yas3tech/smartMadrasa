@@ -28,63 +28,69 @@ const Login = () => {
   const lang = i18n?.language || 'fr';
   const copy = lang.startsWith('nl')
     ? {
-        title: 'Log in om door te gaan',
-        resetTitle: 'Wachtwoord opnieuw instellen',
-        invalidCredentials: 'Ongeldig e-mailadres of wachtwoord',
-        tooManyRequests: 'Te veel pogingen. Probeer het later opnieuw.',
-        genericError: 'Er is een fout opgetreden bij het inloggen',
-        emailRequired: 'Voer uw e-mailadres in.',
-        resetEmailSent: 'Er is een e-mail voor wachtwoordherstel verzonden.',
-        unauthorizedGoogleAccount:
-          'Dit Google-account is niet toegestaan. Neem contact op met de administratie.',
-        googleLoginFailed: 'Inloggen met Google mislukt.',
-        sendResetLink: 'Link verzenden',
-        or: 'OF',
-        continueWithGoogle: 'Doorgaan met Google',
-        backToLogin: 'Terug naar aanmelden',
-        firstRunTitle: 'Eerste gebruik?',
-        firstRunDesc: 'Er is nog geen school geconfigureerd. Maak eerst uw beheerdersaccount aan.',
-        setupSchool: 'School configureren',
-      }
-    : lang.startsWith('ar')
+      title: 'Log in om door te gaan',
+      resetTitle: 'Wachtwoord opnieuw instellen',
+      invalidCredentials: 'Ongeldig e-mailadres of wachtwoord',
+      tooManyRequests: 'Te veel pogingen. Probeer het later opnieuw.',
+      genericError: 'Er is een fout opgetreden bij het inloggen',
+      emailRequired: 'Voer uw e-mailadres in.',
+      resetEmailSent: 'Er is een e-mail voor wachtwoordherstel verzonden.',
+      unauthorizedGoogleAccount:
+        'Dit Google-account is niet toegestaan. Neem contact op met de administratie.',
+      googleLoginFailed: 'Inloggen met Google mislukt.',
+      sendResetLink: 'Link verzenden',
+      or: 'OF',
+      continueWithGoogle: 'Doorgaan met Google',
+      backToLogin: 'Terug naar aanmelden',
+      firstRunTitle: 'Eerste gebruik?',
+      firstRunDesc: 'Er is nog geen school geconfigureerd. Maak eerst uw beheerdersaccount aan.',
+      setupSchool: 'School configureren',
+      firstLogin: 'Eerste aanmelding / Wachtwoord vergeten',
+      resetEmailSentSuccess: 'Er is een e-mail voor wachtwoordherstel verzonden. Het kan tot 5 minuten duren voordat deze aankomt.',
+    }
+    : i18n.language.startsWith('ar')
       ? {
-          title: 'قم بتسجيل الدخول للمتابعة',
-          resetTitle: 'اعادة تعيين كلمة المرور',
-          invalidCredentials: 'بريد الكتروني او كلمة مرور غير صحيحة',
-          tooManyRequests: 'عدد كبير جدا من المحاولات. يرجى المحاولة لاحقا.',
-          genericError: 'حدث خطأ اثناء تسجيل الدخول',
-          emailRequired: 'يرجى ادخال بريدك الالكتروني.',
-          resetEmailSent: 'تم ارسال رسالة اعادة تعيين كلمة المرور.',
-          unauthorizedGoogleAccount: 'حساب Google هذا غير مصرح له. يرجى التواصل مع الادارة.',
-          googleLoginFailed: 'فشل تسجيل الدخول باستخدام Google.',
-          sendResetLink: 'ارسال الرابط',
-          or: 'او',
-          continueWithGoogle: 'المتابعة باستخدام Google',
-          backToLogin: 'العودة الى تسجيل الدخول',
-          firstRunTitle: 'اول استخدام؟',
-          firstRunDesc: 'لم يتم اعداد اي مدرسة بعد. ابدأ بإنشاء حساب المدير.',
-          setupSchool: 'اعداد المدرسة',
-        }
+        title: 'قم بتسجيل الدخول للمتابعة',
+        resetTitle: 'اعادة تعيين كلمة المرور',
+        invalidCredentials: 'بريد الكتروني او كلمة مرور غير صحيحة',
+        tooManyRequests: 'عدد كبير جدا من المحاولات. يرجى المحاولة لاحقا.',
+        genericError: 'حدث خطأ اثناء تسجيل الدخول',
+        emailRequired: 'يرجى ادخال بريدك الالكتروني.',
+        resetEmailSent: 'تم ارسال رسالة اعادة تعيين كلمة المرور.',
+        unauthorizedGoogleAccount: 'حساب Google هذا غير مصرح له. يرجى التواصل مع الادارة.',
+        googleLoginFailed: 'فشل تسجيل الدخول باستخدام Google.',
+        sendResetLink: 'ارسال الرابط',
+        or: 'او',
+        continueWithGoogle: 'المتابعة باستخدام Google',
+        backToLogin: 'العودة الى تسجيل الدخول',
+        firstRunTitle: 'اول استخدام؟',
+        firstRunDesc: 'لم يتم اعداد اي مدرسة بعد. ابدأ بإنشاء حساب المدير.',
+        setupSchool: 'اعداد المدرسة',
+        firstLogin: 'تسجيل الدخول الأول / نسيت كلمة المرور',
+        resetEmailSentSuccess: 'تم ارسال رسالة اعادة تعيين كلمة المرور. قد يستغرق وصولها حتى 5 دقائق.',
+      }
       : {
-          title: 'Connectez-vous pour continuer',
-          resetTitle: 'Reinitialiser le mot de passe',
-          invalidCredentials: 'Email ou mot de passe incorrect',
-          tooManyRequests: 'Trop de tentatives. Reessayez plus tard.',
-          genericError: "Une erreur s'est produite",
-          emailRequired: 'Veuillez saisir votre email.',
-          resetEmailSent: 'Un email de reinitialisation a ete envoye.',
-          unauthorizedGoogleAccount:
-            "Ce compte Google n'est pas autorise. Veuillez contacter l'administration.",
-          googleLoginFailed: 'Echec de la connexion avec Google.',
-          sendResetLink: 'Envoyer le lien',
-          or: 'OU',
-          continueWithGoogle: 'Continuer avec Google',
-          backToLogin: 'Retour a la connexion',
-          firstRunTitle: 'Premiere utilisation ?',
-          firstRunDesc:
-            "Aucune ecole n'est configuree. Commencez par creer votre compte administrateur.",
-          setupSchool: "Configurer l'ecole",
-        };
+        title: 'Connectez-vous pour continuer',
+        resetTitle: 'Reinitialiser le mot de passe',
+        invalidCredentials: 'Email ou mot de passe incorrect',
+        tooManyRequests: 'Trop de tentatives. Reessayez plus tard.',
+        genericError: "Une erreur s'est produite",
+        emailRequired: 'Veuillez saisir votre email.',
+        resetEmailSent: 'Un email de reinitialisation a ete envoye.',
+        unauthorizedGoogleAccount:
+          "Ce compte Google n'est pas autorise. Veuillez contacter l'administration.",
+        googleLoginFailed: 'Echec de la connexion avec Google.',
+        sendResetLink: 'Envoyer le lien',
+        or: 'OU',
+        continueWithGoogle: 'Continuer avec Google',
+        backToLogin: 'Retour a la connexion',
+        firstRunTitle: 'Premiere utilisation ?',
+        firstRunDesc:
+          "Aucune ecole n'est configuree. Commencez par creer votre compte administrateur.",
+        setupSchool: "Configurer l'ecole",
+        firstLogin: 'Première connexion / Mot de passe oublié',
+        resetEmailSentSuccess: 'Un email de réinitialisation a été envoyé. Son arrivée dans votre boîte de réception peut prendre jusqu\'à 5 minutes.',
+      };
 
   const { user, loading: authLoading } = useAuth();
 
@@ -103,9 +109,14 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/', { replace: true });
+    } else if (!authLoading && loading && !isResetMode) {
+      // If AuthContext finished loading but there's no user, 
+      // the login failed (e.g., no Firestore doc or other mismatch)
+      setLoading(false);
+      setError(copy.invalidCredentials);
     }
-  }, [user, navigate]);
+  }, [user, authLoading, loading, isResetMode, navigate, copy.invalidCredentials]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +132,7 @@ const Login = () => {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
       const authError = err as AuthError;
-      if (authError.code === 'auth/invalid-credential') {
+      if (authError.code === 'auth/invalid-credential' || authError.code === 'auth/user-not-found' || authError.code === 'auth/wrong-password') {
         setError(copy.invalidCredentials);
       } else if (authError.code === 'auth/too-many-requests') {
         setError(copy.tooManyRequests);
@@ -152,7 +163,7 @@ const Login = () => {
     } catch (err) {
       const authError = err as AuthError;
       if (authError.code === 'auth/user-not-found') {
-        setMessage(copy.resetEmailSent);
+        setMessage(copy.resetEmailSent); // Prevent email sniffing
       } else {
         setError(copy.genericError);
       }
@@ -225,7 +236,7 @@ const Login = () => {
           />
           <h1 className="text-3xl font-bold text-gray-900">SmartMadrassa</h1>
           <p className="text-gray-500 mt-2">
-            {isResetMode ? copy.resetTitle : copy.title}
+            {isResetMode ? t('auth.resetTitle', 'Réinitialiser le mot de passe') : t('auth.title', 'Connectez-vous pour continuer')}
           </p>
         </div>
 
@@ -257,6 +268,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="exemple@ecole.com"
                 required
+                autoComplete="username"
               />
 
               {!isResetMode && (
@@ -267,6 +279,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="********"
                   required
+                  autoComplete="current-password"
                 />
               )}
             </div>
@@ -290,7 +303,7 @@ const Login = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200"></div>
                   </div>
-                  <div className="relative bg-white px-4 text-sm text-gray-500">{copy.or}</div>
+                  <div className="relative bg-white px-4 text-sm text-gray-500">{t('common.or')}</div>
                 </div>
 
                 <button
@@ -304,7 +317,7 @@ const Login = () => {
                     alt="Google"
                     className="w-5 h-5"
                   />
-                  <span>{copy.continueWithGoogle}</span>
+                  <span>{t('auth.continueWithGoogle')}</span>
                 </button>
               </>
             )}
@@ -322,7 +335,7 @@ const Login = () => {
                 {isResetMode ? (
                   <>
                     <ArrowLeft size={16} />
-                    {copy.backToLogin}
+                    {t('auth.backToLogin')}
                   </>
                 ) : (
                   t('auth.forgotPassword')

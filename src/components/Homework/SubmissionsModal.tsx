@@ -77,7 +77,7 @@ export function SubmissionsModal({
                   </div>
                   {submission.grade !== undefined ? (
                     <Badge variant="success">
-                      {submission.grade}/{homework.maxGrade || 20}
+                      {submission.grade}/{homework.maxScore || 20}
                     </Badge>
                   ) : (
                     <Badge variant="warning">{t('homework.notGraded')}</Badge>
@@ -155,7 +155,7 @@ export function SubmissionsModal({
                       value={gradeValue.toString()}
                       onChange={(e) => setGradeValue(parseInt(e.target.value) || 0)}
                       min={0}
-                      max={homework.maxGrade || 20}
+                      max={homework.maxScore || 20}
                     />
                     <div>
                       <label htmlFor={`feedback-${submission.id}`} className="block text-sm font-medium text-gray-700 mb-1">

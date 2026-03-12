@@ -74,9 +74,9 @@ const HomeworkDetailModal = ({ isOpen, onClose, homework }: HomeworkDetailModalP
 
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {homework.maxGrade && (
+          {homework.maxScore && (
             <Badge variant="info">
-              {t('homework.maxGrade')}: {homework.maxGrade}
+              {t('homework.maxGrade')}: {homework.maxScore}
             </Badge>
           )}
           {homework.allowOnlineSubmission && (

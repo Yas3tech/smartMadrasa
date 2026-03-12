@@ -164,7 +164,7 @@ describe('users service', () => {
             const result = await createUser(newUser);
 
             expect(createUserWithEmailAndPassword).toHaveBeenCalled();
-            expect(sendPasswordResetEmail).toHaveBeenCalled();
+            expect(sendPasswordResetEmail).not.toHaveBeenCalled();
             expect(signOut).toHaveBeenCalled();
             expect(firestore.setDoc).toHaveBeenCalledWith(
                 expect.anything(),
@@ -223,7 +223,7 @@ describe('users service', () => {
 
             expect(collection).toHaveBeenCalledWith(db, 'users');
             expect(limit).toHaveBeenCalledWith(500);
-            expect(onSnapshot).toHaveBeenCalledWith('queryRef', expect.any(Function));
+            expect(onSnapshot).toHaveBeenCalledWith('queryRef', expect.any(Function), expect.any(Function));
         });
     });
 });

@@ -178,9 +178,9 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
                             <Calendar size={14} />
                             {t('homework.dueFor')} : {formatDate(item.date)}
                           </span>
-                          {homework.maxGrade && (
+                          {homework.maxScore && (
                             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                              /{homework.maxGrade} pts
+                              /{homework.maxScore} pts
                             </span>
                           )}
                         </div>

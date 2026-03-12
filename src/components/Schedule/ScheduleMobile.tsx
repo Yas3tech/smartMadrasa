@@ -8,13 +8,35 @@ import {
   Trash2,
   Plus,
 } from 'lucide-react';
-import type { Course } from '../../types';
+import type { User, Course, Event, Homework } from '../../types';
+import type { TFunction, i18n as i18nType } from 'i18next';
+import type { UseScheduleDataReturn } from '../../hooks/useSchedule';
 
 interface ScheduleMobileProps {
-  schedule: any;
-  user: any;
-  t: any;
-  i18n: any;
+  schedule: UseScheduleDataReturn & {
+    mobileDate: Date;
+    mobileExams: Event[];
+    mobileCourses: Course[];
+    mobileHomeworks: Homework[];
+    setWeekOffset: (offset: number) => void;
+    weekOffset: number;
+    setShowUpcomingModal: (show: boolean) => void;
+    handleAddCourse: () => void;
+    handleAddExam: () => void;
+    handleEditCourse: (course: Course) => void;
+    handleEditExam: (exam: Event) => void;
+    showDeleteMenu: (e: React.MouseEvent, courseId: string, date: string) => void;
+    deleteMenu: { courseId: string; date: string; x: number; y: number } | null;
+    setSelectedHomework: (hw: Homework | null) => void;
+    setShowHomeworkDetail: (show: boolean) => void;
+    handlePrevDay: () => void;
+    handleNextDay: () => void;
+    isFabOpen: boolean;
+    setIsFabOpen: (open: boolean) => void;
+  };
+  user: User | null;
+  t: TFunction;
+  i18n: i18nType;
 }
 
 const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n }) => {
@@ -96,7 +118,7 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
               {t('schedule.examEval')}
             </h3>
             <div className="space-y-3">
-              {schedule.mobileExams.map((exam: any) => (
+              {schedule.mobileExams.map((exam) => (
                 <div
                   key={exam.id}
                   className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border-l-4 border-red-500 flex gap-4"
@@ -223,7 +245,7 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
               {t('schedule.homeworkDue') || homeworkDueText}
             </h3>
             <div className="space-y-3">
-              {schedule.mobileHomeworks.map((hw: any) => (
+              {schedule.mobileHomeworks.map((hw) => (
                 <div
                   key={hw.id}
                   className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border-l-4 border-orange-500 flex gap-4 cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20"

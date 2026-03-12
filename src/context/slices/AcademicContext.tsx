@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { ClassGroup, Course, Parent, Student } from '../../types';
+import type { ClassGroup, Course, Student } from '../../types';
 import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -75,20 +75,21 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
   const [gradeCategories, setGradeCategories] = useState<GradeCategory[]>([]);
 
   useEffect(() => {
-    if (useFirebase) {
-      let unsubClasses = () => { };
-      let unsubCourses = () => { };
-      const unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
-      const unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
+    let unsubClasses = () => { };
+    let unsubCourses = () => { };
+    let unsubAcademicPeriods = () => { };
+    let unsubGradeCategories = () => { };
+
+    if (useFirebase && user) {
+      unsubAcademicPeriods = subscribeToAcademicPeriods(setAcademicPeriods);
+      unsubGradeCategories = subscribeToGradeCategories(setGradeCategories);
 
       // SECURITY: Each role only subscribes to the data it needs.
       // Do NOT replace these scoped queries with a generic fetch-all.
       // If a role sees incorrect data, fix the query — don't widen access.
       if (user?.role === 'parent') {
-        // Parent: only classes their children are enrolled in
-        const parentUser = user as Parent;
-        const childrenData = parentUser.children || [];
-        const classIds = childrenData.map((c) => c.classId).filter(Boolean);
+        const parentUser = user as any; // Using any to handle childrenIds
+        const classIds = parentUser.relatedClassIds || [];
         unsubClasses = subscribeToClasses(setClasses, classIds);
         if (classIds.length > 0) {
           unsubCourses = subscribeToCourses(setCourses);
@@ -100,19 +101,26 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
         unsubCourses = subscribeToCourses(setCourses);
       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
         // Admin and Teacher roles: full access to all academic data
-        // Fix for LOGIC-01: Teachers should see all classes/courses in the school,
-        // not just their own classes.
         unsubClasses = subscribeToClasses(setClasses);
         unsubCourses = subscribeToCourses(setCourses);
       }
 
       setIsLoading(false);
 
+      const handleWipe = () => {
+        if (unsubClasses) unsubClasses();
+        if (unsubCourses) unsubCourses();
+        if (unsubAcademicPeriods) unsubAcademicPeriods();
+        if (unsubGradeCategories) unsubGradeCategories();
+      };
+      window.addEventListener('app:wipeData', handleWipe);
+
       return () => {
-        unsubClasses();
-        unsubCourses();
-        unsubAcademicPeriods();
-        unsubGradeCategories();
+        if (unsubClasses) unsubClasses();
+        if (unsubCourses) unsubCourses();
+        if (unsubAcademicPeriods) unsubAcademicPeriods();
+        if (unsubGradeCategories) unsubGradeCategories();
+        window.removeEventListener('app:wipeData', handleWipe);
       };
     } else {
       setIsLoading(false);

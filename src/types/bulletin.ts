@@ -39,6 +39,8 @@ export interface CourseGrade {
   studentName?: string; // Denormalized
   courseId: string;
   courseName?: string; // Denormalized
+  classId?: string; // Requis pour les règles de sécurité Firestore (isTeacherForClass)
+  eventId?: string; // Lien avec l'agenda
   periodId: string;
   categoryId: string;
   categoryName?: string; // Denormalized

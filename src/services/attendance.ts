@@ -51,10 +51,12 @@ export const updateAttendance = async (
 };
 
 export const subscribeToAttendance = (callback: (attendance: Attendance[]) => void) => {
-  if (!db) return () => {};
+  if (!db) return () => { };
   // Use collectionGroup to listen to ALL attendance records
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     callback(mapQuerySnapshot<Attendance>(snapshot));
+  }, (error) => {
+    console.error(`Error in subscribeToAttendance:`, error);
   });
 };
 
@@ -62,7 +64,7 @@ export const subscribeToAttendanceByStudentIds = (
   studentIds: string[],
   callback: (attendance: Attendance[]) => void
 ) => {
-  if (!db || studentIds.length === 0) return () => {};
+  if (!db || studentIds.length === 0) return () => { };
 
   // Note: collectionGroup queries with 'in' might need an index if other filters are applied.
   // But basic 'where' should be okay or prompt for index creation.
@@ -71,6 +73,21 @@ export const subscribeToAttendanceByStudentIds = (
   // However, attendance is likely subcollection of users.
   // If we want to query by studentId field on the document itself:
   const q = query(collectionGroup(db, COLLECTION_NAME), where('studentId', 'in', studentIds));
+
+  return onSnapshot(q, (snapshot) => {
+    callback(mapQuerySnapshot<Attendance>(snapshot));
+  });
+};
+
+export const subscribeToAttendanceByClassIds = (
+  classIds: string[],
+  callback: (attendance: Attendance[]) => void
+) => {
+  if (!db || classIds.length === 0) return () => { };
+
+  // For teachers, we query by classId since they only have permission for their classes.
+  // This is a collectionGroup query that requires a composite index.
+  const q = query(collectionGroup(db, COLLECTION_NAME), where('classId', 'in', classIds));
 
   return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<Attendance>(snapshot));

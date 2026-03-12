@@ -49,7 +49,9 @@
     "actions": "Actions",
     "unsafeFile": "Fichier suspect",
     "showPassword": "Afficher le mot de passe",
-    "hidePassword": "Masquer le mot de passe"
+    "hidePassword": "Masquer le mot de passe",
+    "class": "Classe",
+    "course": "Cours"
   },
   "subjects": {
     "Arabe": "Arabe",
@@ -124,7 +126,7 @@
     "homework": "Devoirs",
     "grades": "Notes",
     "bulletins": "Bulletins",
-    "bulletinGrades": "Saisie des notes",
+    "bulletinGrades": "Saisie des bulletins",
     "bulletinConfig": "Configuration",
     "bulletinDashboard": "Gestion bulletins",
     "attendance": "Présences",
@@ -439,6 +441,7 @@
     "gradeTitle": "Titre",
     "gradeTitlePlaceholder": "Ex: Contrôle #1",
     "evaluation": "Évaluation",
+    "noted": "Noté",
     "scoreArg": "Note (/{{max}})",
     "feedbackPlaceholder": "Appréciation...",
     "feedbackDescPlaceholder": "Commentaire sur la performance...",
@@ -752,6 +755,8 @@
     "absentBtn": "Absent",
     "absenceReason": "Motif d'absence (optionnel)",
     "lateReason": "Motif de retard (optionnel)",
+    "saveSuccess": "Présence enregistrée",
+    "saveError": "Erreur lors de l'enregistrement",
     "history": "Historique",
     "unknownCourse": "Cours inconnu",
     "noRecords": "Aucun enregistrement d'assiduité.",

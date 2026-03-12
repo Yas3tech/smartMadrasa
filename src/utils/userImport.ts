@@ -1,4 +1,4 @@
-import type { Parent, Role, Student, User } from '../types';
+import type { Role, Student, User } from '../types';
 
 export interface ImportedUserSummary {
   id: string;
@@ -282,6 +282,12 @@ export const validateUserImportRows = (
       .map((row) => normalizeEmail(row.email))
   );
 
+  const splitEmails = (emailsStr: string): string[] => {
+    if (!emailsStr) return [];
+    const emails = emailsStr.split(',').map(e => normalizeEmail(e.trim())).filter(Boolean);
+    return Array.from(new Set(emails));
+  };
+
   const emailCounts = normalizedRows.reduce<Record<string, number>>((acc, row) => {
     const email = normalizeEmail(row.email);
     if (!email) return acc;
@@ -306,6 +312,8 @@ export const validateUserImportRows = (
       if ((emailCounts[email] || 0) > 1) fieldErrors.email = 'Email duplique dans le fichier';
     }
 
+    const studentEmails = splitEmails(row.studentEmail || '');
+
     if (!role) {
       fieldErrors.role = 'Role requis';
     } else if (!VALID_ROLES.includes(role as Role)) {
@@ -318,17 +326,22 @@ export const validateUserImportRows = (
       fieldErrors.birthDate = 'Date attendue: YYYY-MM-DD';
     }
 
-    if (studentEmail && role !== 'parent') {
+    if (studentEmails.length > 0 && role !== 'parent') {
       fieldErrors.studentEmail = 'Champ reserve aux parents';
     }
 
     if (role === 'parent') {
-      if (!studentEmail) {
+      if (studentEmails.length === 0) {
         fieldErrors.studentEmail = 'Email eleve requis pour un parent';
-      } else if (!EMAIL_REGEX.test(studentEmail)) {
-        fieldErrors.studentEmail = 'Email eleve invalide';
-      } else if (!existingStudentEmails.has(studentEmail) && !studentEmailsInImport.has(studentEmail)) {
-        fieldErrors.studentEmail = 'Eleve introuvable';
+      } else {
+        const invalidEmails = studentEmails.filter(e => !EMAIL_REGEX.test(e));
+        const missingEmails = studentEmails.filter(e => !existingStudentEmails.has(e) && !studentEmailsInImport.has(e));
+
+        if (invalidEmails.length > 0) {
+          fieldErrors.studentEmail = `Email(s) invalide(s): ${invalidEmails.join(', ')}`;
+        } else if (missingEmails.length > 0) {
+          fieldErrors.studentEmail = `Eleve(s) introuvable(s): ${missingEmails.join(', ')}`;
+        }
       }
     }
 
@@ -365,17 +378,34 @@ export const getUserImportSummary = (rows: UserImportReviewRow[]) => {
   };
 };
 
+/**
+ * Processes items in concurrent batches to improve performance
+ */
+async function processInBatches<T, R>(
+  items: T[],
+  batchSize: number,
+  processor: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(processor));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
 export const processNonParentUsers = async (
   data: UserImportRow[],
   addUser: (user: User) => Promise<unknown>
 ): Promise<{ importedUsers: ImportedUserSummary[]; count: number }> => {
-  const importedUsers: ImportedUserSummary[] = [];
-  let importedCount = 0;
-
-  for (const row of data) {
+  const filteredData = data.filter(row => {
     const role = normalizeRole(row.role) as Role;
-    if (!VALID_ROLES.includes(role) || role === 'parent') continue;
+    return VALID_ROLES.includes(role) && role !== 'parent';
+  });
 
+  const results = await processInBatches<UserImportRow, ImportedUserSummary>(filteredData, 5, async (row) => {
+    const role = normalizeRole(row.role) as Role;
     const newUser: User = {
       id: crypto.randomUUID(),
       name: normalizeString(row.name),
@@ -386,12 +416,12 @@ export const processNonParentUsers = async (
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
     };
 
-    await addUser(newUser);
-    importedUsers.push({ id: newUser.id, email: newUser.email, role: newUser.role });
-    importedCount++;
-  }
+    const result = (await addUser(newUser)) as any;
+    const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
+    return { id: finalId, email: newUser.email, role: newUser.role };
+  });
 
-  return { importedUsers, count: importedCount };
+  return { importedUsers: results, count: results.length };
 };
 
 export const processParentUsers = async (
@@ -400,16 +430,17 @@ export const processParentUsers = async (
   importedUsers: ImportedUserSummary[],
   addUser: (user: User) => Promise<unknown>
 ): Promise<number> => {
-  let importedCount = 0;
+  const filteredData = data.filter(row => normalizeRole(row.role) === 'parent');
 
-  for (const row of data) {
-    if (normalizeRole(row.role) !== 'parent') continue;
-
+  const results = await processInBatches<UserImportRow, boolean>(filteredData, 5, async (row) => {
     const childrenIds: string[] = [];
     const relatedClassIds: string[] = [];
-    const studentEmail = normalizeEmail(row.studentEmail);
+    // Deduplicate student emails to prevent duplicate childrenIds
+    const studentEmails = Array.from(new Set(
+      (row.studentEmail || '').split(',').map((e: string) => e.trim().toLowerCase()).filter(Boolean)
+    ));
 
-    if (studentEmail) {
+    for (const studentEmail of studentEmails) {
       const student = users.find(
         (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
       );
@@ -425,7 +456,7 @@ export const processParentUsers = async (
       }
     }
 
-    const newUser: Parent = {
+    const newUser: any = {
       id: crypto.randomUUID(),
       name: normalizeString(row.name),
       email: normalizeEmail(row.email),
@@ -434,15 +465,18 @@ export const processParentUsers = async (
       birthDate: normalizeString(row.birthDate),
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
       childrenIds,
-      relatedClassIds: relatedClassIds.length > 0 ? relatedClassIds : undefined,
     };
+    if (relatedClassIds.length > 0) {
+      newUser.relatedClassIds = Array.from(new Set(relatedClassIds));
+    }
 
     await addUser(newUser);
-    importedCount++;
-  }
+    return true;
+  });
 
-  return importedCount;
+  return results.length;
 };
+
 
 export const importValidatedUserRows = async (
   rows: UserImportReviewRow[],

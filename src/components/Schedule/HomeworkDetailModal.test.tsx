@@ -42,7 +42,7 @@ const mockHomework: Homework = {
   assignedBy: 'teacher-1',
   classId: 'class-1',
   allowOnlineSubmission: true,
-  maxGrade: 20,
+  maxScore: 20,
   attachments: ['https://example.com/safe.pdf', 'data:text/html,<script>alert(1)</script>'],
 };
 

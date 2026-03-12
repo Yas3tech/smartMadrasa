@@ -125,11 +125,11 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {dash.selectedHomework.maxGrade && (
+              {dash.selectedHomework.maxScore && (
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <TrendingUp size={16} />
                   <span>
-                    {t('homework.maxGrade')}: {dash.selectedHomework.maxGrade} pts
+                    {t('homework.maxGrade')}: {dash.selectedHomework.maxScore} pts
                   </span>
                 </div>
               )}

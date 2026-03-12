@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../AuthContext';
 import { useUsers } from './UserContext';
 import { useAcademics } from './AcademicContext';
-import type { Grade, Attendance, Homework, Parent, Student } from '../../types';
+import type { Grade, Attendance, Homework, Student } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -23,6 +23,7 @@ import {
 import {
   subscribeToAttendance,
   subscribeToAttendanceByStudentIds,
+  subscribeToAttendanceByClassIds,
   createAttendance as fbCreateAttendance,
   updateAttendance as fbUpdateAttendance,
 } from '../../services/attendance';
@@ -33,6 +34,7 @@ import {
   updateHomework as fbUpdateHomework,
   deleteHomework as fbDeleteHomework,
 } from '../../services/homework';
+import { subscribeToClassesByTeacherId } from '../../services/classes';
 import { getRelevantPeriodIds } from '../../utils/academic';
 
 export interface PerformanceContextType {
@@ -71,11 +73,11 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
 
   useEffect(() => {
-    if (useFirebase) {
-      let unsubGrades = () => { };
-      let unsubAttendance = () => { };
-      let unsubHomeworks = () => { };
+    let unsubGrades = () => { };
+    let unsubAttendance = () => { };
+    let unsubHomeworks = () => { };
 
+    if (useFirebase && user) {
       const handleGradesUpdate = (courseGrades: CourseGrade[]) => {
         const grades = courseGrades.map((cg) => ({
           id: cg.id,
@@ -94,10 +96,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       };
 
       if (user?.role === 'parent') {
-        const parentUser = user as Parent;
+        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
         const childIds = parentUser.childrenIds || [];
-        const childrenData = parentUser.children || [];
-        const classIds = childrenData.map((c) => c.classId).filter(Boolean);
+        const classIds = parentUser.relatedClassIds || [];
 
         if (childIds.length > 0) {
           unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);
@@ -109,41 +110,62 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         }
       } else if (user?.role === 'student') {
         const studentUser = user as Student;
-        // Fetch only relevant data for the student
         unsubGrades = subscribeToCourseGradesByStudentIds([user.id], handleGradesUpdate);
         unsubAttendance = subscribeToAttendanceByStudentIds([user.id], setAttendance);
 
         if (studentUser.classId) {
           unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
         }
-      } else {
-        const setupDefaultSubs = () => {
-          // Optimized subscription: fetch only grades for the relevant academic periods (current year)
-          // instead of fetching all grades ever created.
-          const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+      } else if (user?.role === 'teacher') {
+        let innerUnsubAttendance = () => { };
+        let innerUnsubHomeworks = () => { };
 
-          if (relevantPeriodIds.length > 0) {
-            unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
-          } else {
-            // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
-            // We avoid subscribing to EVERYTHING to prevent performance issues.
-            unsubGrades = () => { };
+        const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
+          innerUnsubAttendance();
+          innerUnsubHomeworks();
+          const classIds = teacherClasses.map((c) => c.id);
+
+          if (classIds.length > 0) {
+            innerUnsubAttendance = subscribeToAttendanceByClassIds(classIds, setAttendance);
+            innerUnsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
           }
+        });
 
-          unsubAttendance = subscribeToAttendance(setAttendance);
-          unsubHomeworks = subscribeToHomeworks(setHomeworks);
+        const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+        if (relevantPeriodIds.length > 0) {
+          unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+        }
+
+        unsubAttendance = () => {
+          unsubTeacherClasses();
+          innerUnsubAttendance();
         };
-
-        // For teacher, director, superadmin - fetch filtered data
-        setupDefaultSubs();
+        unsubHomeworks = () => {
+          innerUnsubHomeworks();
+        };
+      } else {
+        const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+        if (relevantPeriodIds.length > 0) {
+          unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+        }
+        unsubAttendance = subscribeToAttendance(setAttendance);
+        unsubHomeworks = subscribeToHomeworks(setHomeworks);
       }
 
       setIsLoading(false);
 
+      const handleWipe = () => {
+        if (unsubGrades) unsubGrades();
+        if (unsubAttendance) unsubAttendance();
+        if (unsubHomeworks) unsubHomeworks();
+      };
+      window.addEventListener('app:wipeData', handleWipe);
+
       return () => {
-        unsubGrades();
-        unsubAttendance();
-        unsubHomeworks();
+        if (unsubGrades) unsubGrades();
+        if (unsubAttendance) unsubAttendance();
+        if (unsubHomeworks) unsubHomeworks();
+        window.removeEventListener('app:wipeData', handleWipe);
       };
     } else {
       setIsLoading(false);
@@ -195,6 +217,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           weight: 1,
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
+          classId: grade.classId,
+          eventId: grade.eventId,
         };
 
         await fbCreateCourseGrade(courseGrade);
@@ -246,6 +270,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           weight: 1,
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
+          classId: grade.classId,
+          eventId: grade.eventId,
         };
       });
 
@@ -285,6 +311,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         const record = attendance.find((a) => a.id === id);
         if (record) {
           await fbUpdateAttendance(record.studentId, id, status, justification);
+        } else {
+          console.error('Attendance record not found for update:', id);
+          throw new Error('Record not found');
         }
       }
     },

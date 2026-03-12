@@ -104,7 +104,7 @@ describe('attendance service', () => {
             subscribeToAttendance(callback);
 
             expect(collectionGroup).toHaveBeenCalledWith(db, 'attendance');
-            expect(onSnapshot).toHaveBeenCalledWith('collectionGroupRef', expect.any(Function));
+            expect(onSnapshot).toHaveBeenCalledWith('collectionGroupRef', expect.any(Function), expect.any(Function));
         });
     });
 

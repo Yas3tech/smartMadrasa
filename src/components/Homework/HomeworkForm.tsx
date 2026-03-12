@@ -41,14 +41,7 @@ export function HomeworkForm({
     ),
   ];
 
-  const handleIsGradedChange = (checked: boolean) => {
-    setFormField('isGraded', checked);
-    if (!checked) {
-      setFormField('maxGrade', undefined);
-    } else {
-      setFormField('maxGrade', 20);
-    }
-  };
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -141,41 +134,6 @@ export function HomeworkForm({
             value={formState.dueDate}
             onChange={(e) => setFormField('dueDate', e.target.value)}
           />
-
-          {/* Is Graded Toggle */}
-          <div className="flex items-center gap-2 mb-2">
-            <input
-              type="checkbox"
-              id="isGraded"
-              checked={formState.isGraded}
-              onChange={(e) => handleIsGradedChange(e.target.checked)}
-              className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500 border-gray-300"
-            />
-            <label
-              htmlFor="isGraded"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              {t('homework.isGraded')}
-            </label>
-          </div>
-
-          {/* Max Grade - only when isGraded */}
-          {formState.isGraded && (
-            <div className="flex items-center gap-4 pl-6">
-              <div className="flex-1">
-                <Input
-                  label={t('homework.maxGrade')}
-                  type="number"
-                  value={formState.maxGrade?.toString() || '20'}
-                  onChange={(e) =>
-                    setFormField('maxGrade', e.target.value ? parseInt(e.target.value) : 20)
-                  }
-                  min={1}
-                  max={100}
-                />
-              </div>
-            </div>
-          )}
 
           {/* Allow Online Submission */}
           <div className="flex items-center gap-2">

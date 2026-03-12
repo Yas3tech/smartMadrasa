@@ -13,6 +13,7 @@ import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
 import { advanceToNextAcademicYear } from '../../services/systemMaintenance';
 import { useAcademics } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
+import { auth } from '../../config/firebase';
 
 const translations = {
   fr: {
@@ -185,9 +186,25 @@ const DatabaseAdmin = () => {
     try {
       await clearAllData();
       setMessage({ type: 'success', text: copy.deleteAllSuccess });
+
+      // Force sign out the current user before reloading so they don't get auto-logged in 
+      // by the cached Firebase valid token (the Cloud Function deletes it server-side, 
+      // but the client-side token expires slowly).
+      if (auth) {
+        try {
+          await auth.signOut();
+        } catch {
+          // Ignore sign out errors during full database reset
+        }
+      }
+
+      // Force a hard page reload to clear Firebase JS SDK state and prevent INTERNAL ASSERTION crashes
+      // caused by active listeners pointing to deleted documents.
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       setMessage({ type: 'error', text: `${t('common.error')}: ${error}` });
-    } finally {
       setLoading(false);
     }
   };

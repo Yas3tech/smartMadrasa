@@ -37,7 +37,35 @@ describe('userImport', () => {
     );
 
     expect(reviewedRows[0].isValid).toBe(false);
-    expect(reviewedRows[0].fieldErrors.studentEmail).toBe('Eleve introuvable');
+    expect(reviewedRows[0].fieldErrors.studentEmail).toContain('Eleve(s) introuvable(s): missing@school.ma');
+  });
+
+  it('validates multiple comma-separated student emails', () => {
+    const reviewedRows = validateUserImportRows(
+      [
+        {
+          rowNumber: 2,
+          name: 'Fatima Dupont',
+          email: 'fatima@school.ma',
+          role: 'parent',
+          phone: '',
+          birthDate: '',
+          studentEmail: 'child1@school.ma, child2@school.ma',
+        },
+      ],
+      {
+        existingUsers: [
+          { id: '1', name: 'Child 1', email: 'child1@school.ma', role: 'student' } as any,
+        ],
+        existingStudents: [
+          { id: '1', name: 'Child 1', email: 'child1@school.ma', role: 'student' } as any,
+        ],
+        canImportSuperadmin: false,
+      }
+    );
+
+    expect(reviewedRows[0].isValid).toBe(false);
+    expect(reviewedRows[0].fieldErrors.studentEmail).toContain('Eleve(s) introuvable(s): child2@school.ma');
   });
 
   it('rejects studentEmail for non-parent roles', () => {

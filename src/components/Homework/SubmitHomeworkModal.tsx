@@ -73,9 +73,9 @@ export function SubmitHomeworkModal({
           {homework.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400">{homework.description}</p>
           )}
-          {homework.maxGrade && (
+          {homework.maxScore && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              <strong>{t('homework.maxGrade')}:</strong> {homework.maxGrade} pts
+              <strong>{t('homework.maxGrade')}:</strong> {homework.maxScore} pts
             </p>
           )}
         </div>

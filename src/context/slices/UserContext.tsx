@@ -40,24 +40,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    if (useFirebase) {
-      let unsubUsers = () => { };
+    let unsubUsers = () => { };
 
+    if (useFirebase && user) {
       // SECURITY: Each role only subscribes to the users it needs.
       // Do NOT replace these scoped queries with a generic fetch-all.
       // Teachers must NOT see all student PII — only students in their classes.
       if (user?.role === 'student') {
-        // Student: only classmates + staff (teachers, directors, superadmins)
         const student = user as Student;
         unsubUsers = subscribeToUsers(setUsers, [
           ...(student.classId ? [{ classId: student.classId }] : []),
           { role: ['teacher', 'director', 'superadmin'] },
         ]);
+      } else if (user?.role === 'parent') {
+        // Parent: See their own children + staff
+        const parent = user as any; // Using any to avoid type cast issues with childrenIds vs children
+        const studentIds = parent.childrenIds || [];
+        const queries: UserQueryFilters[] = [
+          { role: ['teacher', 'director', 'superadmin'] },
+        ];
+        if (studentIds.length > 0) {
+          queries.push({ id: studentIds });
+        }
+        unsubUsers = subscribeToUsers(setUsers, queries);
       } else if (user?.role === 'teacher') {
         // SECURITY: Teacher only sees staff + students in classes they teach.
-        // Chained subscription: first get teacher's classIds from 'classes' collection
-        // (queried by teacherId), then subscribe to users scoped to those classIds.
-        // This avoids relying on user.classIds which may not be synced.
         let innerUnsubUsers = () => { };
         const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
           innerUnsubUsers();
@@ -66,7 +73,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             { role: ['teacher', 'director', 'superadmin'] },
           ];
           if (classIds.length > 0) {
-            queries.push({ classId: classIds });
+            queries.push({ role: 'student', classId: classIds });
+            queries.push({ relatedClassIds: classIds });
           }
           innerUnsubUsers = subscribeToUsers(setUsers, queries);
         });
@@ -81,8 +89,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       setIsLoading(false);
 
+      const handleWipe = () => {
+        if (unsubUsers) unsubUsers();
+      };
+      window.addEventListener('app:wipeData', handleWipe);
+
       return () => {
-        unsubUsers();
+        if (unsubUsers) unsubUsers();
+        window.removeEventListener('app:wipeData', handleWipe);
       };
     } else {
       setIsLoading(false);

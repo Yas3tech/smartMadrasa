@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../UI';
 import { X, Save } from 'lucide-react';
-import type { Grade, Student } from '../../types';
+import type { Grade, Student, Event } from '../../types';
 
 export interface BulkGradeModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ export interface BulkGradeModalProps {
   students: Student[];
   onSave: (grades: Omit<Grade, 'id'>[]) => Promise<void>;
   availableSubjects?: string[];
+  events?: Event[];
 }
 
 const BulkGradeModal = ({
@@ -20,8 +21,10 @@ const BulkGradeModal = ({
   className,
   students,
   availableSubjects = [],
+  events = [],
 }: BulkGradeModalProps) => {
   const { t } = useTranslation();
+  const [eventId, setEventId] = useState('');
   const [subject, setSubject] = useState('');
   const [type, setType] = useState<'exam' | 'homework' | 'participation' | 'evaluation'>('exam');
   const [title, setTitle] = useState('');
@@ -36,6 +39,7 @@ const BulkGradeModal = ({
 
   useEffect(() => {
     if (isOpen) {
+      setEventId('');
       setSubject('');
       setType('exam');
       setTitle('');
@@ -46,6 +50,35 @@ const BulkGradeModal = ({
       setAbsences({});
     }
   }, [isOpen]);
+
+  // Handle Event selection auto-fill
+  useEffect(() => {
+    if (eventId) {
+      const selectedEvent = events.find(e => e.id === eventId);
+      if (selectedEvent) {
+        // Auto-fill form fields
+        if (selectedEvent.className) setTitle(selectedEvent.title);
+
+        // Find subject based on courseId
+        // In this context availableSubjects are just strings, so we might not be 
+        // able to auto-select subject if we only have courseId (not populated in Event type fully?), 
+        // but if the title or type implies something, we use it.
+        // Actually, ExamModal saves the event title often as the subject if the title was empty.
+        // Let's at least set title, date, type.
+        setTitle(selectedEvent.title);
+        setDate(selectedEvent.start.split('T')[0]);
+        if (['exam', 'homework', 'participation', 'evaluation'].includes(selectedEvent.type)) {
+          setType(selectedEvent.type as typeof type);
+        } else {
+          setType('evaluation'); // fallback
+        }
+
+        // Sync maxScore if available (e.g. from mapped homework)
+        const score = selectedEvent.maxScore;
+        if (score) setMaxScore(score);
+      }
+    }
+  }, [eventId, events]);
 
   const handleScoreChange = (studentId: string, value: string) => {
     if (
@@ -98,6 +131,7 @@ const BulkGradeModal = ({
             status: isAbsent ? 'absent' : 'present',
             studentName: student.name,
             className: className,
+            eventId: eventId || undefined,
           } as Omit<Grade, 'id'>);
         }
       });
@@ -132,6 +166,31 @@ const BulkGradeModal = ({
 
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-xl">
+            {events.length > 0 && (
+              <div className="md:col-span-3 mb-2">
+                <label
+                  htmlFor="evaluation-source"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Source de l'évaluation
+                </label>
+                <select
+                  id="evaluation-source"
+                  value={eventId}
+                  onChange={(e) => setEventId(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none bg-white dark:bg-slate-800"
+                >
+                  <option value="">Autre (Saisie manuelle)</option>
+                  {events.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {new Date(e.start).toLocaleDateString()} - {t(`grades.${e.type}`, e.type)}: {e.title}
+                      {e.type === 'homework' && e.isGraded && ` (${t('grades.noted', 'Noté')})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div>
               <p className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t('common.class')}
@@ -142,10 +201,14 @@ const BulkGradeModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="subject-select"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t('common.subject')} *
               </label>
               <select
+                id="subject-select"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
@@ -160,10 +223,14 @@ const BulkGradeModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="grade-title"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t('grades.gradeTitle')} (Optionnel)
               </label>
               <input
+                id="grade-title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -173,10 +240,14 @@ const BulkGradeModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="grade-type"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t('common.type')} *
               </label>
               <select
+                id="grade-type"
                 value={type}
                 onChange={(e) => setType(e.target.value as typeof type)}
                 className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
@@ -189,10 +260,14 @@ const BulkGradeModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="grade-date"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t('common.date')} *
               </label>
               <input
+                id="grade-date"
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -201,10 +276,14 @@ const BulkGradeModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="max-score"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t('grades.maxScore')} *
               </label>
               <input
+                id="max-score"
                 type="number"
                 value={maxScore}
                 onChange={(e) => setMaxScore(Number(e.target.value))}
@@ -215,70 +294,71 @@ const BulkGradeModal = ({
           </div>
 
           {/* Students List */}
-          {students.length > 0 && (
-            <div className="border dark:border-slate-600 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-slate-700">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
-                      {t('common.student')}
-                    </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-300 w-32">
-                      {t('grades.scoreArg', { max: maxScore })}
-                    </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-300 w-24">
-                      {t('status.absent')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
-                      {t('grades.comment')}
-                    </th>
+          <div className="border dark:border-slate-600 rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-slate-700">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                    {t('common.student')}
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-300 w-32">
+                    {t('grades.scoreArg', { max: maxScore })}
+                  </th>
+                  <th className="px-4 py-3 text-center text-sm font-medium text-gray-500 dark:text-gray-300 w-24">
+                    {t('attendance_teacher.absent')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
+                    {t('grades.comment')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-slate-600">
+                {students.map((student) => (
+                  <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {student.name}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        value={scores[student.id] || ''}
+                        onChange={(e) => handleScoreChange(student.id, e.target.value)}
+                        disabled={absences[student.id]}
+                        className="w-full px-3 py-1 text-center rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                        placeholder="-"
+                        aria-label={`${t('common.score')} - ${student.name}`}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={!!absences[student.id]}
+                        onChange={() => toggleAbsence(student.id)}
+                        className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                        aria-label={`${t('attendance_teacher.absent')} - ${student.name}`}
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="text"
+                        value={feedback[student.id] || ''}
+                        onChange={(e) => handleFeedbackChange(student.id, e.target.value)}
+                        className="w-full px-3 py-1 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                        placeholder={t('grades.feedbackPlaceholder')}
+                        aria-label={`${t('grades.comment')} - ${student.name}`}
+                      />
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-slate-600">
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {student.name}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          value={scores[student.id] || ''}
-                          onChange={(e) => handleScoreChange(student.id, e.target.value)}
-                          disabled={absences[student.id]}
-                          className="w-full px-3 py-1 text-center rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none disabled:bg-gray-100 disabled:text-gray-400"
-                          placeholder="-"
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <input
-                          type="checkbox"
-                          checked={!!absences[student.id]}
-                          onChange={() => toggleAbsence(student.id)}
-                          className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          value={feedback[student.id] || ''}
-                          onChange={(e) => handleFeedbackChange(student.id, e.target.value)}
-                          className="w-full px-3 py-1 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                          placeholder={t('grades.feedbackPlaceholder')}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
 
-              {students.length === 0 && (
-                <div className="p-8 text-center text-gray-500">{t('grades.noStudents')}</div>
-              )}
-            </div>
-          )}
+            {students.length === 0 && (
+              <div className="p-8 text-center text-gray-500">{t('grades.noStudents')}</div>
+            )}
+          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="secondary" onClick={onClose} type="button">
