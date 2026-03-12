@@ -32,7 +32,7 @@ const UserManagement = () => {
   const [role, setRole] = useState<Role>('student');
   const [phone, setPhone] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
 
   const isRTL = i18n.language === 'ar';
 
@@ -83,7 +83,7 @@ const UserManagement = () => {
     setRole('student');
     setPhone('');
     setBirthDate('');
-    setSelectedStudentId('');
+    setSelectedStudentIds([]);
     setIsModalOpen(true);
   };
 
@@ -96,9 +96,9 @@ const UserManagement = () => {
     setBirthDate(u.birthDate || '');
     if (u.role === 'parent') {
       const parent = u as Parent;
-      setSelectedStudentId(parent.childrenIds?.[0] || '');
+      setSelectedStudentIds(parent.childrenIds || []);
     } else {
-      setSelectedStudentId('');
+      setSelectedStudentIds([]);
     }
     setIsModalOpen(true);
   };
@@ -117,12 +117,16 @@ const UserManagement = () => {
     if (role === 'teacher' || role === 'parent') userData.phone = phone;
     if (role === 'student') userData.birthDate = birthDate;
 
-    if (role === 'parent' && selectedStudentId) {
-      userData.childrenIds = [selectedStudentId];
-      const student = students.find((s) => s.id === selectedStudentId);
-      if (student && 'classId' in student) {
-        userData.relatedClassIds = [(student as Student).classId!];
-      }
+    if (role === 'parent' && selectedStudentIds.length > 0) {
+      userData.childrenIds = selectedStudentIds;
+      const relatedClassIds = new Set<string>();
+      selectedStudentIds.forEach(id => {
+        const student = students.find((s) => s.id === id);
+        if (student && 'classId' in student && (student as Student).classId) {
+          relatedClassIds.add((student as Student).classId);
+        }
+      });
+      userData.relatedClassIds = Array.from(relatedClassIds);
     }
     try {
       if (editingUser) {
@@ -193,67 +197,90 @@ const UserManagement = () => {
     const ExcelJS = (await import('exceljs')).default;
     const workbook = new ExcelJS.Workbook();
     const guideSheet = workbook.addWorksheet('Guide');
+
+    // Add styling and better structure to guide
     guideSheet.columns = [
-      { header: 'Section', key: 'section', width: 22 },
-      { header: 'Details', key: 'details', width: 85 },
+      { header: 'RUBRIQUE', key: 'section', width: 25 },
+      { header: 'DIRECTIVES & EXPLICATIONS', key: 'details', width: 100 },
     ];
+
     guideSheet.addRows([
       {
-        section: 'Format',
-        details:
-          'Colonnes supportees: name, email, role, phone, birthDate, studentEmail. birthDate doit etre au format YYYY-MM-DD.',
+        section: '1. Format global',
+        details: 'Colonnes supportées obligatoires : name, email, role. Colonnes optionnelles : phone, birthDate, studentEmail.',
       },
       {
-        section: 'Roles',
-        details: 'Valeurs autorisees: student, teacher, parent, director, superadmin.',
+        section: '2. Format des données',
+        details: '- Format Date (birthDate) : YYYY-MM-DD (ex: 2015-05-20).\n- Emails : Doivent être uniques pour chaque utilisateur.',
       },
       {
-        section: 'Parent',
-        details:
-          'Pour un parent, studentEmail doit contenir l email d un eleve existant ou present dans le meme import.',
+        section: '3. Rôles autorisés',
+        details: 'student (élève), teacher (prof), parent (parent), director (directeur), superadmin (admin total).',
       },
       {
-        section: 'Wizard',
-        details:
-          'Le wizard de l application permet de corriger les cellules en erreur avant creation definitive.',
+        section: '4. Liaison Parent-Enfant',
+        details: 'IMPORTANT : Pour un rôle "parent", la colonne "studentEmail" doit contenir l\'email de l\'élève.\n' +
+          '➤ MULTI-ENFANTS : Si un parent a plusieurs enfants, séparez les emails par une VIRGULE.\n' +
+          'Exemple : enfant1@ecole.ma, enfant2@ecole.ma',
+      },
+      {
+        section: '5. Notes sur les profs',
+        details: 'Ajoutez le numéro de téléphone pour que les parents puissent les contacter via le planning.',
       },
     ]);
 
+    // Apply some styling to header
+    guideSheet.getRow(1).font = { bold: true };
+    guideSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+
     const ws = workbook.addWorksheet('Template');
     ws.columns = [
-      { header: 'name', key: 'name', width: 20 },
-      { header: 'email', key: 'email', width: 25 },
-      { header: 'role', key: 'role', width: 10 },
-      { header: 'phone', key: 'phone', width: 15 },
+      { header: 'name', key: 'name', width: 25 },
+      { header: 'email', key: 'email', width: 30 },
+      { header: 'role', key: 'role', width: 12 },
+      { header: 'phone', key: 'phone', width: 18 },
       { header: 'birthDate', key: 'birthDate', width: 15 },
-      { header: 'studentEmail', key: 'studentEmail', width: 25 },
+      { header: 'studentEmail', key: 'studentEmail', width: 45 },
     ];
+
+    // Examples requested by user (2 students, 1 teacher, 1 parent)
     ws.addRows([
       {
-        name: 'Jean Dupont',
-        email: 'jean@school.ma',
+        name: 'Yassine El Amrani',
+        email: 'yassine.student@ecole.ma',
         role: 'student',
         phone: '',
-        birthDate: '2010-01-01',
+        birthDate: '2012-04-12',
         studentEmail: '',
       },
       {
-        name: 'Meryem El Idrissi',
-        email: 'meryem@school.ma',
+        name: 'Lina Bennani',
+        email: 'lina.student@ecole.ma',
+        role: 'student',
+        phone: '',
+        birthDate: '2013-09-25',
+        studentEmail: '',
+      },
+      {
+        name: 'Prof. Ahmed Alaoui',
+        email: 'alaoui.teacher@ecole.ma',
         role: 'teacher',
-        phone: '+212600000001',
+        phone: '+212661001122',
         birthDate: '',
         studentEmail: '',
       },
       {
-        name: 'Fatima Dupont',
-        email: 'fatima.parent@school.ma',
+        name: 'Mme. Samira El Amrani',
+        email: 'samira.parent@ecole.ma',
         role: 'parent',
-        phone: '+212600000002',
+        phone: '+212661334455',
         birthDate: '',
-        studentEmail: 'jean@school.ma',
+        studentEmail: 'yassine.student@ecole.ma, lina.student@ecole.ma',
       },
     ]);
+
+    ws.getRow(1).font = { bold: true };
+    ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
@@ -493,19 +520,33 @@ const UserManagement = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('users.linkedChild')}
                 </label>
-                <select
-                  value={selectedStudentId}
-                  onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                >
-                  <option value="">{t('users.selectStudent')}</option>
+                <div className="space-y-2 max-h-48 overflow-y-auto p-3 border border-gray-200 rounded-xl bg-gray-50">
                   {students.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.name} ({student.email})
-                    </option>
+                    <label key={student.id} className="flex items-center gap-2 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedStudentIds.includes(student.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedStudentIds(prev => [...prev, student.id]);
+                          } else {
+                            setSelectedStudentIds(prev => prev.filter(id => id !== student.id));
+                          }
+                        }}
+                        className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {student.name} <span className="text-gray-400 text-xs">({student.email})</span>
+                      </span>
+                    </label>
                   ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">{t('users.selectStudentHelp')}</p>
+                  {students.length === 0 && (
+                    <p className="text-sm text-gray-500 italic text-center py-2">{t('users.noStudents') || 'Aucun élève trouvé'}</p>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {i18n.language.startsWith('ar') ? 'يمكنك اختيار عدة طلاب' : i18n.language.startsWith('nl') ? 'U kunt meerdere studenten selecteren' : 'Vous pouvez sélectionner plusieurs élèves'}
+                </p>
               </div>
             )}
 

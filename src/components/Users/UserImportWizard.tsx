@@ -42,147 +42,152 @@ export default function UserImportWizard({
   const [isImporting, setIsImporting] = useState(false);
   const copy = i18n.language.startsWith('nl')
     ? {
-        fields: ['Naam', 'E-mail', 'Rol', 'Telefoon', 'Geboortedatum', 'Leerling e-mail'],
-        stepTitles: ['1. Import', '2. Controle en correctie', '3. Definitieve import'],
-        noUsableRows: 'Geen bruikbare rijen gevonden.',
-        invalidFile: 'Kan dit bestand niet lezen. Gebruik .xlsx of .csv.',
-        pasteSource: 'Plakken',
-        noValidRows: 'Geen geldige rijen om te importeren.',
-        partialSuccess: (count: number, invalid: number) =>
-          `${count} gebruikers geimporteerd. ${invalid} rij(en) genegeerd.`,
-        success: (count: number) => `${count} gebruikers succesvol geimporteerd.`,
-        importError: 'Import mislukt. Controleer de gegevens en probeer opnieuw.',
-        importFile: 'Bestand importeren',
-        importFileDesc:
-          'Laad een .xlsx- of .csv-bestand. De wizard maakt nog niets aan en opent eerst een controlescherm.',
-        readingFile: 'Bestand lezen...',
-        chooseFile: 'Bestand kiezen',
-        pasteData: 'Gegevens plakken',
-        pasteDataDesc:
-          'Plak een tabel met headers name,email,role,phone,birthDate,studentEmail.',
-        previewPasted: 'Geplakte rijen bekijken',
-        source: 'Bron',
-        loadedRows: 'Geladen rijen',
-        valid: 'Geldig',
-        fix: 'Te corrigeren',
-        reviewHint: 'Klik in rode cellen om direct te corrigeren zonder terug te gaan naar het bestand.',
-        row: 'Rij',
-        status: 'Status',
-        ready: 'Klaar',
-        summaryTitle: 'Samenvatting voor import',
-        summaryDesc:
-          'Alleen geldige rijen worden aangemaakt. Rijen met fouten blijven zichtbaar voor latere correctie.',
-        validRows: 'Geldige rijen',
-        excludedRows: 'Uitgesloten rijen',
-        controlTitle: 'Controle',
-        controlDesc:
-          'De wizard valideert rollen, e-mails, doublures en ouder-leerling koppelingen voor het aanmaken.',
-        title: 'Wizard gebruikersimport',
-        subtitle: 'Importeer, corrigeer direct en start daarna alleen geldige rijen.',
-        progressReview: (valid: number, invalid: number) => `${valid} geldig / ${invalid} corrigeren`,
-        progressFinalize: (valid: number) => `${valid} rij(en) worden geimporteerd`,
-        continueImport: 'Verder naar import',
-        importing: 'Import bezig...',
-        importRows: (count: number) => `${count} rij(en) importeren`,
-        cancel: 'Annuleren',
-        back: 'Terug',
-        reset: 'Opnieuw instellen',
-      }
+      fields: ['Naam', 'E-mail', 'Rol', 'Telefoon', 'Geboortedatum', 'Leerling e-mail'],
+      stepTitles: ['1. Import', '2. Controle en correctie', '3. Definitieve import'],
+      noUsableRows: 'Geen bruikbare rijen gevonden.',
+      invalidFile: 'Kan dit bestand niet lezen. Gebruik .xlsx of .csv.',
+      pasteSource: 'Plakken',
+      noValidRows: 'Geen geldige rijen om te importeren.',
+      partialSuccess: (count: number, invalid: number) =>
+        `${count} gebruikers geimporteerd. ${invalid} rij(en) genegeerd.`,
+      success: (count: number) => `${count} gebruikers succesvol geimporteerd.`,
+      importError: 'Import mislukt. Controleer de gegevens en probeer opnieuw.',
+      importFile: 'Bestand importeren',
+      importFileDesc:
+        'Laad een .xlsx- of .csv-bestand. De wizard maakt nog niets aan en opent eerst een controlescherm.',
+      readingFile: 'Bestand lezen...',
+      chooseFile: 'Bestand kiezen',
+      pasteData: 'Gegevens plakken',
+      pasteDataDesc:
+        'Plak een tabel met headers name,email,role,phone,birthDate,studentEmail.',
+      previewPasted: 'Geplakte rijen bekijken',
+      source: 'Bron',
+      loadedRows: 'Geladen rijen',
+      valid: 'Geldig',
+      fix: 'Te corrigeren',
+      reviewHint: 'Klik in rode cellen om direct te corrigeren zonder terug te gaan naar het bestand.',
+      row: 'Rij',
+      status: 'Status',
+      ready: 'Klaar',
+      summaryTitle: 'Samenvatting voor import',
+      summaryDesc:
+        'Alleen geldige rijen worden aangemaakt. Rijen met fouten blijven zichtbaar voor latere correctie.',
+      validRows: 'Geldige rijen',
+      excludedRows: 'Uitgesloten rijen',
+      controlTitle: 'Controle',
+      controlDesc:
+        'De wizard valideert rollen, e-mails, doublures en ouder-leerling koppelingen voor het aanmaken.',
+      title: 'Wizard gebruikersimport',
+      subtitle: 'Importeer, corrigeer direct en start daarna alleen geldige rijen.',
+      progressReview: (valid: number, invalid: number) => `${valid} geldig / ${invalid} corrigeren`,
+      progressFinalize: (valid: number) => `${valid} rij(en) worden geimporteerd`,
+      continueImport: 'Verder naar import',
+      importing: 'Import bezig...',
+      importRows: (count: number) => `${count} rij(en) importeren`,
+      cancel: 'Annuleren',
+      back: 'Terug',
+      reset: 'Opnieuw instellen',
+    }
     : i18n.language.startsWith('ar')
       ? {
-          fields: ['الاسم', 'البريد', 'الدور', 'الهاتف', 'تاريخ الميلاد', 'بريد التلميذ'],
-          stepTitles: ['1. استيراد', '2. مراجعة وتصحيح', '3. استيراد نهائي'],
-          noUsableRows: 'لم يتم العثور على اسطر قابلة للاستعمال.',
-          invalidFile: 'تعذر قراءة هذا الملف. استخدم .xlsx او .csv.',
-          pasteSource: 'لصق',
-          noValidRows: 'لا توجد اسطر صالحة للاستيراد.',
-          partialSuccess: (count: number, invalid: number) =>
-            `تم استيراد ${count} مستخدمين. تم تجاهل ${invalid} سطر(اسطر).`,
-          success: (count: number) => `تم استيراد ${count} مستخدمين بنجاح.`,
-          importError: 'فشل الاستيراد. تحقق من البيانات ثم اعد المحاولة.',
-          importFile: 'استيراد ملف',
-          importFileDesc:
-            'حمّل ملف .xlsx او .csv. المعالج لا ينشئ شيئا مباشرة ويفتح اولا خطوة مراجعة.',
-          readingFile: 'جار قراءة الملف...',
-          chooseFile: 'اختيار ملف',
-          pasteData: 'لصق بيانات',
-          pasteDataDesc:
-            'الصق جدولا بعناوين name,email,role,phone,birthDate,studentEmail.',
-          previewPasted: 'معاينة الاسطر الملصقة',
-          source: 'المصدر',
-          loadedRows: 'الاسطر المحملة',
-          valid: 'صالحة',
-          fix: 'للتصحيح',
-          reviewHint: 'انقر في الخلايا الحمراء للتصحيح مباشرة دون الرجوع الى الملف.',
-          row: 'السطر',
-          status: 'الحالة',
-          ready: 'جاهز',
-          summaryTitle: 'ملخص قبل الاستيراد',
-          summaryDesc:
-            'سيتم انشاء الاسطر الصالحة فقط. وستبقى الاسطر الخاطئة ظاهرة لتصحيحها لاحقا.',
-          validRows: 'الاسطر الصالحة',
-          excludedRows: 'الاسطر المستبعدة',
-          controlTitle: 'التحقق',
-          controlDesc:
-            'يتحقق المعالج من الادوار والبريد والتكرار وربط الولي بالتلميذ قبل الانشاء.',
-          title: 'معالج استيراد المستخدمين',
-          subtitle: 'استورد وصحح مباشرة ثم شغل فقط الاسطر الصالحة.',
-          progressReview: (valid: number, invalid: number) => `${valid} صالح / ${invalid} للتصحيح`,
-          progressFinalize: (valid: number) => `سيتم استيراد ${valid} سطر(اسطر)`,
-          continueImport: 'المتابعة الى الاستيراد',
-          importing: 'جار الاستيراد...',
-          importRows: (count: number) => `استيراد ${count} سطر(اسطر)`,
-          cancel: 'الغاء',
-          back: 'رجوع',
-          reset: 'اعادة ضبط',
-        }
+        fields: ['الاسم', 'البريد', 'الدور', 'الهاتف', 'تاريخ الميلاد', 'بريد التلميذ'],
+        stepTitles: ['1. استيراد', '2. مراجعة وتصحيح', '3. استيراد نهائي'],
+        noUsableRows: 'لم يتم العثور على اسطر قابلة للاستعمال.',
+        invalidFile: 'تعذر قراءة هذا الملف. استخدم .xlsx او .csv.',
+        pasteSource: 'لصق',
+        noValidRows: 'لا توجد اسطر صالحة للاستيراد.',
+        partialSuccess: (count: number, invalid: number) =>
+          `تم استيراد ${count} مستخدمين. تم تجاهل ${invalid} سطر(اسطر).`,
+        success: (count: number) => `تم استيراد ${count} مستخدمين بنجاح.`,
+        importError: 'فشل الاستيراد. تحقق من البيانات ثم اعد المحاولة.',
+        importFile: 'استيراد ملف',
+        importFileDesc:
+          'حمّل ملف .xlsx او .csv. المعالج لا ينشئ شيئا مباشرة ويفتح اولا خطوة مراجعة.',
+        readingFile: 'جار قراءة الملف...',
+        chooseFile: 'اختيار ملف',
+        pasteData: 'لصق بيانات',
+        pasteDataDesc:
+          'الصق جدولا بعناوين name,email,role,phone,birthDate,studentEmail.',
+        previewPasted: 'معاينة الاسطر الملصقة',
+        source: 'المصدر',
+        loadedRows: 'الاسطر المحملة',
+        valid: 'صالحة',
+        fix: 'للتصحيح',
+        reviewHint: 'انقر في الخلايا الحمراء للتصحيح مباشرة دون الرجوع الى الملف.',
+        row: 'السطر',
+        status: 'الحالة',
+        ready: 'جاهز',
+        summaryTitle: 'ملخص قبل الاستيراد',
+        summaryDesc:
+          'سيتم انشاء الاسطر الصالحة فقط. وستبقى الاسطر الخاطئة ظاهرة لتصحيحها لاحقا.',
+        validRows: 'الاسطر الصالحة',
+        excludedRows: 'الاسطر المستبعدة',
+        controlTitle: 'التحقق',
+        controlDesc:
+          'يتحقق المعالج من الادوار والبريد والتكرار وربط الولي بالتلميذ قبل الانشاء.',
+        title: 'معالج استيراد المستخدمين',
+        subtitle: 'استورد وصحح مباشرة ثم شغل فقط الاسطر الصالحة.',
+        progressReview: (valid: number, invalid: number) => `${valid} صالح / ${invalid} للتصحيح`,
+        progressFinalize: (valid: number) => `سيتم استيراد ${valid} سطر(اسطر)`,
+        continueImport: 'المتابعة الى الاستيراد',
+        importing: 'جار الاستيراد...',
+        importRows: (count: number) => `استيراد ${count} سطر(اسطر)`,
+        cancel: 'الغاء',
+        back: 'رجوع',
+        reset: 'اعادة ضبط',
+      }
       : {
-          fields: ['Nom', 'Email', 'Role', 'Telephone', 'Date naissance', 'Email eleve'],
-          stepTitles: ['1. Import', '2. Revue et correction', '3. Import final'],
-          noUsableRows: 'Aucune ligne exploitable trouvee.',
-          invalidFile: 'Impossible de lire ce fichier. Utilisez .xlsx ou .csv.',
-          pasteSource: 'Copier-coller',
-          noValidRows: 'Aucune ligne valide a importer.',
-          partialSuccess: (count: number, invalid: number) =>
-            `${count} utilisateurs importes. ${invalid} ligne(s) ignoree(s).`,
-          success: (count: number) => `${count} utilisateurs importes avec succes.`,
-          importError: "L'import a echoue. Verifiez les donnees puis reessayez.",
-          importFile: 'Importer un fichier',
-          importFileDesc:
-            "Chargez un fichier .xlsx ou .csv. Le wizard ne cree rien tout de suite et ouvre d'abord une etape de revue.",
-          readingFile: 'Lecture du fichier...',
-          chooseFile: 'Choisir un fichier',
-          pasteData: 'Coller des donnees',
-          pasteDataDesc:
-            'Collez un tableau avec en-tetes name,email,role,phone,birthDate,studentEmail.',
-          previewPasted: 'Previsualiser les lignes collees',
-          source: 'Source',
-          loadedRows: 'Lignes chargees',
-          valid: 'Valides',
-          fix: 'A corriger',
-          reviewHint: 'Cliquez dans les cellules rouges pour corriger directement, sans revenir au fichier.',
-          row: 'Ligne',
-          status: 'Statut',
-          ready: 'Pret',
-          summaryTitle: 'Resume avant import',
-          summaryDesc:
-            'Seules les lignes valides seront creees. Les lignes en erreur resteront dans le tableau pour correction ulterieure.',
-          validRows: 'Lignes valides',
-          excludedRows: 'Lignes exclues',
-          controlTitle: 'Controle',
-          controlDesc:
-            'Le wizard valide les roles, les emails, les doublons et le lien parent-eleve avant creation.',
-          title: "Assistant d'import utilisateurs",
-          subtitle: 'Importez, corrigez en direct, puis lancez uniquement les lignes valides.',
-          progressReview: (valid: number, invalid: number) => `${valid} valide(s) / ${invalid} a corriger`,
-          progressFinalize: (valid: number) => `${valid} ligne(s) seront importees`,
-          continueImport: "Continuer vers l'import",
-          importing: 'Import en cours...',
-          importRows: (count: number) => `Importer ${count} ligne(s)`,
-          cancel: 'Annuler',
-          back: 'Retour',
-          reset: 'Reinitialiser',
-        };
+        fields: ['Nom', 'Email', 'Role', 'Telephone', 'Date naissance', 'Email eleve'],
+        stepTitles: ['1. Import', '2. Revue et correction', '3. Import final'],
+        noUsableRows: 'Aucune ligne exploitable trouvee.',
+        invalidFile: 'Impossible de lire ce fichier. Utilisez .xlsx ou .csv.',
+        pasteSource: 'Copier-coller',
+        noValidRows: 'Aucune ligne valide a importer.',
+        partialSuccess: (count: number, invalid: number) =>
+          `${count} utilisateurs importes. ${invalid} ligne(s) ignoree(s).`,
+        success: (count: number) => `${count} utilisateurs importes avec succes.`,
+        importError: "L'import a echoue. Verifiez les donnees puis reessayez.",
+        importFile: 'Importer un fichier',
+        importFileDesc:
+          "Chargez un fichier .xlsx ou .csv. Le wizard ne cree rien tout de suite et ouvre d'abord une etape de revue.",
+        readingFile: 'Lecture du fichier...',
+        chooseFile: 'Choisir un fichier',
+        pasteData: 'Coller des donnees',
+        pasteDataDesc:
+          'Collez un tableau avec en-tetes name,email,role,phone,birthDate,studentEmail (plusieurs emails possibles separes par des virgules).',
+        previewPasted: 'Previsualiser les lignes collees',
+        instructions: [
+          'Utilisez le modele Excel pour un import sans erreurs.',
+          'Consultez l\'onglet "Guide" dans le fichier Excel pour les directives structurees.',
+          'Pour les parents multi-enfants, separez les emails par des virgules.',
+        ],
+        source: 'Source',
+        loadedRows: 'Lignes chargees',
+        valid: 'Valides',
+        fix: 'A corriger',
+        reviewHint: 'Cliquez dans les cellules rouges pour corriger directement, sans revenir au fichier.',
+        row: 'Ligne',
+        status: 'Statut',
+        ready: 'Pret',
+        summaryTitle: 'Resume avant import',
+        summaryDesc:
+          'Seules les lignes valides seront creees. Les lignes en erreur resteront dans le tableau pour correction ulterieure.',
+        validRows: 'Lignes valides',
+        excludedRows: 'Lignes exclues',
+        controlTitle: 'Controle',
+        controlDesc:
+          'Le wizard valide les roles, les emails, les doublons et le lien parent-eleve avant creation.',
+        title: "Assistant d'import utilisateurs",
+        subtitle: 'Importez, corrigez en direct, puis lancez uniquement les lignes valides.',
+        progressReview: (valid: number, invalid: number) => `${valid} valide(s) / ${invalid} a corriger`,
+        progressFinalize: (valid: number) => `${valid} ligne(s) seront importees`,
+        continueImport: "Continuer vers l'import",
+        importing: 'Import en cours...',
+        importRows: (count: number) => `Importer ${count} ligne(s)`,
+        cancel: 'Annuler',
+        back: 'Retour',
+        reset: 'Reinitialiser',
+      };
   const editableFields: Array<{ key: UserImportField; label: string; placeholder: string }> = [
     { key: 'name', label: copy.fields[0], placeholder: 'Jean Dupont' },
     { key: 'email', label: copy.fields[1], placeholder: 'jean@school.ma' },
@@ -261,9 +266,9 @@ export default function UserImportWizard({
     const nextRows = rows.map((row) =>
       row.rowNumber === rowNumber
         ? {
-            ...row,
-            [field]: value,
-          }
+          ...row,
+          [field]: value,
+        }
         : row
     );
     revalidateRows(nextRows);
@@ -344,7 +349,7 @@ export default function UserImportWizard({
               onChange={(event) => setPastedData(event.target.value)}
               rows={10}
               className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-              placeholder={'name,email,role,phone,birthDate,studentEmail\nJean Dupont,jean@school.ma,student,,2010-01-01,'}
+              placeholder={'name,email,role,phone,birthDate,studentEmail\nJean Dupont,jean@school.ma,student,,2010-01-01,\nFatima,fatima@school.ma,parent,,,"enfant1@school.ma, enfant2@school.ma"'}
             />
             <Button
               variant="secondary"
@@ -418,11 +423,10 @@ export default function UserImportWizard({
                           onChange={(event) =>
                             handleCellChange(row.rowNumber, field.key, event.target.value)
                           }
-                          className={`w-full rounded-xl border px-3 py-2 text-sm outline-none transition ${
-                            hasError
-                              ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-400 focus:ring-2 focus:ring-red-100'
-                              : 'border-gray-200 bg-white text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
-                          }`}
+                          className={`w-full rounded-xl border px-3 py-2 text-sm outline-none transition ${hasError
+                            ? 'border-red-300 bg-red-50 text-red-900 focus:border-red-400 focus:ring-2 focus:ring-red-100'
+                            : 'border-gray-200 bg-white text-gray-900 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                            }`}
                           placeholder={field.placeholder}
                         />
                         {hasError && (
@@ -519,13 +523,12 @@ export default function UserImportWizard({
               return (
                 <div
                   key={title}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                    active
-                      ? 'bg-orange-500 text-white'
-                      : done
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-500'
-                  }`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold ${active
+                    ? 'bg-orange-500 text-white'
+                    : done
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-500'
+                    }`}
                 >
                   {title}
                 </div>

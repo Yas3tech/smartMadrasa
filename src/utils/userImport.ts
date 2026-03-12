@@ -282,6 +282,12 @@ export const validateUserImportRows = (
       .map((row) => normalizeEmail(row.email))
   );
 
+  const splitEmails = (emailsStr: string): string[] => {
+    if (!emailsStr) return [];
+    const emails = emailsStr.split(',').map(e => normalizeEmail(e.trim())).filter(Boolean);
+    return Array.from(new Set(emails));
+  };
+
   const emailCounts = normalizedRows.reduce<Record<string, number>>((acc, row) => {
     const email = normalizeEmail(row.email);
     if (!email) return acc;
@@ -306,6 +312,8 @@ export const validateUserImportRows = (
       if ((emailCounts[email] || 0) > 1) fieldErrors.email = 'Email duplique dans le fichier';
     }
 
+    const studentEmails = splitEmails(row.studentEmail || '');
+
     if (!role) {
       fieldErrors.role = 'Role requis';
     } else if (!VALID_ROLES.includes(role as Role)) {
@@ -318,17 +326,22 @@ export const validateUserImportRows = (
       fieldErrors.birthDate = 'Date attendue: YYYY-MM-DD';
     }
 
-    if (studentEmail && role !== 'parent') {
+    if (studentEmails.length > 0 && role !== 'parent') {
       fieldErrors.studentEmail = 'Champ reserve aux parents';
     }
 
     if (role === 'parent') {
-      if (!studentEmail) {
+      if (studentEmails.length === 0) {
         fieldErrors.studentEmail = 'Email eleve requis pour un parent';
-      } else if (!EMAIL_REGEX.test(studentEmail)) {
-        fieldErrors.studentEmail = 'Email eleve invalide';
-      } else if (!existingStudentEmails.has(studentEmail) && !studentEmailsInImport.has(studentEmail)) {
-        fieldErrors.studentEmail = 'Eleve introuvable';
+      } else {
+        const invalidEmails = studentEmails.filter(e => !EMAIL_REGEX.test(e));
+        const missingEmails = studentEmails.filter(e => !existingStudentEmails.has(e) && !studentEmailsInImport.has(e));
+
+        if (invalidEmails.length > 0) {
+          fieldErrors.studentEmail = `Email(s) invalide(s): ${invalidEmails.join(', ')}`;
+        } else if (missingEmails.length > 0) {
+          fieldErrors.studentEmail = `Eleve(s) introuvable(s): ${missingEmails.join(', ')}`;
+        }
       }
     }
 
@@ -409,21 +422,23 @@ export const processParentUsers = async (
 
     const childrenIds: string[] = [];
     const relatedClassIds: string[] = [];
-    const studentEmail = normalizeEmail(row.studentEmail);
+    const studentEmails = (row.studentEmail || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
 
-    if (studentEmail) {
-      const student = users.find(
-        (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
-      );
-
-      if (student) {
-        childrenIds.push(student.id);
-        if (student.classId) relatedClassIds.push(student.classId);
-      } else {
-        const imported = importedUsers.find(
-          (user) => user.role === 'student' && normalizeEmail(user.email) === studentEmail
+    for (const studentEmail of studentEmails) {
+      if (studentEmail) {
+        const student = users.find(
+          (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
         );
-        if (imported) childrenIds.push(imported.id);
+
+        if (student) {
+          childrenIds.push(student.id);
+          if (student.classId) relatedClassIds.push(student.classId);
+        } else {
+          const imported = importedUsers.find(
+            (user) => user.role === 'student' && normalizeEmail(user.email) === studentEmail
+          );
+          if (imported) childrenIds.push(imported.id);
+        }
       }
     }
 
