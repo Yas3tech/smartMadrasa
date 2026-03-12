@@ -46,20 +46,18 @@ describe('isSafeUrl', () => {
     expect(isSafeUrl('http://example.com?q=javascript:alert(1)')).toBe(true);
 
     // protocol-relative URLs starting with //
-    // new URL('//example.com') throws without base.
-    // So it goes to catch block.
-    // It contains ':'. Returns false.
-    // wait, '//example.com' contains ':'. No.
-    // '//example.com' contains ':'. No?
-    // Oh, 'http:' contains ':'.
-    // '//example.com' does NOT contain ':'.
-    // So it returns true.
-    // Protocol relative URLs are safe (inherit http/https).
     expect(isSafeUrl('//example.com')).toBe(true);
 
-    // What if malicious protocol relative?
-    // //javascript:alert(1) -> treated as relative/authority -> resolves to http://javascript:alert(1) -> Safe (domain lookup).
-    // So it returns true, which is acceptable as it doesn't execute JS.
     expect(isSafeUrl('//javascript:alert(1)')).toBe(true);
+  });
+
+  it('should block payload urls containing control characters and inner spaces', () => {
+    expect(isSafeUrl(' \x00 javascript:alert(1)')).toBe(false);
+    expect(isSafeUrl('jav\tascript:alert(1)')).toBe(false);
+    expect(isSafeUrl('java\x0Bscript:alert(1)')).toBe(false);
+    expect(isSafeUrl('\x01javascript:alert(1)')).toBe(false);
+    expect(isSafeUrl('javascript :alert(1)')).toBe(false);
+    expect(isSafeUrl('javascript\n:alert(1)')).toBe(false);
+    expect(isSafeUrl('  javascript:alert(1)  ')).toBe(false);
   });
 });

@@ -11,30 +11,26 @@
 export const isSafeUrl = (url: string): boolean => {
   if (!url) return false;
 
-  const trimmed = url.trim();
+  // Remove control characters and whitespace which might bypass validation
+  // Browsers ignore these when parsing URLs
+  // eslint-disable-next-line no-control-regex
+  const sanitized = url.replace(/[\x00-\x20\s]+/g, '');
+
+  if (!sanitized) return false;
 
   // Allow relative URLs starting with / or #
-  if (trimmed.startsWith('/') || trimmed.startsWith('#')) return true;
+  if (sanitized.startsWith('/') || sanitized.startsWith('#')) return true;
 
   try {
-    const parsed = new URL(trimmed);
+    const parsed = new URL(sanitized);
     const protocol = parsed.protocol.toLowerCase();
 
     // Whitelist allowed protocols
     return ['http:', 'https:', 'blob:', 'mailto:', 'tel:'].includes(protocol);
-  } catch (e) {
+  } catch {
     // If URL parsing fails, check if it looks like a relative path (no protocol)
-    // If it contains a colon, it might be a weird scheme that URL() failed on but browser might accept?
-    // Or just a filename with a colon (invalid on Windows but maybe valid on Linux/Mac).
-    // To be safe, we reject if it contains a colon (unless it's a port, but URL() handles ports).
-    // Actually, "file.txt" is safe. "javascript:alert(1)" contains a colon.
-    // If URL() throws, it's not a valid absolute URL.
-    // So if it contains ':', treat as unsafe (could be 'javascript:...' that URL() failed on? unlikely).
-    // But 'javascript:' is parsed correctly by URL().
-
-    // So if URL() throws, it's likely a relative path or invalid.
-    // If it contains ':', it's suspicious if not parsed as URL.
-    if (trimmed.includes(':')) return false;
+    // If it contains a colon, it's suspicious and should be rejected
+    if (sanitized.includes(':')) return false;
 
     return true; // Treat as relative path
   }
