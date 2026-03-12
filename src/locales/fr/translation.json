@@ -755,6 +755,8 @@
     "absentBtn": "Absent",
     "absenceReason": "Motif d'absence (optionnel)",
     "lateReason": "Motif de retard (optionnel)",
+    "saveSuccess": "Présence enregistrée",
+    "saveError": "Erreur lors de l'enregistrement",
     "history": "Historique",
     "unknownCourse": "Cours inconnu",
     "noRecords": "Aucun enregistrement d'assiduité.",

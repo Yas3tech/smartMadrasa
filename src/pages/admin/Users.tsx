@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Trash2, Search, X, FileSpreadsheet, FileDown } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
-import type { User, Role } from '../../types';
+import type { User, Role, Parent, Student } from '../../types';
 import toast from 'react-hot-toast';
 import { deleteUserWithAllData, previewUserDeletion } from '../../services/users';
 import UserImportWizard from '../../components/Users/UserImportWizard';
@@ -95,7 +95,7 @@ const UserManagement = () => {
     setPhone(u.phone || '');
     setBirthDate(u.birthDate || '');
     if (u.role === 'parent') {
-      const parent = u as any;
+      const parent = u as Parent;
       setSelectedStudentId(parent.childrenIds?.[0] || '');
     } else {
       setSelectedStudentId('');
@@ -108,7 +108,7 @@ const UserManagement = () => {
       toast.error(t('users.fillRequired'));
       return;
     }
-    const userData: Record<string, any> = {
+    const userData: Partial<User> & { childrenIds?: string[]; relatedClassIds?: string[]; phone?: string; birthDate?: string } = {
       name,
       email: email.toLowerCase().trim(),
       role,
@@ -121,7 +121,7 @@ const UserManagement = () => {
       userData.childrenIds = [selectedStudentId];
       const student = students.find((s) => s.id === selectedStudentId);
       if (student && 'classId' in student) {
-        userData.relatedClassIds = [(student as any).classId];
+        userData.relatedClassIds = [(student as Student).classId!];
       }
     }
     try {
@@ -146,14 +146,15 @@ const UserManagement = () => {
         }
       }
       setIsModalOpen(false);
-    } catch (error: any) {
-      console.error('Error saving user:', error);
-      if (error?.code === 'auth/email-already-in-use') {
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+      console.error('Error saving user:', err);
+      if (err?.code === 'auth/email-already-in-use') {
         toast.error(t('users.emailInUse') || "Cette adresse e-mail est déjà utilisée.");
-      } else if (error?.code === 'auth/operation-not-allowed') {
+      } else if (err?.code === 'auth/operation-not-allowed') {
         toast.error("L'authentification par email/mot de passe n'est pas activée dans Firebase.");
       } else {
-        toast.error(error?.message || t('common.error') || "Une erreur s'est produite.");
+        toast.error(err?.message || t('common.error') || "Une erreur s'est produite.");
       }
     }
   };

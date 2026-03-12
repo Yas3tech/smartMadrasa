@@ -105,12 +105,8 @@ export const createUser = async (
 
   // 1. Create Auth User (if email is provided)
   if (user.email) {
-    try {
-      authResult = await createAuthUser(user.email.toLowerCase().trim());
-      uid = authResult.uid;
-    } catch (error) {
-      throw error;
-    }
+    authResult = await createAuthUser(user.email.toLowerCase().trim());
+    uid = authResult.uid;
   }
 
   if (uid) {

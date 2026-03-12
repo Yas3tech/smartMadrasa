@@ -23,6 +23,7 @@ import {
 import {
   subscribeToAttendance,
   subscribeToAttendanceByStudentIds,
+  subscribeToAttendanceByClassIds,
   createAttendance as fbCreateAttendance,
   updateAttendance as fbUpdateAttendance,
 } from '../../services/attendance';
@@ -33,6 +34,7 @@ import {
   updateHomework as fbUpdateHomework,
   deleteHomework as fbDeleteHomework,
 } from '../../services/homework';
+import { subscribeToClassesByTeacherId } from '../../services/classes';
 import { getRelevantPeriodIds } from '../../utils/academic';
 
 export interface PerformanceContextType {
@@ -119,25 +121,47 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           if (studentUser.classId) {
             unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
           }
+        } else if (user?.role === 'teacher') {
+          // Teacher: only data for their classes
+          let innerUnsubAttendance = () => { };
+          let innerUnsubHomeworks = () => { };
+
+          const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
+            console.log(`[PerformanceContext] Teacher ${user.id} classes:`, teacherClasses.map(c => c.id));
+            innerUnsubAttendance();
+            innerUnsubHomeworks();
+            const classIds = teacherClasses.map((c) => c.id);
+
+            if (classIds.length > 0) {
+              innerUnsubAttendance = subscribeToAttendanceByClassIds(classIds, (data) => {
+                console.log(`[PerformanceContext] Received attendance for classes ${classIds}:`, data.length, "records");
+                setAttendance(data);
+              });
+              innerUnsubHomeworks = subscribeToHomeworksByClassIds(classIds, setHomeworks);
+            }
+          });
+
+          const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
+          if (relevantPeriodIds.length > 0) {
+            unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
+          }
+
+          unsubAttendance = () => {
+            unsubTeacherClasses();
+            innerUnsubAttendance();
+          };
+          unsubHomeworks = () => {
+            innerUnsubHomeworks();
+          };
         } else {
           const setupDefaultSubs = () => {
-            // Optimized subscription: fetch only grades for the relevant academic periods (current year)
-            // instead of fetching all grades ever created.
             const relevantPeriodIds = getRelevantPeriodIds(academicPeriods);
-
             if (relevantPeriodIds.length > 0) {
               unsubGrades = subscribeToCourseGradesByPeriodIds(relevantPeriodIds, handleGradesUpdate);
-            } else {
-              // If no relevant periods found (e.g. data not loaded yet), do nothing or handle gracefully.
-              // We avoid subscribing to EVERYTHING to prevent performance issues.
-              unsubGrades = () => { };
             }
-
             unsubAttendance = subscribeToAttendance(setAttendance);
             unsubHomeworks = subscribeToHomeworks(setHomeworks);
           };
-
-          // For teacher, director, superadmin - fetch filtered data
           setupDefaultSubs();
         }
 
@@ -302,6 +326,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
         const record = attendance.find((a) => a.id === id);
         if (record) {
           await fbUpdateAttendance(record.studentId, id, status, justification);
+        } else {
+          console.error('Attendance record not found for update:', id);
+          throw new Error('Record not found');
         }
       }
     },

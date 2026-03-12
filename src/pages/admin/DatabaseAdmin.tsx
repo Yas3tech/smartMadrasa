@@ -193,7 +193,9 @@ const DatabaseAdmin = () => {
       if (auth) {
         try {
           await auth.signOut();
-        } catch (e) { }
+        } catch {
+          // Ignore sign out errors during full database reset
+        }
       }
 
       // Force a hard page reload to clear Firebase JS SDK state and prevent INTERNAL ASSERTION crashes
