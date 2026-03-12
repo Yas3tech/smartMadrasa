@@ -74,10 +74,10 @@ export function HomeworkCard({
       </div>
 
       {/* Grade display for graded submissions */}
-      {submission?.grade !== undefined && homework.maxGrade && (
+      {submission?.grade !== undefined && homework.maxScore && (
         <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg mb-4">
           <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-            {t('homework.grade')}: {submission.grade}/{homework.maxGrade}
+            {t('homework.grade')}: {submission.grade}/{homework.maxScore}
           </p>
         </div>
       )}

@@ -18,10 +18,10 @@ const mockHomework: Homework = {
   description: 'Solve problems 1-10',
   subject: 'Math',
   classId: 'class-1',
-  teacherId: 'teacher-1',
+  assignedBy: 'teacher-1',
   dueDate: '2024-12-31',
   createdAt: '2024-12-01',
-  maxGrade: 20,
+  maxScore: 20,
   isGraded: true,
   allowOnlineSubmission: true,
 };
@@ -66,7 +66,6 @@ describe('SubmitHomeworkModal', () => {
         url: 'http://example.com/old.pdf',
         type: 'application/pdf',
         size: 1024,
-        path: 'path/to/old.pdf',
         uploadedAt: '2024-12-01',
       },
     ];

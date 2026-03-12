@@ -32,7 +32,7 @@ const mockHomework: Homework = {
   assignedBy: 'teacher-1',
   classId: 'class-1',
   allowOnlineSubmission: true,
-  maxGrade: 20,
+  maxScore: 20,
 };
 
 describe('HomeworkCard', () => {
