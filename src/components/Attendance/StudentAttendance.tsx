@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card } from '../UI';
 import { Check, X, Clock, Calendar, AlertCircle } from 'lucide-react';
 import StudentSelector from '../Common/StudentSelector';
@@ -33,6 +33,16 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({
     };
 
     const targetStudentId = user.role === 'student' ? user.id : selectedChild?.id;
+
+    // ⚡ Bolt: Pre-compute course map to prevent O(N^2) render bottleneck
+    // Replaces O(N) array.find() inside the map loop with O(1) Map lookup
+    const courseMap = useMemo(() => {
+        const map = new Map<string, Course>();
+        for (const course of courses) {
+            map.set(course.id, course);
+        }
+        return map;
+    }, [courses]);
 
     if (user.role === 'parent' && !targetStudentId) {
         return (
@@ -122,7 +132,7 @@ const StudentAttendance: React.FC<StudentAttendanceProps> = ({
                         .filter((record) => record.status !== 'present')
                         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                         .map((record) => {
-                            const course = courses.find((c) => c.id === record.courseId);
+                            const course = record.courseId ? courseMap.get(record.courseId) : undefined;
                             return (
                                 <div
                                     key={record.id}
