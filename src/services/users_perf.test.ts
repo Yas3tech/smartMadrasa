@@ -33,7 +33,11 @@ describe('subscribeToUsers Performance', () => {
     expect(firestore.collection).toHaveBeenCalledWith(expect.anything(), 'users');
     expect(firestore.query).toHaveBeenCalled();
     expect(firestore.where).not.toHaveBeenCalled();
-    expect(firestore.onSnapshot).toHaveBeenCalledWith('mock-query-ref', expect.any(Function), expect.any(Function));
+    expect(firestore.onSnapshot).toHaveBeenCalledWith(
+      'mock-query-ref',
+      expect.any(Function),
+      expect.any(Function)
+    );
   });
 
   it('optimizes subscription with filters', () => {
@@ -49,6 +53,10 @@ describe('subscribeToUsers Performance', () => {
     expect(firestore.where).toHaveBeenCalledWith('role', 'in', ['student', 'teacher']);
 
     // onSnapshot should be called with the query result, not the collection directly
-    expect(firestore.onSnapshot).toHaveBeenCalledWith('mock-query-ref', expect.any(Function), expect.any(Function));
+    expect(firestore.onSnapshot).toHaveBeenCalledWith(
+      'mock-query-ref',
+      expect.any(Function),
+      expect.any(Function)
+    );
   });
 });

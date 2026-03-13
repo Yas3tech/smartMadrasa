@@ -121,7 +121,9 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                 }}
                 onFocus={() => setShowRecipientDropdown(true)}
                 className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-gray-900 dark:text-white"
-                placeholder={recipients.length === 0 ? t('messages.searchRecipientPlaceholder') : ''}
+                placeholder={
+                  recipients.length === 0 ? t('messages.searchRecipientPlaceholder') : ''
+                }
                 disabled={composeMode === 'reply' || isSending}
               />
             </div>
@@ -156,7 +158,10 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
           />
 
           <div>
-            <label htmlFor="compose-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="compose-message"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t('messages.message')}
             </label>
             <textarea
@@ -226,12 +231,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
             <Button variant="secondary" onClick={onClose} disabled={isSending}>
               {t('common.cancel')}
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSendMessage}
-              icon={Send}
-              isLoading={isSending}
-            >
+            <Button variant="primary" onClick={handleSendMessage} icon={Send} isLoading={isSending}>
               {t('messages.send')}
             </Button>
           </div>

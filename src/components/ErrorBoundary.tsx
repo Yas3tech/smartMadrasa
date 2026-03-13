@@ -40,11 +40,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       const lang = this.props.i18n?.language || 'fr';
-      const language = lang.startsWith('nl')
-        ? 'nl'
-        : lang.startsWith('ar')
-          ? 'ar'
-          : 'fr';
+      const language = lang.startsWith('nl') ? 'nl' : lang.startsWith('ar') ? 'ar' : 'fr';
       const copy = {
         fr: {
           title: 'Une erreur est survenue',

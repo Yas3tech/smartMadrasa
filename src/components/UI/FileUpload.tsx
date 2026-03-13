@@ -118,12 +118,13 @@ export const FileUpload = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500 ${uploading
+          className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500 ${
+            uploading
               ? 'border-gray-300 cursor-not-allowed opacity-50'
               : isDragging
                 ? 'border-orange-500 bg-orange-50 cursor-copy'
                 : 'border-gray-300 cursor-pointer hover:border-orange-500 hover:bg-gray-50'
-            }`}
+          }`}
         >
           <input
             id={inputId}

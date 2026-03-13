@@ -15,11 +15,7 @@ import {
   Save,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import {
-  loadUserSettings,
-  saveUserSettings,
-  type UserSettings,
-} from '../../services/userSettings';
+import { loadUserSettings, saveUserSettings, type UserSettings } from '../../services/userSettings';
 
 const applyTheme = (theme: 'light' | 'dark' | 'auto') => {
   const root = document.documentElement;
@@ -314,10 +310,7 @@ const Settings = () => {
                         : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 bg-white dark:bg-slate-800'
                     }`}
                   >
-                    <Monitor
-                      className="mx-auto mb-2 text-gray-600 dark:text-slate-300"
-                      size={24}
-                    />
+                    <Monitor className="mx-auto mb-2 text-gray-600 dark:text-slate-300" size={24} />
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {t('settings.auto')}
                     </p>

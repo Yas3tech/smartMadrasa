@@ -20,14 +20,12 @@ const translations = {
     title: 'Administration base de donnees',
     subtitle: 'Operations de maintenance systeme',
     seedTitle: 'Initialiser les donnees de base',
-    seedDescription:
-      "Cree les donnees academiques par defaut si elles n'existent pas encore.",
+    seedDescription: "Cree les donnees academiques par defaut si elles n'existent pas encore.",
     seedAction: 'Initialiser',
     seeding: 'Initialisation...',
     seedSuccess: 'Donnees de base initialisees avec succes',
     advanceYearTitle: "Passer a l'annee suivante",
-    advanceYearDescription:
-      'Cree la nouvelle annee scolaire et efface les donnees annuelles.',
+    advanceYearDescription: 'Cree la nouvelle annee scolaire et efface les donnees annuelles.',
     advanceYearAction: "Passer a l'annee suivante",
     processing: 'Traitement...',
     advanceYearConfirmBody:
@@ -44,19 +42,19 @@ const translations = {
       "Cette action va initialiser les donnees de base de l'application. Continuer ?",
     seedConfirmAction: 'Confirmer',
     advanceYearResult:
-      "Année scolaire {{year}} créée. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimés.",
+      'Année scolaire {{year}} créée. {{messages}} messages, {{homeworks}} devoirs, {{announcements}} annonces, {{notifications}} notifications et {{files}} fichiers storage supprimés.',
     tags: {
-      deleted: "Supprimé :",
-      messages: "Messages",
-      homeworks: "Devoirs",
-      announcements: "Annonces",
-      notifications: "Notifications",
-      events: "Événements",
-      attendance: "Absences",
-      courseGrades: "Notes",
-      teacherComments: "Appréciations",
-      files: "Fichiers joints",
-      all: "Toute la base de données",
+      deleted: 'Supprimé :',
+      messages: 'Messages',
+      homeworks: 'Devoirs',
+      announcements: 'Annonces',
+      notifications: 'Notifications',
+      events: 'Événements',
+      attendance: 'Absences',
+      courseGrades: 'Notes',
+      teacherComments: 'Appréciations',
+      files: 'Fichiers joints',
+      all: 'Toute la base de données',
     },
   },
   nl: {
@@ -86,17 +84,17 @@ const translations = {
     advanceYearResult:
       'Schooljaar {{year}} aangemaakt. {{messages}} berichten, {{homeworks}} huiswerken, {{announcements}} aankondigingen, {{notifications}} meldingen en {{files}} opslagbestanden verwijderd.',
     tags: {
-      deleted: "Verwijderd:",
-      messages: "Berichten",
-      homeworks: "Huiswerk",
-      announcements: "Aankondigingen",
-      notifications: "Meldingen",
-      events: "Evenementen",
-      attendance: "Aanwezigheid",
-      courseGrades: "Cijfers",
-      teacherComments: "Opmerkingen docent",
-      files: "Bijlagen",
-      all: "Gehele database",
+      deleted: 'Verwijderd:',
+      messages: 'Berichten',
+      homeworks: 'Huiswerk',
+      announcements: 'Aankondigingen',
+      notifications: 'Meldingen',
+      events: 'Evenementen',
+      attendance: 'Aanwezigheid',
+      courseGrades: 'Cijfers',
+      teacherComments: 'Opmerkingen docent',
+      files: 'Bijlagen',
+      all: 'Gehele database',
     },
   },
   ar: {
@@ -126,17 +124,17 @@ const translations = {
     advanceYearResult:
       'تم انشاء العام الدراسي {{year}}. تم حذف {{messages}} رسائل و{{homeworks}} واجبات و{{announcements}} اعلانات و{{notifications}} اشعارات و{{files}} ملفات تخزين.',
     tags: {
-      deleted: "سيتم حذف:",
-      messages: "رسائل",
-      homeworks: "واجبات",
-      announcements: "إعلانات",
-      notifications: "إشعارات",
-      events: "أحداث",
-      attendance: "غياب",
-      courseGrades: "علامات",
-      teacherComments: "ملاحظات المعلمين",
-      files: "ملفات",
-      all: "كل قاعدة البيانات",
+      deleted: 'سيتم حذف:',
+      messages: 'رسائل',
+      homeworks: 'واجبات',
+      announcements: 'إعلانات',
+      notifications: 'إشعارات',
+      events: 'أحداث',
+      attendance: 'غياب',
+      courseGrades: 'علامات',
+      teacherComments: 'ملاحظات المعلمين',
+      files: 'ملفات',
+      all: 'كل قاعدة البيانات',
     },
   },
 } as const;
@@ -187,8 +185,8 @@ const DatabaseAdmin = () => {
       await clearAllData();
       setMessage({ type: 'success', text: copy.deleteAllSuccess });
 
-      // Force sign out the current user before reloading so they don't get auto-logged in 
-      // by the cached Firebase valid token (the Cloud Function deletes it server-side, 
+      // Force sign out the current user before reloading so they don't get auto-logged in
+      // by the cached Firebase valid token (the Cloud Function deletes it server-side,
       // but the client-side token expires slowly).
       if (auth) {
         try {
@@ -259,8 +257,9 @@ const DatabaseAdmin = () => {
 
       {message && (
         <div
-          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-            }`}
+          className={`p-4 rounded-xl border-2 flex items-start gap-3 ${
+            message.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+          }`}
         >
           {message.type === 'success' ? (
             <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
@@ -299,8 +298,23 @@ const DatabaseAdmin = () => {
             </p>
             <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className="text-xs text-gray-500 font-medium mr-1">{copy.tags.deleted}</span>
-              {(['messages', 'homeworks', 'announcements', 'notifications', 'events', 'attendance', 'courseGrades', 'teacherComments', 'files'] as const).map(tag => (
-                <span key={tag} className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-md border border-red-200 dark:border-red-800/50">
+              {(
+                [
+                  'messages',
+                  'homeworks',
+                  'announcements',
+                  'notifications',
+                  'events',
+                  'attendance',
+                  'courseGrades',
+                  'teacherComments',
+                  'files',
+                ] as const
+              ).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-md border border-red-200 dark:border-red-800/50"
+                >
                   {copy.tags[tag]}
                 </span>
               ))}
@@ -399,10 +413,7 @@ const DatabaseAdmin = () => {
             <Button variant="secondary" onClick={() => setShowClearModal(false)}>
               {t('common.cancel')}
             </Button>
-            <Button
-              onClick={handleConfirmClear}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
+            <Button onClick={handleConfirmClear} className="bg-red-600 hover:bg-red-700 text-white">
               {copy.deleteAllAction}
             </Button>
           </div>

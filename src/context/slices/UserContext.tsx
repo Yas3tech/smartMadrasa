@@ -40,7 +40,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    let unsubUsers = () => { };
+    let unsubUsers = () => {};
 
     if (useFirebase && user) {
       // SECURITY: Each role only subscribes to the users it needs.
@@ -56,22 +56,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         // Parent: See their own children + staff
         const parent = user as any; // Using any to avoid type cast issues with childrenIds vs children
         const studentIds = parent.childrenIds || [];
-        const queries: UserQueryFilters[] = [
-          { role: ['teacher', 'director', 'superadmin'] },
-        ];
+        const queries: UserQueryFilters[] = [{ role: ['teacher', 'director', 'superadmin'] }];
         if (studentIds.length > 0) {
           queries.push({ id: studentIds });
         }
         unsubUsers = subscribeToUsers(setUsers, queries);
       } else if (user?.role === 'teacher') {
         // SECURITY: Teacher only sees staff + students in classes they teach.
-        let innerUnsubUsers = () => { };
+        let innerUnsubUsers = () => {};
         const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
           innerUnsubUsers();
           const classIds = teacherClasses.map((c) => c.id);
-          const queries: UserQueryFilters[] = [
-            { role: ['teacher', 'director', 'superadmin'] },
-          ];
+          const queries: UserQueryFilters[] = [{ role: ['teacher', 'director', 'superadmin'] }];
           if (classIds.length > 0) {
             queries.push({ role: 'student', classId: classIds });
             queries.push({ relatedClassIds: classIds });

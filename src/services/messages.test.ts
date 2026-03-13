@@ -84,7 +84,7 @@ describe('subscribeToMessages Performance & Logic', () => {
 
         // Pass the mock snapshot
         snapshotCallback({ docs: mockDocs });
-        return () => { };
+        return () => {};
       }
     );
 

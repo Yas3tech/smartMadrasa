@@ -215,9 +215,8 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
         ...grade,
         teacherId: user?.id || '',
         classId: selectedClassId,
-        courseId: courses.find(
-          (c) => c.subject === grade.subject && c.classId === selectedClassId
-        )?.id,
+        courseId: courses.find((c) => c.subject === grade.subject && c.classId === selectedClassId)
+          ?.id,
       }));
       await addGradesBatch(formattedGrades);
       toast.success(t('grades.gradesSaved'));

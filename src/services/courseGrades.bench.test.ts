@@ -90,7 +90,7 @@ describe('Course Grades Subscription Benchmark', () => {
         forEach: (cb: any) => gradesToReturn.forEach((g) => cb({ id: g.id, data: () => g })),
       };
       callback(snapshot);
-      return () => { };
+      return () => {};
     });
   });
 

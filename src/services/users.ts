@@ -43,12 +43,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
 };
 
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signOut,
-  type Auth,
-} from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signOut, type Auth } from 'firebase/auth';
 import { firebaseConfig } from '../config/firebase';
 
 /**
@@ -116,7 +111,7 @@ export const createUser = async (
     // which would break Firestore security rules that look up users/{request.auth.uid}.
     const userWithPasswordFlag = {
       ...user,
-      id: uid,                  // ← Override any client-side UUID with the real Auth UID
+      id: uid, // ← Override any client-side UUID with the real Auth UID
       mustChangePassword: true, // Force password rotation on first login
     };
     const { setDoc } = await import('firebase/firestore');
@@ -228,19 +223,27 @@ export const subscribeToUsers = (
   lastDocSnapshot?: QueryDocumentSnapshot
 ) => {
   const firestore = db;
-  if (!firestore) return () => { };
+  if (!firestore) return () => {};
 
   // If no queries provided, fallback to default (fetch up to 500)
   if (!queries || queries.length === 0) {
     let defaultQuery = query(collection(firestore, COLLECTION_NAME), limit(500));
     if (lastDocSnapshot) {
-      defaultQuery = query(collection(firestore, COLLECTION_NAME), startAfter(lastDocSnapshot), limit(500));
+      defaultQuery = query(
+        collection(firestore, COLLECTION_NAME),
+        startAfter(lastDocSnapshot),
+        limit(500)
+      );
     }
-    return onSnapshot(defaultQuery, (snapshot) => {
-      callback(mapQuerySnapshot<User>(snapshot));
-    }, (error) => {
-      console.error('[subscribeToUsers] Error in default query:', error);
-    });
+    return onSnapshot(
+      defaultQuery,
+      (snapshot) => {
+        callback(mapQuerySnapshot<User>(snapshot));
+      },
+      (error) => {
+        console.error('[subscribeToUsers] Error in default query:', error);
+      }
+    );
   }
 
   // Handle multiple queries
@@ -282,7 +285,7 @@ export const subscribeToUsers = (
       if (ids.length === 1) {
         q = query(q, where('id', '==', ids[0]));
       } else if (ids.length > 1) {
-        // Firestore 'in' operator limited to 10-30 items depending on version, 
+        // Firestore 'in' operator limited to 10-30 items depending on version,
         // but for parent-child relationship (usually < 10) it's perfect.
         q = query(q, where('id', 'in', ids));
       }
@@ -292,18 +295,22 @@ export const subscribeToUsers = (
       q = query(q, startAfter(lastDocSnapshot));
     }
 
-    const unsub = onSnapshot(q, (snapshot) => {
-      const users = mapQuerySnapshot<User>(snapshot);
-      results.set(index, users);
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const users = mapQuerySnapshot<User>(snapshot);
+        results.set(index, users);
 
-      // Optimized merge: flatten arrays and use Map constructor for deduping
-      const allUsers = Array.from(results.values()).flat();
-      const uniqueUsersMap = new Map(allUsers.map((u) => [u.id, u]));
+        // Optimized merge: flatten arrays and use Map constructor for deduping
+        const allUsers = Array.from(results.values()).flat();
+        const uniqueUsersMap = new Map(allUsers.map((u) => [u.id, u]));
 
-      callback(Array.from(uniqueUsersMap.values()));
-    }, (error) => {
-      console.error(`[subscribeToUsers] Error in query ${index}:`, error, filter);
-    });
+        callback(Array.from(uniqueUsersMap.values()));
+      },
+      (error) => {
+        console.error(`[subscribeToUsers] Error in query ${index}:`, error, filter);
+      }
+    );
 
     unsubscribes.push(unsub);
   });

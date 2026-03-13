@@ -57,7 +57,7 @@ export const sendMessage = async (message: Omit<Message, 'id' | 'timestamp'>): P
   const sanitizedMessage = {
     ...message,
     subject: sanitizeText(message.subject),
-    content: sanitizeText(message.content)
+    content: sanitizeText(message.content),
   };
 
   const docRef = await addDoc(collection(db, COLLECTION_NAME), {
@@ -85,7 +85,7 @@ export const deleteMessage = async (id: string): Promise<void> => {
 };
 
 export const subscribeToMessages = (callback: (messages: Message[]) => void, userId?: string) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
 
   let q;
   if (userId) {

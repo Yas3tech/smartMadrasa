@@ -1,11 +1,7 @@
 {
   "hosting": {
     "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",
@@ -47,15 +43,8 @@
   "functions": {
     "source": "functions",
     "codebase": "default",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log"
-    ],
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run build"
-    ]
+    "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+    "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
   },
   "firestore": {
     "rules": "firestore.rules",

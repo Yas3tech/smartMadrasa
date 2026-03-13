@@ -166,37 +166,41 @@ const ExamModal = ({
           )}
 
           {/* Course selector — filters by selected class */}
-          {classId && (() => {
-            const classCourses = courses.filter((c) => c.classId === classId);
-            if (classCourses.length === 0) return null;
-            return (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t('common.course')} ({t('common.optional').toLowerCase()})
-                </label>
-                <select
-                  value={courseId}
-                  onChange={(e) => {
-                    const selected = classCourses.find((c) => c.id === e.target.value);
-                    setCourseId(e.target.value);
-                    // Auto-fill the title with the course subject if title is empty
-                    if (selected && !title) setTitle(selected.subject);
-                  }}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
-                >
-                  <option value="">{t('schedule.noCourse')}</option>
-                  {classCourses.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.subject}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            );
-          })()}
+          {classId &&
+            (() => {
+              const classCourses = courses.filter((c) => c.classId === classId);
+              if (classCourses.length === 0) return null;
+              return (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('common.course')} ({t('common.optional').toLowerCase()})
+                  </label>
+                  <select
+                    value={courseId}
+                    onChange={(e) => {
+                      const selected = classCourses.find((c) => c.id === e.target.value);
+                      setCourseId(e.target.value);
+                      // Auto-fill the title with the course subject if title is empty
+                      if (selected && !title) setTitle(selected.subject);
+                    }}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                  >
+                    <option value="">{t('schedule.noCourse')}</option>
+                    {classCourses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.subject}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })()}
 
           <div>
-            <label htmlFor="exam-description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="exam-description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               {t('common.description')}
             </label>
             <textarea

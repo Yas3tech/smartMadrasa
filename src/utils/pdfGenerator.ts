@@ -77,9 +77,8 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
 
     // Get comment for any course with this subject using O(1) map lookup
     const comment =
-      subjectCourses
-        .map((course) => studentPeriodCommentsMap.get(course.id))
-        .find((c) => c)?.comment || '';
+      subjectCourses.map((course) => studentPeriodCommentsMap.get(course.id)).find((c) => c)
+        ?.comment || '';
 
     return {
       course: { ...subjectCourses[0], subject },

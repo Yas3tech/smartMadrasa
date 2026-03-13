@@ -1,4 +1,5 @@
 ## 2023-10-27 - [XSS Bypass via Control Characters in URL Validation]
+
 **Vulnerability:** The `isSafeUrl` function used for validating `href` attributes relied on `.trim()` and `new URL()` to parse and validate protocols. However, browsers ignore control characters (e.g., `\x00-\x20`) when evaluating URLs in HTML. An attacker could supply a payload like ` \x00 javascript:alert(1)` which would bypass basic string checks and potentially bypass simple URL parsing wrappers, executing XSS.
 **Learning:** `new URL()` alone or simple `.trim()` is insufficient for sanitizing URLs destined for `href` attributes because the WHATWG URL standard and browser HTML parsers handle control characters differently. Specifically, whitespace and control characters embedded within the protocol scheme can mask malicious intent from naive validators.
-**Prevention:** Always comprehensively strip control characters (`\x00-\x20`) and whitespace (`\s`) from a URL string using a regex like `url.replace(/[\x00-\x20\s]+/g, '')` *before* attempting to parse it with `new URL()` or evaluate its protocol against an allowlist.
+**Prevention:** Always comprehensively strip control characters (`\x00-\x20`) and whitespace (`\s`) from a URL string using a regex like `url.replace(/[\x00-\x20\s]+/g, '')` _before_ attempting to parse it with `new URL()` or evaluate its protocol against an allowlist.

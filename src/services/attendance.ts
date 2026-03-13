@@ -51,20 +51,24 @@ export const updateAttendance = async (
 };
 
 export const subscribeToAttendance = (callback: (attendance: Attendance[]) => void) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
   // Use collectionGroup to listen to ALL attendance records
-  return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
-    callback(mapQuerySnapshot<Attendance>(snapshot));
-  }, (error) => {
-    console.error(`Error in subscribeToAttendance:`, error);
-  });
+  return onSnapshot(
+    collectionGroup(db, COLLECTION_NAME),
+    (snapshot) => {
+      callback(mapQuerySnapshot<Attendance>(snapshot));
+    },
+    (error) => {
+      console.error(`Error in subscribeToAttendance:`, error);
+    }
+  );
 };
 
 export const subscribeToAttendanceByStudentIds = (
   studentIds: string[],
   callback: (attendance: Attendance[]) => void
 ) => {
-  if (!db || studentIds.length === 0) return () => { };
+  if (!db || studentIds.length === 0) return () => {};
 
   // Note: collectionGroup queries with 'in' might need an index if other filters are applied.
   // But basic 'where' should be okay or prompt for index creation.
@@ -83,7 +87,7 @@ export const subscribeToAttendanceByClassIds = (
   classIds: string[],
   callback: (attendance: Attendance[]) => void
 ) => {
-  if (!db || classIds.length === 0) return () => { };
+  if (!db || classIds.length === 0) return () => {};
 
   // For teachers, we query by classId since they only have permission for their classes.
   // This is a collectionGroup query that requires a composite index.

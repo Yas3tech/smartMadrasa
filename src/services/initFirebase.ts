@@ -1,4 +1,12 @@
-import { collection, doc, getDocs, deleteDoc, setDoc, collectionGroup, clearIndexedDbPersistence } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDocs,
+  deleteDoc,
+  setDoc,
+  collectionGroup,
+  clearIndexedDbPersistence,
+} from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../config/db';
 import { auth } from '../config/firebase';
@@ -63,7 +71,10 @@ export const clearAllData = async () => {
     await clearIndexedDbPersistence(db!);
     console.log('Successfully cleared Firestore IndexedDB persistence');
   } catch (e) {
-    console.warn('Failed to clear IndexedDB persistence. This is usually fine if persistence was not enabled.', e);
+    console.warn(
+      'Failed to clear IndexedDB persistence. This is usually fine if persistence was not enabled.',
+      e
+    );
   }
 };
 

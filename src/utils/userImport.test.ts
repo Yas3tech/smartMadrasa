@@ -37,7 +37,9 @@ describe('userImport', () => {
     );
 
     expect(reviewedRows[0].isValid).toBe(false);
-    expect(reviewedRows[0].fieldErrors.studentEmail).toContain('Eleve(s) introuvable(s): missing@school.ma');
+    expect(reviewedRows[0].fieldErrors.studentEmail).toContain(
+      'Eleve(s) introuvable(s): missing@school.ma'
+    );
   });
 
   it('validates multiple comma-separated student emails', () => {
@@ -65,7 +67,9 @@ describe('userImport', () => {
     );
 
     expect(reviewedRows[0].isValid).toBe(false);
-    expect(reviewedRows[0].fieldErrors.studentEmail).toContain('Eleve(s) introuvable(s): child2@school.ma');
+    expect(reviewedRows[0].fieldErrors.studentEmail).toContain(
+      'Eleve(s) introuvable(s): child2@school.ma'
+    );
   });
 
   it('rejects studentEmail for non-parent roles', () => {

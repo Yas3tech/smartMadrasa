@@ -108,7 +108,12 @@ const UserManagement = () => {
       toast.error(t('users.fillRequired'));
       return;
     }
-    const userData: Partial<User> & { childrenIds?: string[]; relatedClassIds?: string[]; phone?: string; birthDate?: string } = {
+    const userData: Partial<User> & {
+      childrenIds?: string[];
+      relatedClassIds?: string[];
+      phone?: string;
+      birthDate?: string;
+    } = {
       name,
       email: email.toLowerCase().trim(),
       role,
@@ -120,7 +125,7 @@ const UserManagement = () => {
     if (role === 'parent' && selectedStudentIds.length > 0) {
       userData.childrenIds = selectedStudentIds;
       const relatedClassIds = new Set<string>();
-      selectedStudentIds.forEach(id => {
+      selectedStudentIds.forEach((id) => {
         const student = students.find((s) => s.id === id);
         if (student && 'classId' in student && (student as Student).classId) {
           relatedClassIds.add((student as Student).classId);
@@ -138,10 +143,13 @@ const UserManagement = () => {
           if (result.emailSent) {
             toast.success(t('users.userCreatedEmail', { email }), { duration: 5000, icon: '📧' });
           } else if (result.password) {
-            toast.success(`${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`, {
-              duration: 30000,
-              icon: '🔑',
-            });
+            toast.success(
+              `${t('users.tempPassword') || 'Mot de passe temporaire'}: ${result.password}`,
+              {
+                duration: 30000,
+                icon: '🔑',
+              }
+            );
           } else {
             toast.success(t('users.userCreated'));
           }
@@ -154,7 +162,7 @@ const UserManagement = () => {
       const err = error as { code?: string; message?: string };
       console.error('Error saving user:', err);
       if (err?.code === 'auth/email-already-in-use') {
-        toast.error(t('users.emailInUse') || "Cette adresse e-mail est déjà utilisée.");
+        toast.error(t('users.emailInUse') || 'Cette adresse e-mail est déjà utilisée.');
       } else if (err?.code === 'auth/operation-not-allowed') {
         toast.error("L'authentification par email/mot de passe n'est pas activée dans Firebase.");
       } else {
@@ -181,7 +189,10 @@ const UserManagement = () => {
         if (result.success) {
           const counts = result.deletedCounts as Record<string, number>;
           const totalDeleted = Object.values(counts).reduce((a, b) => a + b, 0);
-          toast.success(t('users.userDeletedComplete', { count: totalDeleted }), { duration: 5000, icon: '🗑️' });
+          toast.success(t('users.userDeletedComplete', { count: totalDeleted }), {
+            duration: 5000,
+            icon: '🗑️',
+          });
         } else {
           toast.error(t('users.deleteError'));
         }
@@ -190,8 +201,6 @@ const UserManagement = () => {
       }
     }
   };
-
-
 
   const handleDownloadTemplate = async () => {
     const ExcelJS = (await import('exceljs')).default;
@@ -207,31 +216,40 @@ const UserManagement = () => {
     guideSheet.addRows([
       {
         section: '1. Format global',
-        details: 'Colonnes supportées obligatoires : name, email, role. Colonnes optionnelles : phone, birthDate, studentEmail.',
+        details:
+          'Colonnes supportées obligatoires : name, email, role. Colonnes optionnelles : phone, birthDate, studentEmail.',
       },
       {
         section: '2. Format des données',
-        details: '- Format Date (birthDate) : YYYY-MM-DD (ex: 2015-05-20).\n- Emails : Doivent être uniques pour chaque utilisateur.',
+        details:
+          '- Format Date (birthDate) : YYYY-MM-DD (ex: 2015-05-20).\n- Emails : Doivent être uniques pour chaque utilisateur.',
       },
       {
         section: '3. Rôles autorisés',
-        details: 'student (élève), teacher (prof), parent (parent), director (directeur), superadmin (admin total).',
+        details:
+          'student (élève), teacher (prof), parent (parent), director (directeur), superadmin (admin total).',
       },
       {
         section: '4. Liaison Parent-Enfant',
-        details: 'IMPORTANT : Pour un rôle "parent", la colonne "studentEmail" doit contenir l\'email de l\'élève.\n' +
+        details:
+          'IMPORTANT : Pour un rôle "parent", la colonne "studentEmail" doit contenir l\'email de l\'élève.\n' +
           '➤ MULTI-ENFANTS : Si un parent a plusieurs enfants, séparez les emails par une VIRGULE.\n' +
           'Exemple : enfant1@ecole.ma, enfant2@ecole.ma',
       },
       {
         section: '5. Notes sur les profs',
-        details: 'Ajoutez le numéro de téléphone pour que les parents puissent les contacter via le planning.',
+        details:
+          'Ajoutez le numéro de téléphone pour que les parents puissent les contacter via le planning.',
       },
     ]);
 
     // Apply some styling to header
     guideSheet.getRow(1).font = { bold: true };
-    guideSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+    guideSheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' },
+    };
 
     const ws = workbook.addWorksheet('Template');
     ws.columns = [
@@ -282,7 +300,9 @@ const UserManagement = () => {
     ws.getRow(1).font = { bold: true };
     ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } };
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -421,7 +441,6 @@ const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} gap-2`}>
-
                       <button
                         onClick={() => handleEdit(user)}
                         className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
@@ -522,30 +541,40 @@ const UserManagement = () => {
                 </label>
                 <div className="space-y-2 max-h-48 overflow-y-auto p-3 border border-gray-200 rounded-xl bg-gray-50">
                   {students.map((student) => (
-                    <label key={student.id} className="flex items-center gap-2 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                    <label
+                      key={student.id}
+                      className="flex items-center gap-2 cursor-pointer hover:bg-white p-1 rounded transition-colors"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedStudentIds.includes(student.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedStudentIds(prev => [...prev, student.id]);
+                            setSelectedStudentIds((prev) => [...prev, student.id]);
                           } else {
-                            setSelectedStudentIds(prev => prev.filter(id => id !== student.id));
+                            setSelectedStudentIds((prev) => prev.filter((id) => id !== student.id));
                           }
                         }}
                         className="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
                       />
                       <span className="text-sm text-gray-700">
-                        {student.name} <span className="text-gray-400 text-xs">({student.email})</span>
+                        {student.name}{' '}
+                        <span className="text-gray-400 text-xs">({student.email})</span>
                       </span>
                     </label>
                   ))}
                   {students.length === 0 && (
-                    <p className="text-sm text-gray-500 italic text-center py-2">{t('users.noStudents') || 'Aucun élève trouvé'}</p>
+                    <p className="text-sm text-gray-500 italic text-center py-2">
+                      {t('users.noStudents') || 'Aucun élève trouvé'}
+                    </p>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {i18n.language.startsWith('ar') ? 'يمكنك اختيار عدة طلاب' : i18n.language.startsWith('nl') ? 'U kunt meerdere studenten selecteren' : 'Vous pouvez sélectionner plusieurs élèves'}
+                  {i18n.language.startsWith('ar')
+                    ? 'يمكنك اختيار عدة طلاب'
+                    : i18n.language.startsWith('nl')
+                      ? 'U kunt meerdere studenten selecteren'
+                      : 'Vous pouvez sélectionner plusieurs élèves'}
                 </p>
               </div>
             )}
@@ -560,7 +589,7 @@ const UserManagement = () => {
             </div>
           </div>
         </div>
-      </Modal >
+      </Modal>
 
       <UserImportWizard
         isOpen={isImportWizardOpen}
@@ -570,7 +599,7 @@ const UserManagement = () => {
         addUser={addUser}
         canImportSuperadmin={currentUser?.role === 'superadmin'}
       />
-    </div >
+    </div>
   );
 };
 

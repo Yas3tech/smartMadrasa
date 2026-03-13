@@ -2,16 +2,19 @@
 
 Ce document decrit les controles backend effectifs.  
 Source de verite:
+
 - `firestore.rules`
 - `storage.rules`
 
 ## Principes actifs
+
 - Deny-by-default pour Firestore et Storage.
 - RBAC sur roles `student`, `parent`, `teacher`, `director`, `superadmin`.
 - Validation role via custom claims + role Firestore pour limiter les claims obsoletes.
 - Separation stricte frontend/backend: les autorisations sont imposees par les rules.
 
 ## Firestore - points cles
+
 - `users/{userId}`:
   - lecture: owner, direction/admin, enseignants limites, eleves de meme classe.
   - update owner: uniquement champs whitelistes (pas de role/classId).
@@ -27,6 +30,7 @@ Source de verite:
   - `users/{uid}/attendance/{id}`
 
 ## Storage - points cles
+
 - Regle globale deny par defaut.
 - `profiles/{userId}`: write owner + image only.
 - `homework/{homeworkId}/{studentId}/{fileName}`:
@@ -36,6 +40,7 @@ Source de verite:
   - read/delete owner + direction/admin (effacement RGPD).
 
 ## Tests et validation
+
 - Scripts logiques inclus:
   - `scripts/verify_rules_mock.js`
   - `scripts/verify_grade_rules.js`
@@ -46,4 +51,5 @@ Source de verite:
   - `pnpm verify-rules:all`
 
 ## Limites
+
 - Ce document ne remplace pas des tests via emulateur Firebase ni un pentest.

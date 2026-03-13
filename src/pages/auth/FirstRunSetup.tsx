@@ -284,9 +284,7 @@ const FirstRunSetup: React.FC = () => {
                     className="w-5 h-5 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
                   />
                   <div>
-                    <span className="font-semibold text-gray-900">
-                      {copy.preconfigureSchool}
-                    </span>
+                    <span className="font-semibold text-gray-900">{copy.preconfigureSchool}</span>
                     <p className="text-xs text-gray-500">{copy.preconfigureDescription}</p>
                   </div>
                 </label>
@@ -323,9 +321,7 @@ const FirstRunSetup: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <h2 className="text-3xl font-extrabold text-gray-900">
-                  {copy.completedTitle}
-                </h2>
+                <h2 className="text-3xl font-extrabold text-gray-900">{copy.completedTitle}</h2>
                 <p className="text-gray-500">{copy.completedDescription}</p>
               </div>
 

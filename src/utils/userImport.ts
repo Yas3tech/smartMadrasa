@@ -16,13 +16,7 @@ export interface UserImportRow {
   studentEmail?: string;
 }
 
-export type UserImportField =
-  | 'name'
-  | 'email'
-  | 'role'
-  | 'phone'
-  | 'birthDate'
-  | 'studentEmail';
+export type UserImportField = 'name' | 'email' | 'role' | 'phone' | 'birthDate' | 'studentEmail';
 
 export interface UserImportReviewRow extends UserImportRow {
   fieldErrors: Partial<Record<UserImportField, string>>;
@@ -74,7 +68,10 @@ const extractCellValue = (value: unknown): string => {
     }
     if ('richText' in (value as Record<string, unknown>)) {
       const richText = (value as { richText?: Array<{ text?: string }> }).richText || [];
-      return richText.map((part) => part.text || '').join('').trim();
+      return richText
+        .map((part) => part.text || '')
+        .join('')
+        .trim();
     }
   }
   return normalizeString(value);
@@ -105,9 +102,11 @@ const mapHeaderToField = (header: string): UserImportField | null => {
   return null;
 };
 
-const extractWorksheetHeaders = (
-  worksheet: { getRow: (rowNumber: number) => { eachCell: (callback: (cell: { value: unknown }, columnNumber: number) => void) => void } }
-): string[] => {
+const extractWorksheetHeaders = (worksheet: {
+  getRow: (rowNumber: number) => {
+    eachCell: (callback: (cell: { value: unknown }, columnNumber: number) => void) => void;
+  };
+}): string[] => {
   const headers: string[] = [];
   worksheet.getRow(1).eachCell((cell, columnNumber) => {
     headers[columnNumber] = normalizeHeader(extractCellValue(cell.value));
@@ -115,9 +114,12 @@ const extractWorksheetHeaders = (
   return headers.filter(Boolean);
 };
 
-export const scoreWorksheet = (
-  worksheet: { name?: string; getRow: (rowNumber: number) => { eachCell: (callback: (cell: { value: unknown }, columnNumber: number) => void) => void } }
-): number => {
+export const scoreWorksheet = (worksheet: {
+  name?: string;
+  getRow: (rowNumber: number) => {
+    eachCell: (callback: (cell: { value: unknown }, columnNumber: number) => void) => void;
+  };
+}): number => {
   const headers = extractWorksheetHeaders(worksheet);
   const matchingHeaders = headers.filter((header) => mapHeaderToField(header) !== null).length;
   const hasRequiredHeaders = REQUIRED_IMPORT_HEADERS.every((requiredHeader) =>
@@ -220,8 +222,9 @@ const parseRowsFromWorkbook = async (file: File): Promise<UserImportRow[]> => {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(data);
 
-  const worksheet = [...workbook.worksheets]
-    .sort((leftSheet, rightSheet) => scoreWorksheet(rightSheet) - scoreWorksheet(leftSheet))[0];
+  const worksheet = [...workbook.worksheets].sort(
+    (leftSheet, rightSheet) => scoreWorksheet(rightSheet) - scoreWorksheet(leftSheet)
+  )[0];
   if (!worksheet) return [];
 
   const headers: string[] = [];
@@ -278,13 +281,19 @@ export const validateUserImportRows = (
   const normalizedRows = rows.map((row) => mapRowToImportRow(row, row.rowNumber));
   const studentEmailsInImport = new Set(
     normalizedRows
-      .filter((row) => normalizeRole(row.role) === 'student' && EMAIL_REGEX.test(normalizeEmail(row.email)))
+      .filter(
+        (row) =>
+          normalizeRole(row.role) === 'student' && EMAIL_REGEX.test(normalizeEmail(row.email))
+      )
       .map((row) => normalizeEmail(row.email))
   );
 
   const splitEmails = (emailsStr: string): string[] => {
     if (!emailsStr) return [];
-    const emails = emailsStr.split(',').map(e => normalizeEmail(e.trim())).filter(Boolean);
+    const emails = emailsStr
+      .split(',')
+      .map((e) => normalizeEmail(e.trim()))
+      .filter(Boolean);
     return Array.from(new Set(emails));
   };
 
@@ -334,8 +343,10 @@ export const validateUserImportRows = (
       if (studentEmails.length === 0) {
         fieldErrors.studentEmail = 'Email eleve requis pour un parent';
       } else {
-        const invalidEmails = studentEmails.filter(e => !EMAIL_REGEX.test(e));
-        const missingEmails = studentEmails.filter(e => !existingStudentEmails.has(e) && !studentEmailsInImport.has(e));
+        const invalidEmails = studentEmails.filter((e) => !EMAIL_REGEX.test(e));
+        const missingEmails = studentEmails.filter(
+          (e) => !existingStudentEmails.has(e) && !studentEmailsInImport.has(e)
+        );
 
         if (invalidEmails.length > 0) {
           fieldErrors.studentEmail = `Email(s) invalide(s): ${invalidEmails.join(', ')}`;
@@ -399,27 +410,31 @@ export const processNonParentUsers = async (
   data: UserImportRow[],
   addUser: (user: User) => Promise<unknown>
 ): Promise<{ importedUsers: ImportedUserSummary[]; count: number }> => {
-  const filteredData = data.filter(row => {
+  const filteredData = data.filter((row) => {
     const role = normalizeRole(row.role) as Role;
     return VALID_ROLES.includes(role) && role !== 'parent';
   });
 
-  const results = await processInBatches<UserImportRow, ImportedUserSummary>(filteredData, 5, async (row) => {
-    const role = normalizeRole(row.role) as Role;
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      name: normalizeString(row.name),
-      email: normalizeEmail(row.email),
-      role,
-      phone: normalizeString(row.phone),
-      birthDate: normalizeString(row.birthDate),
-      avatar: normalizeString(row.name).charAt(0).toUpperCase(),
-    };
+  const results = await processInBatches<UserImportRow, ImportedUserSummary>(
+    filteredData,
+    5,
+    async (row) => {
+      const role = normalizeRole(row.role) as Role;
+      const newUser: User = {
+        id: crypto.randomUUID(),
+        name: normalizeString(row.name),
+        email: normalizeEmail(row.email),
+        role,
+        phone: normalizeString(row.phone),
+        birthDate: normalizeString(row.birthDate),
+        avatar: normalizeString(row.name).charAt(0).toUpperCase(),
+      };
 
-    const result = (await addUser(newUser)) as any;
-    const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
-    return { id: finalId, email: newUser.email, role: newUser.role };
-  });
+      const result = (await addUser(newUser)) as any;
+      const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
+      return { id: finalId, email: newUser.email, role: newUser.role };
+    }
+  );
 
   return { importedUsers: results, count: results.length };
 };
@@ -430,19 +445,25 @@ export const processParentUsers = async (
   importedUsers: ImportedUserSummary[],
   addUser: (user: User) => Promise<unknown>
 ): Promise<number> => {
-  const filteredData = data.filter(row => normalizeRole(row.role) === 'parent');
+  const filteredData = data.filter((row) => normalizeRole(row.role) === 'parent');
 
   const results = await processInBatches<UserImportRow, boolean>(filteredData, 5, async (row) => {
     const childrenIds: string[] = [];
     const relatedClassIds: string[] = [];
     // Deduplicate student emails to prevent duplicate childrenIds
-    const studentEmails = Array.from(new Set(
-      (row.studentEmail || '').split(',').map((e: string) => e.trim().toLowerCase()).filter(Boolean)
-    ));
+    const studentEmails = Array.from(
+      new Set(
+        (row.studentEmail || '')
+          .split(',')
+          .map((e: string) => e.trim().toLowerCase())
+          .filter(Boolean)
+      )
+    );
 
     for (const studentEmail of studentEmails) {
       const student = users.find(
-        (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
+        (user): user is Student =>
+          user.role === 'student' && normalizeEmail(user.email) === studentEmail
       );
 
       if (student) {
@@ -476,7 +497,6 @@ export const processParentUsers = async (
 
   return results.length;
 };
-
 
 export const importValidatedUserRows = async (
   rows: UserImportReviewRow[],

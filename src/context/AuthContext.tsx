@@ -34,7 +34,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
               userData = userDoc.exists() ? userDoc.data() : null;
             } catch (docError: any) {
-              console.warn('Initial doc fetch failed (likely mismatched UID permissions):', docError.message);
+              console.warn(
+                'Initial doc fetch failed (likely mismatched UID permissions):',
+                docError.message
+              );
             }
 
             // Fallback: If no doc found by UID or permission denied, search by email
@@ -56,7 +59,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 role: userData.role as Role,
               });
             } else {
-              console.warn('Firebase user logged in but no Firestore document found for UID or Email:', firebaseUser.uid, firebaseUser.email);
+              console.warn(
+                'Firebase user logged in but no Firestore document found for UID or Email:',
+                firebaseUser.uid,
+                firebaseUser.email
+              );
               setUser(null);
             }
           }

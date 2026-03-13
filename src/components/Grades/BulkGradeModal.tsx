@@ -54,14 +54,14 @@ const BulkGradeModal = ({
   // Handle Event selection auto-fill
   useEffect(() => {
     if (eventId) {
-      const selectedEvent = events.find(e => e.id === eventId);
+      const selectedEvent = events.find((e) => e.id === eventId);
       if (selectedEvent) {
         // Auto-fill form fields
         if (selectedEvent.className) setTitle(selectedEvent.title);
 
         // Find subject based on courseId
-        // In this context availableSubjects are just strings, so we might not be 
-        // able to auto-select subject if we only have courseId (not populated in Event type fully?), 
+        // In this context availableSubjects are just strings, so we might not be
+        // able to auto-select subject if we only have courseId (not populated in Event type fully?),
         // but if the title or type implies something, we use it.
         // Actually, ExamModal saves the event title often as the subject if the title was empty.
         // Let's at least set title, date, type.
@@ -183,7 +183,8 @@ const BulkGradeModal = ({
                   <option value="">Autre (Saisie manuelle)</option>
                   {events.map((e) => (
                     <option key={e.id} value={e.id}>
-                      {new Date(e.start).toLocaleDateString()} - {t(`grades.${e.type}`, e.type)}: {e.title}
+                      {new Date(e.start).toLocaleDateString()} - {t(`grades.${e.type}`, e.type)}:{' '}
+                      {e.title}
                       {e.type === 'homework' && e.isGraded && ` (${t('grades.noted', 'Noté')})`}
                     </option>
                   ))}

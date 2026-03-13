@@ -264,12 +264,13 @@ const TeacherGradesView = () => {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${grade.type === 'exam'
-                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                              : grade.type === 'homework'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
-                              }`}
+                            className={`px-2 py-1 rounded text-xs font-medium ${
+                              grade.type === 'exam'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                : grade.type === 'homework'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
+                            }`}
                           >
                             {t(`grades.${grade.type}`)}
                           </span>
@@ -403,12 +404,13 @@ const TeacherGradesView = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`px-2 py-1 rounded text-xs font-medium ${grade.type === 'exam'
-                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                                : grade.type === 'homework'
-                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                  : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
-                                }`}
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                grade.type === 'exam'
+                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : grade.type === 'homework'
+                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                    : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
+                              }`}
                             >
                               {t(`grades.${grade.type}`)}
                             </span>

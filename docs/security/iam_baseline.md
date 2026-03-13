@@ -4,11 +4,13 @@ Date: 2026-03-05
 Scope: smartmadrasa-dev / smartmadrasa-staging / smartmadrasa-prod
 
 ## Principles
+
 - Least privilege by environment.
 - Separate service accounts for CI deploy and runtime functions.
 - No owner/editor roles for daily operations.
 
 ## Required Role Model
+
 - CI deploy account:
   - Firebase Hosting Admin
   - Cloud Functions Developer
@@ -21,12 +23,14 @@ Scope: smartmadrasa-dev / smartmadrasa-staging / smartmadrasa-prod
   - Temporary elevation with ticket and expiry.
 
 ## Mandatory Settings
+
 - MFA required for all privileged users.
 - Disable unused service account keys.
 - Prefer Workload Identity Federation over long-lived keys.
 - Audit logs enabled for Admin Activity and Data Access.
 
 ## Quarterly Review Checklist
+
 - Remove stale users/service accounts.
 - Validate no wildcard broad roles remain.
 - Rotate secrets and deployment tokens.

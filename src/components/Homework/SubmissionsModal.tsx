@@ -158,7 +158,10 @@ export function SubmissionsModal({
                       max={homework.maxScore || 20}
                     />
                     <div>
-                      <label htmlFor={`feedback-${submission.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor={`feedback-${submission.id}`}
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         {t('homework.feedback')}
                       </label>
                       <textarea

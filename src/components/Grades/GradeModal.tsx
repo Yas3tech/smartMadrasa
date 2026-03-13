@@ -104,13 +104,17 @@ const GradeModal = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="grade-student"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t('common.student')} *
             </label>
             <select
+              id="grade-student"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+              className="w-full px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none text-gray-900 dark:text-slate-100 transition-all duration-200"
               required
             >
               <option value="">{t('grades.selectStudent')}</option>
@@ -123,13 +127,17 @@ const GradeModal = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="grade-subject"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t('common.subject')} *
             </label>
             <select
+              id="grade-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+              className="w-full px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none text-gray-900 dark:text-slate-100 transition-all duration-200"
               required
             >
               <option value="">{t('common.selectSubject')}</option>
@@ -143,15 +151,19 @@ const GradeModal = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="grade-type"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {t('common.type')} *
               </label>
               <select
+                id="grade-type"
                 value={type}
                 onChange={(e) =>
                   setType(e.target.value as 'exam' | 'homework' | 'participation' | 'evaluation')
                 }
-                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+                className="w-full px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none text-gray-900 dark:text-slate-100 transition-all duration-200"
                 required
               >
                 <option value="exam">{t('grades.exam')}</option>
@@ -198,7 +210,10 @@ const GradeModal = ({
           />
 
           <div>
-            <label htmlFor="grade-feedback" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="grade-feedback"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t('grades.comment')} (optionnel)
             </label>
             <textarea
@@ -206,7 +221,7 @@ const GradeModal = ({
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               rows={3}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none"
+              className="w-full px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-100 focus:border-orange-500 outline-none text-gray-900 dark:text-slate-100 transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-slate-500"
               placeholder={t('grades.feedbackDescPlaceholder')}
             />
           </div>

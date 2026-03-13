@@ -137,7 +137,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
     // Optimization: Create a Map of comments for O(1) lookup
     // Key: studentId::courseId
     const commentsMap = new Map<string, TeacherComment>();
-    classComments.forEach(c => {
+    classComments.forEach((c) => {
       if (c.periodId === selectedPeriod) {
         commentsMap.set(`${c.studentId}::${c.courseId}`, c);
       }
@@ -197,7 +197,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
 
     // Optimization: Create a Map of teacherComments for O(1) lookup
     const commentsMap = new Map<string, TeacherComment>();
-    teacherComments.forEach(tc => {
+    teacherComments.forEach((tc) => {
       if (tc.periodId === selectedPeriod && tc.studentId === selectedStudent) {
         commentsMap.set(tc.courseId, tc);
       }
@@ -309,7 +309,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
 
     // Optimization: Map lookups
     const commentsMap = new Map<string, TeacherComment>();
-    classComments.forEach(c => {
+    classComments.forEach((c) => {
       if (c.periodId === selectedPeriod) {
         commentsMap.set(`${c.studentId}::${c.courseId}`, c);
       }
@@ -381,7 +381,7 @@ export function useBulletinGrades(): UseBulletinGradesReturn {
 
     // Optimization: Map lookups
     const commentsMap = new Map<string, TeacherComment>();
-    teacherComments.forEach(tc => {
+    teacherComments.forEach((tc) => {
       if (tc.periodId === selectedPeriod && tc.studentId === selectedStudent) {
         commentsMap.set(tc.courseId, tc);
       }

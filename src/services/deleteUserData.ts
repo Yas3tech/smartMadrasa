@@ -53,15 +53,15 @@ async function executeBatchOperations(
 
   // Combine all operations
   const operations = [
-    ...deletes.map(ref => ({ type: 'delete' as const, ref })),
-    ...updates.map(u => ({ type: 'update' as const, ref: u.ref, data: u.data }))
+    ...deletes.map((ref) => ({ type: 'delete' as const, ref })),
+    ...updates.map((u) => ({ type: 'update' as const, ref: u.ref, data: u.data })),
   ];
 
   for (let i = 0; i < operations.length; i += CHUNK_SIZE) {
     const chunk = operations.slice(i, i + CHUNK_SIZE);
     const batch = writeBatch(db);
 
-    chunk.forEach(op => {
+    chunk.forEach((op) => {
       if (op.type === 'delete') {
         batch.delete(op.ref);
       } else {
@@ -183,41 +183,61 @@ export async function deleteAllUserData(
     switch (userRole) {
       case 'student': {
         const studentRef = getDocumentRefById('students', userId);
-        if (studentRef) { refsToDelete.push(studentRef); result.deletedCounts.students = 1; }
+        if (studentRef) {
+          refsToDelete.push(studentRef);
+          result.deletedCounts.students = 1;
+        }
 
         const grades = await getDocumentRefsWhere('grades', 'studentId', userId);
-        refsToDelete.push(...grades); result.deletedCounts.grades = grades.length;
+        refsToDelete.push(...grades);
+        result.deletedCounts.grades = grades.length;
 
         const attendance = await getDocumentRefsWhere('attendance', 'studentId', userId);
-        refsToDelete.push(...attendance); result.deletedCounts.attendance = attendance.length;
+        refsToDelete.push(...attendance);
+        result.deletedCounts.attendance = attendance.length;
 
         const submissions = await getDocumentRefsWhere('homeworkSubmissions', 'studentId', userId);
-        refsToDelete.push(...submissions); result.deletedCounts.homeworkSubmissions = submissions.length;
+        refsToDelete.push(...submissions);
+        result.deletedCounts.homeworkSubmissions = submissions.length;
 
         const comments = await getDocumentRefsWhere('teacherComments', 'studentId', userId);
-        refsToDelete.push(...comments); result.deletedCounts.teacherComments = comments.length;
+        refsToDelete.push(...comments);
+        result.deletedCounts.teacherComments = comments.length;
         break;
       }
       case 'parent': {
         const parentRef = getDocumentRefById('parents', userId);
-        if (parentRef) { refsToDelete.push(parentRef); result.deletedCounts.parents = 1; }
+        if (parentRef) {
+          refsToDelete.push(parentRef);
+          result.deletedCounts.parents = 1;
+        }
         break;
       }
       case 'teacher': {
         const teacherRef = getDocumentRefById('teachers', userId);
-        if (teacherRef) { refsToDelete.push(teacherRef); result.deletedCounts.teachers = 1; }
+        if (teacherRef) {
+          refsToDelete.push(teacherRef);
+          result.deletedCounts.teachers = 1;
+        }
 
         const homeworks = await getDocumentRefsWhere('homeworks', 'teacherId', userId);
-        refsToDelete.push(...homeworks); result.deletedCounts.homework = homeworks.length;
+        refsToDelete.push(...homeworks);
+        result.deletedCounts.homework = homeworks.length;
 
         const comments = await getDocumentRefsWhere('teacherComments', 'teacherId', userId);
-        refsToDelete.push(...comments); result.deletedCounts.teacherComments = comments.length;
+        refsToDelete.push(...comments);
+        result.deletedCounts.teacherComments = comments.length;
 
         // WARN-05/LOGIC-06: Handle orphaned courseGrades
         // Using 'deleted_teacher' instead of empty string maintains a valid key format,
         // and provides a clear signal to the frontend to render the 'Utilisateur Supprimé' state.
         const courseGrades = await getDocumentRefsWhere('courseGrades', 'teacherId', userId);
-        courseGrades.forEach(ref => refsToUpdate.push({ ref, data: { teacherId: 'deleted_teacher', teacherName: 'Utilisateur Supprimé' } }));
+        courseGrades.forEach((ref) =>
+          refsToUpdate.push({
+            ref,
+            data: { teacherId: 'deleted_teacher', teacherName: 'Utilisateur Supprimé' },
+          })
+        );
         result.deletedCounts.grades += courseGrades.length;
 
         // WARN-05: Handle orphaned courses
@@ -226,8 +246,11 @@ export async function deleteAllUserData(
 
         // WARN-05: Handle orphaned classes (reset teacherId instead of deleting class)
         const classes = await getDocumentRefsWhere('classes', 'teacherId', userId);
-        classes.forEach(classRef => {
-          refsToUpdate.push({ ref: classRef, data: { teacherId: 'deleted_teacher', teacherName: '' } });
+        classes.forEach((classRef) => {
+          refsToUpdate.push({
+            ref: classRef,
+            data: { teacherId: 'deleted_teacher', teacherName: '' },
+          });
         });
         break;
       }

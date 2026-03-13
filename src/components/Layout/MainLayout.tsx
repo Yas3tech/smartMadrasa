@@ -60,12 +60,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Sidebar - hidden on mobile by default, shown as overlay when menu open */}
       <div
         className={`
-                ${isMobile
-            ? isMobileMenuOpen
-              ? `fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 transform transition-transform duration-300 ease-out translate-x-0`
-              : 'hidden'
-            : ''
-          }
+                ${
+                  isMobile
+                    ? isMobileMenuOpen
+                      ? `fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 transform transition-transform duration-300 ease-out translate-x-0`
+                      : 'hidden'
+                    : ''
+                }
             `}
       >
         <Sidebar isCollapsed={isMobile ? false : isSidebarCollapsed} />
@@ -73,7 +74,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${isMobile
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          isMobile
             ? ''
             : isSidebarCollapsed
               ? isRTL
@@ -82,7 +84,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               : isRTL
                 ? 'mr-64'
                 : 'ml-64'
-          }`}
+        }`}
       >
         {/* Header */}
         <header

@@ -51,8 +51,8 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
-    let unsubMessages = () => { };
-    let unsubEvents = () => { };
+    let unsubMessages = () => {};
+    let unsubEvents = () => {};
 
     if (useFirebase && user) {
       unsubMessages = subscribeToMessages(setMessages, user?.id);
@@ -67,7 +67,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
         }
       } else if (user?.role === 'student') {
         const student = user as Student;
-        unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => { };
+        unsubEvents = student.classId ? subscribeToEvents(setEvents, [student.classId]) : () => {};
       } else if (user && ['teacher', 'director', 'superadmin'].includes(user.role)) {
         unsubEvents = subscribeToEvents(setEvents);
       }

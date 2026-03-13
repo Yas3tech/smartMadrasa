@@ -88,9 +88,11 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
     }
 
     if (role === 'superadmin') {
-      links.push(
-        { to: '/admin/database', icon: Database, label: t('sidebar.database', 'Base de données') }
-      );
+      links.push({
+        to: '/admin/database',
+        icon: Database,
+        label: t('sidebar.database', 'Base de données'),
+      });
     }
 
     // Add Profile and Settings for all users at the end
@@ -106,8 +108,9 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
 
   return (
     <aside
-      className={`bg-white dark:bg-slate-900 ${isRTL ? 'border-l rtl:border-l' : 'border-r'} border-gray-100 dark:border-slate-700 h-screen flex flex-col fixed ${isRTL ? 'right-0' : 'left-0'} top-0 z-50 shadow-soft transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
-        }`}
+      className={`bg-white dark:bg-slate-900 ${isRTL ? 'border-l rtl:border-l' : 'border-r'} border-gray-100 dark:border-slate-700 h-screen flex flex-col fixed ${isRTL ? 'right-0' : 'left-0'} top-0 z-50 shadow-soft transition-all duration-300 ${
+        isCollapsed ? 'w-20' : 'w-64'
+      }`}
     >
       {/* Header */}
       <Link
@@ -129,9 +132,10 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
-                ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium shadow-sm'
-                : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'
+              `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${
+                isActive
+                  ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 font-medium shadow-sm'
+                  : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'
               }`
             }
             title={isCollapsed ? link.label : undefined}
@@ -191,8 +195,9 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
 
         <button
           onClick={logout}
-          className={`flex items-center gap-2 text-sm text-red-500 hover:text-red-600 w-full px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ${isCollapsed ? 'justify-center' : ''
-            }`}
+          className={`flex items-center gap-2 text-sm text-red-500 hover:text-red-600 w-full px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
           title={t('sidebar.logout')}
           aria-label={t('sidebar.logout')}
         >

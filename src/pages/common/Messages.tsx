@@ -15,12 +15,7 @@ import type { Message, Parent, Student, User } from '../../types';
 import { Card, Button } from '../../components/UI';
 import { generateMessagePath, uploadFile } from '../../services/storage';
 
-import {
-  PenSquare,
-  Inbox,
-  Send,
-  Archive,
-} from 'lucide-react';
+import { PenSquare, Inbox, Send, Archive } from 'lucide-react';
 import ComposeModal from '../../components/Messages/ComposeModal';
 import MessageList from '../../components/Messages/MessageList';
 import MessageDetail from '../../components/Messages/MessageDetail';
@@ -28,7 +23,8 @@ import MessageDetail from '../../components/Messages/MessageDetail';
 const Messages = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage } = useCommunication();
+  const { messages, sendMessage, deleteMessage, markMessageAsRead, updateMessage } =
+    useCommunication();
   const { users } = useUsers();
   const { classes } = useAcademics();
 
@@ -97,13 +93,13 @@ const Messages = () => {
     return [
       ...(isDirectorOrSuperAdmin
         ? [
-          {
-            type: 'all',
-            id: 'all',
-            label: `👥 ${t('messages.allUsers')}`,
-            searchText: t('messages.allUsers').toLowerCase(),
-          },
-        ]
+            {
+              type: 'all',
+              id: 'all',
+              label: `👥 ${t('messages.allUsers')}`,
+              searchText: t('messages.allUsers').toLowerCase(),
+            },
+          ]
         : []),
       ...visibleUsers.map((u) => {
         let label = '';
@@ -119,7 +115,8 @@ const Messages = () => {
           }
           const childrenNames = children.map((c) => c.name).join(', ');
           label = `👨‍👩‍👧 ${t('messages.parentOf')} ${childrenNames || t('roles.student')}`;
-          searchText = `${t('messages.parentOf')} ${childrenNames} ${u.name} ${u.email}`.toLowerCase();
+          searchText =
+            `${t('messages.parentOf')} ${childrenNames} ${u.name} ${u.email}`.toLowerCase();
         } else if (u.role === 'student') {
           label = `🎓 ${u.name}`;
           searchText = `${u.name} ${t('roles.student')}`.toLowerCase();
@@ -143,18 +140,17 @@ const Messages = () => {
     const query = recipientSearch.trim().toLowerCase();
     if (query.length < MIN_RECIPIENT_SEARCH_CHARS) return [];
     // Filter out already selected recipients
-    return allRecipientOptions.filter((item) =>
-      !recipients.includes(item.id) && item.searchText.includes(query)
+    return allRecipientOptions.filter(
+      (item) => !recipients.includes(item.id) && item.searchText.includes(query)
     );
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
   const selectedRecipientLabels = useMemo(() => {
-    return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+    return recipients.map((id) => {
+      const opt = allRecipientOptions.find((r) => r.id === id);
       return { id, label: opt?.label || id };
     });
   }, [recipients, allRecipientOptions]);
-
 
   const handleArchiveMessage = async (messageId: string | number) => {
     const message = messages.find((m) => m.id === messageId);
@@ -210,49 +206,34 @@ const Messages = () => {
   };
 
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
-  const handleSendMessage = useThrottle(useCallback(async () => {
-    if (!user || recipients.length === 0 || !subject || !content || isSending) return;
+  const handleSendMessage = useThrottle(
+    useCallback(async () => {
+      if (!user || recipients.length === 0 || !subject || !content || isSending) return;
 
-    setIsSending(true);
+      setIsSending(true);
 
-    try {
-      const attachmentUrls = await Promise.all(
-        attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
-      );
+      try {
+        const attachmentUrls = await Promise.all(
+          attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
+        );
 
-      const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
+        const allOutbound = recipients.map(async (recipientId) => {
+          const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
 
-        if (selectedRecipient?.type === 'class') {
-          const selectedClass = classes.find((c) => c.id === recipientId);
-          if (selectedClass) {
-            const classStudents = users.filter(
-              (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
-            );
-            const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
-            const classOutbound = classStudents.map((student) =>
-              sendMessage({
-                senderId: user.id,
-                senderName: user.name,
-                senderEmail: user.email,
-                senderRole: user.role,
-                receiverId: student.id,
-                subject: `[${selectedClass.name}] ${subject}`,
-                content,
-                read: false,
-                type: 'group',
-                attachments: attachmentUrls,
-              })
-            );
-
-            if (classTeacher) {
-              classOutbound.push(
+          if (selectedRecipient?.type === 'class') {
+            const selectedClass = classes.find((c) => c.id === recipientId);
+            if (selectedClass) {
+              const classStudents = users.filter(
+                (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
+              );
+              const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+              const classOutbound = classStudents.map((student) =>
                 sendMessage({
                   senderId: user.id,
                   senderName: user.name,
                   senderEmail: user.email,
                   senderRole: user.role,
-                  receiverId: classTeacher.id,
+                  receiverId: student.id,
                   subject: `[${selectedClass.name}] ${subject}`,
                   content,
                   read: false,
@@ -260,40 +241,70 @@ const Messages = () => {
                   attachments: attachmentUrls,
                 })
               );
+
+              if (classTeacher) {
+                classOutbound.push(
+                  sendMessage({
+                    senderId: user.id,
+                    senderName: user.name,
+                    senderEmail: user.email,
+                    senderRole: user.role,
+                    receiverId: classTeacher.id,
+                    subject: `[${selectedClass.name}] ${subject}`,
+                    content,
+                    read: false,
+                    type: 'group',
+                    attachments: attachmentUrls,
+                  })
+                );
+              }
+              return Promise.all(classOutbound);
             }
-            return Promise.all(classOutbound);
+          } else {
+            return sendMessage({
+              senderId: user.id,
+              senderName: user.name,
+              senderEmail: user.email,
+              senderRole: user.role,
+              receiverId: recipientId,
+              subject,
+              content,
+              read: false,
+              type: recipientId === 'all' ? 'broadcast' : 'individual',
+              attachments: attachmentUrls,
+            });
           }
-        } else {
-          return sendMessage({
-            senderId: user.id,
-            senderName: user.name,
-            senderEmail: user.email,
-            senderRole: user.role,
-            receiverId: recipientId,
-            subject,
-            content,
-            read: false,
-            type: recipientId === 'all' ? 'broadcast' : 'individual',
-            attachments: attachmentUrls,
-          });
-        }
-      });
+        });
 
-      await Promise.all(allOutbound);
+        await Promise.all(allOutbound);
 
-      setIsComposeOpen(false);
-      setRecipients([]);
-      setRecipientSearch('');
-      setSubject('');
-      setContent('');
-      setAttachments([]);
-    } catch (error) {
-      console.error('Failed to upload message attachments or send message', error);
-      toast.error(t('common.error'));
-    } finally {
-      setIsSending(false);
-    }
-  }, [user, recipients, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, t]), 2000);
+        setIsComposeOpen(false);
+        setRecipients([]);
+        setRecipientSearch('');
+        setSubject('');
+        setContent('');
+        setAttachments([]);
+      } catch (error) {
+        console.error('Failed to upload message attachments or send message', error);
+        toast.error(t('common.error'));
+      } finally {
+        setIsSending(false);
+      }
+    }, [
+      user,
+      recipients,
+      subject,
+      content,
+      isSending,
+      allRecipientOptions,
+      classes,
+      users,
+      sendMessage,
+      attachments,
+      t,
+    ]),
+    2000
+  );
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
@@ -319,12 +330,13 @@ const Messages = () => {
       <Card className="flex-1 flex overflow-hidden !p-0 border-0 shadow-xl">
         {/* Left Sidebar - Folders */}
         <div
-          className={`${isMobile
-            ? mobileView === 'folders'
-              ? 'flex-1 w-full bg-white dark:bg-slate-800'
-              : 'hidden'
-            : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
-            }`}
+          className={`${
+            isMobile
+              ? mobileView === 'folders'
+                ? 'flex-1 w-full bg-white dark:bg-slate-800'
+                : 'hidden'
+              : 'w-64 bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-700 flex flex-col'
+          }`}
         >
           <div className="p-4">
             <div className="flex items-center gap-3 mb-6 px-2">
@@ -348,10 +360,11 @@ const Messages = () => {
                     setSelectedFolder(folder.id);
                     if (isMobile) setMobileView('list');
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${selectedFolder === folder.id
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
-                    }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    selectedFolder === folder.id
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
                 >
                   <folder.icon size={18} />
                   {folder.label}

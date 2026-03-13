@@ -43,12 +43,12 @@ export const subscribeToClasses = (
   callback: (classes: ClassGroup[]) => void,
   classIds?: string[]
 ) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
 
   if (classIds) {
     if (classIds.length === 0) {
       callback([]);
-      return () => { };
+      return () => {};
     }
 
     const q = query(collection(db, COLLECTION_NAME), where(documentId(), 'in', classIds));
@@ -71,7 +71,7 @@ export const subscribeToClassesByTeacherId = (
   teacherId: string,
   callback: (classes: ClassGroup[]) => void
 ) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
   const q = query(collection(db, COLLECTION_NAME), where('teacherId', '==', teacherId));
   return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<ClassGroup>(snapshot));

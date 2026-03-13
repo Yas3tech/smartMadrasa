@@ -41,8 +41,6 @@ export function HomeworkForm({
     ),
   ];
 
-
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="p-6">
@@ -114,7 +112,10 @@ export function HomeworkForm({
 
           {/* Description */}
           <div>
-            <label htmlFor="homeworkDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label
+              htmlFor="homeworkDescription"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               {t('homework.description')}
             </label>
             <textarea

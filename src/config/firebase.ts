@@ -17,9 +17,7 @@ const isFirebaseConfigured = Object.values(firebaseConfig).every(
 const isUnsafeProductionConfig = (() => {
   if (!import.meta.env.PROD) return false;
   const projectId = (firebaseConfig.projectId || '').toLowerCase();
-  return ['test', 'dev', 'demo', 'staging', 'sandbox'].some((marker) =>
-    projectId.includes(marker)
-  );
+  return ['test', 'dev', 'demo', 'staging', 'sandbox'].some((marker) => projectId.includes(marker));
 })();
 
 let app: FirebaseApp | undefined;

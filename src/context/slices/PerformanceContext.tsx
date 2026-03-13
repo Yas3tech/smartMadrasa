@@ -73,9 +73,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
 
   useEffect(() => {
-    let unsubGrades = () => { };
-    let unsubAttendance = () => { };
-    let unsubHomeworks = () => { };
+    let unsubGrades = () => {};
+    let unsubAttendance = () => {};
+    let unsubHomeworks = () => {};
 
     if (useFirebase && user) {
       const handleGradesUpdate = (courseGrades: CourseGrade[]) => {
@@ -117,8 +117,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           unsubHomeworks = subscribeToHomeworksByClassIds([studentUser.classId], setHomeworks);
         }
       } else if (user?.role === 'teacher') {
-        let innerUnsubAttendance = () => { };
-        let innerUnsubHomeworks = () => { };
+        let innerUnsubAttendance = () => {};
+        let innerUnsubHomeworks = () => {};
 
         const unsubTeacherClasses = subscribeToClassesByTeacherId(user.id, (teacherClasses) => {
           innerUnsubAttendance();

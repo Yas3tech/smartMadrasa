@@ -47,7 +47,9 @@ const BulletinDashboard: React.FC = () => {
       {};
 
     // Optimization: Pre-compute comments lookup map (O(C) instead of O(S*C*K))
-    const commentMap = new Map<string, TeacherComment>(periodComments.map((c) => [`${c.studentId}::${c.courseId}`, c]));
+    const commentMap = new Map<string, TeacherComment>(
+      periodComments.map((c) => [`${c.studentId}::${c.courseId}`, c])
+    );
 
     classes.forEach((cls) => {
       // Find students in this class
@@ -287,10 +289,11 @@ const BulletinDashboard: React.FC = () => {
             <button
               onClick={handlePublishBulletins}
               disabled={!canPublishAll}
-              className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 justify-center ${canPublishAll
+              className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 justify-center ${
+                canPublishAll
                   ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+              }`}
             >
               <Send size={20} />
               {t('bulletinDashboard.publishAllBulletins')}

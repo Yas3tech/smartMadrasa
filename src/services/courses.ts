@@ -56,7 +56,7 @@ export const deleteCourse = async (classId: string, courseId: string): Promise<v
 };
 
 export const subscribeToCourses = (callback: (courses: Course[]) => void) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
   // Fetches ALL courses across all classes — only for director/superadmin
   return onSnapshot(collectionGroup(db, COLLECTION_NAME), (snapshot) => {
     callback(mapQuerySnapshot<Course>(snapshot));
@@ -73,7 +73,7 @@ export const subscribeToCoursesByTeacherId = (
   teacherId: string,
   callback: (courses: Course[]) => void
 ) => {
-  if (!db) return () => { };
+  if (!db) return () => {};
   const q = query(collectionGroup(db, COLLECTION_NAME), where('teacherId', '==', teacherId));
   return onSnapshot(q, (snapshot) => {
     callback(mapQuerySnapshot<Course>(snapshot));
