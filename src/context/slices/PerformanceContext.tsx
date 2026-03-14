@@ -231,16 +231,24 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
     async (gradesToAdd: Omit<Grade, 'id'>[]) => {
       if (!useFirebase || gradesToAdd.length === 0) return;
 
+      // ⚡ Bolt: Pre-compute maps to replace O(N^2) loops with O(N) map lookups
+      const studentMap = new Map(students.map((s) => [s.id, s.name]));
+
+      // Cache period dates to avoid repeatedly parsing them inside the loop
+      const periodRanges = academicPeriods.map(p => ({
+        id: p.id,
+        startDate: new Date(p.startDate).getTime(),
+        endDate: new Date(p.endDate).getTime()
+      }));
+
       const courseGrades = gradesToAdd.map((grade) => {
         const studentName =
-          grade.studentName || students.find((s) => s.id === grade.studentId)?.name || 'Unknown';
+          grade.studentName || studentMap.get(grade.studentId) || 'Unknown';
 
-        const gradeDate = new Date(grade.date);
-        const matchingPeriod = academicPeriods.find((period) => {
-          const startDate = new Date(period.startDate);
-          const endDate = new Date(period.endDate);
-          return gradeDate >= startDate && gradeDate <= endDate;
-        });
+        const gradeTime = new Date(grade.date).getTime();
+        const matchingPeriod = periodRanges.find(
+          (period) => gradeTime >= period.startDate && gradeTime <= period.endDate
+        );
 
         const periodId = matchingPeriod?.id;
         if (!periodId) {
