@@ -45,7 +45,7 @@ export const Input = ({ label, error, icon: Icon, className = '', ...props }: In
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 focus:outline-none focus:text-orange-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:rounded-md focus:text-orange-600"
                         aria-label={showPassword ? t('common.hidePassword') : t('common.showPassword')}
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
