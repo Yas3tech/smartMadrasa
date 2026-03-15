@@ -35,6 +35,23 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
       .map((c) => [c.courseId, c])
   );
 
+  // ⚡ Bolt: Pre-compute grades map for O(1) lookups instead of O(N^2) filtering
+  const studentPeriodGradesMap = new Map<string, Grade[]>();
+  const periodStart = new Date(period.startDate);
+  const periodEnd = new Date(period.endDate);
+
+  grades.forEach((g) => {
+    if (g.studentId === student.id) {
+      const d = new Date(g.date);
+      if (d >= periodStart && d <= periodEnd) {
+        if (!studentPeriodGradesMap.has(g.courseId)) {
+          studentPeriodGradesMap.set(g.courseId, []);
+        }
+        studentPeriodGradesMap.get(g.courseId)!.push(g);
+      }
+    }
+  });
+
   // Calculate averages for display - group by subject to avoid duplicates
   const coursesBySubject = courses.reduce(
     (acc, course) => {
@@ -48,15 +65,9 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
   );
 
   const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
-    // Get all grades for this student across all courses with this subject
+    // Get all grades for this student across all courses with this subject using O(1) lookups
     const allPeriodGrades = subjectCourses.flatMap((course) => {
-      const courseGrades = grades.filter(
-        (g) => g.studentId === student.id && g.courseId === course.id
-      );
-      return courseGrades.filter((g) => {
-        const d = new Date(g.date);
-        return d >= new Date(period.startDate) && d <= new Date(period.endDate);
-      });
+      return studentPeriodGradesMap.get(course.id) || [];
     });
 
     const average =
