@@ -155,7 +155,8 @@ service cloud.firestore {
       );
       // Improved Write Rule: Validate Score Range and Class Access
       // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
-      allow create, update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow create: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId)) && isValidGrade();
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
@@ -171,7 +172,8 @@ service cloud.firestore {
       );
       // Improved Write Rule: Validate Score Range and Class Access
       // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
-      allow create, update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow create: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
+      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId)) && isValidGrade();
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
@@ -185,7 +187,9 @@ service cloud.firestore {
         isDirector() ||
         isSuperAdmin()
       );
-      allow create, update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)))
+      allow create: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)))
+        && request.resource.data.studentId is string;
+      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId))
         && request.resource.data.studentId is string;
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
@@ -199,8 +203,11 @@ service cloud.firestore {
         isDirector() ||
         isSuperAdmin()
       );
-      allow create, update: if request.resource.data.studentId == userId &&
+      allow create: if request.resource.data.studentId == userId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) &&
+        isValidGrade();
+      allow update: if request.resource.data.studentId == userId &&
+        (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId)) &&
         isValidGrade();
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
@@ -213,8 +220,10 @@ service cloud.firestore {
         isDirector() ||
         isSuperAdmin()
       );
-      allow create, update: if request.resource.data.studentId == userId &&
+      allow create: if request.resource.data.studentId == userId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)));
+      allow update: if request.resource.data.studentId == userId &&
+        (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId));
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
