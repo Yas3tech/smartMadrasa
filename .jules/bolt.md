@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2026-03-15 - [O(N^2) Bottleneck in Bulletin Grade Aggregation]
+**Learning:** In bulletin generation components (`BulletinPreview.tsx` and `pdfGenerator.ts`), filtering the entire `grades` array repeatedly inside a loop over `coursesBySubject` resulted in an O(Subjects * Courses * TotalGrades) complexity, severely impacting performance for large datasets.
+**Action:** Pre-compute a `Map` of grades keyed by `courseId` (filtered once by `student.id` and date range) before the loop, replacing O(TotalGrades) inner filters with O(1) map lookups, effectively reducing complexity to O(TotalGrades + Courses).
