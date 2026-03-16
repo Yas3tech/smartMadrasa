@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## $(date +%Y-%m-%d) - [O(N^2) Render Bottleneck in Classes.tsx]
+**Learning:** Found an O(N^2) bottleneck where `students.filter` and `users.find` were called inside a `classes.map` loop during render in `src/pages/director/Classes.tsx`.
+**Action:** Replaced array lookups with pre-computed O(1) `Map` lookups using `useMemo` for `teacherMap` and `classStudentsMap`, resolving the performance issue.
