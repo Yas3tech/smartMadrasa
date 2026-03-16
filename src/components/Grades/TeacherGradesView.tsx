@@ -282,13 +282,17 @@ const TeacherGradesView = () => {
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={tg.handleUpdateGrade}
-                                className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                className="p-1 text-green-600 hover:bg-green-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                aria-label={t('common.save')}
+                                title={t('common.save')}
                               >
                                 <Check size={18} />
                               </button>
                               <button
                                 onClick={tg.cancelEditing}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                className="p-1 text-red-600 hover:bg-red-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                aria-label={t('common.cancel')}
+                                title={t('common.cancel')}
                               >
                                 <X size={18} />
                               </button>
@@ -296,7 +300,9 @@ const TeacherGradesView = () => {
                           ) : (
                             <button
                               onClick={() => tg.startEditingGrade(grade)}
-                              className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                              className="p-1 text-gray-400 hover:text-indigo-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
+                              aria-label={t('common.edit')}
+                              title={t('common.edit')}
                             >
                               <Pencil size={18} />
                             </button>
@@ -421,13 +427,17 @@ const TeacherGradesView = () => {
                               <div className="flex justify-end gap-2">
                                 <button
                                   onClick={tg.handleUpdateGrade}
-                                  className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                  className="p-1 text-green-600 hover:bg-green-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                  aria-label={t('common.save')}
+                                  title={t('common.save')}
                                 >
                                   <Check size={18} />
                                 </button>
                                 <button
                                   onClick={tg.cancelEditing}
-                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                  aria-label={t('common.cancel')}
+                                  title={t('common.cancel')}
                                 >
                                   <X size={18} />
                                 </button>
@@ -435,7 +445,9 @@ const TeacherGradesView = () => {
                             ) : (
                               <button
                                 onClick={() => tg.startEditingGrade(grade)}
-                                className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                                className="p-1 text-gray-400 hover:text-indigo-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
+                                aria-label={t('common.edit')}
+                                title={t('common.edit')}
                               >
                                 <Pencil size={18} />
                               </button>
