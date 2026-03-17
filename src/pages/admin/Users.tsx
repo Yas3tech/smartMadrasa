@@ -487,6 +487,7 @@ const UserManagement = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Jean Dupont"
+              autoComplete="off"
             />
             <Input
               label={t('users.email')}
@@ -494,6 +495,7 @@ const UserManagement = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jean.dupont@school.ma"
+              autoComplete="off"
             />
 
             {(role === 'teacher' || role === 'parent') && (
@@ -503,6 +505,7 @@ const UserManagement = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+212 6..."
+                autoComplete="off"
               />
             )}
 
@@ -512,6 +515,7 @@ const UserManagement = () => {
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
+                autoComplete="off"
               />
             )}
 
