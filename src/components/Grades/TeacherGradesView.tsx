@@ -34,7 +34,9 @@ const TeacherGradesView = () => {
           <button
             onClick={() => tg.setIsBulkModalOpen(true)}
             disabled={!tg.selectedClassId}
-            className={`p-2 rounded-lg bg-orange-700/30 backdrop-blur-md border border-white/20 ${!tg.selectedClassId ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 transition-transform'}`}
+            className={`p-2 rounded-lg bg-orange-700/30 backdrop-blur-md border border-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${!tg.selectedClassId ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 transition-transform'}`}
+            aria-label={t('grades.addBulkGrades')}
+            title={t('grades.addBulkGrades')}
           >
             <Upload size={20} />
           </button>
@@ -94,7 +96,9 @@ const TeacherGradesView = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={tg.goBack}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              aria-label={t('common.back')}
+              title={t('common.back')}
             >
               <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
             </button>
@@ -151,7 +155,9 @@ const TeacherGradesView = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={tg.goBack}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                aria-label={t('common.back')}
+                title={t('common.back')}
               >
                 <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
               </button>
@@ -282,13 +288,17 @@ const TeacherGradesView = () => {
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={tg.handleUpdateGrade}
-                                className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                className="p-1 text-green-600 hover:bg-green-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                aria-label={t('common.save')}
+                                title={t('common.save')}
                               >
                                 <Check size={18} />
                               </button>
                               <button
                                 onClick={tg.cancelEditing}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                className="p-1 text-red-600 hover:bg-red-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                aria-label={t('common.cancel')}
+                                title={t('common.cancel')}
                               >
                                 <X size={18} />
                               </button>
@@ -296,7 +306,9 @@ const TeacherGradesView = () => {
                           ) : (
                             <button
                               onClick={() => tg.startEditingGrade(grade)}
-                              className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                              className="p-1 text-gray-400 hover:text-indigo-600 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                              aria-label={t('common.edit')}
+                              title={t('common.edit')}
                             >
                               <Pencil size={18} />
                             </button>
@@ -318,7 +330,9 @@ const TeacherGradesView = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={tg.goBack}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              aria-label={t('common.back')}
+              title={t('common.back')}
             >
               <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
             </button>
@@ -421,13 +435,17 @@ const TeacherGradesView = () => {
                               <div className="flex justify-end gap-2">
                                 <button
                                   onClick={tg.handleUpdateGrade}
-                                  className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                  className="p-1 text-green-600 hover:bg-green-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                  aria-label={t('common.save')}
+                                  title={t('common.save')}
                                 >
                                   <Check size={18} />
                                 </button>
                                 <button
                                   onClick={tg.cancelEditing}
-                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                  aria-label={t('common.cancel')}
+                                  title={t('common.cancel')}
                                 >
                                   <X size={18} />
                                 </button>
@@ -435,7 +453,9 @@ const TeacherGradesView = () => {
                             ) : (
                               <button
                                 onClick={() => tg.startEditingGrade(grade)}
-                                className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                                className="p-1 text-gray-400 hover:text-indigo-600 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                aria-label={t('common.edit')}
+                                title={t('common.edit')}
                               >
                                 <Pencil size={18} />
                               </button>
