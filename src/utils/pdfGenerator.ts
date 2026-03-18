@@ -42,9 +42,31 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
   // Pre-compute comments map for O(1) lookups
   const studentPeriodCommentsMap = new Map(
     comments
-      .filter((c) => c.studentId === student.id && c.periodId === period.id)
-      .map((c) => [c.courseId, c])
+      .filter((c) => c.studentId === student.id && c.periodId === period.id && c.courseId)
+      .map((c) => [c.courseId as string, c])
   );
+
+  // Optimization: Pre-compute grades for this student and period into a map for O(1) lookups.
+  // This reduces complexity from O(Courses * Grades) to O(Grades + Courses),
+  // and avoids repeatedly instantiating Date objects within the nested loop.
+  const periodStart = new Date(period.startDate).getTime();
+  const periodEnd = new Date(period.endDate).getTime();
+
+  const studentPeriodGradesMap = new Map<string, typeof grades>();
+  for (let i = 0; i < grades.length; i++) {
+    const g = grades[i];
+    if (g.studentId === student.id) {
+      const d = new Date(g.date).getTime();
+      if (d >= periodStart && d <= periodEnd) {
+        if (g.courseId) {
+          if (!studentPeriodGradesMap.has(g.courseId)) {
+            studentPeriodGradesMap.set(g.courseId, []);
+          }
+          studentPeriodGradesMap.get(g.courseId)!.push(g);
+        }
+      }
+    }
+  }
 
   // Calculate averages - group by subject to avoid duplicates
   const coursesBySubject = courses.reduce(
@@ -61,13 +83,8 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
   const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
     // Get all grades for this student across all courses with this subject
     const allPeriodGrades = subjectCourses.flatMap((course) => {
-      const courseGrades = grades.filter(
-        (g) => g.studentId === student.id && g.courseId === course.id
-      );
-      return courseGrades.filter((g) => {
-        const d = new Date(g.date);
-        return d >= new Date(period.startDate) && d <= new Date(period.endDate);
-      });
+      const gradesForCourse = studentPeriodGradesMap.get(course.id);
+      return gradesForCourse || [];
     });
 
     const average =
