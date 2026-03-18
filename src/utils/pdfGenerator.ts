@@ -42,8 +42,8 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
   // Pre-compute comments map for O(1) lookups
   const studentPeriodCommentsMap = new Map(
     comments
-      .filter((c) => c.studentId === student.id && c.periodId === period.id)
-      .map((c) => [c.courseId, c])
+      .filter((c) => c.studentId === student.id && c.periodId === period.id && c.courseId)
+      .map((c) => [c.courseId as string, c])
   );
 
   // Optimization: Pre-compute grades for this student and period into a map for O(1) lookups.
@@ -58,10 +58,12 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
     if (g.studentId === student.id) {
       const d = new Date(g.date).getTime();
       if (d >= periodStart && d <= periodEnd) {
-        if (!studentPeriodGradesMap.has(g.courseId)) {
-          studentPeriodGradesMap.set(g.courseId, []);
+        if (g.courseId) {
+          if (!studentPeriodGradesMap.has(g.courseId)) {
+            studentPeriodGradesMap.set(g.courseId, []);
+          }
+          studentPeriodGradesMap.get(g.courseId)!.push(g);
         }
-        studentPeriodGradesMap.get(g.courseId)!.push(g);
       }
     }
   }
@@ -80,7 +82,10 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
 
   const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
     // Get all grades for this student across all courses with this subject
-    const allPeriodGrades = subjectCourses.flatMap((course) => studentPeriodGradesMap.get(course.id) || []);
+    const allPeriodGrades = subjectCourses.flatMap((course) => {
+      const gradesForCourse = studentPeriodGradesMap.get(course.id);
+      return gradesForCourse || [];
+    });
 
     const average =
       allPeriodGrades.length > 0
