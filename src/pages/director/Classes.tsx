@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useUsers, useAcademics } from '../../context/DataContext';
@@ -65,9 +65,29 @@ const Classes = () => {
     setIsModalOpen(false);
   };
 
-  const getClassTeacher = (id: string) => users.find((entry) => entry.id === id);
-  const getClassStudents = (classId: string) =>
-    students.filter((student) => (student as Student).classId === classId);
+  // ⚡ Bolt: Pre-compute maps to optimize O(N^2) render bottleneck
+  // Replacing O(N) array lookups (users.find and students.filter) inside classes.map()
+  // with O(1) Map lookups. Reduces render complexity to O(N).
+  const teacherMap = useMemo(() => {
+    const map = new Map();
+    users.forEach(u => map.set(u.id, u));
+    return map;
+  }, [users]);
+
+  const classStudentsMap = useMemo(() => {
+    const map = new Map();
+    students.forEach(s => {
+      const student = s as Student;
+      if (student.classId) {
+        if (!map.has(student.classId)) map.set(student.classId, []);
+        map.get(student.classId).push(student);
+      }
+    });
+    return map;
+  }, [students]);
+
+  const getClassTeacher = (id: string) => teacherMap.get(id);
+  const getClassStudents = (classId: string): Student[] => classStudentsMap.get(classId) || [];
 
   const handleManageStudents = (classGroup: ClassGroup) => {
     setManagingClass(classGroup);
