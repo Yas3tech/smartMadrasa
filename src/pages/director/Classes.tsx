@@ -87,7 +87,7 @@ const Classes = () => {
   }, [students]);
 
   const getClassTeacher = (id: string) => teacherMap.get(id);
-  const getClassStudents = (classId: string) => classStudentsMap.get(classId) || [];
+  const getClassStudents = (classId: string): Student[] => classStudentsMap.get(classId) || [];
 
   const handleManageStudents = (classGroup: ClassGroup) => {
     setManagingClass(classGroup);
