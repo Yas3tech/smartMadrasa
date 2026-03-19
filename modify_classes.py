@@ -1,82 +1,47 @@
-import sys
+import re
 
-try:
-    with open('src/services/classes.ts', 'r') as f:
-        content = f.read()
+with open('src/pages/director/Classes.tsx', 'r') as f:
+    content = f.read()
 
-    # Replacement 1: Imports
-    search_import = """import {
-  collection,
-  doc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-} from 'firebase/firestore';"""
+# Add useMemo import if missing
+if "import { useState" in content and "useMemo" not in content:
+    content = content.replace("import { useState }", "import { useState, useMemo }")
 
-    replace_import = """import {
-  collection,
-  doc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-  query,
-  where,
-  documentId,
-} from 'firebase/firestore';"""
+# Add the pre-computed maps before the classes.map
+# Find the line "const getClassTeacher =" and replace it
+replacement = """
+  // ⚡ Bolt: Pre-compute maps to optimize O(N^2) render bottleneck
+  // Replacing O(N) array lookups (users.find and students.filter) inside classes.map()
+  // with O(1) Map lookups. Reduces render complexity to O(N).
+  const teacherMap = useMemo(() => {
+    const map = new Map();
+    users.forEach(u => map.set(u.id, u));
+    return map;
+  }, [users]);
 
-    if search_import not in content:
-        print("Error: Could not find import block")
-        sys.exit(1)
-
-    content = content.replace(search_import, replace_import)
-
-    # Replacement 2: Function
-    search_func = """export const subscribeToClasses = (callback: (classes: ClassGroup[]) => void) => {
-  if (!db) return () => { };
-  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
-    const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
-    callback(classes);
-  });
-};"""
-
-    replace_func = """export const subscribeToClasses = (
-  callback: (classes: ClassGroup[]) => void,
-  classIds?: string[]
-) => {
-  if (!db) return () => { };
-
-  if (classIds) {
-    if (classIds.length === 0) {
-      callback([]);
-      return () => { };
-    }
-
-    const q = query(collection(db, COLLECTION_NAME), where(documentId(), 'in', classIds));
-    return onSnapshot(q, (snapshot) => {
-      const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
-      callback(classes);
+  const classStudentsMap = useMemo(() => {
+    const map = new Map();
+    students.forEach(s => {
+      const student = s as Student;
+      if (student.classId) {
+        if (!map.has(student.classId)) map.set(student.classId, []);
+        map.get(student.classId).push(student);
+      }
     });
-  }
+    return map;
+  }, [students]);
 
-  return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
-    const classes = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }) as ClassGroup);
-    callback(classes);
-  });
-};"""
+  const getClassTeacher = (id: string) => teacherMap.get(id);
+  const getClassStudents = (classId: string) => classStudentsMap.get(classId) || [];
+"""
 
-    if search_func not in content:
-        sys.exit(1)
+content = re.sub(
+    r"  const getClassTeacher = \(id: string\) => users\.find\(\(entry\) => entry\.id === id\);\n  const getClassStudents = \(classId: string\) =>\n    students\.filter\(\(student\) => \(student as Student\)\.classId === classId\);",
+    replacement.strip('\n'),
+    content
+)
 
-    content = content.replace(search_func, replace_func)
+with open('src/pages/director/Classes.tsx', 'w') as f:
+    f.write(content)
 
-    with open('src/services/classes.ts', 'w') as f:
-        f.write(content)
-    print("Successfully modified src/services/classes.ts")
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-    sys.exit(1)
+print("Done")
