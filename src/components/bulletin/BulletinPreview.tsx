@@ -40,7 +40,7 @@ const BulletinPreview: React.FC<BulletinPreviewProps> = ({
   const periodEnd = new Date(period.endDate).getTime();
   const studentPeriodGradesMap = new Map<string, Grade[]>();
   grades.forEach((g) => {
-    if (g.studentId === student.id) {
+    if (g.studentId === student.id && g.courseId) {
       const d = new Date(g.date).getTime();
       if (d >= periodStart && d <= periodEnd) {
         if (!studentPeriodGradesMap.has(g.courseId)) {
