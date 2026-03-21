@@ -103,9 +103,15 @@ export function useDashboard(): UseDashboardReturn {
   );
 
   const upcomingEvents = useMemo(() => {
+    // Optimization: Pre-compute current time to avoid repeated Date object creation
+    const now = Date.now();
     return events
-      .filter((e) => new Date(e.start) >= new Date())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      // Optimization: Parse dates once per element using Date.parse which is faster than new Date()
+      .map((e) => ({ original: e, parsedStart: Date.parse(e.start) }))
+      .filter((wrapper) => wrapper.parsedStart >= now)
+      .sort((a, b) => a.parsedStart - b.parsedStart)
+      // Extract original object to maintain reference identity
+      .map((wrapper) => wrapper.original)
       .slice(0, 3);
   }, [events]);
 
@@ -151,12 +157,16 @@ export function useDashboard(): UseDashboardReturn {
   }, [myGrades]);
 
   const pendingHomeworks = useMemo(() => {
+    // Optimization: Pre-compute current time
+    const now = Date.now();
     return homeworks
-      .filter((hw) => {
-        if (hw.classId !== targetClassId) return false;
-        return new Date(hw.dueDate) >= new Date();
-      })
-      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+      .filter((hw) => hw.classId === targetClassId)
+      // Optimization: Parse dates once using Date.parse which is faster than new Date()
+      .map((hw) => ({ original: hw, parsedDueDate: Date.parse(hw.dueDate) }))
+      .filter((wrapper) => wrapper.parsedDueDate >= now)
+      .sort((a, b) => a.parsedDueDate - b.parsedDueDate)
+      // Extract original object to maintain reference identity
+      .map((wrapper) => wrapper.original)
       .slice(0, 5);
   }, [homeworks, targetClassId]);
 
