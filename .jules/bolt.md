@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2025-03-03 - [Date Parsing Inside Loops]
+**Learning:** Found a performance bottleneck in `useDashboard.ts` where `new Date().getTime()` and `new Date(string)` were repeatedly executed inside `.filter()` and `.sort()` callbacks, leading to O(N log N) `Date` object instantiations and heavy garbage collection overhead.
+**Action:** When filtering or sorting lists by dates, always pre-compute `Date.now()` outside the loop. Use a Schwartzian transform (e.g., `.map(item => ({ original: item, parsed: Date.parse(item.date) }))`) to evaluate timestamps exactly once per item, preserving the original object's reference identity rather than unsafely spreading objects (`{ ...item, parsed: ... }`) which can break React's rendering optimizations.
