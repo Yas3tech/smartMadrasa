@@ -155,8 +155,9 @@ service cloud.firestore {
       );
       // Improved Write Rule: Validate Score Range and Class Access
       // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
+      // SECURITY FIX: Enforce immutability on studentId to prevent IDOR
       allow create: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
-      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId)) && isValidGrade();
+      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId && request.resource.data.studentId == resource.data.studentId)) && isValidGrade();
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
@@ -172,8 +173,9 @@ service cloud.firestore {
       );
       // Improved Write Rule: Validate Score Range and Class Access
       // SECURITY FIX: Use isTeacherForClass() instead of classIds (unreliable)
+      // SECURITY FIX: Enforce immutability on studentId to prevent IDOR
       allow create: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) && isValidGrade();
-      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId)) && isValidGrade();
+      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId && request.resource.data.studentId == resource.data.studentId)) && isValidGrade();
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
 
@@ -189,7 +191,8 @@ service cloud.firestore {
       );
       allow create: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)))
         && request.resource.data.studentId is string;
-      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId))
+      // SECURITY FIX: Enforce immutability on studentId to prevent IDOR
+      allow update: if (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId && request.resource.data.studentId == resource.data.studentId))
         && request.resource.data.studentId is string;
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
@@ -206,7 +209,8 @@ service cloud.firestore {
       allow create: if request.resource.data.studentId == userId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId))) &&
         isValidGrade();
-      allow update: if request.resource.data.studentId == userId &&
+      // SECURITY FIX: Enforce immutability on studentId to prevent IDOR
+      allow update: if request.resource.data.studentId == userId && request.resource.data.studentId == resource.data.studentId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId)) &&
         isValidGrade();
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
@@ -222,7 +226,8 @@ service cloud.firestore {
       );
       allow create: if request.resource.data.studentId == userId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(request.resource.data.classId)));
-      allow update: if request.resource.data.studentId == userId &&
+      // SECURITY FIX: Enforce immutability on studentId to prevent IDOR
+      allow update: if request.resource.data.studentId == userId && request.resource.data.studentId == resource.data.studentId &&
         (isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId) && request.resource.data.classId == resource.data.classId));
       allow delete: if isDirector() || isSuperAdmin() || (isTeacher() && isTeacherForClass(resource.data.classId));
     }
@@ -376,8 +381,9 @@ service cloud.firestore {
       
       // LOGIC-02: Prevent identity spoofing
       // Teachers can only update/delete their own events
+      // SECURITY FIX: Enforce immutability on classId and teacherId to prevent IDOR
       allow update: if isDirector() || isSuperAdmin() || (
-        isTeacher() && isTeacherForClass(resource.data.classId) && resource.data.teacherId == request.auth.uid
+        isTeacher() && isTeacherForClass(resource.data.classId) && resource.data.teacherId == request.auth.uid && request.resource.data.classId == resource.data.classId && request.resource.data.teacherId == resource.data.teacherId
       );
       
       allow delete: if isDirector() || isSuperAdmin() || (
@@ -420,8 +426,9 @@ service cloud.firestore {
                       (isTeacher() &&
                        request.resource.data.teacherId == request.auth.uid &&
                        canTeacherCommentStudent(request.resource.data.studentId));
+      // SECURITY FIX: Enforce immutability on studentId and teacherId to prevent IDOR
       allow update: if isAuthenticated() && (
-        (isTeacher() && resource.data.teacherId == request.auth.uid) ||
+        (isTeacher() && resource.data.teacherId == request.auth.uid && request.resource.data.studentId == resource.data.studentId && request.resource.data.teacherId == resource.data.teacherId) ||
         isDirector() ||
         isSuperAdmin()
       );
