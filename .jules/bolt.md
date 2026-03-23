@@ -31,3 +31,7 @@
 ## 2024-06-18 - Optimize Grade Filtering in Bulletin Processing
 **Learning:** Found an O(N^2) bottleneck in `BulletinPreview.tsx` and `pdfGenerator.ts` where the entire `grades` array was filtered repeatedly inside a nested `coursesBySubject.flatMap` loop. Date strings for the period bounds were also redundantly parsed for every matching grade.
 **Action:** Always pre-compute a lookup Map (e.g., `studentPeriodGradesMap`) in a single O(N) pass before iterating over relational collections like courses, and parse reference dates (like period start/end) exactly once outside the loop.
+
+## 2024-06-18 - Resolving Vulnerability-Induced CI Failures
+**Learning:** `pnpm audit --audit-level high` CI step can fail a build due to critical/high transitive dependencies vulnerabilities like `jspdf`, `flatted`, and `fast-xml-parser`.
+**Action:** As instructed in memory, use `pnpm.overrides` in `package.json` to enforce patched versions, run `pnpm install` to update `pnpm-lock.yaml`, and verify the fix using `pnpm audit`.
