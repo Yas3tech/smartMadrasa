@@ -222,6 +222,8 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
                                 schedule.mobileDate.toISOString().split('T')[0]
                               )
                             }
+                            title={t('common.delete')}
+                            aria-label={t('common.delete')}
                           >
                             <Trash2 size={16} />
                           </button>
