@@ -35,3 +35,7 @@
 ## 2024-06-18 - Resolving Vulnerability-Induced CI Failures
 **Learning:** `pnpm audit --audit-level high` CI step can fail a build due to critical/high transitive dependencies vulnerabilities like `jspdf`, `flatted`, and `fast-xml-parser`.
 **Action:** As instructed in memory, use `pnpm.overrides` in `package.json` to enforce patched versions, run `pnpm install` to update `pnpm-lock.yaml`, and verify the fix using `pnpm audit`.
+
+## 2024-06-18 - Typescript Errors With Optional Interface Fields
+**Learning:** When using an optional property (e.g., `courseId?: string`) as a key in a map or function argument, TypeScript will throw an `Argument of type 'string | undefined' is not assignable to parameter of type 'string'` error if not explicitly checked for truthiness.
+**Action:** Always verify optional interface fields exist (e.g., `if (g.courseId) { ... }`) before utilizing them as non-nullable map keys or method arguments to avoid TS build failures in CI.

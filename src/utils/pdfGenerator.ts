@@ -54,7 +54,7 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
 
   for (let i = 0; i < grades.length; i++) {
     const g = grades[i];
-    if (g.studentId === student.id) {
+    if (g.studentId === student.id && g.courseId) {
       const time = new Date(g.date).getTime();
       if (time >= periodStart && time <= periodEnd) {
         if (!studentPeriodGradesMap.has(g.courseId)) {
