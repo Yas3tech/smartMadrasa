@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2026-03-24 - Repeated `new Date()` allocations in filter/sort loops
+**Learning:** Instantiating `new Date()` inside `.filter()` and `.sort()` array methods creates a severe O(N) to O(N log N) performance bottleneck due to continuous object allocation and date parsing overhead.
+**Action:** Pre-compute the target comparison strings outside loops. For array iteration, use a Schwartzian transform (e.g., `.map(item => ({ original: item, parsedDate: new Date(item.date) }))`) to cache parsed objects and scalar values (`.getTime()`) once per item before applying filters and sorts, then map back to the original objects.
