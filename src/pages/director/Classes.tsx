@@ -180,7 +180,9 @@ const Classes = () => {
                 </div>
                 <button
                   onClick={() => handleEdit(classGroup)}
-                  className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  aria-label={t('common.edit')}
+                  title={t('common.edit')}
                 >
                   <Edit2 size={18} />
                 </button>
@@ -201,7 +203,9 @@ const Classes = () => {
 
                 <button
                   onClick={() => handleManageStudents(classGroup)}
-                  className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-between p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  aria-label={`${t('classes.manageStudents')} ${classGroup.name}`}
+                  title={t('classes.manageStudents')}
                 >
                   <div className="flex items-center gap-2">
                     <Users className="text-blue-600" size={18} />
@@ -250,7 +254,9 @@ const Classes = () => {
             </h2>
             <button
               onClick={() => setIsModalOpen(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              aria-label={t('common.close')}
+              title={t('common.close')}
             >
               <X size={24} />
             </button>
@@ -310,7 +316,9 @@ const Classes = () => {
             </div>
             <button
               onClick={() => setIsStudentModalOpen(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              aria-label={t('common.close')}
+              title={t('common.close')}
             >
               <X size={24} />
             </button>
@@ -341,8 +349,9 @@ const Classes = () => {
                       </div>
                       <button
                         onClick={() => handleRemoveStudentFromClass(student.id)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                         title={t('classes.removeStudent')}
+                        aria-label={`${t('classes.removeStudent')} ${student.name}`}
                       >
                         <UserMinus size={18} />
                       </button>
@@ -393,8 +402,9 @@ const Classes = () => {
                       </div>
                       <button
                         onClick={() => handleAddStudentToClass(student.id)}
-                        className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                         title={t('classes.addStudent')}
+                        aria-label={`${t('classes.addStudent')} ${student.name}`}
                       >
                         <UserPlus size={18} />
                       </button>
