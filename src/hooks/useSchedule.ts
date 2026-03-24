@@ -161,6 +161,7 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
     const dayIndex = mobileDate.getDay() || 7;
     const dateTs = mobileDate.getTime();
     const currentDateStr = mobileDate.toISOString().split('T')[0];
+    const targetDateStr = mobileDate.toDateString();
 
     return userCourses
       .filter((course) => {
@@ -174,7 +175,8 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
           return true;
         }
         if (course.specificDate) {
-          return new Date(course.specificDate).toDateString() === mobileDate.toDateString();
+          // PERFORMANCE: Precompute targetDateStr to avoid repeated calls
+          return new Date(course.specificDate).toDateString() === targetDateStr;
         }
         // Fallback: course has no recurrence info and no specific date → treat as always-recurring
         return true;
@@ -183,14 +185,20 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
   }, [userCourses, mobileDate]);
 
   const mobileExams = useMemo(() => {
+    // PERFORMANCE: Use Schwartzian transform to avoid O(N log N) repeated Date parsing
+    const targetDateStr = mobileDate.toDateString();
     return userExams
-      .filter((exam) => new Date(exam.start).toDateString() === mobileDate.toDateString())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+      .map((exam) => ({ original: exam, parsedDate: new Date(exam.start) }))
+      .filter((item) => item.parsedDate.toDateString() === targetDateStr)
+      .sort((a, b) => a.parsedDate.getTime() - b.parsedDate.getTime())
+      .map((item) => item.original);
   }, [userExams, mobileDate]);
 
   const mobileHomeworks = useMemo(() => {
+    // PERFORMANCE: Precompute targetDateStr to avoid repeated `.toDateString()` on every iteration
+    const targetDateStr = mobileDate.toDateString();
     return userHomeworks.filter(
-      (hw) => new Date(hw.dueDate).toDateString() === mobileDate.toDateString()
+      (hw) => new Date(hw.dueDate).toDateString() === targetDateStr
     );
   }, [userHomeworks, mobileDate]);
 
