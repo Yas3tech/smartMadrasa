@@ -7,3 +7,8 @@
 **Vulnerability:** In `firestore.rules`, combining `create` and `update` rules using only `request.resource.data` to validate authorization (e.g., `isTeacherForClass(request.resource.data.classId)`) creates an Insecure Direct Object Reference (IDOR) vulnerability. An attacker could modify an existing document belonging to another class and maliciously reassign it to their own class, bypassing the check since `request.resource.data.classId` satisfies the condition.
 **Learning:** Firestore `update` operations merge new data (`request.resource.data`) with existing data (`resource.data`). Authorization checks for `update` MUST validate against the existing data (`resource.data`) to ensure the user has rights to the original document, not just the proposed changes.
 **Prevention:** Always separate `create` and `update` rules. For `update` rules, enforce access checks using `resource.data` (e.g., `isTeacherForClass(resource.data.classId)`) AND explicitly prevent reassignment by asserting that key grouping fields remain unchanged (e.g., `request.resource.data.classId == resource.data.classId`).
+
+## 2026-03-26 - [High] Fix Picomatch ReDoS Vulnerability
+**Vulnerability:** The `picomatch` package (< 4.0.4) was vulnerable to a Regular Expression Denial of Service (ReDoS) via extglob quantifiers. This was flagged by `pnpm audit` during the CI pipeline run.
+**Learning:** We need to keep our dependencies secure and listen to CI alerts from `pnpm audit`.
+**Prevention:** Update `package.json` with a strict override for `picomatch: ">=4.0.4"` to ensure transitive dependencies use the patched version. Always run `pnpm audit` to check for dependency vulnerabilities.
