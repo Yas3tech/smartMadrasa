@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2024-03-28 - NotificationBell generateNotifications Re-render O(N log N) overhead
+**Learning:** In React, dynamically generated notification arrays inside components (like `generateNotifications` in `NotificationBell`) trigger expensive array sorts with `Date` object instantiations `O(N log N)` on *every* single render (e.g. toggling a dropdown). This overhead multiplies across multiple arrays (events, grades, messages).
+**Action:** Always wrap array transformations that parse dates/sort inside `useMemo`. When applying multiple sorts across arrays containing ISO date strings, employ the Schwartzian transform (e.g. `.map(e => ({ original: e, parsed: Date.parse(e.date) }))`) within the memoized block to eliminate repetitive string parsing overhead within the sort comparator, improving performance significantly.
