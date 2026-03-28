@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -35,14 +35,14 @@ const NotificationBell = () => {
     localStorage.setItem('readNotificationIds', JSON.stringify(readNotificationIds));
   }, [readNotificationIds]);
 
-  // Generate notifications from app data
-  const generateNotifications = (): Notification[] => {
-    const notifications: Notification[] = [];
+  // Generate notifications from app data memoized
+  const notifications = useMemo(() => {
+    const notifs: Notification[] = [];
 
     // Message notifications (only unread ones)
     const unreadMessages = messages.filter((m) => m.receiverId === user?.id && !m.read);
     unreadMessages.slice(0, 3).forEach((msg) => {
-      notifications.push({
+      notifs.push({
         id: `msg-${msg.id}`,
         originalId: msg.id,
         type: 'message',
@@ -58,13 +58,16 @@ const NotificationBell = () => {
     if (user?.role === 'student') {
       const recentGrades = grades
         .filter((g) => g.studentId === user.id)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        // Optimization: Pre-parse dates to avoid repeated Date parsing in sort
+        .map(g => ({ original: g, parsedDate: Date.parse(g.date) }))
+        .sort((a, b) => b.parsedDate - a.parsedDate)
+        .map(item => item.original)
         .slice(0, 5); // Check more to filter out read ones
 
       recentGrades.forEach((grade) => {
         const notifId = `grade-${grade.id}`;
         if (!readNotificationIds.includes(notifId)) {
-          notifications.push({
+          notifs.push({
             id: notifId,
             originalId: grade.id,
             type: 'grade',
@@ -79,15 +82,19 @@ const NotificationBell = () => {
     }
 
     // Event notifications (upcoming events)
+    const now = Date.now();
     const upcomingEvents = events
-      .filter((e) => new Date(e.start) > new Date())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      // Optimization: Cache parsed start times
+      .map(e => ({ original: e, parsedStart: Date.parse(e.start) }))
+      .filter((e) => e.parsedStart > now)
+      .sort((a, b) => a.parsedStart - b.parsedStart)
+      .map(item => item.original)
       .slice(0, 5);
 
     upcomingEvents.forEach((event) => {
       const notifId = `event-${event.id}`;
       if (!readNotificationIds.includes(notifId)) {
-        notifications.push({
+        notifs.push({
           id: notifId,
           originalId: event.id,
           type: 'event',
@@ -100,12 +107,14 @@ const NotificationBell = () => {
       }
     });
 
-    return notifications
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    return notifs
+      // Optimization: Cache parsed timestamps for final sort
+      .map(n => ({ original: n, parsedTime: Date.parse(n.timestamp) }))
+      .sort((a, b) => b.parsedTime - a.parsedTime)
+      .map(item => item.original)
       .slice(0, 5);
-  };
+  }, [messages, grades, events, user, readNotificationIds, t]);
 
-  const notifications = generateNotifications();
   const unreadCount = notifications.length;
 
   // Close dropdown when clicking outside
