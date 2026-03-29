@@ -180,7 +180,9 @@ const Classes = () => {
                 </div>
                 <button
                   onClick={() => handleEdit(classGroup)}
-                  className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  title={t('common.edit')}
+                  aria-label={t('common.edit')}
                 >
                   <Edit2 size={18} />
                 </button>
@@ -341,8 +343,9 @@ const Classes = () => {
                       </div>
                       <button
                         onClick={() => handleRemoveStudentFromClass(student.id)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                         title={t('classes.removeStudent')}
+                        aria-label={t('classes.removeStudent')}
                       >
                         <UserMinus size={18} />
                       </button>
@@ -393,8 +396,9 @@ const Classes = () => {
                       </div>
                       <button
                         onClick={() => handleAddStudentToClass(student.id)}
-                        className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                         title={t('classes.addStudent')}
+                        aria-label={t('classes.addStudent')}
                       >
                         <UserPlus size={18} />
                       </button>
