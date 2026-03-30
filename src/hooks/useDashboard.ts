@@ -92,8 +92,8 @@ export function useDashboard(): UseDashboardReturn {
   const avgGrade = useMemo(() => {
     return allGrades.length > 0
       ? (
-        allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
-      ).toFixed(1)
+          allGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / allGrades.length
+        ).toFixed(1)
       : 0;
   }, [allGrades]);
 
@@ -103,10 +103,17 @@ export function useDashboard(): UseDashboardReturn {
   );
 
   const upcomingEvents = useMemo(() => {
-    return events
-      .filter((e) => new Date(e.start) >= new Date())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-      .slice(0, 3);
+    const now = Date.now();
+    return (
+      events
+        // Optimization: Parse dates once and cache them (Schwartzian transform)
+        // to avoid O(N log N) new Date() instantiations during sort/filter
+        .map((e) => ({ original: e, parsedDate: new Date(e.start).getTime() }))
+        .filter((e) => e.parsedDate >= now)
+        .sort((a, b) => a.parsedDate - b.parsedDate)
+        .slice(0, 3)
+        .map((e) => e.original)
+    );
   }, [events]);
 
   // Memoized Student Specific Calculations
@@ -126,8 +133,8 @@ export function useDashboard(): UseDashboardReturn {
   const myAvg = useMemo(() => {
     return myGrades.length > 0
       ? (
-        myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
-      ).toFixed(1)
+          myGrades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0) / myGrades.length
+        ).toFixed(1)
       : 0;
   }, [myGrades]);
 
@@ -151,13 +158,18 @@ export function useDashboard(): UseDashboardReturn {
   }, [myGrades]);
 
   const pendingHomeworks = useMemo(() => {
-    return homeworks
-      .filter((hw) => {
-        if (hw.classId !== targetClassId) return false;
-        return new Date(hw.dueDate) >= new Date();
-      })
-      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-      .slice(0, 5);
+    const now = Date.now();
+    return (
+      homeworks
+        // Optimization: Filter by class first, then cache parsed dates
+        // to avoid O(N log N) new Date() instantiations during sort/filter
+        .filter((hw) => hw.classId === targetClassId)
+        .map((hw) => ({ original: hw, parsedDate: new Date(hw.dueDate).getTime() }))
+        .filter((hw) => hw.parsedDate >= now)
+        .sort((a, b) => a.parsedDate - b.parsedDate)
+        .slice(0, 5)
+        .map((hw) => hw.original)
+    );
   }, [homeworks, targetClassId]);
 
   const childClass = useMemo(
