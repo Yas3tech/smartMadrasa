@@ -186,7 +186,7 @@ const NotificationBell = () => {
       {/* Bell Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-xl transition-all duration-200 group"
+        className="relative p-2 text-gray-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-xl transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
         aria-label={t('notificationCenter.title')}
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -221,14 +221,14 @@ const NotificationBell = () => {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="text-xs font-medium text-orange-600 hover:text-orange-700 underline"
+                  className="text-xs font-medium text-orange-600 hover:text-orange-700 underline focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
                 >
                   {t('notificationCenter.markAllRead')}
                 </button>
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 aria-label={t('common.close')}
               >
                 <X size={20} />

@@ -191,7 +191,7 @@ const Sidebar = ({ isCollapsed }: SidebarProps) => {
 
         <button
           onClick={logout}
-          className={`flex items-center gap-2 text-sm text-red-500 hover:text-red-600 w-full px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors ${isCollapsed ? 'justify-center' : ''
+          className={`flex items-center gap-2 text-sm text-red-500 hover:text-red-600 w-full px-2 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${isCollapsed ? 'justify-center' : ''
             }`}
           title={t('sidebar.logout')}
           aria-label={t('sidebar.logout')}
