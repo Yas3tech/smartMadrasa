@@ -96,7 +96,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                   ? setIsMobileMenuOpen(!isMobileMenuOpen)
                   : setIsSidebarCollapsed(!isSidebarCollapsed)
               }
-              className="group relative p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 hover:from-orange-100 hover:to-orange-200 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-orange-200 dark:border-orange-700/50"
+              className="group relative p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 hover:from-orange-100 hover:to-orange-200 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-orange-200 dark:border-orange-700/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               title={isSidebarCollapsed ? t('common.showMenu') : t('common.hideMenu')}
               aria-label={isSidebarCollapsed ? t('common.showMenu') : t('common.hideMenu')}
             >
