@@ -376,8 +376,11 @@ service cloud.firestore {
       
       // LOGIC-02: Prevent identity spoofing
       // Teachers can only update/delete their own events
+      // 🛡️ SECURITY: Prevent IDOR (reassigning events to other classes or teachers)
       allow update: if isDirector() || isSuperAdmin() || (
-        isTeacher() && isTeacherForClass(resource.data.classId) && resource.data.teacherId == request.auth.uid
+        isTeacher() && isTeacherForClass(resource.data.classId) && resource.data.teacherId == request.auth.uid &&
+        request.resource.data.classId == resource.data.classId &&
+        request.resource.data.teacherId == resource.data.teacherId
       );
       
       allow delete: if isDirector() || isSuperAdmin() || (
@@ -420,8 +423,13 @@ service cloud.firestore {
                       (isTeacher() &&
                        request.resource.data.teacherId == request.auth.uid &&
                        canTeacherCommentStudent(request.resource.data.studentId));
+      // 🛡️ SECURITY: Prevent IDOR (reassigning comments to other students)
       allow update: if isAuthenticated() && (
-        (isTeacher() && resource.data.teacherId == request.auth.uid) ||
+        (
+          isTeacher() && resource.data.teacherId == request.auth.uid &&
+          request.resource.data.studentId == resource.data.studentId &&
+          request.resource.data.teacherId == resource.data.teacherId
+        ) ||
         isDirector() ||
         isSuperAdmin()
       );
