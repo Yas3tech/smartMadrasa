@@ -60,12 +60,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Sidebar - hidden on mobile by default, shown as overlay when menu open */}
       <div
         className={`
-                ${isMobile
-            ? isMobileMenuOpen
-              ? `fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 transform transition-transform duration-300 ease-out translate-x-0`
-              : 'hidden'
-            : ''
-          }
+                ${
+                  isMobile
+                    ? isMobileMenuOpen
+                      ? `fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-50 w-64 transform transition-transform duration-300 ease-out translate-x-0`
+                      : 'hidden'
+                    : ''
+                }
             `}
       >
         <Sidebar isCollapsed={isMobile ? false : isSidebarCollapsed} />
@@ -73,7 +74,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${isMobile
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          isMobile
             ? ''
             : isSidebarCollapsed
               ? isRTL
@@ -82,7 +84,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               : isRTL
                 ? 'mr-64'
                 : 'ml-64'
-          }`}
+        }`}
       >
         {/* Header */}
         <header
@@ -96,7 +98,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                   ? setIsMobileMenuOpen(!isMobileMenuOpen)
                   : setIsSidebarCollapsed(!isSidebarCollapsed)
               }
-              className="group relative p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 hover:from-orange-100 hover:to-orange-200 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-orange-200 dark:border-orange-700/50"
+              className="group relative p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 hover:from-orange-100 hover:to-orange-200 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-orange-200 dark:border-orange-700/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               title={isSidebarCollapsed ? t('common.showMenu') : t('common.hideMenu')}
               aria-label={isSidebarCollapsed ? t('common.showMenu') : t('common.hideMenu')}
             >
