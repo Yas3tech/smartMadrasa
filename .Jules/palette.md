@@ -11,3 +11,6 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+## 2024-05-24 - Screen reader communication of loading states
+**Learning:** `Button` components often display loading spinners visually but fail to announce this asynchronous loading state to screen readers, causing confusion for non-visual users.
+**Action:** Always add `aria-busy={isLoading}` directly to `<button>` elements to properly announce the busy state when asynchronous actions are in progress.
