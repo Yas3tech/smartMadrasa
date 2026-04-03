@@ -34,6 +34,7 @@ const TeacherGradesView = () => {
           <button
             onClick={() => tg.setIsBulkModalOpen(true)}
             disabled={!tg.selectedClassId}
+            aria-label={t('grades.addBulkGrades')}
             className={`p-2 rounded-lg bg-orange-700/30 backdrop-blur-md border border-white/20 ${!tg.selectedClassId ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 transition-transform'}`}
           >
             <Upload size={20} />
@@ -94,6 +95,7 @@ const TeacherGradesView = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={tg.goBack}
+              aria-label={t('common.back')}
               className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             >
               <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
@@ -151,6 +153,7 @@ const TeacherGradesView = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={tg.goBack}
+                aria-label={t('common.back')}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
@@ -282,12 +285,14 @@ const TeacherGradesView = () => {
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={tg.handleUpdateGrade}
+                                aria-label={t('common.save')}
                                 className="p-1 text-green-600 hover:bg-green-50 rounded"
                               >
                                 <Check size={18} />
                               </button>
                               <button
                                 onClick={tg.cancelEditing}
+                                aria-label={t('common.cancel')}
                                 className="p-1 text-red-600 hover:bg-red-50 rounded"
                               >
                                 <X size={18} />
@@ -296,6 +301,7 @@ const TeacherGradesView = () => {
                           ) : (
                             <button
                               onClick={() => tg.startEditingGrade(grade)}
+                              aria-label={t('common.edit')}
                               className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
                             >
                               <Pencil size={18} />
@@ -318,6 +324,7 @@ const TeacherGradesView = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={tg.goBack}
+              aria-label={t('common.back')}
               className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             >
               <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
@@ -421,12 +428,14 @@ const TeacherGradesView = () => {
                               <div className="flex justify-end gap-2">
                                 <button
                                   onClick={tg.handleUpdateGrade}
+                                  aria-label={t('common.save')}
                                   className="p-1 text-green-600 hover:bg-green-50 rounded"
                                 >
                                   <Check size={18} />
                                 </button>
                                 <button
                                   onClick={tg.cancelEditing}
+                                  aria-label={t('common.cancel')}
                                   className="p-1 text-red-600 hover:bg-red-50 rounded"
                                 >
                                   <X size={18} />
@@ -435,6 +444,7 @@ const TeacherGradesView = () => {
                             ) : (
                               <button
                                 onClick={() => tg.startEditingGrade(grade)}
+                                aria-label={t('common.edit')}
                                 className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
                               >
                                 <Pencil size={18} />
