@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { Modal, Button } from '../UI';
 import { X, Calendar, Clock, BookOpen, FileText, GraduationCap } from 'lucide-react';
 import type { Event, Homework } from '../../types';
@@ -17,15 +18,31 @@ type UpcomingItem =
 const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEventsModalProps) => {
   const { t, i18n } = useTranslation();
 
-  // Combine events and homeworks
-  const upcomingItems: UpcomingItem[] = [
-    ...events
-      .filter((e) => new Date(e.start) >= new Date())
-      .map((e) => ({ type: 'event' as const, data: e, date: new Date(e.start) })),
-    ...homeworks
-      .filter((h) => new Date(h.dueDate) >= new Date())
-      .map((h) => ({ type: 'homework' as const, data: h, date: new Date(h.dueDate) })),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  // Combine events and homeworks with useMemo and optimized date parsing
+  const upcomingItems = useMemo<UpcomingItem[]>(() => {
+    const now = Date.now();
+    const items: UpcomingItem[] = [];
+
+    // Single pass for events
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      const time = Date.parse(event.start);
+      if (time >= now) {
+        items.push({ type: 'event', data: event, date: new Date(time) });
+      }
+    }
+
+    // Single pass for homeworks
+    for (let i = 0; i < homeworks.length; i++) {
+      const homework = homeworks[i];
+      const time = Date.parse(homework.dueDate);
+      if (time >= now) {
+        items.push({ type: 'homework', data: homework, date: new Date(time) });
+      }
+    }
+
+    return items.sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [events, homeworks]);
 
   const eventTypeConfig = {
     lesson: {

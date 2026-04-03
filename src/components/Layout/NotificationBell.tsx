@@ -35,9 +35,10 @@ const NotificationBell = () => {
     localStorage.setItem('readNotificationIds', JSON.stringify(readNotificationIds));
   }, [readNotificationIds]);
 
-  // Generate notifications from app data
-  const generateNotifications = (): Notification[] => {
+  // Generate notifications from app data wrapped in useMemo with optimized date parsing
+  const notifications = useMemo(() => {
     const notifications: Notification[] = [];
+    const now = Date.now();
 
     // Message notifications (only unread ones)
     const unreadMessages = messages.filter((m) => m.receiverId === user?.id && !m.read);
@@ -58,8 +59,10 @@ const NotificationBell = () => {
     if (user?.role === 'student') {
       const recentGrades = grades
         .filter((g) => g.studentId === user.id)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 5); // Check more to filter out read ones
+        .map((g) => ({ original: g, time: Date.parse(g.date) }))
+        .sort((a, b) => b.time - a.time)
+        .slice(0, 5)
+        .map((item) => item.original);
 
       recentGrades.forEach((grade) => {
         const notifId = `grade-${grade.id}`;
@@ -80,9 +83,11 @@ const NotificationBell = () => {
 
     // Event notifications (upcoming events)
     const upcomingEvents = events
-      .filter((e) => new Date(e.start) > new Date())
-      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
-      .slice(0, 5);
+      .map((e) => ({ original: e, time: Date.parse(e.start) }))
+      .filter((e) => e.time > now)
+      .sort((a, b) => a.time - b.time)
+      .slice(0, 5)
+      .map((item) => item.original);
 
     upcomingEvents.forEach((event) => {
       const notifId = `event-${event.id}`;
@@ -101,11 +106,11 @@ const NotificationBell = () => {
     });
 
     return notifications
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .map((n) => ({ original: n, time: Date.parse(n.timestamp) }))
+      .sort((a, b) => b.time - a.time)
+      .map((item) => item.original)
       .slice(0, 5);
-  };
-
-  const notifications = generateNotifications();
+  }, [messages, grades, events, user?.id, user?.role, t, readNotificationIds]);
   const unreadCount = notifications.length;
 
   // Close dropdown when clicking outside
