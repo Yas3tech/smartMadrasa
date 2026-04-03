@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2025-03-03 - [Date Parsing Optimization in Array Iterations]
+**Learning:** Found a severe performance overhead in `UpcomingEventsModal.tsx` and `NotificationBell.tsx` where `new Date()` object instantiation or `Date.parse()` occurred directly inside nested array `.filter()` and `.sort()` callbacks. This results in heavy redundant computation O(N log N) during renders.
+**Action:** Always pre-compute and cache parsed timestamps outside of chained array loops. For complex chaining, use a Schwartzian transform pattern (`.map(item => ({ original: item, parsed: Date.parse(item.date) }))`) to evaluate dates only once while preserving object reference identity, avoiding expensive re-evaluation during sorting.
