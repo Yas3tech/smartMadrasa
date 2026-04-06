@@ -34,7 +34,9 @@ const TeacherGradesView = () => {
           <button
             onClick={() => tg.setIsBulkModalOpen(true)}
             disabled={!tg.selectedClassId}
-            className={`p-2 rounded-lg bg-orange-700/30 backdrop-blur-md border border-white/20 ${!tg.selectedClassId ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 transition-transform'}`}
+            title={t('grades.addBulkGrades')}
+            aria-label={t('grades.addBulkGrades')}
+            className={`p-2 rounded-lg bg-orange-700/30 backdrop-blur-md border border-white/20 focus-visible:ring-2 focus-visible:ring-orange-500 focus:outline-none ${!tg.selectedClassId ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 transition-transform'}`}
           >
             <Upload size={20} />
           </button>
@@ -264,12 +266,13 @@ const TeacherGradesView = () => {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${grade.type === 'exam'
-                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                              : grade.type === 'homework'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
-                              }`}
+                            className={`px-2 py-1 rounded text-xs font-medium ${
+                              grade.type === 'exam'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                : grade.type === 'homework'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
+                            }`}
                           >
                             {t(`grades.${grade.type}`)}
                           </span>
@@ -282,13 +285,17 @@ const TeacherGradesView = () => {
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={tg.handleUpdateGrade}
-                                className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                title={t('common.save')}
+                                aria-label={t('common.save')}
+                                className="p-1 text-green-600 hover:bg-green-50 rounded focus-visible:ring-2 focus-visible:ring-green-500 focus:outline-none"
                               >
                                 <Check size={18} />
                               </button>
                               <button
                                 onClick={tg.cancelEditing}
-                                className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                title={t('common.cancel')}
+                                aria-label={t('common.cancel')}
+                                className="p-1 text-red-600 hover:bg-red-50 rounded focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none"
                               >
                                 <X size={18} />
                               </button>
@@ -296,7 +303,9 @@ const TeacherGradesView = () => {
                           ) : (
                             <button
                               onClick={() => tg.startEditingGrade(grade)}
-                              className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                              title={t('common.edit')}
+                              aria-label={t('common.edit')}
+                              className="p-1 text-gray-400 hover:text-indigo-600 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus:outline-none"
                             >
                               <Pencil size={18} />
                             </button>
@@ -403,12 +412,13 @@ const TeacherGradesView = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`px-2 py-1 rounded text-xs font-medium ${grade.type === 'exam'
-                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                                : grade.type === 'homework'
-                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                  : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
-                                }`}
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                grade.type === 'exam'
+                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : grade.type === 'homework'
+                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                    : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
+                              }`}
                             >
                               {t(`grades.${grade.type}`)}
                             </span>
@@ -421,13 +431,17 @@ const TeacherGradesView = () => {
                               <div className="flex justify-end gap-2">
                                 <button
                                   onClick={tg.handleUpdateGrade}
-                                  className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                  title={t('common.save')}
+                                  aria-label={t('common.save')}
+                                  className="p-1 text-green-600 hover:bg-green-50 rounded focus-visible:ring-2 focus-visible:ring-green-500 focus:outline-none"
                                 >
                                   <Check size={18} />
                                 </button>
                                 <button
                                   onClick={tg.cancelEditing}
-                                  className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  title={t('common.cancel')}
+                                  aria-label={t('common.cancel')}
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded focus-visible:ring-2 focus-visible:ring-red-500 focus:outline-none"
                                 >
                                   <X size={18} />
                                 </button>
@@ -435,7 +449,9 @@ const TeacherGradesView = () => {
                             ) : (
                               <button
                                 onClick={() => tg.startEditingGrade(grade)}
-                                className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                                title={t('common.edit')}
+                                aria-label={t('common.edit')}
+                                className="p-1 text-gray-400 hover:text-indigo-600 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus:outline-none"
                               >
                                 <Pencil size={18} />
                               </button>
