@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../UI';
 import { X, Calendar, Clock, BookOpen, FileText, GraduationCap } from 'lucide-react';
@@ -18,14 +19,31 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
   const { t, i18n } = useTranslation();
 
   // Combine events and homeworks
-  const upcomingItems: UpcomingItem[] = [
-    ...events
-      .filter((e) => new Date(e.start) >= new Date())
-      .map((e) => ({ type: 'event' as const, data: e, date: new Date(e.start) })),
-    ...homeworks
-      .filter((h) => new Date(h.dueDate) >= new Date())
-      .map((h) => ({ type: 'homework' as const, data: h, date: new Date(h.dueDate) })),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  // ⚡ Bolt: Memoized array combining to avoid O(N log N) sorting and object recreation on every render.
+  // Replaced chained filter().map() with a single loop to avoid intermediate array allocations.
+  // Moved Date parsing into loop to parse once per item instead of twice, and cached Date.now().
+  // Included `isOpen` in dependency array to ensure `now` is re-evaluated when the modal is opened.
+  // Impact: Reduces rendering overhead from ~O(2N + N log N) complex parsing steps to ~O(N + N log N) simpler steps.
+  const upcomingItems: UpcomingItem[] = useMemo(() => {
+    const now = Date.now();
+    const items: UpcomingItem[] = [];
+
+    for (const e of events) {
+      const parsedDate = new Date(e.start);
+      if (parsedDate.getTime() >= now) {
+        items.push({ type: 'event', data: e, date: parsedDate });
+      }
+    }
+
+    for (const h of homeworks) {
+      const parsedDate = new Date(h.dueDate);
+      if (parsedDate.getTime() >= now) {
+        items.push({ type: 'homework', data: h, date: parsedDate });
+      }
+    }
+
+    return items.sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [events, homeworks, isOpen]);
 
   const eventTypeConfig = {
     lesson: {
