@@ -67,8 +67,9 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-2 text-white/80" />
           <button
-            className="text-white/80 hover:text-white p-2"
+            className="text-white/80 hover:text-white p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:rounded-lg"
             onClick={() => schedule.setShowUpcomingModal(true)}
+            aria-label={t('schedule.upcoming')}
           >
             <CalendarIcon size={24} />
           </button>
@@ -93,7 +94,8 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
       <div className="flex items-center justify-between px-6 mb-6">
         <button
           onClick={schedule.handlePrevDay}
-          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600"
+          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+          aria-label={t('common.previous')}
         >
           <ChevronLeft size={20} />
         </button>
@@ -105,7 +107,8 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
         </span>
         <button
           onClick={schedule.handleNextDay}
-          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600"
+          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+          aria-label={t('common.next')}
         >
           <ChevronRight size={20} />
         </button>
@@ -214,7 +217,8 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
                         )}
                         {schedule.canEdit && (
                           <button
-                            className="absolute right-2 top-2 p-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"
+                            className="absolute right-2 top-2 p-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-gray-400 hover:text-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:rounded-lg"
+                            aria-label={t('common.delete')}
                             onClick={(e) =>
                               schedule.showDeleteMenu(
                                 e,
@@ -298,7 +302,8 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
           )}
           <button
             onClick={() => schedule.setIsFabOpen(!schedule.isFabOpen)}
-            className={`w-14 h-14 ${schedule.isFabOpen ? 'bg-gray-800' : 'bg-orange-600'} text-white rounded-full shadow-lg flex items-center justify-center hover:opacity-90`}
+            className={`w-14 h-14 ${schedule.isFabOpen ? 'bg-gray-800' : 'bg-orange-600'} text-white rounded-full shadow-lg flex items-center justify-center hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500`}
+            aria-label={t('common.add')}
           >
             <Plus
               size={28}
