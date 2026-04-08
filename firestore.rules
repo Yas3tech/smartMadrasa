@@ -377,7 +377,9 @@ service cloud.firestore {
       // LOGIC-02: Prevent identity spoofing
       // Teachers can only update/delete their own events
       allow update: if isDirector() || isSuperAdmin() || (
-        isTeacher() && isTeacherForClass(resource.data.classId) && resource.data.teacherId == request.auth.uid
+        isTeacher() && isTeacherForClass(resource.data.classId) && resource.data.teacherId == request.auth.uid &&
+        request.resource.data.classId == resource.data.classId &&
+        request.resource.data.teacherId == resource.data.teacherId
       );
       
       allow delete: if isDirector() || isSuperAdmin() || (
