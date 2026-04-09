@@ -7,3 +7,8 @@
 **Vulnerability:** In `firestore.rules`, combining `create` and `update` rules using only `request.resource.data` to validate authorization (e.g., `isTeacherForClass(request.resource.data.classId)`) creates an Insecure Direct Object Reference (IDOR) vulnerability. An attacker could modify an existing document belonging to another class and maliciously reassign it to their own class, bypassing the check since `request.resource.data.classId` satisfies the condition.
 **Learning:** Firestore `update` operations merge new data (`request.resource.data`) with existing data (`resource.data`). Authorization checks for `update` MUST validate against the existing data (`resource.data`) to ensure the user has rights to the original document, not just the proposed changes.
 **Prevention:** Always separate `create` and `update` rules. For `update` rules, enforce access checks using `resource.data` (e.g., `isTeacherForClass(resource.data.classId)`) AND explicitly prevent reassignment by asserting that key grouping fields remain unchanged (e.g., `request.resource.data.classId == resource.data.classId`).
+
+## 2025-02-23 - [Direct Dependency jsPDF HTML Injection]
+**Vulnerability:** The jsPDF library had a critical HTML injection vulnerability when handling New Window paths.
+**Learning:** Using an outdated direct dependency with known vulnerabilities can introduce severe security risks like HTML injection, especially in PDF generation components.
+**Prevention:** Always use bounded version constraints (e.g., `^4.2.1`) in `package.json` dependencies or overrides to ensure critical security patches are applied without introducing breaking changes.
