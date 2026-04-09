@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../UI';
 import { X, Calendar, Clock, BookOpen, FileText, GraduationCap } from 'lucide-react';
@@ -18,14 +19,17 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
   const { t, i18n } = useTranslation();
 
   // Combine events and homeworks
-  const upcomingItems: UpcomingItem[] = [
-    ...events
-      .filter((e) => new Date(e.start) >= new Date())
-      .map((e) => ({ type: 'event' as const, data: e, date: new Date(e.start) })),
-    ...homeworks
-      .filter((h) => new Date(h.dueDate) >= new Date())
-      .map((h) => ({ type: 'homework' as const, data: h, date: new Date(h.dueDate) })),
-  ].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const upcomingItems: UpcomingItem[] = useMemo(() => {
+    if (!isOpen) return [];
+
+    const now = new Date();
+    return [
+      ...events.map(e => ({ type: 'event' as const, data: e, date: new Date(e.start) })),
+      ...homeworks.map(h => ({ type: 'homework' as const, data: h, date: new Date(h.dueDate) }))
+    ]
+      .filter(item => item.date >= now)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [events, homeworks, isOpen]);
 
   const eventTypeConfig = {
     lesson: {
