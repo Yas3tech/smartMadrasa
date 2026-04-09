@@ -8,7 +8,7 @@
 **Learning:** Firestore `update` operations merge new data (`request.resource.data`) with existing data (`resource.data`). Authorization checks for `update` MUST validate against the existing data (`resource.data`) to ensure the user has rights to the original document, not just the proposed changes.
 **Prevention:** Always separate `create` and `update` rules. For `update` rules, enforce access checks using `resource.data` (e.g., `isTeacherForClass(resource.data.classId)`) AND explicitly prevent reassignment by asserting that key grouping fields remain unchanged (e.g., `request.resource.data.classId == resource.data.classId`).
 
-## 2025-02-23 - [Direct Dependency jsPDF HTML Injection]
-**Vulnerability:** The jsPDF library had a critical HTML injection vulnerability when handling New Window paths.
-**Learning:** Using an outdated direct dependency with known vulnerabilities can introduce severe security risks like HTML injection, especially in PDF generation components.
-**Prevention:** Always use bounded version constraints (e.g., `^4.2.1`) in `package.json` dependencies or overrides to ensure critical security patches are applied without introducing breaking changes.
+## 2025-02-23 - [Multiple Transitive Dependency Vulnerabilities]
+**Vulnerability:** Several high-severity vulnerabilities were identified in transitive dependencies (`vite`, `node-forge`, `picomatch`, `fast-xml-parser`) via `pnpm audit`.
+**Learning:** Security audits frequently uncover vulnerabilities deep within the dependency tree where direct package updates aren't possible. The package manager's override mechanism is required to force safe versions across all consumers.
+**Prevention:** Use `pnpm.overrides` with bounded version constraints (e.g., `^7.3.2`) in `package.json` to systematically resolve transitive vulnerabilities without waiting for upstream package maintainers.
