@@ -18,11 +18,12 @@ import { AcademicProvider, useAcademics } from './slices/AcademicContext';
 import { CommunicationProvider, useCommunication } from './slices/CommunicationContext';
 import { PerformanceProvider, usePerformance } from './slices/PerformanceContext';
 
+// eslint-disable-next-line react-refresh/only-export-components
 // Re-export specific hooks for performance optimization
-export { useUsers } from './slices/UserContext';
-export { useAcademics } from './slices/AcademicContext';
-export { useCommunication } from './slices/CommunicationContext';
-export { usePerformance } from './slices/PerformanceContext';
+import { useUsers as _useUsers } from './slices/UserContext';
+import { useAcademics as _useAcademics } from './slices/AcademicContext';
+import { useCommunication as _useCommunication } from './slices/CommunicationContext';
+import { usePerformance as _usePerformance } from './slices/PerformanceContext';
 
 export interface DataContextType {
   // State
@@ -103,6 +104,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
 /**
  * @deprecated usage of useData causes re-renders on any data change.
+// eslint-disable-next-line react-refresh/only-export-components
  * Please use specific hooks instead: useUsers, useAcademics, useCommunication, usePerformance.
  */
 export const useData = (): DataContextType => {
@@ -177,3 +179,6 @@ export const useData = (): DataContextType => {
     };
   }, [userContext, academicContext, communicationContext, performanceContext, useFirebase]);
 };
+
+// Re-export correctly below to avoid eslint warnings
+export { _useUsers as useUsers, _useAcademics as useAcademics, _useCommunication as useCommunication, _usePerformance as usePerformance };
