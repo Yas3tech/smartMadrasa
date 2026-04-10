@@ -1,0 +1,13 @@
+--- src/context/DataContext.tsx
++++ src/context/DataContext.tsx
+@@ -107,10 +107,10 @@
+
+ /**
+  * @deprecated usage of useData causes re-renders on any data change.
+-// eslint-disable-next-line react-refresh/only-export-components
+  * Please use specific hooks instead: useUsers, useAcademics, useCommunication, usePerformance.
+  */
++// eslint-disable-next-line react-refresh/only-export-components
+ export const useData = (): DataContextType => {
+   const userContext = useUsers();
+   const academicContext = useAcademics();

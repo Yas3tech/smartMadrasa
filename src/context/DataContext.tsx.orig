@@ -18,7 +18,7 @@ import { AcademicProvider, useAcademics } from './slices/AcademicContext';
 import { CommunicationProvider, useCommunication } from './slices/CommunicationContext';
 import { PerformanceProvider, usePerformance } from './slices/PerformanceContext';
 
-
+// eslint-disable-next-line react-refresh/only-export-components
 // Re-export specific hooks for performance optimization
 import { useUsers as _useUsers } from './slices/UserContext';
 import { useAcademics as _useAcademics } from './slices/AcademicContext';
@@ -104,9 +104,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
 /**
  * @deprecated usage of useData causes re-renders on any data change.
+// eslint-disable-next-line react-refresh/only-export-components
  * Please use specific hooks instead: useUsers, useAcademics, useCommunication, usePerformance.
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export const useData = (): DataContextType => {
   const userContext = useUsers();
   const academicContext = useAcademics();
