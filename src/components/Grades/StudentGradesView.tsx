@@ -35,15 +35,31 @@ const StudentGradesView = () => {
     return studentGrades.filter((g) => g.subject === selectedSubject);
   }, [studentGrades, selectedSubject]);
 
+  // ⚡ Bolt: Pre-compute maps to prevent O(N^2) render bottleneck
+  const teacherMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const u of users) {
+      map.set(u.id, u.name);
+    }
+    return map;
+  }, [users]);
+
+  const courseMap = useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    for (const c of courses) {
+      map.set(`${c.classId}::${c.subject}`, c.teacherName);
+    }
+    return map;
+  }, [courses]);
+
   if (!user || !stats) return null;
 
   const getTeacherName = (grade: Grade) => {
     if (grade.teacherId) {
-      const teacher = users.find((u) => u.id === grade.teacherId);
-      if (teacher) return teacher.name;
+      const teacherName = teacherMap.get(grade.teacherId);
+      if (teacherName !== undefined) return teacherName;
     }
-    const course = courses.find((c) => c.classId === grade.classId && c.subject === grade.subject);
-    return course?.teacherName;
+    return courseMap.get(`${grade.classId}::${grade.subject}`);
   };
 
   return (
