@@ -83,7 +83,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             aria-label={t('common.close')}
             disabled={isSending}
           >
@@ -105,7 +105,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                   {item.label}
                   <button
                     onClick={() => handleRemoveRecipient(item.id)}
-                    className="hover:text-orange-800 dark:hover:text-orange-200 transition-colors"
+                    className="hover:text-orange-800 dark:hover:text-orange-200 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                     disabled={isSending || (composeMode === 'reply' && recipients.length === 1)}
                   >
                     <X size={14} />
@@ -137,7 +137,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                       setRecipientSearch('');
                       setShowRecipientDropdown(false);
                     }}
-                    className="w-full px-4 py-3 text-left hover:bg-orange-50 dark:hover:bg-slate-600 transition-colors flex items-center gap-2 border-b border-gray-100 dark:border-slate-600 last:border-0"
+                    className="w-full px-4 py-3 text-left hover:bg-orange-50 dark:hover:bg-slate-600 transition-colors flex items-center gap-2 border-b border-gray-100 dark:border-slate-600 last:border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   >
                     <span className="text-sm text-gray-900 dark:text-white">{item.label}</span>
                   </button>
@@ -177,7 +177,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
               </label>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+                className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 disabled={isSending}
               >
                 <Paperclip size={16} />
@@ -210,7 +210,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({
                     </div>
                     <button
                       onClick={() => removeAttachment(index)}
-                      className="text-gray-400 hover:text-red-500 p-1"
+                      className="text-gray-400 hover:text-red-500 p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                       aria-label={t('common.delete')}
                       disabled={isSending}
                     >
