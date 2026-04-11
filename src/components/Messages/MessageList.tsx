@@ -44,7 +44,7 @@ const MessageList: React.FC<MessageListProps> = ({
                     {isMobile && (
                         <button
                             onClick={() => setMobileView('folders')}
-                            className="p-1 mr-2 -ml-2 text-gray-500"
+                            className="p-1 mr-2 -ml-2 text-gray-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-lg"
                             aria-label={t('common.back')}
                         >
                             <ChevronLeft size={24} />
@@ -75,7 +75,7 @@ const MessageList: React.FC<MessageListProps> = ({
                         />
                     </div>
                     <button
-                        className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                         aria-label={t('common.filter')}
                     >
                         <Filter size={18} />
