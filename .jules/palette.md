@@ -11,3 +11,7 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+
+## 2025-05-20 - Ensure All Icon-Only Buttons Include `aria-label` Attributes
+**Learning:** During review of the `TeacherGradesView` component, several icon-only buttons (such as those using Lucide-react icons for "Upload", "Back", "Save", "Cancel", and "Edit") were identified lacking accessible names, which creates a poor experience for screen reader users relying on semantic markup.
+**Action:** When working with or adding new icon-only buttons in the application, ALWAYS apply a localized `aria-label` attribute (e.g., `aria-label={t('common.edit')}`) that accurately describes the button's action. This is a critical pattern for maintaining an accessible design system.
