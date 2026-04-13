@@ -35,8 +35,6 @@ const StudentGradesView = () => {
     return studentGrades.filter((g) => g.subject === selectedSubject);
   }, [studentGrades, selectedSubject]);
 
-  if (!user || !stats) return null;
-
   // Pre-compute user and course maps to optimize lookups in the render loop
   const teacherMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -55,6 +53,8 @@ const StudentGradesView = () => {
     });
     return map;
   }, [courses]);
+
+  if (!user || !stats) return null;
 
   const getTeacherName = (grade: Grade) => {
     if (grade.teacherId) {
