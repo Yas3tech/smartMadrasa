@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2025-03-03 - [Nested Loop O(N*M) Optimization in StudentGradesView]
+**Learning:** Found a performance bottleneck in `StudentGradesView.tsx` where an `Array.prototype.find()` lookup over `users` and `courses` was executed inside the render loop for `myGrades`. This creates an O(G * (U + C)) complexity (Grades x (Users + Courses)) on each render.
+**Action:** Replaced the inner `find()` searches with O(1) `Map.prototype.get()` lookups by pre-computing `teacherMap` and `courseMap` in O(U + C) time. Always pre-compute lookup maps before mapping over arrays to resolve related items in the render loop.
