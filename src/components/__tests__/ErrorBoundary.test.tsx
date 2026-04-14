@@ -1,6 +1,8 @@
 /// <reference types="@testing-library/jest-dom" />
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../i18n';
 import ErrorBoundary from '../ErrorBoundary';
 
 // Component that throws an error on render
@@ -19,9 +21,11 @@ describe('ErrorBoundary', () => {
 
     it('renders children when there is no error', () => {
         render(
-            <ErrorBoundary>
-                <ThrowingComponent shouldThrow={false} />
-            </ErrorBoundary>
+            <I18nextProvider i18n={i18n}>
+                <ErrorBoundary>
+                    <ThrowingComponent shouldThrow={false} />
+                </ErrorBoundary>
+            </I18nextProvider>
         );
 
         expect(screen.getByText('Normal content')).toBeInTheDocument();
@@ -29,9 +33,11 @@ describe('ErrorBoundary', () => {
 
     it('renders fallback UI when a child component throws', () => {
         render(
-            <ErrorBoundary>
-                <ThrowingComponent shouldThrow={true} />
-            </ErrorBoundary>
+            <I18nextProvider i18n={i18n}>
+                <ErrorBoundary>
+                    <ThrowingComponent shouldThrow={true} />
+                </ErrorBoundary>
+            </I18nextProvider>
         );
 
         expect(screen.getByText('Une erreur est survenue')).toBeInTheDocument();
@@ -40,9 +46,11 @@ describe('ErrorBoundary', () => {
 
     it('renders custom fallback when provided', () => {
         render(
-            <ErrorBoundary fallback={<div>Custom fallback</div>}>
-                <ThrowingComponent shouldThrow={true} />
-            </ErrorBoundary>
+            <I18nextProvider i18n={i18n}>
+                <ErrorBoundary fallback={<div>Custom fallback</div>}>
+                    <ThrowingComponent shouldThrow={true} />
+                </ErrorBoundary>
+            </I18nextProvider>
         );
 
         expect(screen.getByText('Custom fallback')).toBeInTheDocument();
@@ -56,9 +64,11 @@ describe('ErrorBoundary', () => {
         });
 
         render(
-            <ErrorBoundary>
-                <ThrowingComponent shouldThrow={true} />
-            </ErrorBoundary>
+            <I18nextProvider i18n={i18n}>
+                <ErrorBoundary>
+                    <ThrowingComponent shouldThrow={true} />
+                </ErrorBoundary>
+            </I18nextProvider>
         );
 
         fireEvent.click(screen.getByText('Recharger la page'));
@@ -69,9 +79,11 @@ describe('ErrorBoundary', () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
         render(
-            <ErrorBoundary>
-                <ThrowingComponent shouldThrow={true} />
-            </ErrorBoundary>
+            <I18nextProvider i18n={i18n}>
+                <ErrorBoundary>
+                    <ThrowingComponent shouldThrow={true} />
+                </ErrorBoundary>
+            </I18nextProvider>
         );
 
         expect(consoleSpy).toHaveBeenCalledWith(
