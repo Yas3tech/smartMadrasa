@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
               const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
               userData = userDoc.exists() ? userDoc.data() : null;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (docError: any) {
               console.warn('Initial doc fetch failed (likely mismatched UID permissions):', docError.message);
             }
