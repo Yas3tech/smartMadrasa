@@ -58,17 +58,32 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
     {} as Record<string, typeof courses>
   );
 
+  // Pre-filter grades for this student and period, and group them by courseId
+  // This reduces complexity from O(C * G) to O(G)
+  const pStart = new Date(period.startDate).getTime();
+  const pEnd = new Date(period.endDate).getTime();
+  const studentPeriodGrades = grades.filter((g) => {
+    if (g.studentId !== student.id) return false;
+    const t = new Date(g.date).getTime();
+    return t >= pStart && t <= pEnd;
+  });
+
+  const gradesByCourse = new Map<string, Grade[]>();
+  for (let i = 0; i < studentPeriodGrades.length; i++) {
+    const g = studentPeriodGrades[i];
+    const list = gradesByCourse.get(g.courseId);
+    if (list) {
+      list.push(g);
+    } else {
+      gradesByCourse.set(g.courseId, [g]);
+    }
+  }
+
   const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
-    // Get all grades for this student across all courses with this subject
-    const allPeriodGrades = subjectCourses.flatMap((course) => {
-      const courseGrades = grades.filter(
-        (g) => g.studentId === student.id && g.courseId === course.id
-      );
-      return courseGrades.filter((g) => {
-        const d = new Date(g.date);
-        return d >= new Date(period.startDate) && d <= new Date(period.endDate);
-      });
-    });
+    // Get all grades for this student across all courses with this subject using O(1) map lookup
+    const allPeriodGrades = subjectCourses.flatMap(
+      (course) => gradesByCourse.get(course.id) || []
+    );
 
     const average =
       allPeriodGrades.length > 0
