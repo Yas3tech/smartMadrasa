@@ -247,7 +247,7 @@ const Announcements = () => {
                     <div className="flex gap-1">
                       <button
                         onClick={() => togglePin(announcement.id, announcement.pinned)}
-                        className={`p-2 rounded-lg transition-colors ${
+                        className={`p-2 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                           announcement.pinned
                             ? 'text-orange-600 bg-orange-100'
                             : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50'
@@ -257,13 +257,19 @@ const Announcements = () => {
                             ? t('announcements.actions.unpin')
                             : t('announcements.actions.pin')
                         }
+                        aria-label={
+                          announcement.pinned
+                            ? t('announcements.actions.unpin')
+                            : t('announcements.actions.pin')
+                        }
                       >
                         <Pin size={18} />
                       </button>
                       <button
                         onClick={() => handleDeleteAnnouncement(announcement.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                         title={t('announcements.actions.delete')}
+                        aria-label={t('announcements.actions.delete')}
                       >
                         <Trash2 size={18} />
                       </button>
