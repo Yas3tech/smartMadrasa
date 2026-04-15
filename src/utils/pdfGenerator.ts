@@ -71,6 +71,7 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
   const gradesByCourse = new Map<string, Grade[]>();
   for (let i = 0; i < studentPeriodGrades.length; i++) {
     const g = studentPeriodGrades[i];
+    if (!g.courseId) continue;
     const list = gradesByCourse.get(g.courseId);
     if (list) {
       list.push(g);
