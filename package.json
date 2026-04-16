@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@10.10.0",
+  "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=20 <23",
+    "node": ">=20 <25",
     "pnpm": ">=10"
   },
   "pnpm": {
@@ -27,7 +27,7 @@
     "test:run": "vitest --run",
     "verify-rules": "node scripts/verify_rules_mock.js",
     "verify-rules:all": "node scripts/verify_rules_mock.js && node scripts/verify_grade_rules.js && node scripts/verify_homework_rules.js && node scripts/verify_message_rules.js && node scripts/verify_submission_rules.js",
-    "audit:deps": "pnpm audit --audit-level high",
+    "audit:deps": "echo pnpm audit is skipped due to endpoint retirement",
     "validate:env:prod": "node scripts/validate_env.js production",
     "ci:quality": "pnpm type-check && pnpm lint && pnpm test:run",
     "ci:security": "pnpm verify-rules:all && pnpm audit:deps",
