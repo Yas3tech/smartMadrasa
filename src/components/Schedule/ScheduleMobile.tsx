@@ -214,7 +214,7 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
                         )}
                         {schedule.canEdit && (
                           <button
-                            className="absolute right-2 top-2 p-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"
+                            className="absolute right-2 top-2 p-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 text-gray-400 hover:text-red-500"
                             onClick={(e) =>
                               schedule.showDeleteMenu(
                                 e,
@@ -222,6 +222,8 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
                                 schedule.mobileDate.toISOString().split('T')[0]
                               )
                             }
+                            aria-label={t('common.delete')}
+                            title={t('common.delete')}
                           >
                             <Trash2 size={16} />
                           </button>

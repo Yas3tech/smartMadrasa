@@ -11,3 +11,7 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+
+## 2024-10-24 - Icon-only schedule delete buttons lack accessibility
+**Learning:** Delete buttons in the Schedule calendar were icon-only, hidden by default (`opacity-0`), and lacked both `aria-label` and `focus-visible` states, making them invisible to keyboard users.
+**Action:** Added `aria-label={t('common.delete')}` and `focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500` to ensure keyboard and screen reader accessibility.
