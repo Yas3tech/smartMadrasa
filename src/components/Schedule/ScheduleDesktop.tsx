@@ -218,8 +218,10 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                                                 )}
                                                                 {schedule.canEdit && (
                                                                     <button
-                                                                        className="absolute -top-1 -right-1 p-1 bg-white dark:bg-slate-700 rounded-full shadow opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500"
+                                                                        className="absolute -top-1 -right-1 p-1 bg-white dark:bg-slate-700 rounded-full shadow opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 text-gray-500 hover:text-red-500"
                                                                         onClick={(e) => schedule.showDeleteMenu(e, ci.course.id, dateStr)}
+                                                                        aria-label={t('common.delete')}
+                                                                        title={t('common.delete')}
                                                                     >
                                                                         <Trash2 size={12} />
                                                                     </button>
