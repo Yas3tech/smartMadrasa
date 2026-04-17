@@ -89,7 +89,7 @@ export interface DataContextType {
   deleteGradeCategory: (id: string) => Promise<void>;
 }
 
-export const DataProvider = ({ children }: { children: ReactNode }) => {
+export function DataProvider({ children }: { children: ReactNode }) {
   return (
     <UserProvider>
       <AcademicProvider>
@@ -105,7 +105,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
  * @deprecated usage of useData causes re-renders on any data change.
  * Please use specific hooks instead: useUsers, useAcademics, useCommunication, usePerformance.
  */
-export const useData = (): DataContextType => {
+export function useData(): DataContextType {
   const userContext = useUsers();
   const academicContext = useAcademics();
   const communicationContext = useCommunication();
