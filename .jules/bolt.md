@@ -27,7 +27,3 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
-
-## 2026-04-17 - [O(N^2) Recipient Mapping Optimization]
-**Learning:** Found a performance bottleneck in `Messages.tsx` where multiple `Array.prototype.find()` lookups were executed inside a `.map()` loop for recipients during label generation and message sending.
-**Action:** When performing array transformations over recipients, always pre-compute search objects using `Map`s (O(N) initialization) to ensure O(1) lookups inside the iteration loop.
