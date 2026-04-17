@@ -60,7 +60,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       // SECURITY: Each role only subscribes to events it is authorized to see.
       // Do NOT replace these scoped queries with a generic fetch-all.
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
+        const parentUser = user as Parent; // Using Parent instead of any
         const classIds = parentUser.relatedClassIds || [];
         if (classIds.length > 0) {
           unsubEvents = subscribeToEventsByClassIds(classIds, setEvents);
@@ -183,7 +183,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   return <CommunicationContext.Provider value={value}>{children}</CommunicationContext.Provider>;
 };
 
-export const useCommunication = () => {
+export function useCommunication() {
   const context = useContext(CommunicationContext);
   if (!context) {
     throw new Error('useCommunication must be used within CommunicationProvider');
