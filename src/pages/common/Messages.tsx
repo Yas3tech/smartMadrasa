@@ -148,12 +148,20 @@ const Messages = () => {
     );
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
+  const recipientOptionsMap = useMemo(() => {
+    const map = new Map();
+    for (const opt of allRecipientOptions) {
+      map.set(opt.id, opt);
+    }
+    return map;
+  }, [allRecipientOptions]);
+
   const selectedRecipientLabels = useMemo(() => {
     return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+      const opt = recipientOptionsMap.get(id);
       return { id, label: opt?.label || id };
     });
-  }, [recipients, allRecipientOptions]);
+  }, [recipients, recipientOptionsMap]);
 
 
   const handleArchiveMessage = async (messageId: string | number) => {
@@ -220,16 +228,19 @@ const Messages = () => {
         attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
       );
 
+      const classMap = new Map(classes.map(c => [c.id, c]));
+      const userMap = new Map(users.map(u => [u.id, u]));
+
       const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
+        const selectedRecipient = recipientOptionsMap.get(recipientId);
 
         if (selectedRecipient?.type === 'class') {
-          const selectedClass = classes.find((c) => c.id === recipientId);
+          const selectedClass = classMap.get(recipientId);
           if (selectedClass) {
             const classStudents = users.filter(
               (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
             );
-            const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+            const classTeacher = userMap.get(selectedClass.teacherId);
             const classOutbound = classStudents.map((student) =>
               sendMessage({
                 senderId: user.id,
@@ -293,7 +304,7 @@ const Messages = () => {
     } finally {
       setIsSending(false);
     }
-  }, [user, recipients, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, t]), 2000);
+  }, [user, recipients, subject, content, isSending, recipientOptionsMap, classes, users, sendMessage, attachments, t]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
