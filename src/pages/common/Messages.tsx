@@ -139,6 +139,12 @@ const Messages = () => {
     ];
   }, [users, classes, t, isDirectorOrSuperAdmin]);
 
+  const recipientOptionsMap = useMemo(() => {
+    const map = new Map<string, typeof allRecipientOptions[0]>();
+    allRecipientOptions.forEach(opt => map.set(opt.id, opt));
+    return map;
+  }, [allRecipientOptions]);
+
   const filteredRecipients = useMemo(() => {
     const query = recipientSearch.trim().toLowerCase();
     if (query.length < MIN_RECIPIENT_SEARCH_CHARS) return [];
@@ -150,10 +156,10 @@ const Messages = () => {
 
   const selectedRecipientLabels = useMemo(() => {
     return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+      const opt = recipientOptionsMap.get(id);
       return { id, label: opt?.label || id };
     });
-  }, [recipients, allRecipientOptions]);
+  }, [recipients, recipientOptionsMap]);
 
 
   const handleArchiveMessage = async (messageId: string | number) => {
@@ -221,7 +227,7 @@ const Messages = () => {
       );
 
       const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
+        const selectedRecipient = recipientOptionsMap.get(recipientId);
 
         if (selectedRecipient?.type === 'class') {
           const selectedClass = classes.find((c) => c.id === recipientId);
