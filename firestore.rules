@@ -421,7 +421,10 @@ service cloud.firestore {
                        request.resource.data.teacherId == request.auth.uid &&
                        canTeacherCommentStudent(request.resource.data.studentId));
       allow update: if isAuthenticated() && (
-        (isTeacher() && resource.data.teacherId == request.auth.uid) ||
+        (isTeacher() &&
+         resource.data.teacherId == request.auth.uid &&
+         request.resource.data.teacherId == resource.data.teacherId &&
+         request.resource.data.studentId == resource.data.studentId) ||
         isDirector() ||
         isSuperAdmin()
       );

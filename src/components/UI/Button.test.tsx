@@ -65,7 +65,7 @@ describe('Button', () => {
   it('does not show icon when isLoading is true', () => {
 
     render(
-      <Button isLoading icon={MockIcon as any}>
+      <Button isLoading icon={MockIcon as unknown as React.ElementType}>
         Loading
       </Button>
     );
