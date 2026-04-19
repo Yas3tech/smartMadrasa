@@ -9,12 +9,12 @@ const mockUseAuth = vi.fn();
 vi.spyOn(AuthContext, 'useAuth').mockImplementation(mockUseAuth);
 
 const { triggerMessages, subscribe } = vi.hoisted(() => {
-  const callbacks: Set<(msgs: any[]) => void> = new Set();
+  const callbacks: Set<(msgs: Message[]) => void> = new Set();
   return {
-    triggerMessages: (msgs: any[]) => {
+    triggerMessages: (msgs: Message[]) => {
       callbacks.forEach((cb) => cb(msgs));
     },
-    subscribe: (cb: any) => {
+    subscribe: (cb: (msgs: Message[]) => void) => {
       callbacks.add(cb);
       return () => callbacks.delete(cb);
     },
