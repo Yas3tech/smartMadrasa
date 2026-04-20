@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DataContextType } from '../hooks/useData';
+import type { DataContextType } from '../context/DataContext';
 import { useUsers } from '../context/slices/UserContext';
 import { useAcademics } from '../context/slices/AcademicContext';
 import { useCommunication } from '../context/slices/CommunicationContext';
