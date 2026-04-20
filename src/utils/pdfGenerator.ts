@@ -58,16 +58,27 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
     {} as Record<string, typeof courses>
   );
 
+  // Pre-compute grades map for O(1) lookups by courseId to avoid O(C*G) filtering
+  const periodStartDate = new Date(period.startDate).getTime();
+  const periodEndDate = new Date(period.endDate).getTime();
+
+  const studentPeriodGradesMap = new Map<string, Grade[]>();
+  grades.forEach((g) => {
+    if (g.studentId === student.id && g.courseId) {
+      const d = new Date(g.date).getTime();
+      if (d >= periodStartDate && d <= periodEndDate) {
+        if (!studentPeriodGradesMap.has(g.courseId)) {
+          studentPeriodGradesMap.set(g.courseId, []);
+        }
+        studentPeriodGradesMap.get(g.courseId)!.push(g);
+      }
+    }
+  });
+
   const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
     // Get all grades for this student across all courses with this subject
     const allPeriodGrades = subjectCourses.flatMap((course) => {
-      const courseGrades = grades.filter(
-        (g) => g.studentId === student.id && g.courseId === course.id
-      );
-      return courseGrades.filter((g) => {
-        const d = new Date(g.date);
-        return d >= new Date(period.startDate) && d <= new Date(period.endDate);
-      });
+      return studentPeriodGradesMap.get(course.id) || [];
     });
 
     const average =
