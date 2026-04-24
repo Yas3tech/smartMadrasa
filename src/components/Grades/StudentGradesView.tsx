@@ -35,14 +35,30 @@ const StudentGradesView = () => {
     return studentGrades.filter((g) => g.subject === selectedSubject);
   }, [studentGrades, selectedSubject]);
 
+  const usersMap = useMemo(() => {
+    const map = new Map();
+    for (const u of users) {
+      map.set(u.id, u);
+    }
+    return map;
+  }, [users]);
+
+  const coursesMap = useMemo(() => {
+    const map = new Map();
+    for (const c of courses) {
+      map.set(`${c.classId}::${c.subject}`, c);
+    }
+    return map;
+  }, [courses]);
+
   if (!user || !stats) return null;
 
   const getTeacherName = (grade: Grade) => {
     if (grade.teacherId) {
-      const teacher = users.find((u) => u.id === grade.teacherId);
+      const teacher = usersMap.get(grade.teacherId);
       if (teacher) return teacher.name;
     }
-    const course = courses.find((c) => c.classId === grade.classId && c.subject === grade.subject);
+    const course = coursesMap.get(`${grade.classId}::${grade.subject}`);
     return course?.teacherName;
   };
 
