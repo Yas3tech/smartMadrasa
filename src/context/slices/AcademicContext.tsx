@@ -89,7 +89,7 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
       // Do NOT replace these scoped queries with a generic fetch-all.
       // If a role sees incorrect data, fix the query — don't widen access.
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any to handle childrenIds
+        const parentUser = user as unknown; // Using any to handle childrenIds
         const classIds = parentUser.relatedClassIds || [];
         unsubClasses = subscribeToClasses(setClasses, classIds);
         if (classIds.length > 0) {

@@ -55,7 +55,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         ]);
       } else if (user?.role === 'parent') {
         // Parent: See their own children + staff
-        const parent = user as any; // Using any to avoid type cast issues with childrenIds vs children
+        const parent = user as unknown; // Using any to avoid type cast issues with childrenIds vs children
         const studentIds = parent.childrenIds || [];
         const queries: UserQueryFilters[] = [
           { role: ['teacher', 'director', 'superadmin'] },
