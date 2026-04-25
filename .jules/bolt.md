@@ -27,3 +27,6 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+## 2025-03-03 - [O(N²) Optimization in StudentGradesView]
+**Learning:** Found an O(G * (U + C)) anti-pattern in `StudentGradesView.tsx` where an `Array.prototype.find()` lookup over `users` and `courses` was executed inside a function `getTeacherName` that is called for every rendered grade.
+**Action:** Used `useMemo` to pre-compute a `usersMap` and `coursesMap` (O(U + C)) using a composite key (`${classId}::${subject}`), transforming all subsequent lookups within the render loop into O(1) operations, dropping the complexity to O(U + C + G). Refactored to define the maps before any conditional early returns to obey React hook rules.
