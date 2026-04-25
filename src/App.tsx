@@ -19,7 +19,7 @@ function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/setup" element={<FirstRunSetup />} />
+              {import.meta.env.DEV && <Route path="/setup" element={<FirstRunSetup />} />}
 
               {/* All other routes are handled in ProtectedApp to isolate dependencies */}
               <Route path="/*" element={<ProtectedApp />} />
