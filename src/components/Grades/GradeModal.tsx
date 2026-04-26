@@ -4,7 +4,7 @@ import { Modal, Input, Button } from '../UI';
 import { X, Plus } from 'lucide-react';
 import type { Grade, Student } from '../../types';
 // PERFORMANCE: Use specific hook instead of deprecated useData
-import { useUsers } from '../../context/DataContext';
+import { useUsers } from '../../context';
 
 interface GradeModalProps {
   isOpen: boolean;

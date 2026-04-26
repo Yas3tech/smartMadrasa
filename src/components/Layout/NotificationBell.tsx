@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useCommunication, usePerformance } from '../../context/DataContext';
+import { useCommunication, usePerformance } from '../../context';
 import { Bell, MessageSquare, GraduationCap, Calendar, Users, X } from 'lucide-react';
 
 interface Notification {

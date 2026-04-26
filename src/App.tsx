@@ -7,7 +7,7 @@ import { Toaster } from 'react-hot-toast';
 
 // Only load what is strictly necessary for the initial boot
 const Login = lazy(() => import('./pages/auth/Login'));
-const FirstRunSetup = lazy(() => import('./pages/auth/FirstRunSetup'));
+const FirstRunSetup = import.meta.env.DEV ? lazy(() => import('./pages/auth/FirstRunSetup')) : null;
 const ProtectedApp = lazy(() => import('./components/Auth/ProtectedApp'));
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/setup" element={<FirstRunSetup />} />
+              {import.meta.env.DEV && FirstRunSetup && <Route path="/setup" element={<FirstRunSetup />} />}
 
               {/* All other routes are handled in ProtectedApp to isolate dependencies */}
               <Route path="/*" element={<ProtectedApp />} />

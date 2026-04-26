@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 // PERFORMANCE: Use specific hook instead of deprecated useData
-import { useAcademics } from '../../context/DataContext';
+import { useAcademics } from '../../context';
 import { X, Plus } from 'lucide-react';
 import type { Course } from '../../types';
 import { toast } from 'react-hot-toast';

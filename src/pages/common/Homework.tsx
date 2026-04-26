@@ -10,7 +10,7 @@
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 // PERFORMANCE: Use specific hooks instead of deprecated useData
-import { useAcademics, usePerformance } from '../../context/DataContext';
+import { useAcademics, usePerformance } from '../../context';
 import { useHomework } from '../../hooks/useHomework';
 import { Card, Button } from '../../components/UI';
 import {

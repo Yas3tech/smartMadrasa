@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { usePerformance } from '../context/DataContext';
+import { usePerformance } from '../context';
 
 export const useGradeStats = (studentId?: string) => {
   const { grades, attendance } = usePerformance();

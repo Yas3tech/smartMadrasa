@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useGradeStats } from '../useGradeStats';
-import { useData, usePerformance } from '../../context/DataContext';
+import { useData, usePerformance } from '../../context';
 
 // Mock the modules
 vi.mock('../../context/DataContext', () => ({

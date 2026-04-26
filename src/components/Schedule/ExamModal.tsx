@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Input, Button } from '../UI';
 import { X, Save } from 'lucide-react';
-import { useAcademics } from '../../context/DataContext';
+import { useAcademics } from '../../context';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import type { Event } from '../../types';

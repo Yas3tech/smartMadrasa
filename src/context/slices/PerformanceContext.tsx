@@ -96,9 +96,9 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       };
 
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
-        const childIds = parentUser.childrenIds || [];
-        const classIds = parentUser.relatedClassIds || [];
+        const parentUser = user as Record<string, unknown>; // Using unknown for childrenIds/relatedClassIds
+        const childIds = (parentUser.childrenIds as string[]) || [];
+        const classIds = (parentUser.relatedClassIds as string[]) || [];
 
         if (childIds.length > 0) {
           unsubGrades = subscribeToCourseGradesByStudentIds(childIds, handleGradesUpdate);

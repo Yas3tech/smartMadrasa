@@ -1,4 +1,4 @@
-import { useUsers as useUserContext } from '../context/DataContext';
+import { useUsers as useUserContext } from '../context';
 import type { User } from '../types';
 
 export interface UseUsersReturn {

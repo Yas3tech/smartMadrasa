@@ -1,5 +1,5 @@
 import { render, act } from '@testing-library/react';
-import { DataProvider, useData, useUsers } from './DataContext';
+import { DataProvider, useData, useUsers } from './index';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import * as AuthContext from './AuthContext';
 import { memo } from 'react';
@@ -9,12 +9,12 @@ const mockUseAuth = vi.fn();
 vi.spyOn(AuthContext, 'useAuth').mockImplementation(mockUseAuth);
 
 const { triggerMessages, subscribe } = vi.hoisted(() => {
-  const callbacks: Set<(msgs: any[]) => void> = new Set();
+  const callbacks: Set<(msgs: unknown[]) => void> = new Set();
   return {
-    triggerMessages: (msgs: any[]) => {
+    triggerMessages: (msgs: unknown[]) => {
       callbacks.forEach((cb) => cb(msgs));
     },
-    subscribe: (cb: any) => {
+    subscribe: (cb: (msgs: unknown[]) => void) => {
       callbacks.add(cb);
       return () => callbacks.delete(cb);
     },

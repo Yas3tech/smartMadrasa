@@ -1,7 +1,7 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useCommunication } from '../../context/DataContext';
+import { useCommunication } from '../../context';
 import {
   LayoutDashboard,
   Users,

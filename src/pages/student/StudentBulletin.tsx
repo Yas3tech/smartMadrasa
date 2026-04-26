@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 // PERFORMANCE: Use specific hooks instead of deprecated useData
-import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../../context';
 import { useAuth } from '../../context/AuthContext';
 import { Download, Calendar, Clock, Eye } from 'lucide-react';
 import type { TeacherComment } from '../../types/bulletin';

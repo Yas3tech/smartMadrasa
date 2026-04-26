@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { usePerformance } from '../context/DataContext';
+import { usePerformance } from '../context';
 import {
   createHomework,
   updateHomework,

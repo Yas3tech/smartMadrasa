@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAcademics } from '../../context/DataContext';
+import { useAcademics } from '../../context';
 import { useAuth } from '../../context/AuthContext';
 import { Calendar, Plus, Edit2, Trash2, Check, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
