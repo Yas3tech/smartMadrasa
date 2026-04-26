@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { DataProvider } from '../../context/DataContext';
+import { DataProvider } from '../../context';
 import ProtectedRoute from './ProtectedRoute';
 import { PageLoader } from '../UI';
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useBulletinGrades } from '../useBulletinGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useData, useUsers, useAcademics, usePerformance } from '../../context/DataContext';
+import { useData, useUsers, useAcademics, usePerformance } from '../../context';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({

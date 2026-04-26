@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 // PERFORMANCE: Use specific hooks instead of deprecated useData to avoid global re-renders
-import { useUsers, useAcademics, useCommunication, usePerformance } from '../context/DataContext';
+import { useUsers, useAcademics, useCommunication, usePerformance } from '../context';
 import type { User, Grade, Homework, Event, Student, Teacher } from '../types';
 
 export interface UseDashboardReturn {

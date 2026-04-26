@@ -17,12 +17,6 @@ import { AcademicProvider } from './slices/AcademicContext';
 import { CommunicationProvider } from './slices/CommunicationContext';
 import { PerformanceProvider } from './slices/PerformanceContext';
 
-// Re-export specific hooks for performance optimization
-export { useUsers } from './slices/UserContext';
-export { useAcademics } from './slices/AcademicContext';
-export { useCommunication } from './slices/CommunicationContext';
-export { usePerformance } from './slices/PerformanceContext';
-
 export interface DataContextType {
   // State
   users: User[];
@@ -99,5 +93,3 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     </UserProvider>
   );
 };
-
-export { useData } from './useData';

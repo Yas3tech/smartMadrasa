@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 // PERFORMANCE: Use specific hooks instead of deprecated useData
-import { useUsers, useAcademics } from '../../context/DataContext';
+import { useUsers, useAcademics } from '../../context';
 import { Card, Button, Input } from '../../components/UI';
 import { User as UserIcon, Mail, Save, Edit2 } from 'lucide-react';
 import { sendPasswordResetEmail } from 'firebase/auth';

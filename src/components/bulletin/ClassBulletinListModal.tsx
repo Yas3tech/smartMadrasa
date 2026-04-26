@@ -5,7 +5,7 @@ import type { Student, AcademicPeriod, Course, Grade, TeacherComment } from '../
 import BulletinPreview from './BulletinPreview';
 import { generateClassBulletinPDF } from '../../utils/pdfGenerator';
 import toast from 'react-hot-toast';
-import { usePerformance } from '../../context/DataContext';
+import { usePerformance } from '../../context';
 
 interface ClassBulletinListModalProps {
   classId: string;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../../context';
 import StudentAttendance from '../../components/Attendance/StudentAttendance';
 import TeacherAttendance from '../../components/Attendance/TeacherAttendance';
 

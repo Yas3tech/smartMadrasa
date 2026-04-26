@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useAcademics, useCommunication, usePerformance } from '../context/DataContext';
+import { useAcademics, useCommunication, usePerformance } from '../context';
 import type { Course, Event, Homework } from '../types';
 import { SUBJECT_COLORS } from '../constants/subjectColors';
 

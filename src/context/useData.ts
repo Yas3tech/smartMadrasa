@@ -6,6 +6,11 @@ import { useAcademics } from './slices/AcademicContext';
 import { useCommunication } from './slices/CommunicationContext';
 import { usePerformance } from './slices/PerformanceContext';
 
+export { useUsers } from './slices/UserContext';
+export { useAcademics } from './slices/AcademicContext';
+export { useCommunication } from './slices/CommunicationContext';
+export { usePerformance } from './slices/PerformanceContext';
+
 /**
  * @deprecated usage of useData causes re-renders on any data change.
  * Please use specific hooks instead: useUsers, useAcademics, useCommunication, usePerformance.

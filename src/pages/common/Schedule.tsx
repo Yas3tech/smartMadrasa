@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Course, Event, Homework } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { useAcademics, useCommunication, usePerformance } from '../../context/DataContext';
+import { useAcademics, useCommunication, usePerformance } from '../../context';
 import { useSchedule } from '../../hooks/useSchedule';
 import ScheduleMobile from '../../components/Schedule/ScheduleMobile';
 import ScheduleDesktop from '../../components/Schedule/ScheduleDesktop';

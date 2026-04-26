@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useUsers, useAcademics } from '../../context/DataContext';
+import { useUsers, useAcademics } from '../../context';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Users, GraduationCap, X, UserPlus, UserMinus, Search } from 'lucide-react';
 import type { ClassGroup, Student } from '../../types';

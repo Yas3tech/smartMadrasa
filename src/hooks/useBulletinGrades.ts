@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUsers, useAcademics, usePerformance } from '../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../context';
 import { useAuth } from '../context/AuthContext';
 import {
   subscribeToTeacherCommentsByStudent,

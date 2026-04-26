@@ -9,7 +9,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
-import { useCommunication, useUsers, useAcademics } from '../../context/DataContext';
+import { useCommunication, useUsers, useAcademics } from '../../context';
 import { useThrottle } from '../../hooks/useThrottle';
 import type { Message, Parent, Student, User } from '../../types';
 import { Card, Button } from '../../components/UI';

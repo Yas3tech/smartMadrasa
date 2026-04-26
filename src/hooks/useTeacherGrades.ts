@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useUsers, useAcademics, usePerformance, useCommunication } from '../context/DataContext';
+import { useUsers, useAcademics, usePerformance, useCommunication } from '../context';
 import toast from 'react-hot-toast';
 import type { Grade, Student, ClassGroup, Event } from '../types';
 
