@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode } from 'react';
 import type {
   User,
   Student,
@@ -11,12 +11,11 @@ import type {
   Homework,
 } from '../types';
 import type { AcademicPeriod, GradeCategory } from '../types/bulletin';
-import { isFirebaseConfigured } from '../config/firebase';
 
-import { UserProvider, useUsers } from './slices/UserContext';
-import { AcademicProvider, useAcademics } from './slices/AcademicContext';
-import { CommunicationProvider, useCommunication } from './slices/CommunicationContext';
-import { PerformanceProvider, usePerformance } from './slices/PerformanceContext';
+import { UserProvider } from './slices/UserContext';
+import { AcademicProvider } from './slices/AcademicContext';
+import { CommunicationProvider } from './slices/CommunicationContext';
+import { PerformanceProvider } from './slices/PerformanceContext';
 
 // Re-export specific hooks for performance optimization
 export { useUsers } from './slices/UserContext';
