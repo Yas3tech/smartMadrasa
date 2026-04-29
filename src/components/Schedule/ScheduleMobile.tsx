@@ -93,7 +93,9 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
       <div className="flex items-center justify-between px-6 mb-6">
         <button
           onClick={schedule.handlePrevDay}
-          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600"
+          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600 focus-visible:ring-2 focus-visible:ring-orange-500"
+          aria-label={t('common.previous')}
+          title={t('common.previous')}
         >
           <ChevronLeft size={20} />
         </button>
@@ -105,7 +107,9 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
         </span>
         <button
           onClick={schedule.handleNextDay}
-          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600"
+          className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600 focus-visible:ring-2 focus-visible:ring-orange-500"
+          aria-label={t('common.next')}
+          title={t('common.next')}
         >
           <ChevronRight size={20} />
         </button>
