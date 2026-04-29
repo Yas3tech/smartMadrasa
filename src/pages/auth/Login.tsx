@@ -343,7 +343,7 @@ const Login = () => {
               </button>
             </div>
 
-            {isDatabaseEmpty && !isResetMode && !error && !message && (
+            {import.meta.env.DEV && isDatabaseEmpty && !isResetMode && !error && !message && (
               <div className="mt-6 pt-6 border-t border-gray-100 animate-in slide-in-from-bottom-2 duration-500">
                 <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
                   <div className="flex items-center gap-3 text-orange-800 font-semibold">
