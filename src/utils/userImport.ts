@@ -441,7 +441,7 @@ export const processParentUsers = async (
     ));
 
     const studentsByEmail = new Map(
-      users.filter(u => u.role === 'student').map(u => [normalizeEmail(u.email), u])
+      users.filter(u => u.role === 'student').map(u => [normalizeEmail(u.email), u as Student])
     );
 
     for (const studentEmail of studentEmails) {
