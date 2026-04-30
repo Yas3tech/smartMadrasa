@@ -149,8 +149,10 @@ const Messages = () => {
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
   const selectedRecipientLabels = useMemo(() => {
+    // ⚡ Bolt: Pre-compute map for O(1) lookups
+    const optionsMap = new Map(allRecipientOptions.map(r => [r.id, r]));
     return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+      const opt = optionsMap.get(id);
       return { id, label: opt?.label || id };
     });
   }, [recipients, allRecipientOptions]);
@@ -220,16 +222,21 @@ const Messages = () => {
         attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
       );
 
+      // ⚡ Bolt: Pre-compute maps to replace O(N^2) loops with O(N) map lookups
+      const recipientOptionsMap = new Map(allRecipientOptions.map((r) => [r.id, r]));
+      const classesMap = new Map(classes.map((c) => [c.id, c]));
+      const usersMap = new Map(users.map((u) => [u.id, u]));
+
       const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
+        const selectedRecipient = recipientOptionsMap.get(recipientId);
 
         if (selectedRecipient?.type === 'class') {
-          const selectedClass = classes.find((c) => c.id === recipientId);
+          const selectedClass = classesMap.get(recipientId);
           if (selectedClass) {
             const classStudents = users.filter(
               (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
             );
-            const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+            const classTeacher = usersMap.get(selectedClass.teacherId);
             const classOutbound = classStudents.map((student) =>
               sendMessage({
                 senderId: user.id,

@@ -440,10 +440,12 @@ export const processParentUsers = async (
       (row.studentEmail || '').split(',').map((e: string) => e.trim().toLowerCase()).filter(Boolean)
     ));
 
+    const studentsByEmail = new Map(
+      users.filter(u => u.role === 'student').map(u => [normalizeEmail(u.email), u])
+    );
+
     for (const studentEmail of studentEmails) {
-      const student = users.find(
-        (user): user is Student => user.role === 'student' && normalizeEmail(user.email) === studentEmail
-      );
+      const student = studentsByEmail.get(studentEmail);
 
       if (student) {
         childrenIds.push(student.id);
