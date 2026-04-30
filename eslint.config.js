@@ -26,7 +26,7 @@ export default defineConfig([
       '@typescript-eslint/ban-ts-comment': 'off', // Allow @ts-ignore comments
       'react-hooks/exhaustive-deps': 'warn', // Downgrade dependency warnings
       // Disable React Compiler strict rules (experimental feature causing false positives)
-      'react-refresh/only-export-components': 'warn',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'react-hooks/set-state-in-effect': 'off', // Allow setState in useEffect
       'react-hooks/purity': 'off', // Allow impure functions like Math.random() in handlers
       'react-hooks/preserve-manual-memoization': 'off', // Allow manual memoization patterns
