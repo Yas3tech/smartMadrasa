@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useHomework } from '../useHomework';
 import { useAuth } from '../../context/AuthContext';
-import { usePerformance } from '../../context/DataContext';
+import { usePerformance } from '../../hooks/useData';
 import { subscribeToSubmissions } from '../../services/homework';
 
 // Mock dependencies
@@ -10,7 +10,7 @@ vi.mock('../../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('../../context/DataContext', () => ({
+vi.mock('../../hooks/useData', () => ({
   usePerformance: vi.fn(),
 }));
 
