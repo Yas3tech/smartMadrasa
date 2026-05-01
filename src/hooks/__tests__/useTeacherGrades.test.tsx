@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useTeacherGrades } from '../useTeacherGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useUsers, useAcademics, usePerformance, useCommunication } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance, useCommunication } from '../../hooks/useData';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('../../context/DataContext', () => ({
+vi.mock('../../hooks/useData', () => ({
   useUsers: vi.fn(),
   useAcademics: vi.fn(),
   usePerformance: vi.fn(),

@@ -1,5 +1,7 @@
 import { render, act } from '@testing-library/react';
-import { DataProvider, useData, useUsers } from './DataContext';
+import { DataProvider } from './DataContext';
+import { useData } from '../hooks/useData';
+import { useUsers } from '../hooks/useUsers';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import * as AuthContext from './AuthContext';
 import { memo } from 'react';

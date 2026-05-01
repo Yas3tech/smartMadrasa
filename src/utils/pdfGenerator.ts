@@ -46,6 +46,24 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
       .map((c) => [c.courseId, c])
   );
 
+  // Pre-compute period dates for grades
+  const periodStart = new Date(period.startDate).getTime();
+  const periodEnd = new Date(period.endDate).getTime();
+
+  // Pre-compute grades per course for this student in this period
+  const studentPeriodGrades = new Map<string, Grade[]>();
+  for (const g of grades) {
+    if (g.studentId === student.id) {
+      const time = new Date(g.date).getTime();
+      if (time >= periodStart && time <= periodEnd) {
+        if (!studentPeriodGrades.has(g.courseId)) {
+          studentPeriodGrades.set(g.courseId, []);
+        }
+        studentPeriodGrades.get(g.courseId)!.push(g);
+      }
+    }
+  }
+
   // Calculate averages - group by subject to avoid duplicates
   const coursesBySubject = courses.reduce(
     (acc, course) => {
@@ -60,15 +78,9 @@ const addBulletinPage = (doc: jsPDF, data: BulletinData) => {
 
   const courseData = Object.entries(coursesBySubject).map(([subject, subjectCourses]) => {
     // Get all grades for this student across all courses with this subject
-    const allPeriodGrades = subjectCourses.flatMap((course) => {
-      const courseGrades = grades.filter(
-        (g) => g.studentId === student.id && g.courseId === course.id
-      );
-      return courseGrades.filter((g) => {
-        const d = new Date(g.date);
-        return d >= new Date(period.startDate) && d <= new Date(period.endDate);
-      });
-    });
+    const allPeriodGrades = subjectCourses.flatMap((course) =>
+      studentPeriodGrades.get(course.id) || []
+    );
 
     const average =
       allPeriodGrades.length > 0
