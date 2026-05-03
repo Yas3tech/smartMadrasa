@@ -95,6 +95,7 @@ const TeacherGradesView = () => {
             <button
               onClick={tg.goBack}
               className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              aria-label={t('common.back')}
             >
               <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
             </button>
@@ -152,6 +153,7 @@ const TeacherGradesView = () => {
               <button
                 onClick={tg.goBack}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                aria-label={t('common.back')}
               >
                 <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
               </button>
@@ -264,12 +266,13 @@ const TeacherGradesView = () => {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${grade.type === 'exam'
-                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                              : grade.type === 'homework'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
-                              }`}
+                            className={`px-2 py-1 rounded text-xs font-medium ${
+                              grade.type === 'exam'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                : grade.type === 'homework'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                  : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
+                            }`}
                           >
                             {t(`grades.${grade.type}`)}
                           </span>
@@ -283,12 +286,14 @@ const TeacherGradesView = () => {
                               <button
                                 onClick={tg.handleUpdateGrade}
                                 className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                aria-label={t('common.save')}
                               >
                                 <Check size={18} />
                               </button>
                               <button
                                 onClick={tg.cancelEditing}
                                 className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                aria-label={t('common.cancel')}
                               >
                                 <X size={18} />
                               </button>
@@ -297,6 +302,7 @@ const TeacherGradesView = () => {
                             <button
                               onClick={() => tg.startEditingGrade(grade)}
                               className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                              aria-label={t('common.edit')}
                             >
                               <Pencil size={18} />
                             </button>
@@ -319,6 +325,7 @@ const TeacherGradesView = () => {
             <button
               onClick={tg.goBack}
               className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              aria-label={t('common.back')}
             >
               <ArrowLeft className="text-gray-600 dark:text-slate-300" size={20} />
             </button>
@@ -403,12 +410,13 @@ const TeacherGradesView = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`px-2 py-1 rounded text-xs font-medium ${grade.type === 'exam'
-                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                                : grade.type === 'homework'
-                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                                  : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
-                                }`}
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                grade.type === 'exam'
+                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                  : grade.type === 'homework'
+                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                                    : 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300'
+                              }`}
                             >
                               {t(`grades.${grade.type}`)}
                             </span>
@@ -422,12 +430,14 @@ const TeacherGradesView = () => {
                                 <button
                                   onClick={tg.handleUpdateGrade}
                                   className="p-1 text-green-600 hover:bg-green-50 rounded"
+                                  aria-label={t('common.save')}
                                 >
                                   <Check size={18} />
                                 </button>
                                 <button
                                   onClick={tg.cancelEditing}
                                   className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                  aria-label={t('common.cancel')}
                                 >
                                   <X size={18} />
                                 </button>
@@ -436,6 +446,7 @@ const TeacherGradesView = () => {
                               <button
                                 onClick={() => tg.startEditingGrade(grade)}
                                 className="p-1 text-gray-400 hover:text-indigo-600 transition-colors"
+                                aria-label={t('common.edit')}
                               >
                                 <Pencil size={18} />
                               </button>

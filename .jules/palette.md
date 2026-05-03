@@ -9,5 +9,11 @@
 **Action:** When using icon-only `Button`, always verify that an `aria-label` is provided, especially for critical actions like "Edit" or "Delete".
 
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
+
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+
+## 2025-05-25 - Icon-only Action Buttons in Tables
+
+**Learning:** Action buttons in list/table views (like "Edit", "Save", "Cancel") are frequently implemented as icon-only without accessible names, making them difficult for screen reader users to identify out of context.
+**Action:** Consistently apply `aria-label` to all icon-only buttons, especially those mapped to generic actions within lists or tables. Use existing translation keys (e.g., `t('common.edit')`) whenever possible.
