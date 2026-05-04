@@ -30,15 +30,25 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Manual chunking strategy for better caching
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-firebase-auth': ['firebase/app', 'firebase/auth'],
-          'vendor-firebase-db': ['firebase/firestore', 'firebase/storage'],
-          'vendor-icons': ['lucide-react'],
-          'vendor-i18n': ['i18next', 'react-i18next'],
-          'vendor-pdf': ['jspdf', 'jspdf-autotable'],
-          // WARN-01/LOGIC-05: Removed unused dompurify/html2canvas and 
-          // removed manual exceljs chunk to let Vite handle the dynamic import perfectly
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/firebase/app') || id.includes('node_modules/firebase/auth')) {
+            return 'vendor-firebase-auth';
+          }
+          if (id.includes('node_modules/firebase/firestore') || id.includes('node_modules/firebase/storage')) {
+            return 'vendor-firebase-db';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons';
+          }
+          if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next')) {
+            return 'vendor-i18n';
+          }
+          if (id.includes('node_modules/jspdf') || id.includes('node_modules/jspdf-autotable')) {
+            return 'vendor-pdf';
+          }
         },
       },
     },
