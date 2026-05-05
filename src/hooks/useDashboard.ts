@@ -103,8 +103,9 @@ export function useDashboard(): UseDashboardReturn {
   );
 
   const upcomingEvents = useMemo(() => {
+    const now = new Date();
     return events
-      .filter((e) => new Date(e.start) >= new Date())
+      .filter((e) => new Date(e.start) >= now)
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
       .slice(0, 3);
   }, [events]);
@@ -151,10 +152,11 @@ export function useDashboard(): UseDashboardReturn {
   }, [myGrades]);
 
   const pendingHomeworks = useMemo(() => {
+    const now = new Date();
     return homeworks
       .filter((hw) => {
         if (hw.classId !== targetClassId) return false;
-        return new Date(hw.dueDate) >= new Date();
+        return new Date(hw.dueDate) >= now;
       })
       .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
       .slice(0, 5);

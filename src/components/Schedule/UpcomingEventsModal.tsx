@@ -18,13 +18,22 @@ const UpcomingEventsModal = ({ isOpen, onClose, events, homeworks }: UpcomingEve
   const { t, i18n } = useTranslation();
 
   // Combine events and homeworks
+  const now = new Date();
   const upcomingItems: UpcomingItem[] = [
-    ...events
-      .filter((e) => new Date(e.start) >= new Date())
-      .map((e) => ({ type: 'event' as const, data: e, date: new Date(e.start) })),
-    ...homeworks
-      .filter((h) => new Date(h.dueDate) >= new Date())
-      .map((h) => ({ type: 'homework' as const, data: h, date: new Date(h.dueDate) })),
+    ...events.reduce((acc, e) => {
+      const eventDate = new Date(e.start);
+      if (eventDate >= now) {
+        acc.push({ type: 'event' as const, data: e, date: eventDate });
+      }
+      return acc;
+    }, [] as UpcomingItem[]),
+    ...homeworks.reduce((acc, h) => {
+      const dueDate = new Date(h.dueDate);
+      if (dueDate >= now) {
+        acc.push({ type: 'homework' as const, data: h, date: dueDate });
+      }
+      return acc;
+    }, [] as UpcomingItem[]),
   ].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const eventTypeConfig = {

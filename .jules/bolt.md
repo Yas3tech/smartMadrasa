@@ -27,3 +27,6 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+## 2025-03-03 - [Date Parsing Optimization]
+**Learning:** Found multiple instances where `new Date()` was repeatedly evaluated inside `.filter()` operations instead of being cached outside the loop, causing redundant Object creation and allocation.
+**Action:** Always pre-compute static properties like `new Date()` outside iteration functions like `map` and `filter` to eliminate hidden overhead. Additionally, combining `.filter` and `.map` over the same array into a single `.reduce()` pass further prevents redundant iterations.
