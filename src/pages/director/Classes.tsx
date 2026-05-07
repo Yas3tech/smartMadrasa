@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useUsers, useAcademics } from '../../context/DataContext';
@@ -30,7 +30,25 @@ const Classes = () => {
   const [grade, setGrade] = useState('');
   const [teacherId, setTeacherId] = useState('');
 
-  const teachers = users.filter((entry) => entry.role === 'teacher');
+  const teachers = useMemo(() => users.filter((entry) => entry.role === 'teacher'), [users]);
+
+  const teachersMap = useMemo(() => {
+    const map = new Map<string, typeof users[0]>();
+    teachers.forEach((t) => map.set(t.id, t));
+    return map;
+  }, [teachers]);
+
+  const studentsByClassMap = useMemo(() => {
+    const map = new Map<string, typeof students[0][]>();
+    students.forEach((student) => {
+      const classId = (student as Student).classId;
+      if (classId) {
+        if (!map.has(classId)) map.set(classId, []);
+        map.get(classId)!.push(student);
+      }
+    });
+    return map;
+  }, [students]);
 
   const handleOpenNew = () => {
     setEditingClass(null);
@@ -65,9 +83,8 @@ const Classes = () => {
     setIsModalOpen(false);
   };
 
-  const getClassTeacher = (id: string) => users.find((entry) => entry.id === id);
-  const getClassStudents = (classId: string) =>
-    students.filter((student) => (student as Student).classId === classId);
+  const getClassTeacher = (id: string) => teachersMap.get(id);
+  const getClassStudents = (classId: string) => studentsByClassMap.get(classId) || [];
 
   const handleManageStudents = (classGroup: ClassGroup) => {
     setManagingClass(classGroup);
