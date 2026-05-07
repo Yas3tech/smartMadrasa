@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { type ReactNode, useMemo } from 'react';
 import type {
   User,
@@ -105,7 +106,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
  * @deprecated usage of useData causes re-renders on any data change.
  * Please use specific hooks instead: useUsers, useAcademics, useCommunication, usePerformance.
  */
-// eslint-disable-next-line react-refresh/only-export-components
 export const useData = (): DataContextType => {
   const userContext = useUsers();
   const academicContext = useAcademics();
