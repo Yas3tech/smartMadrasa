@@ -33,8 +33,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
               const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
               userData = userDoc.exists() ? userDoc.data() : null;
-            } catch (docError: any) {
-              console.warn('Initial doc fetch failed (likely mismatched UID permissions):', docError.message);
+            } catch (docError: unknown) {
+              const err = docError as Error;
+              console.warn('Initial doc fetch failed (likely mismatched UID permissions):', err.message);
             }
 
             // Fallback: If no doc found by UID or permission denied, search by email
