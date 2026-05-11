@@ -55,10 +55,10 @@ describe('userImport', () => {
       ],
       {
         existingUsers: [
-          { id: '1', name: 'Child 1', email: 'child1@school.ma', role: 'student' } as any,
+          { id: '1', name: 'Child 1', email: 'child1@school.ma', role: 'student' } as import('../types').User,
         ],
         existingStudents: [
-          { id: '1', name: 'Child 1', email: 'child1@school.ma', role: 'student' } as any,
+          { id: '1', name: 'Child 1', email: 'child1@school.ma', role: 'student' } as import('../types').Student,
         ],
         canImportSuperadmin: false,
       }
