@@ -9,7 +9,7 @@ export const checkIfDatabaseEmpty = async (): Promise<boolean> => {
   try {
     const setupDoc = await getDoc(doc(db, '_setup', 'config'));
     return !setupDoc.exists();
-  } catch (err) {
+  } catch {
     // If we get permission denied, it means the doc exists and we can't read it
     // because isSetupOpen() in firestore rules returned false.
     return false;

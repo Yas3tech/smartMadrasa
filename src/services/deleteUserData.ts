@@ -1,5 +1,5 @@
 import { db, storage } from '../config/db';
-import { collection, query, where, getDocs, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, writeBatch, type DocumentReference, type UpdateData } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { deleteUser, type User } from 'firebase/auth';
 
@@ -34,7 +34,7 @@ async function getDocumentRefsWhere(
   collectionName: string,
   field: string,
   value: string
-): Promise<any[]> {
+): Promise<DocumentReference[]> {
   if (!db) return [];
   const q = query(collection(db, collectionName), where(field, '==', value));
   const snapshot = await getDocs(q);
@@ -45,8 +45,8 @@ async function getDocumentRefsWhere(
  * Exécute une série d'opérations en lots (batches) de 500 maximum (limite Firestore)
  */
 async function executeBatchOperations(
-  deletes: any[],
-  updates: { ref: any; data: any }[] = []
+  deletes: DocumentReference[],
+  updates: { ref: DocumentReference; data: UpdateData<unknown> }[] = []
 ): Promise<void> {
   if (!db) return;
   const CHUNK_SIZE = 500;
@@ -76,7 +76,7 @@ async function executeBatchOperations(
 /**
  * Supprime un document par son ID (renvoie l'objet ref au lieu de supprimer)
  */
-function getDocumentRefById(collectionName: string, docId: string): any | null {
+function getDocumentRefById(collectionName: string, docId: string): DocumentReference | null {
   if (!db) return null;
   return doc(db, collectionName, docId);
 }
@@ -166,8 +166,8 @@ export async function deleteAllUserData(
   };
 
   try {
-    const refsToDelete: any[] = [];
-    const refsToUpdate: { ref: any; data: any }[] = [];
+    const refsToDelete: DocumentReference[] = [];
+    const refsToUpdate: { ref: DocumentReference; data: UpdateData<unknown> }[] = [];
 
     // Phase 1: Collect all references (Reads) to ensure atomic-like failure model
     // --------------------------------------------------------------------------
