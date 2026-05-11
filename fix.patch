@@ -1,0 +1,27 @@
+diff --git a/firestore.rules b/firestore.rules
+index 0b4f307..1cc9026 100644
+--- a/firestore.rules
++++ b/firestore.rules
+@@ -127,7 +127,11 @@ service cloud.firestore {
+
+       // 🛡️ SECURITY: Prevent Privilege Escalation
+       // Allow superadmin creation ONLY if setup is open.
+-      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin');
++      allow create: if isDirector() || isSuperAdmin() || (
++        isSetupOpen() &&
++        request.resource.data.role == 'superadmin' &&
++        existsAfter(/databases/$(database)/documents/_setup/config)
++      );
+       // Only allow users to update their own profile fields.
+       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
+       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
+diff --git a/.jules/sentinel.md b/.jules/sentinel.md
+index XXXXXXX..YYYYYYY 100644
+--- a/.jules/sentinel.md
++++ b/.jules/sentinel.md
+@@ -X,X +Y,X @@
++
++## 2024-06-13 - [Firestore Race Condition in Unauthenticated Setup Endpoint]
++**Vulnerability:** The `/setup` endpoint allowed creating a `superadmin` user and writing the setup lock document (`_setup/config`) sequentially. The `firestore.rules` permitted this based solely on `isSetupOpen()` (which checks `!exists(...)` of the lock doc). An attacker could race the sequential requests or forge a single `setDoc` payload to create a superadmin without ever creating the lock document, leaving the system permanently open for further exploitation.
++**Learning:** Unauthenticated setup endpoints that grant maximum privileges must enforce strict atomicity on the server side. Relying on sequential client-side requests is insecure because the first request (user creation) succeeds independently of the second (locking the system).
++**Prevention:** Always enforce atomic batching in `firestore.rules` using `existsAfter` or `getAfter`. For setup scenarios, mandate that the creation of the high-privilege account MUST occur in the exact same transaction as the creation of the lock document (e.g., `allow create: if ... && existsAfter(/databases/$(database)/documents/_setup/config)`), and update the client to use `writeBatch`.
