@@ -35,15 +35,18 @@ const StudentGradesView = () => {
     return studentGrades.filter((g) => g.subject === selectedSubject);
   }, [studentGrades, selectedSubject]);
 
+  // Pre-compute O(1) lookups to avoid O(N) array finds in render loop
+  const usersMap = useMemo(() => new Map(users.map(u => [u.id, u.name])), [users]);
+  const coursesMap = useMemo(() => new Map(courses.map(c => [`${c.classId}::${c.subject}`, c.teacherName])), [courses]);
+
   if (!user || !stats) return null;
 
   const getTeacherName = (grade: Grade) => {
     if (grade.teacherId) {
-      const teacher = users.find((u) => u.id === grade.teacherId);
-      if (teacher) return teacher.name;
+      const teacherName = usersMap.get(grade.teacherId);
+      if (teacherName) return teacherName;
     }
-    const course = courses.find((c) => c.classId === grade.classId && c.subject === grade.subject);
-    return course?.teacherName;
+    return coursesMap.get(`${grade.classId}::${grade.subject}`);
   };
 
   return (
