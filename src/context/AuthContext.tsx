@@ -5,7 +5,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/db';
 import type { User, Role } from '../types';
 
-interface AuthContextType {
+// eslint-disable-next-line react-refresh/only-export-components
+export interface AuthContextType {
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;

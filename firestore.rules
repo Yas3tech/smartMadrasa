@@ -137,7 +137,8 @@ service cloud.firestore {
     // LOGIC-04: Removed public read access to prevent backend reconnaissance
     match /_setup/{docId} {
       allow read: if isDirector() || isSuperAdmin() || isSetupOpen();
-      allow create: if !exists(/databases/$(database)/documents/_setup/config);
+      // Ensure setup lock and user are created atomically to prevent race condition
+      allow create: if !exists(/databases/$(database)/documents/_setup/config) && existsAfter(/databases/$(database)/documents/users/$(request.auth.uid));
       allow delete: if isSuperAdmin();
     }
 

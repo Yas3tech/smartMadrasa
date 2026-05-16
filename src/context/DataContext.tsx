@@ -24,6 +24,7 @@ export { useAcademics } from './slices/AcademicContext';
 export { useCommunication } from './slices/CommunicationContext';
 export { usePerformance } from './slices/PerformanceContext';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export interface DataContextType {
   // State
   users: User[];
