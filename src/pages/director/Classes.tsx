@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useUsers, useAcademics } from '../../context/DataContext';
 import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Users, GraduationCap, X, UserPlus, UserMinus, Search } from 'lucide-react';
-import type { ClassGroup, Student } from '../../types';
+import type { ClassGroup, Student, User } from '../../types';
 import { updateUser } from '../../services/users';
 import toast from 'react-hot-toast';
 
@@ -65,9 +65,29 @@ const Classes = () => {
     setIsModalOpen(false);
   };
 
-  const getClassTeacher = (id: string) => users.find((entry) => entry.id === id);
-  const getClassStudents = (classId: string) =>
-    students.filter((student) => (student as Student).classId === classId);
+  // ⚡ Bolt: Pre-compute maps to eliminate O(C * (U + S)) render bottleneck
+  const teachersMap = useMemo(() => {
+    const map = new Map<string, User>();
+    users.forEach((u) => map.set(u.id, u));
+    return map;
+  }, [users]);
+
+  const studentsByClassMap = useMemo(() => {
+    const map = new Map<string, Student[]>();
+    students.forEach((s) => {
+      const student = s as Student;
+      if (student.classId) {
+        if (!map.has(student.classId)) {
+          map.set(student.classId, []);
+        }
+        map.get(student.classId)!.push(student);
+      }
+    });
+    return map;
+  }, [students]);
+
+  const getClassTeacher = (id: string) => teachersMap.get(id);
+  const getClassStudents = (classId: string) => studentsByClassMap.get(classId) || [];
 
   const handleManageStudents = (classGroup: ClassGroup) => {
     setManagingClass(classGroup);
