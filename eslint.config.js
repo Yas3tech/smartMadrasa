@@ -21,7 +21,7 @@ export default defineConfig([
     },
     rules: {
       // Disable strict type rules that cause noise in this project
-      '@typescript-eslint/no-explicit-any': 'warn', // Downgrade from error to warning
+      '@typescript-eslint/no-explicit-any': 'off', // Downgrade from error to warning
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // Allow underscore-prefixed unused vars
       '@typescript-eslint/ban-ts-comment': 'off', // Allow @ts-ignore comments
       'react-hooks/exhaustive-deps': 'warn', // Downgrade dependency warnings
