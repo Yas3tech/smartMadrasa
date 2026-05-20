@@ -183,6 +183,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   return <CommunicationContext.Provider value={value}>{children}</CommunicationContext.Provider>;
 };
 
+/* eslint-disable-next-line react-refresh/only-export-components */
 export const useCommunication = () => {
   const context = useContext(CommunicationContext);
   if (!context) {

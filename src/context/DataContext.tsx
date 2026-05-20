@@ -19,6 +19,7 @@ import { CommunicationProvider, useCommunication } from './slices/CommunicationC
 import { PerformanceProvider, usePerformance } from './slices/PerformanceContext';
 
 // Re-export specific hooks for performance optimization
+/* eslint-disable react-refresh/only-export-components */
 export { useUsers } from './slices/UserContext';
 export { useAcademics } from './slices/AcademicContext';
 export { useCommunication } from './slices/CommunicationContext';
