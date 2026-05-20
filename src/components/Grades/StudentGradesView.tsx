@@ -35,14 +35,28 @@ const StudentGradesView = () => {
     return studentGrades.filter((g) => g.subject === selectedSubject);
   }, [studentGrades, selectedSubject]);
 
+  // Pre-compute user lookup map for O(1) lookups
+  const usersMap = useMemo(() => {
+    const map = new Map();
+    users.forEach((u) => map.set(u.id, u));
+    return map;
+  }, [users]);
+
+  // Pre-compute courses lookup map for O(1) lookups
+  const coursesMap = useMemo(() => {
+    const map = new Map();
+    courses.forEach((c) => map.set(`${c.classId}::${c.subject}`, c));
+    return map;
+  }, [courses]);
+
   if (!user || !stats) return null;
 
   const getTeacherName = (grade: Grade) => {
     if (grade.teacherId) {
-      const teacher = users.find((u) => u.id === grade.teacherId);
+      const teacher = usersMap.get(grade.teacherId);
       if (teacher) return teacher.name;
     }
-    const course = courses.find((c) => c.classId === grade.classId && c.subject === grade.subject);
+    const course = coursesMap.get(`${grade.classId}::${grade.subject}`);
     return course?.teacherName;
   };
 
