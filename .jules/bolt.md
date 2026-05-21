@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+## 2026-03-03 - [Nested Loop Optimization in Hooks]
+
+**Learning:** Found a performance bottleneck in `useSchedule` where a nested loop (Events x Classes) checked for classes inside the `events.filter(...)` loop using `teacherClassIds.includes(...)`. This resulted in O(E*C) complexity.
+**Action:** Replaced the inner search with a `Set` lookup (O(1)) by hoisting the classes array filtering out of the loop and creating a Set, reducing the complexity to O(E+C). Always prefer pre-computing Set/Map lookups outside nested array mapping or filtering.
