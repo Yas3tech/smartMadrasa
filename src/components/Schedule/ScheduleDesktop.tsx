@@ -43,6 +43,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                         icon={ChevronLeft}
                         onClick={() => schedule.setWeekOffset(schedule.weekOffset - 1)}
                         className="px-3"
+                        aria-label={t('common.previous')}
                     />
                     <div className="flex flex-col items-center min-w-[200px]">
                         <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 rounded-xl">
@@ -63,6 +64,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                         icon={ChevronRight}
                         onClick={() => schedule.setWeekOffset(schedule.weekOffset + 1)}
                         className="px-3"
+                        aria-label={t('common.next')}
                     />
                     <Button
                         variant="secondary"
@@ -220,6 +222,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                                                                     <button
                                                                         className="absolute -top-1 -right-1 p-1 bg-white dark:bg-slate-700 rounded-full shadow opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-500"
                                                                         onClick={(e) => schedule.showDeleteMenu(e, ci.course.id, dateStr)}
+                                                                        aria-label={t('common.delete')}
                                                                     >
                                                                         <Trash2 size={12} />
                                                                     </button>
