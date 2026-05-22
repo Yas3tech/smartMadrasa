@@ -7,3 +7,8 @@
 **Vulnerability:** In `firestore.rules`, combining `create` and `update` rules using only `request.resource.data` to validate authorization (e.g., `isTeacherForClass(request.resource.data.classId)`) creates an Insecure Direct Object Reference (IDOR) vulnerability. An attacker could modify an existing document belonging to another class and maliciously reassign it to their own class, bypassing the check since `request.resource.data.classId` satisfies the condition.
 **Learning:** Firestore `update` operations merge new data (`request.resource.data`) with existing data (`resource.data`). Authorization checks for `update` MUST validate against the existing data (`resource.data`) to ensure the user has rights to the original document, not just the proposed changes.
 **Prevention:** Always separate `create` and `update` rules. For `update` rules, enforce access checks using `resource.data` (e.g., `isTeacherForClass(resource.data.classId)`) AND explicitly prevent reassignment by asserting that key grouping fields remain unchanged (e.g., `request.resource.data.classId == resource.data.classId`).
+
+## 2025-05-22 - [CRITICAL] Fix setup atomic batch and authorization (CRIT-01)
+**Vulnerability:** The `/setup` route allowed unauthenticated creation of a superadmin if the `_setup` check and user creation weren't perfectly atomic.
+**Learning:** Sequential `setDoc` operations can leave the database in an inconsistent state or allow race conditions on bootstrapping routes.
+**Prevention:** Use `writeBatch` in the client code and enforce atomic transaction checks in `firestore.rules` using `existsAfter` and `getAfter` to ensure the lock document is created simultaneously with the superadmin user.
