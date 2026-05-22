@@ -11,3 +11,7 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+
+## 2025-05-22 - Keyboard Focus Accessibility for Interactive UI Components
+**Learning:** Universal UI controls like the `Button` component require visible focus states for keyboard users. Relying on default browser outlines or hover states alone provides insufficient accessibility.
+**Action:** Standardize on Tailwind's `focus-visible` pseudo-class (e.g., `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900`) on base interactive components to guarantee an accessible focus ring that only appears for keyboard navigation, avoiding persisting on mouse clicks.
