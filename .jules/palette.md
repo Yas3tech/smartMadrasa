@@ -11,3 +11,7 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+
+## 2024-05-24 - Focus Visible for Buttons
+**Learning:** The core Button component lacked focus indicators when navigated via keyboard. Relying solely on `hover` states discriminates against keyboard-only users.
+**Action:** Added `focus-visible` pseudo-class styles to the base button component to ensure a clear, consistent focus ring across all instances when focused via keyboard.
