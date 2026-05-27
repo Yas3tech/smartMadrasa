@@ -416,8 +416,8 @@ export const processNonParentUsers = async (
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
     };
 
-    const result = (await addUser(newUser)) as unknown as { id: string };
-    const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
+    const result = (await addUser(newUser)) as unknown as { id?: string; uid?: string };
+    const finalId = typeof result === 'string' ? result : result?.uid || result?.id || newUser.id;
     return { id: finalId, email: newUser.email, role: newUser.role };
   });
 
@@ -456,19 +456,17 @@ export const processParentUsers = async (
       }
     }
 
-    const newUser: Partial<User> = {
+    const newUser = {
       id: crypto.randomUUID(),
       name: normalizeString(row.name),
       email: normalizeEmail(row.email),
-      role: 'parent',
+      role: 'parent' as const,
       phone: normalizeString(row.phone),
       birthDate: normalizeString(row.birthDate),
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
       childrenIds,
-    };
-    if (relatedClassIds.length > 0) {
-      newUser.relatedClassIds = Array.from(new Set(relatedClassIds));
-    }
+      ...(relatedClassIds.length > 0 ? { relatedClassIds: Array.from(new Set(relatedClassIds)) } : {}),
+    } as unknown as User;
 
     await addUser(newUser);
     return true;
