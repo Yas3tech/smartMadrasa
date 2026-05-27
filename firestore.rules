@@ -127,7 +127,7 @@ service cloud.firestore {
 
       // 🛡️ SECURITY: Prevent Privilege Escalation
       // Allow superadmin creation ONLY if setup is open.
-      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin');
+      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin' && existsAfter(/databases/$(database)/documents/_setup/config));
       // Only allow users to update their own profile fields.
       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
@@ -137,7 +137,7 @@ service cloud.firestore {
     // LOGIC-04: Removed public read access to prevent backend reconnaissance
     match /_setup/{docId} {
       allow read: if isDirector() || isSuperAdmin() || isSetupOpen();
-      allow create: if !exists(/databases/$(database)/documents/_setup/config);
+      allow create: if !exists(/databases/$(database)/documents/_setup/config) && existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)) && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin';
       allow delete: if isSuperAdmin();
     }
 
