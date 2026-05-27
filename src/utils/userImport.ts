@@ -416,7 +416,7 @@ export const processNonParentUsers = async (
       avatar: normalizeString(row.name).charAt(0).toUpperCase(),
     };
 
-    const result = (await addUser(newUser)) as any;
+    const result = (await addUser(newUser)) as unknown as { id: string };
     const finalId = typeof result === 'string' ? result : result?.uid || newUser.id;
     return { id: finalId, email: newUser.email, role: newUser.role };
   });
@@ -456,7 +456,7 @@ export const processParentUsers = async (
       }
     }
 
-    const newUser: any = {
+    const newUser: Partial<User> = {
       id: crypto.randomUUID(),
       name: normalizeString(row.name),
       email: normalizeEmail(row.email),
