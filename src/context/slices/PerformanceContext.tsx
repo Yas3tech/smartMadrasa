@@ -389,6 +389,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
   return <PerformanceContext.Provider value={value}>{children}</PerformanceContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePerformance = () => {
   const context = useContext(PerformanceContext);
   if (!context) {
