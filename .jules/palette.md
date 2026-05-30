@@ -11,7 +11,3 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
-
-## 2025-05-30 - Schedule Pagination Missing aria-labels
-**Learning:** Pagination buttons like prev/next day or week in the schedule component often rely only on icons (ChevronLeft/ChevronRight), lacking accessible names.
-**Action:** Ensure that all pagination icon-only controls, including native HTML buttons or UI Button components, have `aria-label={t('common.previous')}` and `aria-label={t('common.next')}`.
