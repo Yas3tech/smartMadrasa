@@ -26,7 +26,7 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "verify-rules": "node scripts/verify_rules_mock.js",
-    "verify-rules:all": "node scripts/verify_rules_mock.js && node scripts/verify_grade_rules.js && node scripts/verify_homework_rules.js && node scripts/verify_message_rules.js && node scripts/verify_submission_rules.js",
+    "verify-rules:all": "node scripts/verify_rules_mock.js && node scripts/verify_grade_rules.js && node scripts/verify_homework_rules.js && node scripts/verify_message_rules.js && node scripts/verify_submission_rules.js && node scripts/verify_setup_rules.js",
     "audit:deps": "pnpm audit --audit-level high",
     "validate:env:prod": "node scripts/validate_env.js production",
     "ci:quality": "pnpm type-check && pnpm lint && pnpm test:run",
