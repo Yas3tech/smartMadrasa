@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useBulletinGrades } from '../../hooks/useBulletinGrades';
@@ -42,6 +42,16 @@ const TeacherBulletinGrades: React.FC = () => {
     handleValidateAll,
     handleValidateStudentBulletin,
   } = useBulletinGrades();
+
+  const studentValidatedCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const comment of classComments) {
+      if (comment.periodId === selectedPeriod && comment.isValidated) {
+        counts.set(comment.studentId, (counts.get(comment.studentId) || 0) + 1);
+      }
+    }
+    return counts;
+  }, [classComments, selectedPeriod]);
 
   // Access check
   if (user?.role !== 'teacher') {
@@ -167,17 +177,8 @@ const TeacherBulletinGrades: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {classStudents.map((student) => {
-                const studentComments = classComments.filter(
-                  (c) => c.studentId === student.id && c.periodId === selectedPeriod
-                );
-                // Note: In the hook we calculate complexity, here we just need to display.
-                // But wait, to show 'isFullyValidated', we need data.
-                // The hook's classValidationStats gives global stats.
-                // For individual student button color, we need per-student stats.
-                // I'll reimplement simple check here or update hook to return this map?
-                // Let's reimplement simple UI check or assume all if global is done? No.
-                // Reimplementing minimal logic for UI display:
-                const validatedCount = studentComments.filter((c) => c.isValidated).length;
+                // Reimplementing minimal logic for UI display using O(1) map lookup:
+                const validatedCount = studentValidatedCounts.get(student.id) || 0;
                 // We don't have totalCourses per student easily here without recalculating.
                 // I will skip the precise count display for now or just check if *any* validated comments match expected count?
                 // Let's just use validatedCount for now.
