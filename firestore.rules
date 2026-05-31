@@ -127,7 +127,12 @@ service cloud.firestore {
 
       // 🛡️ SECURITY: Prevent Privilege Escalation
       // Allow superadmin creation ONLY if setup is open.
-      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin');
+      // Must be an atomic batch write that also creates the _setup/config lock
+      allow create: if isDirector() || isSuperAdmin() || (
+        !exists(/databases/$(database)/documents/_setup/config) &&
+        existsAfter(/databases/$(database)/documents/_setup/config) &&
+        request.resource.data.role == 'superadmin'
+      );
       // Only allow users to update their own profile fields.
       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
