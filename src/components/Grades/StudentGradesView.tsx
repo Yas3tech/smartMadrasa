@@ -7,7 +7,7 @@ import { useGradeStats } from '../../hooks/useGradeStats';
 
 import type { Grade } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { useUsers, useAcademics } from '../../context/DataContext';
+import { useUsers, useAcademics } from '../../context/hooks';
 
 const StudentGradesView = () => {
   const { t } = useTranslation();

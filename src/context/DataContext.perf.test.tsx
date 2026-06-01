@@ -1,5 +1,6 @@
 import { render, act } from '@testing-library/react';
-import { DataProvider, useData, useUsers } from './DataContext';
+import { DataProvider, useData } from './DataContext';
+import { useUsers } from './hooks';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import * as AuthContext from './AuthContext';
 import { memo } from 'react';
@@ -9,11 +10,14 @@ const mockUseAuth = vi.fn();
 vi.spyOn(AuthContext, 'useAuth').mockImplementation(mockUseAuth);
 
 const { triggerMessages, subscribe } = vi.hoisted(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const callbacks: Set<(msgs: any[]) => void> = new Set();
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     triggerMessages: (msgs: any[]) => {
       callbacks.forEach((cb) => cb(msgs));
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subscribe: (cb: any) => {
       callbacks.add(cb);
       return () => callbacks.delete(cb);

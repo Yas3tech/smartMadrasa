@@ -18,12 +18,6 @@ import { AcademicProvider, useAcademics } from './slices/AcademicContext';
 import { CommunicationProvider, useCommunication } from './slices/CommunicationContext';
 import { PerformanceProvider, usePerformance } from './slices/PerformanceContext';
 
-// Re-export specific hooks for performance optimization
-export { useUsers } from './slices/UserContext';
-export { useAcademics } from './slices/AcademicContext';
-export { useCommunication } from './slices/CommunicationContext';
-export { usePerformance } from './slices/PerformanceContext';
-
 export interface DataContextType {
   // State
   users: User[];

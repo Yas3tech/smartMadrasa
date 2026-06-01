@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { clearAllData, seedSystemBasics } from '../../services/initFirebase';
 import { advanceToNextAcademicYear } from '../../services/systemMaintenance';
-import { useAcademics } from '../../context/DataContext';
+import { useAcademics } from '../../context/hooks';
 import { useAuth } from '../../context/AuthContext';
 import { auth } from '../../config/firebase';
 
