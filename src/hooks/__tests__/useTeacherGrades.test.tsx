@@ -9,7 +9,7 @@ vi.mock('../../context/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('../../context/DataContext', () => ({
+vi.mock('../../context/hooks', () => ({
   useUsers: vi.fn(),
   useAcademics: vi.fn(),
   usePerformance: vi.fn(),

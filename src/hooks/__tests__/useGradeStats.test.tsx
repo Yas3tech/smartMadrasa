@@ -4,7 +4,7 @@ import { useGradeStats } from '../useGradeStats';
 import { useData, usePerformance } from '../../context/hooks';
 
 // Mock the modules
-vi.mock('../../context/DataContext', () => ({
+vi.mock('../../context/hooks', () => ({
   useData: vi.fn(),
   usePerformance: vi.fn(),
 }));
