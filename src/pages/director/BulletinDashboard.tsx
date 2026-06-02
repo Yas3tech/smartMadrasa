@@ -39,6 +39,30 @@ const BulletinDashboard: React.FC = () => {
 
   const selectedPeriodData = academicPeriods.find((p) => p.id === selectedPeriod);
 
+  // Pre-compute students and courses by class to avoid O(C*S) and O(C*C) lookups
+  const studentsByClass = useMemo(() => {
+    const map = new Map<string, Student[]>();
+    students.forEach(s => {
+      const student = s as Student;
+      if (student.classId) {
+        if (!map.has(student.classId)) map.set(student.classId, []);
+        map.get(student.classId)!.push(student);
+      }
+    });
+    return map;
+  }, [students]);
+
+  const coursesByClass = useMemo(() => {
+    const map = new Map<string, typeof courses>();
+    courses.forEach(c => {
+      if (c.classId) {
+        if (!map.has(c.classId)) map.set(c.classId, []);
+        map.get(c.classId)!.push(c);
+      }
+    });
+    return map;
+  }, [courses]);
+
   // Calculate stats per class
   const classStats = useMemo(() => {
     if (!selectedPeriod) return {};
@@ -51,10 +75,10 @@ const BulletinDashboard: React.FC = () => {
 
     classes.forEach((cls) => {
       // Find students in this class
-      const classStudents = students.filter((s) => (s as Student).classId === cls.id);
+      const classStudents = studentsByClass.get(cls.id) || [];
 
       // Find courses for this class
-      const classCourses = courses.filter((c) => c.classId === cls.id);
+      const classCourses = coursesByClass.get(cls.id) || [];
 
       let totalExpected = 0;
       let validatedCount = 0;
@@ -80,7 +104,7 @@ const BulletinDashboard: React.FC = () => {
     });
 
     return stats;
-  }, [selectedPeriod, classes, students, courses, periodComments]);
+  }, [selectedPeriod, classes, studentsByClass, coursesByClass, periodComments]);
 
   const validationStats = useMemo(() => {
     const totalClasses = classes.length;
@@ -234,7 +258,7 @@ const BulletinDashboard: React.FC = () => {
                           {classItem.name}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {students.filter((s) => (s as Student).classId === classItem.id).length}{' '}
+                          {(studentsByClass.get(classItem.id) || []).length}{' '}
                           {t('bulletinDashboard.students')} • {progress}%{' '}
                           {t('bulletinDashboard.validated')}
                         </p>
@@ -314,8 +338,8 @@ const BulletinDashboard: React.FC = () => {
           classId={viewingClassId}
           className={classes.find((c) => c.id === viewingClassId)?.name || ''}
           period={selectedPeriodData}
-          students={students.filter((s) => (s as Student).classId === viewingClassId)}
-          courses={courses.filter((c) => c.classId === viewingClassId)}
+          students={studentsByClass.get(viewingClassId) || []}
+          courses={coursesByClass.get(viewingClassId) || []}
           grades={grades}
           comments={periodComments}
           onClose={() => setViewingClassId(null)}
