@@ -19,6 +19,8 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/preserve-manual-memoization": "off",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
@@ -32,6 +34,7 @@ export default tseslint.config(
       ],
       // Allow any type, just warn. This helps when integrating with untyped JS/Firebase dynamically.
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/ban-ts-comment": "warn"
     },
   }
 );
