@@ -11,3 +11,8 @@
 ## 2024-03-07 - Icon-only Toolbar Buttons Accessibility
 **Learning:** Icon-only toolbar buttons often rely solely on the `title` attribute for tooltips, which is insufficient for screen readers and keyboard users. Furthermore, relying on `hover` pseudo-classes for interactivity indication fails to accommodate keyboard navigation.
 **Action:** Always ensure icon-only buttons have explicit `aria-label` attributes (often matching the `title`) and use `focus-visible:ring-2 focus-visible:ring-orange-500` (or appropriate thematic color) to provide clear visual feedback for tab-based navigation.
+
+## 2024-06-03 - Modal Close Button Accessibility
+
+**Learning:** Modal components across the application often use the `X` icon from `lucide-react` as a close button but omit an accessible name, rendering them completely opaque to screen readers. The standard translation `t('common.close')` exists and should be used consistently.
+**Action:** Always add `aria-label={t('common.close')}` to icon-only close buttons (like `<X />`) within modals or overlays to guarantee screen reader accessibility.

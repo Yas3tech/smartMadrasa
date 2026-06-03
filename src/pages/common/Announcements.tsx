@@ -325,6 +325,7 @@ const Announcements = () => {
             <button
               onClick={() => setIsModalOpen(false)}
               className="text-gray-400 hover:text-gray-600"
+              aria-label={t('common.close')}
             >
               <X size={24} />
             </button>

@@ -88,6 +88,7 @@ const Dashboard = () => {
                   dash.setSelectedHomework(null);
                 }}
                 className="text-gray-400 hover:text-gray-600"
+                aria-label={t('common.close')}
               >
                 <X size={24} />
               </button>
