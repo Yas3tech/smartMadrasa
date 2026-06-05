@@ -96,7 +96,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       };
 
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
+        const parentUser = user as unknown as import("../../types").Parent; // Using any for childrenIds/relatedClassIds
         const childIds = parentUser.childrenIds || [];
         const classIds = parentUser.relatedClassIds || [];
 
