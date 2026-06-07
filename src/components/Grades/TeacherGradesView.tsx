@@ -35,6 +35,7 @@ const TeacherGradesView = () => {
             onClick={() => tg.setIsBulkModalOpen(true)}
             disabled={!tg.selectedClassId}
             className={`p-2 rounded-lg bg-orange-700/30 backdrop-blur-md border border-white/20 ${!tg.selectedClassId ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 transition-transform'}`}
+            aria-label={t('grades.addBulkGrades')}
           >
             <Upload size={20} />
           </button>
