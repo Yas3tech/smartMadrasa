@@ -166,41 +166,39 @@ const TeacherBulletinGrades: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {classStudents.map((student) => {
-                const studentComments = classComments.filter(
-                  (c) => c.studentId === student.id && c.periodId === selectedPeriod
-                );
-                // Note: In the hook we calculate complexity, here we just need to display.
-                // But wait, to show 'isFullyValidated', we need data.
-                // The hook's classValidationStats gives global stats.
-                // For individual student button color, we need per-student stats.
-                // I'll reimplement simple check here or update hook to return this map?
-                // Let's reimplement simple UI check or assume all if global is done? No.
-                // Reimplementing minimal logic for UI display:
-                const validatedCount = studentComments.filter((c) => c.isValidated).length;
-                // We don't have totalCourses per student easily here without recalculating.
-                // I will skip the precise count display for now or just check if *any* validated comments match expected count?
-                // Let's just use validatedCount for now.
-                return (
-                  <button
-                    key={student.id}
-                    onClick={() => setSelectedStudent(student.id)}
-                    className="p-4 border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-3"
-                  >
-                    <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {student.name.charAt(0)}
-                    </div>
-                    <div className="text-left flex-1">
-                      <p className="font-medium text-gray-800">{student.name}</p>
-                      {validatedCount > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-green-600">
-                          <CheckCircle size={12} /> {validatedCount} {t('bulletinGrades.validated')}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+          {(() => {
+            // Optimization: Pre-compute validated comments count per student to avoid O(S * K) loop
+            const studentValidatedCounts = new Map<string, number>();
+            for (const c of classComments) {
+              if (c.periodId === selectedPeriod && c.isValidated) {
+                studentValidatedCounts.set(c.studentId, (studentValidatedCounts.get(c.studentId) || 0) + 1);
+              }
+            }
+
+            return classStudents.map((student) => {
+              const validatedCount = studentValidatedCounts.get(student.id) || 0;
+
+              return (
+                <button
+                  key={student.id}
+                  onClick={() => setSelectedStudent(student.id)}
+                  className="p-4 border-2 border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 rounded-lg transition-all flex items-center gap-3"
+                >
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {student.name.charAt(0)}
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-medium text-gray-800">{student.name}</p>
+                    {validatedCount > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-green-600">
+                        <CheckCircle size={12} /> {validatedCount} {t('bulletinGrades.validated')}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            });
+          })()}
             </div>
           </div>
         </div>
