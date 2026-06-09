@@ -22,7 +22,7 @@ describe('Button', () => {
 
   it('renders icon if provided', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    render(<Button icon={MockIcon as any}>Icon Button</Button>);
+    render(<Button icon={MockIcon as unknown as React.ElementType}>Icon Button</Button>);
     expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
   });
 
