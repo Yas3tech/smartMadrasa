@@ -62,22 +62,22 @@ describe('useBulletinGrades', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as any);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as unknown as never);
 
     // Mock granular hooks
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
-    } as any);
+    } as unknown as never);
 
     vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
       courses: mockCourses,
       academicPeriods: mockPeriods,
-    } as any);
+    } as unknown as never);
 
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
-    } as any);
+    } as unknown as never);
   });
 
   it('should initialize with correct data', () => {
