@@ -148,12 +148,16 @@ const Messages = () => {
     );
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
+  const recipientOptionsMap = useMemo(() => {
+    return new Map(allRecipientOptions.map((opt) => [opt.id, opt]));
+  }, [allRecipientOptions]);
+
   const selectedRecipientLabels = useMemo(() => {
-    return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+    return recipients.map((id) => {
+      const opt = recipientOptionsMap.get(id);
       return { id, label: opt?.label || id };
     });
-  }, [recipients, allRecipientOptions]);
+  }, [recipients, recipientOptionsMap]);
 
 
   const handleArchiveMessage = async (messageId: string | number) => {
@@ -209,6 +213,30 @@ const Messages = () => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const classesMap = useMemo(() => {
+    return new Map(classes.map((c) => [c.id, c]));
+  }, [classes]);
+
+  const usersMap = useMemo(() => {
+    return new Map(users.map((u) => [u.id, u]));
+  }, [users]);
+
+  const classStudentsMap = useMemo(() => {
+    const map = new Map<string, User[]>();
+    users.forEach((u) => {
+      if (u.role === 'student') {
+        const student = u as Student;
+        if (student.classId) {
+          if (!map.has(student.classId)) {
+            map.set(student.classId, []);
+          }
+          map.get(student.classId)?.push(student);
+        }
+      }
+    });
+    return map;
+  }, [users]);
+
   // SECURITY: Throttle message sending to prevent spam (2 second cooldown)
   const handleSendMessage = useThrottle(useCallback(async () => {
     if (!user || recipients.length === 0 || !subject || !content || isSending) return;
@@ -221,15 +249,13 @@ const Messages = () => {
       );
 
       const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
+        const selectedRecipient = recipientOptionsMap.get(recipientId);
 
         if (selectedRecipient?.type === 'class') {
-          const selectedClass = classes.find((c) => c.id === recipientId);
+          const selectedClass = classesMap.get(recipientId);
           if (selectedClass) {
-            const classStudents = users.filter(
-              (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
-            );
-            const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
+            const classStudents = classStudentsMap.get(selectedClass.id) || [];
+            const classTeacher = usersMap.get(selectedClass.teacherId);
             const classOutbound = classStudents.map((student) =>
               sendMessage({
                 senderId: user.id,
@@ -293,7 +319,7 @@ const Messages = () => {
     } finally {
       setIsSending(false);
     }
-  }, [user, recipients, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, t]), 2000);
+  }, [user, recipients, subject, content, isSending, recipientOptionsMap, classesMap, usersMap, classStudentsMap, sendMessage, attachments, t]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
