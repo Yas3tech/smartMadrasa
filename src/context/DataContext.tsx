@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { type ReactNode, useMemo } from 'react';
 import type {
   User,
@@ -23,6 +24,8 @@ export { useUsers } from './slices/UserContext';
 export { useAcademics } from './slices/AcademicContext';
 export { useCommunication } from './slices/CommunicationContext';
 export { usePerformance } from './slices/PerformanceContext';
+
+
 
 export interface DataContextType {
   // State
