@@ -38,23 +38,23 @@ describe('useDashboard', () => {
       { id: 'g2', score: 80, maxScore: 100, subject: 'Math', studentId: 's1' },
     ];
 
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser as unknown } as ReturnType<typeof useAuth>);
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
       users: [...mockTeachers, ...mockStudents],
-    } as any);
+    } as unknown);
     vi.mocked(useAcademics).mockReturnValue({
       classes: [],
-    } as any);
+    } as unknown);
     vi.mocked(useCommunication).mockReturnValue({
       messages: [],
       events: [],
-    } as any);
+    } as unknown);
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
       attendance: mockAttendance,
       homeworks: [],
-    } as any);
+    } as unknown);
 
     const { result } = renderHook(() => useDashboard());
 
@@ -99,23 +99,23 @@ describe('useDashboard', () => {
 
     const mockUser = { id: 'user1', role: 'director', name: 'Director' };
 
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser as unknown } as ReturnType<typeof useAuth>);
     vi.mocked(useUsers).mockReturnValue({
       students: [],
       users: [],
-    } as any);
+    } as unknown);
     vi.mocked(useAcademics).mockReturnValue({
       classes: [],
-    } as any);
+    } as unknown);
     vi.mocked(useCommunication).mockReturnValue({
       messages: [],
       events: [],
-    } as any);
+    } as unknown);
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
       attendance: mockAttendance,
       homeworks: [],
-    } as any);
+    } as unknown);
 
     const { result } = renderHook(() => useDashboard());
     const dash = result.current;
