@@ -296,6 +296,7 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
   return <AcademicContext.Provider value={value}>{children}</AcademicContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAcademics = () => {
   const context = useContext(AcademicContext);
   if (!context) {
