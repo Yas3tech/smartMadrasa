@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { deleteAllUserData } from '../deleteUserData';
 import { db, storage } from '../../config/db';
-import { collection, query, where, getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, getDocs, deleteDoc, doc, runTransaction } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { deleteUser } from 'firebase/auth';
 
@@ -17,7 +17,7 @@ vi.mock('firebase/firestore', () => ({
     getDocs: vi.fn(),
     deleteDoc: vi.fn(),
     doc: vi.fn(),
-    writeBatch: vi.fn(),
+    runTransaction: vi.fn(),
 }));
 
 vi.mock('firebase/storage', () => ({
@@ -34,12 +34,13 @@ describe('deleteUserData', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        const mockBatch = {
+        const mockTransaction = {
             delete: vi.fn(),
             update: vi.fn(),
-            commit: vi.fn().mockResolvedValue(true),
         };
-        (writeBatch as any).mockReturnValue(mockBatch);
+        (runTransaction as any).mockImplementation((db: any, callback: any) => {
+            return callback(mockTransaction);
+        });
 
         (getDocs as any).mockResolvedValue({
             empty: false,

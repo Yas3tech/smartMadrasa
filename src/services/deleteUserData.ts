@@ -1,5 +1,5 @@
 import { db, storage } from '../config/db';
-import { collection, query, where, getDocs, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, runTransaction } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 import { deleteUser, type User } from 'firebase/auth';
 
@@ -42,7 +42,7 @@ async function getDocumentRefsWhere(
 }
 
 /**
- * Exécute une série d'opérations en lots (batches) de 500 maximum (limite Firestore)
+ * Exécute une série d'opérations en transaction (limite Firestore de 500 opérations)
  */
 async function executeBatchOperations(
   deletes: any[],
@@ -59,17 +59,15 @@ async function executeBatchOperations(
 
   for (let i = 0; i < operations.length; i += CHUNK_SIZE) {
     const chunk = operations.slice(i, i + CHUNK_SIZE);
-    const batch = writeBatch(db);
-
-    chunk.forEach(op => {
-      if (op.type === 'delete') {
-        batch.delete(op.ref);
-      } else {
-        batch.update(op.ref, op.data);
-      }
+    await runTransaction(db, async (transaction) => {
+      chunk.forEach(op => {
+        if (op.type === 'delete') {
+          transaction.delete(op.ref);
+        } else {
+          transaction.update(op.ref, op.data);
+        }
+      });
     });
-
-    await batch.commit();
   }
 }
 
