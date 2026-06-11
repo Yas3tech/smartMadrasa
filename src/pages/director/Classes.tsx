@@ -67,9 +67,13 @@ const Classes = () => {
 
   const teachersMap = useMemo(() => {
     const map = new Map();
-    teachers.forEach(t => map.set(t.id, t));
+    users.forEach((entry) => {
+      if (entry.role === 'teacher') {
+        map.set(entry.id, entry);
+      }
+    });
     return map;
-  }, [teachers]);
+  }, [users]);
 
   const classStudentsMap = useMemo(() => {
     const map = new Map<string, Student[]>();
