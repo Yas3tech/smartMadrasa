@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2026-03-03 - [O(N) Variable Dependencies in Component Optimization]
+**Learning:** When refactoring existing O(N) inline array lookups (like `users.find()`) into `useMemo` mapped components, always verify the exact source array used in the original logic. Substituting arrays arbitrarily without verification (e.g., using a hallucinated `teachers` array instead of `users`) leads to critical `ReferenceError` crashes on render.
+**Action:** When extracting mapping loops to `useMemo`, strictly pass and iterate over the exact variables confirmed to exist in the component's scope via grep or `cat`, preserving the original array data source.
