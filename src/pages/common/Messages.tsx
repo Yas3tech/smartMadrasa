@@ -139,30 +139,21 @@ const Messages = () => {
     ];
   }, [users, classes, t, isDirectorOrSuperAdmin]);
 
-  const allRecipientOptionsMap = useMemo(() => {
-    const map = new Map();
-    for (const opt of allRecipientOptions) {
-      map.set(opt.id, opt);
-    }
-    return map;
-  }, [allRecipientOptions]);
-
   const filteredRecipients = useMemo(() => {
     const query = recipientSearch.trim().toLowerCase();
     if (query.length < MIN_RECIPIENT_SEARCH_CHARS) return [];
     // Filter out already selected recipients
-    const recipientsSet = new Set(recipients);
     return allRecipientOptions.filter((item) =>
-      !recipientsSet.has(item.id) && item.searchText.includes(query)
+      !recipients.includes(item.id) && item.searchText.includes(query)
     );
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
   const selectedRecipientLabels = useMemo(() => {
     return recipients.map(id => {
-      const opt = allRecipientOptionsMap.get(id);
+      const opt = allRecipientOptions.find(r => r.id === id);
       return { id, label: opt?.label || id };
     });
-  }, [recipients, allRecipientOptionsMap]);
+  }, [recipients, allRecipientOptions]);
 
 
   const handleArchiveMessage = async (messageId: string | number) => {
@@ -229,29 +220,16 @@ const Messages = () => {
         attachments.map((file) => uploadFile(file, generateMessagePath(user.id, file.name)))
       );
 
-      // Pre-compute maps to avoid O(N*M) lookups inside the map loop
-      const classesMap = new Map(classes.map(c => [c.id, c]));
-      const classStudentsMap = new Map<string, Student[]>();
-      const usersMap = new Map(users.map(u => [u.id, u]));
-
-      for (const u of users) {
-        if (u.role === 'student') {
-          const student = u as Student;
-          if (!classStudentsMap.has(student.classId)) {
-            classStudentsMap.set(student.classId, []);
-          }
-          classStudentsMap.get(student.classId)!.push(student);
-        }
-      }
-
       const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptionsMap.get(recipientId);
+        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
 
         if (selectedRecipient?.type === 'class') {
-          const selectedClass = classesMap.get(recipientId);
+          const selectedClass = classes.find((c) => c.id === recipientId);
           if (selectedClass) {
-            const classStudents = classStudentsMap.get(selectedClass.id) || [];
-            const classTeacher = usersMap.get(selectedClass.teacherId);
+            const classStudents = users.filter(
+              (u) => u.role === 'student' && (u as Student).classId === selectedClass.id
+            );
+            const classTeacher = users.find((u) => u.id === selectedClass.teacherId);
             const classOutbound = classStudents.map((student) =>
               sendMessage({
                 senderId: user.id,
@@ -315,7 +293,7 @@ const Messages = () => {
     } finally {
       setIsSending(false);
     }
-  }, [user, recipients, subject, content, isSending, allRecipientOptionsMap, classes, users, sendMessage, attachments, t]), 2000);
+  }, [user, recipients, subject, content, isSending, allRecipientOptions, classes, users, sendMessage, attachments, t]), 2000);
 
   const handleSelectMessage = (msg: Message) => {
     setSelectedMessage(msg);
