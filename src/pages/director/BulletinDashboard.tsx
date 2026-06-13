@@ -7,7 +7,7 @@ import { subscribeToTeacherCommentsByPeriod } from '../../services/teacherCommen
 import { CheckCircle, Clock, Calendar, Users, FileText, Send, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { TeacherComment } from '../../types/bulletin';
-import type { Student } from '../../types';
+import type { Student, Course } from '../../types';
 import ClassBulletinListModal from '../../components/bulletin/ClassBulletinListModal';
 
 const BulletinDashboard: React.FC = () => {
@@ -39,6 +39,26 @@ const BulletinDashboard: React.FC = () => {
 
   const selectedPeriodData = academicPeriods.find((p) => p.id === selectedPeriod);
 
+  // Optimization: Pre-compute maps to avoid O(N*M) filtering per class
+  const { studentsByClassId, coursesByClassId } = useMemo(() => {
+    const sMap = new Map<string, Student[]>();
+    const cMap = new Map<string, Course[]>();
+
+    students.forEach((s) => {
+      const student = s as Student;
+      const classId = student.classId;
+      if (!sMap.has(classId)) sMap.set(classId, []);
+      sMap.get(classId)!.push(student);
+    });
+
+    courses.forEach((c) => {
+      if (!cMap.has(c.classId)) cMap.set(c.classId, []);
+      cMap.get(c.classId)!.push(c);
+    });
+
+    return { studentsByClassId: sMap, coursesByClassId: cMap };
+  }, [students, courses]);
+
   // Calculate stats per class
   const classStats = useMemo(() => {
     if (!selectedPeriod) return {};
@@ -51,10 +71,10 @@ const BulletinDashboard: React.FC = () => {
 
     classes.forEach((cls) => {
       // Find students in this class
-      const classStudents = students.filter((s) => (s as Student).classId === cls.id);
+      const classStudents = studentsByClassId.get(cls.id) || [];
 
       // Find courses for this class
-      const classCourses = courses.filter((c) => c.classId === cls.id);
+      const classCourses = coursesByClassId.get(cls.id) || [];
 
       let totalExpected = 0;
       let validatedCount = 0;
@@ -234,7 +254,7 @@ const BulletinDashboard: React.FC = () => {
                           {classItem.name}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {students.filter((s) => (s as Student).classId === classItem.id).length}{' '}
+                          {(studentsByClassId.get(classItem.id) || []).length}{' '}
                           {t('bulletinDashboard.students')} • {progress}%{' '}
                           {t('bulletinDashboard.validated')}
                         </p>
@@ -314,8 +334,8 @@ const BulletinDashboard: React.FC = () => {
           classId={viewingClassId}
           className={classes.find((c) => c.id === viewingClassId)?.name || ''}
           period={selectedPeriodData}
-          students={students.filter((s) => (s as Student).classId === viewingClassId)}
-          courses={courses.filter((c) => c.classId === viewingClassId)}
+          students={studentsByClassId.get(viewingClassId) || []}
+          courses={coursesByClassId.get(viewingClassId) || []}
           grades={grades}
           comments={periodComments}
           onClose={() => setViewingClassId(null)}
