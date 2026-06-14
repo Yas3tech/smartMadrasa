@@ -139,21 +139,27 @@ const Messages = () => {
     ];
   }, [users, classes, t, isDirectorOrSuperAdmin]);
 
+  const allRecipientOptionsMap = useMemo(() => {
+    return new Map(allRecipientOptions.map((r) => [r.id, r]));
+  }, [allRecipientOptions]);
+
+  const recipientsSet = useMemo(() => new Set(recipients), [recipients]);
+
   const filteredRecipients = useMemo(() => {
     const query = recipientSearch.trim().toLowerCase();
     if (query.length < MIN_RECIPIENT_SEARCH_CHARS) return [];
     // Filter out already selected recipients
     return allRecipientOptions.filter((item) =>
-      !recipients.includes(item.id) && item.searchText.includes(query)
+      !recipientsSet.has(item.id) && item.searchText.includes(query)
     );
-  }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
+  }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipientsSet]);
 
   const selectedRecipientLabels = useMemo(() => {
     return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+      const opt = allRecipientOptionsMap.get(id);
       return { id, label: opt?.label || id };
     });
-  }, [recipients, allRecipientOptions]);
+  }, [recipients, allRecipientOptionsMap]);
 
 
   const handleArchiveMessage = async (messageId: string | number) => {
@@ -221,7 +227,7 @@ const Messages = () => {
       );
 
       const allOutbound = recipients.map(async (recipientId) => {
-        const selectedRecipient = allRecipientOptions.find((r) => r.id === recipientId);
+        const selectedRecipient = allRecipientOptionsMap.get(recipientId);
 
         if (selectedRecipient?.type === 'class') {
           const selectedClass = classes.find((c) => c.id === recipientId);
