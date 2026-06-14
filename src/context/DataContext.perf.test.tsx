@@ -8,6 +8,7 @@ import { memo } from 'react';
 const mockUseAuth = vi.fn();
 vi.spyOn(AuthContext, 'useAuth').mockImplementation(mockUseAuth);
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const { triggerMessages, subscribe } = vi.hoisted(() => {
   const callbacks: Set<(msgs: any[]) => void> = new Set();
   return {
