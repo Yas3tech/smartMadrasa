@@ -43,6 +43,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                         icon={ChevronLeft}
                         onClick={() => schedule.setWeekOffset(schedule.weekOffset - 1)}
                         className="px-3"
+                        aria-label={t('common.previous')}
                     />
                     <div className="flex flex-col items-center min-w-[200px]">
                         <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 border border-orange-200 rounded-xl">
@@ -63,6 +64,7 @@ const ScheduleDesktop: React.FC<ScheduleDesktopProps> = ({ schedule, t, i18n, da
                         icon={ChevronRight}
                         onClick={() => schedule.setWeekOffset(schedule.weekOffset + 1)}
                         className="px-3"
+                        aria-label={t('common.next')}
                     />
                     <Button
                         variant="secondary"
