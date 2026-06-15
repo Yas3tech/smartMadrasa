@@ -31,6 +31,8 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
     const [selectedCourseId, setSelectedCourseId] = useState<string>('');
     const [justificationMap, setJustificationMap] = useState<Record<string, string>>({});
 
+    const classesMap = useMemo(() => new Map(classes.map((c) => [c.id, c])), [classes]);
+
     // Filter courses for the current teacher and selected date
     const teacherCourses = useMemo(() => {
         const date = new Date(selectedDate);
@@ -161,7 +163,7 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                         >
                             <option value="">{t('attendance.selectCourse')}</option>
                             {teacherCourses.map((course) => {
-                                const classGroup = classes.find((c) => c.id === course.classId);
+                                const classGroup = classesMap.get(course.classId);
                                 return (
                                     <option key={course.id} value={course.id}>
                                         {course.subject} - {classGroup?.name || t('attendance.unknownClass')} (

@@ -148,12 +148,14 @@ const Messages = () => {
     );
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
+  const allRecipientOptionsMap = useMemo(() => new Map(allRecipientOptions.map(opt => [opt.id, opt])), [allRecipientOptions]);
+
   const selectedRecipientLabels = useMemo(() => {
     return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+      const opt = allRecipientOptionsMap.get(id);
       return { id, label: opt?.label || id };
     });
-  }, [recipients, allRecipientOptions]);
+  }, [recipients, allRecipientOptionsMap]);
 
 
   const handleArchiveMessage = async (messageId: string | number) => {

@@ -27,3 +27,6 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+## 2025-03-03 - [Nested Loop O(N*M) Optimization in List Rendering]
+**Learning:** Found O(N*M) performance bottlenecks in `Profile.tsx`, `TeacherAttendance.tsx`, and `Messages.tsx` where `Array.prototype.find()` lookups over arrays were executed inside `.map()` loops rendering child elements and dropdown options. This can cause UI lag when scaling to larger datasets.
+**Action:** Used `useMemo` to pre-compute lookup Maps (O(C) time), converting the inner render loop search to an O(1) `Map.prototype.get()` operation. Always pre-compute map objects before array mapping in React render paths to flatten complexity.
