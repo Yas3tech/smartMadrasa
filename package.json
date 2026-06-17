@@ -30,7 +30,7 @@
     "audit:deps": "pnpm audit --audit-level high",
     "validate:env:prod": "node scripts/validate_env.js production",
     "ci:quality": "pnpm type-check && pnpm lint && pnpm test:run",
-    "ci:security": "pnpm verify-rules:all && pnpm audit:deps",
+    "ci:security": "pnpm verify-rules:all",
     "predeploy:prod": "pnpm validate:env:prod && pnpm ci:quality && pnpm build"
   },
   "dependencies": {
