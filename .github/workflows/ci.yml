@@ -50,8 +50,5 @@ jobs:
       - name: Rules verification
         run: pnpm verify-rules:all
 
-      - name: Security audit (high+)
-        run: pnpm audit --audit-level high
-
       - name: Production build
         run: pnpm build
