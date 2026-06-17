@@ -60,6 +60,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       // SECURITY: Each role only subscribes to events it is authorized to see.
       // Do NOT replace these scoped queries with a generic fetch-all.
       if (user?.role === 'parent') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const parentUser = user as any; // Using any for childrenIds/relatedClassIds
         const classIds = parentUser.relatedClassIds || [];
         if (classIds.length > 0) {
@@ -183,6 +184,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
   return <CommunicationContext.Provider value={value}>{children}</CommunicationContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCommunication = () => {
   const context = useContext(CommunicationContext);
   if (!context) {
