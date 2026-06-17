@@ -56,6 +56,14 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
         return students.filter((s) => (s as Student).classId === selectedCourse.classId);
     }, [selectedCourse, students]);
 
+    const classesMap = useMemo(() => {
+        const map = new Map();
+        for (const c of classes) {
+            map.set(c.id, c);
+        }
+        return map;
+    }, [classes]);
+
     // Pre-compute attendance records for the selected date and course to ensure O(1) lookups
     const attendanceMap = useMemo(() => {
         const map = new Map();
@@ -161,7 +169,7 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                         >
                             <option value="">{t('attendance.selectCourse')}</option>
                             {teacherCourses.map((course) => {
-                                const classGroup = classes.find((c) => c.id === course.classId);
+                                const classGroup = classesMap.get(course.classId);
                                 return (
                                     <option key={course.id} value={course.id}>
                                         {course.subject} - {classGroup?.name || t('attendance.unknownClass')} (
