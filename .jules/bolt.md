@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2025-03-03 - [Nested Loop O(N²) Optimization in Messages]
+**Learning:** Found an O(N²) anti-pattern inside a `useMemo` block in `src/pages/common/Messages.tsx` where `.find()`, `.filter()`, and `.includes()` were executed inside nested map operations during array filtering.
+**Action:** Replaced `.find()` with an `allRecipientOptionsMap` mapping and `recipients.includes()` with `new Set(recipients)`, resolving $O(N \times R)$ render-time bottlenecks and preventing UI lag on huge user lists.
