@@ -55,15 +55,18 @@ describe('useTeacherGrades', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAuth).mockReturnValue({ user: { id: 't1', role: 'teacher' } } as any);
 
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
       courses: mockCourses,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(usePerformance).mockReturnValue({
@@ -72,10 +75,12 @@ describe('useTeacherGrades', () => {
       addGrade: vi.fn(),
       addGradesBatch: vi.fn(),
       updateGrade: vi.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(useCommunication).mockReturnValue({
       events: [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 

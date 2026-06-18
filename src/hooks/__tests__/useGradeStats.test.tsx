@@ -39,7 +39,9 @@ describe('useGradeStats', () => {
     };
 
     // Mock both contexts to support refactoring
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useData).mockReturnValue(mockData as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(usePerformance).mockReturnValue(mockData as any);
 
     const { result } = renderHook(() => useGradeStats());
@@ -76,7 +78,9 @@ describe('useGradeStats', () => {
       attendance: mockAttendance,
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useData).mockReturnValue(mockData as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(usePerformance).mockReturnValue(mockData as any);
 
     const { result } = renderHook(() => useGradeStats('s1'));

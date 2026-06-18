@@ -38,23 +38,16 @@ describe('useDashboard', () => {
       { id: 'g2', score: 80, maxScore: 100, subject: 'Math', studentId: 's1' },
     ];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
-    vi.mocked(useUsers).mockReturnValue({
-      students: mockStudents,
-      users: [...mockTeachers, ...mockStudents],
-    } as any);
-    vi.mocked(useAcademics).mockReturnValue({
-      classes: [],
-    } as any);
-    vi.mocked(useCommunication).mockReturnValue({
-      messages: [],
-      events: [],
-    } as any);
-    vi.mocked(usePerformance).mockReturnValue({
-      grades: mockGrades,
-      attendance: mockAttendance,
-      homeworks: [],
-    } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useUsers).mockReturnValue({ students: mockStudents, users: [...mockTeachers, ...mockStudents] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useAcademics).mockReturnValue({ classes: [] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useCommunication).mockReturnValue({ messages: [], events: [] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(usePerformance).mockReturnValue({ grades: mockGrades, attendance: mockAttendance, homeworks: [] } as any);
 
     const { result } = renderHook(() => useDashboard());
 
@@ -88,6 +81,7 @@ describe('useDashboard', () => {
       { date: todayStr, status: 'present' },
       { date: todayStr, status: 'absent' },
       { date: yesterdayStr, status: 'present' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any;
 
     const mockGrades = [
@@ -95,27 +89,21 @@ describe('useDashboard', () => {
       { id: 'g2', score: 85, maxScore: 100, subject: 'Math', studentId: 's2' }, // Bien
       { id: 'g3', score: 55, maxScore: 100, subject: 'History', studentId: 's1' }, // Moyen
       { id: 'g4', score: 40, maxScore: 100, subject: 'History', studentId: 's2' }, // Faible
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any;
 
     const mockUser = { id: 'user1', role: 'director', name: 'Director' };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
-    vi.mocked(useUsers).mockReturnValue({
-      students: [],
-      users: [],
-    } as any);
-    vi.mocked(useAcademics).mockReturnValue({
-      classes: [],
-    } as any);
-    vi.mocked(useCommunication).mockReturnValue({
-      messages: [],
-      events: [],
-    } as any);
-    vi.mocked(usePerformance).mockReturnValue({
-      grades: mockGrades,
-      attendance: mockAttendance,
-      homeworks: [],
-    } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useUsers).mockReturnValue({ students: [], users: [] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useAcademics).mockReturnValue({ classes: [] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useCommunication).mockReturnValue({ messages: [], events: [] } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(usePerformance).mockReturnValue({ grades: mockGrades, attendance: mockAttendance, homeworks: [] } as any);
 
     const { result } = renderHook(() => useDashboard());
     const dash = result.current;

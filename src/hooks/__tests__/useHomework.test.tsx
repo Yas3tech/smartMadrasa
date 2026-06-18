@@ -65,15 +65,18 @@ describe('useHomework', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAuth).mockReturnValue({ user: { id: 'u1', role: 'teacher', name: 'T1' } } as any);
     vi.mocked(usePerformance).mockReturnValue({
       homeworks: mockHomeworks,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 
   it('should subscribe to submissions for student user', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: { id: 's1', role: 'student', classId: 'c1', name: 'Student 1' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     renderHook(() => useHomework());
@@ -87,6 +90,7 @@ describe('useHomework', () => {
   it('should not subscribe to submissions for teacher user', () => {
     vi.mocked(useAuth).mockReturnValue({
       user: { id: 't1', role: 'teacher', name: 'Teacher 1' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     renderHook(() => useHomework());
