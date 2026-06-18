@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useBulletinGrades } from '../useBulletinGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useData, useUsers, useAcademics, usePerformance } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -62,21 +62,25 @@ describe('useBulletinGrades', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAuth).mockReturnValue({ user: mockUser } as any);
 
     // Mock granular hooks
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
       courses: mockCourses,
       academicPeriods: mockPeriods,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   });
 

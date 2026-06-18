@@ -96,6 +96,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       };
 
       if (user?.role === 'parent') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const parentUser = user as any; // Using any for childrenIds/relatedClassIds
         const childIds = parentUser.childrenIds || [];
         const classIds = parentUser.relatedClassIds || [];
@@ -389,6 +390,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
   return <PerformanceContext.Provider value={value}>{children}</PerformanceContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePerformance = () => {
   const context = useContext(PerformanceContext);
   if (!context) {
