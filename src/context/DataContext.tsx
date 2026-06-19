@@ -18,6 +18,7 @@ import { AcademicProvider, useAcademics } from './slices/AcademicContext';
 import { CommunicationProvider, useCommunication } from './slices/CommunicationContext';
 import { PerformanceProvider, usePerformance } from './slices/PerformanceContext';
 
+/* eslint-disable react-refresh/only-export-components */
 // Re-export specific hooks for performance optimization
 export { useUsers } from './slices/UserContext';
 export { useAcademics } from './slices/AcademicContext';
