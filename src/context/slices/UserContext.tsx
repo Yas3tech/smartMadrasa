@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -8,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { User, Student } from '../../types';
+import type { User, Student, Parent } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToUsers,
@@ -54,7 +55,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         ]);
       } else if (user?.role === 'parent') {
         // Parent: See their own children + staff
-        const parent = user as any; // Using any to avoid type cast issues with childrenIds vs children
+        const parent = user as Parent;
         const studentIds = parent.childrenIds || [];
         const queries: UserQueryFilters[] = [
           { role: ['teacher', 'director', 'superadmin'] },

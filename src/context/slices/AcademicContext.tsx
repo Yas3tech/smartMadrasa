@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -8,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { ClassGroup, Course, Student } from '../../types';
+import type { ClassGroup, Course, Student, Parent } from '../../types';
 import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -88,8 +89,8 @@ export const AcademicProvider = ({ children }: { children: ReactNode }) => {
       // Do NOT replace these scoped queries with a generic fetch-all.
       // If a role sees incorrect data, fix the query — don't widen access.
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any to handle childrenIds
-        const classIds = parentUser.relatedClassIds || [];
+        const parentUser = user as Parent;
+        const classIds = (parentUser as unknown as { relatedClassIds?: string[] }).relatedClassIds || [];
         unsubClasses = subscribeToClasses(setClasses, classIds);
         if (classIds.length > 0) {
           unsubCourses = subscribeToCourses(setCourses);
