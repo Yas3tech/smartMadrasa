@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2025-05-24 - [O(N*M) Bottleneck in Array Filtering]
+**Learning:** Using `.find()` and `.includes()` inside `.map()` or `.filter()` loops during renders creates severe O(N*M) bottlenecks, particularly for large lists like user directories.
+**Action:** Pre-compute `Map` and `Set` structures using `useMemo` before these loops to ensure O(1) lookups during iteration.
