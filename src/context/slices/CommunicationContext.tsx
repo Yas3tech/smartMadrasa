@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -8,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { Message, Event, Student } from '../../types';
+import type { Message, Event, Student, User } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToMessages,
@@ -60,7 +61,7 @@ export const CommunicationProvider = ({ children }: { children: ReactNode }) => 
       // SECURITY: Each role only subscribes to events it is authorized to see.
       // Do NOT replace these scoped queries with a generic fetch-all.
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
+        const parentUser = user as User & { childrenIds?: string[], relatedClassIds?: string[] };
         const classIds = parentUser.relatedClassIds || [];
         if (classIds.length > 0) {
           unsubEvents = subscribeToEventsByClassIds(classIds, setEvents);
