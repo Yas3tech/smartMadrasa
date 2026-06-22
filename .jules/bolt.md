@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2026-03-04 - [O(N²) Array Lookup Optimization in Profile Rendering]
+**Learning:** Using `Array.prototype.find()` inside array `.map()` calls or conditional render blocks (e.g., retrieving class information for each child in a parent's profile) creates an O(N*M) performance bottleneck, as seen in `src/pages/common/Profile.tsx`.
+**Action:** Pre-compute lookup tables (`classesMap`) using `useMemo` outside of iterators to convert O(M) lookups to O(1), bringing overall render complexity down from O(N*M) to O(N+M).
