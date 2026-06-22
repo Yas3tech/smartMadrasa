@@ -62,7 +62,7 @@ describe('useBulletinGrades', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as any);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser as unknown as ReturnType<typeof useAuth>["user"] } as ReturnType<typeof useAuth>);
 
     // Mock granular hooks
     vi.mocked(useUsers).mockReturnValue({
