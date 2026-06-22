@@ -13,6 +13,7 @@ import type {
 import type { AcademicPeriod, GradeCategory } from '../types/bulletin';
 import { isFirebaseConfigured } from '../config/firebase';
 
+/* eslint-disable react-refresh/only-export-components */
 import { UserProvider, useUsers } from './slices/UserContext';
 import { AcademicProvider, useAcademics } from './slices/AcademicContext';
 import { CommunicationProvider, useCommunication } from './slices/CommunicationContext';
