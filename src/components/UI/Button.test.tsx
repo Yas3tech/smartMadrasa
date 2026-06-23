@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { Button } from './index';
@@ -21,8 +22,7 @@ describe('Button', () => {
   });
 
   it('renders icon if provided', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    render(<Button icon={MockIcon as any}>Icon Button</Button>);
+    render(<Button icon={MockIcon as React.ElementType}>Icon Button</Button>);
     expect(screen.getByTestId('mock-icon')).toBeInTheDocument();
   });
 
@@ -65,7 +65,7 @@ describe('Button', () => {
   it('does not show icon when isLoading is true', () => {
 
     render(
-      <Button isLoading icon={MockIcon as any}>
+      <Button isLoading icon={MockIcon as React.ElementType}>
         Loading
       </Button>
     );
