@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, writeBatch } from 'firebase/firestore';
 import { auth } from '../../config/firebase';
 import { db } from '../../config/db';
 import { Button, Input, Card } from '../../components/UI';
@@ -135,7 +135,11 @@ const FirstRunSetup: React.FC = () => {
       await updateProfile(user, { displayName: adminName });
       toast.success(copy.authCreated);
 
-      await setDoc(doc(db, 'users', user.uid), {
+      // Use a batch write to ensure atomic setup configuration and user creation
+      const batch = writeBatch(db);
+
+      const userRef = doc(db, 'users', user.uid);
+      batch.set(userRef, {
         id: user.uid,
         name: adminName,
         email: adminEmail,
@@ -144,11 +148,14 @@ const FirstRunSetup: React.FC = () => {
         createdAt: new Date().toISOString(),
       });
 
-      await setDoc(doc(db, '_setup', 'config'), {
+      const setupRef = doc(db, '_setup', 'config');
+      batch.set(setupRef, {
         setupCompletedAt: new Date().toISOString(),
         completedBy: user.uid,
         status: 'locked',
       });
+
+      await batch.commit();
 
       if (seedData) {
         toast.loading(copy.seedingData, { id: 'seed' });
