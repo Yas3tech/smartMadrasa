@@ -93,14 +93,18 @@ export function useSchedule({ weekOffset, mobileDate, classId }: UseScheduleProp
   }, [courses, user, classId]);
 
   const userExams = useMemo(() => {
+    // Pre-compute teacher class IDs to avoid O(N*M) calculation inside the filter loop
+    const teacherClassIds = user?.role === 'teacher'
+      ? new Set(classes.filter((c) => c.teacherId === user.id).map((c) => c.id))
+      : new Set();
+
     return events.filter((e) => {
       if (e.type !== 'exam' && e.type !== 'evaluation') return false;
       if ((user?.role === 'student' || user?.role === 'parent') && classId) {
         return e.classId === classId;
       }
       if (user?.role === 'teacher') {
-        const teacherClassIds = classes.filter((c) => c.teacherId === user.id).map((c) => c.id);
-        return !!e.classId && teacherClassIds.includes(e.classId);
+        return !!e.classId && teacherClassIds.has(e.classId);
       }
       return user?.role === 'director' || user?.role === 'superadmin';
     });
