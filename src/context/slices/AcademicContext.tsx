@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { ClassGroup, Course, Student } from '../../types';
+import type { ClassGroup, Course, Student, User } from '../../types';
 import type { AcademicPeriod, GradeCategory } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {

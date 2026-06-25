@@ -23,7 +23,7 @@ describe('useDashboard', () => {
 
   it('should return dashboard data correctly', () => {
     // Setup mock data
-    const mockUser = { id: 'user1', role: 'director', name: 'Director' };
+    const mockUser = { id: 'user1', role: 'director', name: 'Director' } as unknown as ReturnType<typeof useAuth>["user"];
     const mockStudents = [
       { id: 's1', name: 'Student 1', role: 'student' },
       { id: 's2', name: 'Student 2', role: 'student' },
@@ -38,7 +38,7 @@ describe('useDashboard', () => {
       { id: 'g2', score: 80, maxScore: 100, subject: 'Math', studentId: 's1' },
     ];
 
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser as unknown as ReturnType<typeof useAuth>["user"] } as ReturnType<typeof useAuth>);
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
       users: [...mockTeachers, ...mockStudents],
@@ -97,9 +97,9 @@ describe('useDashboard', () => {
       { id: 'g4', score: 40, maxScore: 100, subject: 'History', studentId: 's2' }, // Faible
     ] as any;
 
-    const mockUser = { id: 'user1', role: 'director', name: 'Director' };
+    const mockUser = { id: 'user1', role: 'director', name: 'Director' } as unknown as ReturnType<typeof useAuth>["user"];
 
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser as any } as ReturnType<typeof useAuth>);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser as unknown as ReturnType<typeof useAuth>["user"] } as ReturnType<typeof useAuth>);
     vi.mocked(useUsers).mockReturnValue({
       students: [],
       users: [],

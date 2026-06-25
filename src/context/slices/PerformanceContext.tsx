@@ -11,7 +11,7 @@ import {
 import { useAuth } from '../AuthContext';
 import { useUsers } from './UserContext';
 import { useAcademics } from './AcademicContext';
-import type { Grade, Attendance, Homework, Student } from '../../types';
+import type { Grade, Attendance, Homework, Student, User } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {

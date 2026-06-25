@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useAuth } from '../AuthContext';
-import type { Message, Event, Student } from '../../types';
+import type { Message, Event, Student, User } from '../../types';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
   subscribeToMessages,
