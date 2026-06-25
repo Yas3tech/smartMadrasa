@@ -67,17 +67,17 @@ describe('useBulletinGrades', () => {
     // Mock granular hooks
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
-    } as any);
+    } as unknown as ReturnType<typeof useUsers>);
 
     vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
       courses: mockCourses,
       academicPeriods: mockPeriods,
-    } as any);
+    } as unknown as ReturnType<typeof useAcademics>);
 
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
-    } as any);
+    } as unknown as ReturnType<typeof usePerformance>);
   });
 
   it('should initialize with correct data', () => {
