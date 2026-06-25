@@ -22,6 +22,8 @@ const Profile = () => {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
 
+  const classesMap = useMemo(() => new Map(classes.map(c => [c.id, c])), [classes]);
+
   const teacherData = useMemo(() => {
     if (!user || user.role !== 'teacher') return { subjects: [], teacherClasses: [] };
 
@@ -83,7 +85,7 @@ const Profile = () => {
     if (!studentData) return null;
 
     const parent = users.find((u) => u.id === studentData.parentId);
-    const classInfo = classes.find((c) => c.id === studentData.classId);
+    const classInfo = classesMap.get(studentData.classId);
 
     return (
       <Card className="p-6">
@@ -123,7 +125,7 @@ const Profile = () => {
         <div className="space-y-3">
           {children.length > 0 ? (
             children.map((child) => {
-              const classInfo = classes.find((c) => c.id === (child as Student).classId);
+              const classInfo = classesMap.get((child as Student).classId);
               return (
                 <div key={child.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">

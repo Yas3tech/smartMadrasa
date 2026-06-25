@@ -149,8 +149,9 @@ const Messages = () => {
   }, [recipientSearch, allRecipientOptions, MIN_RECIPIENT_SEARCH_CHARS, recipients]);
 
   const selectedRecipientLabels = useMemo(() => {
+    const optionsMap = new Map(allRecipientOptions.map(r => [r.id, r]));
     return recipients.map(id => {
-      const opt = allRecipientOptions.find(r => r.id === id);
+      const opt = optionsMap.get(id);
       return { id, label: opt?.label || id };
     });
   }, [recipients, allRecipientOptions]);

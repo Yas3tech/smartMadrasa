@@ -210,14 +210,19 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
 
   const handleBulkSave = async (gradesData: Omit<Grade, 'id'>[]) => {
     try {
+      // Optimized: Precompute course lookups by subject
+      const courseMap = new Map(
+        courses
+          .filter(c => c.classId === selectedClassId)
+          .map(c => [c.subject, c.id])
+      );
+
       // Optimized: use Firestore writeBatch to save all grades in a single roundtrip
       const formattedGrades = gradesData.map((grade) => ({
         ...grade,
         teacherId: user?.id || '',
         classId: selectedClassId,
-        courseId: courses.find(
-          (c) => c.subject === grade.subject && c.classId === selectedClassId
-        )?.id,
+        courseId: courseMap.get(grade.subject),
       }));
       await addGradesBatch(formattedGrades);
       toast.success(t('grades.gradesSaved'));
