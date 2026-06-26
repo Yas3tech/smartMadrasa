@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -10,7 +11,7 @@ import {
 import { useAuth } from '../AuthContext';
 import { useUsers } from './UserContext';
 import { useAcademics } from './AcademicContext';
-import type { Grade, Attendance, Homework, Student } from '../../types';
+import type { Grade, Attendance, Homework, Student, User } from '../../types';
 import type { CourseGrade } from '../../types/bulletin';
 import { isFirebaseConfigured } from '../../config/firebase';
 import {
@@ -96,7 +97,7 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
       };
 
       if (user?.role === 'parent') {
-        const parentUser = user as any; // Using any for childrenIds/relatedClassIds
+        const parentUser = user as unknown as User & { childrenIds?: string[], relatedClassIds?: string[] }; // Using any for childrenIds/relatedClassIds
         const childIds = parentUser.childrenIds || [];
         const classIds = parentUser.relatedClassIds || [];
 

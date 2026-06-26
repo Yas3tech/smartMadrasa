@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useBulletinGrades } from '../useBulletinGrades';
 import { useAuth } from '../../context/AuthContext';
-import { useData, useUsers, useAcademics, usePerformance } from '../../context/DataContext';
+import { useUsers, useAcademics, usePerformance } from '../../context/DataContext';
 
 // Mock the modules
 vi.mock('../../context/AuthContext', () => ({
@@ -62,22 +62,22 @@ describe('useBulletinGrades', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as any);
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as unknown as ReturnType<typeof useUsers>);
 
     // Mock granular hooks
     vi.mocked(useUsers).mockReturnValue({
       students: mockStudents,
-    } as any);
+    } as unknown as ReturnType<typeof useAcademics>);
 
     vi.mocked(useAcademics).mockReturnValue({
       classes: mockClasses,
       courses: mockCourses,
       academicPeriods: mockPeriods,
-    } as any);
+    } as unknown as ReturnType<typeof usePerformance>);
 
     vi.mocked(usePerformance).mockReturnValue({
       grades: mockGrades,
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
   });
 
   it('should initialize with correct data', () => {
