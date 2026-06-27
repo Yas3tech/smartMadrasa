@@ -69,6 +69,7 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
           <button
             className="text-white/80 hover:text-white p-2"
             onClick={() => schedule.setShowUpcomingModal(true)}
+            aria-label={t('schedule.upcoming')}
           >
             <CalendarIcon size={24} />
           </button>
@@ -94,6 +95,7 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
         <button
           onClick={schedule.handlePrevDay}
           className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600"
+          aria-label={t('common.previous')}
         >
           <ChevronLeft size={20} />
         </button>
@@ -106,6 +108,7 @@ const ScheduleMobile: React.FC<ScheduleMobileProps> = ({ schedule, user, t, i18n
         <button
           onClick={schedule.handleNextDay}
           className="p-3 bg-white dark:bg-slate-800 shadow-sm rounded-full text-gray-600 dark:text-slate-300 hover:text-orange-600"
+          aria-label={t('common.next')}
         >
           <ChevronRight size={20} />
         </button>
