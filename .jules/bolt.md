@@ -27,3 +27,7 @@
 ## 2026-03-03 - [Batch Grade Add Optimization]
 **Learning:** `Array.prototype.find()` inside `.map()` loops over an array of entities created a hidden O(N * M) complexity which becomes noticeable during batch operations like `addGradesBatch` (where multiple grades lookup students). Additionally, re-parsing strings to `Date` objects inside loops adds high computational overhead.
 **Action:** When performing array transformations (`.map()`), always pre-compute search objects using `Map`s for O(1) lookups, and pre-parse slow types (like `Date`s to `.getTime()`) before entering the iteration loop to flatten complexity to O(N + M).
+
+## 2025-03-03 - [Nested Loop O(S*A) Optimization in Class Bulletin Print Batch]
+**Learning:** Found a severe performance bottleneck in `ClassBulletinListModal.tsx` where an `Array.prototype.filter()` over `attendance` records was executed inside a `students.map()` block during batch PDF generation for an entire class. This created an O(S*A) operation that scaled poorly.
+**Action:** Replaced the inner filter search with an O(1) `Map.prototype.get()` lookup by pre-computing an `absencesMap` using `useMemo` in O(A+S) time. Always prefer pre-computing lookup maps outside nested iterations, especially for large datasets like attendance logs.

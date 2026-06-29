@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Printer, Eye } from 'lucide-react';
 import type { Student, AcademicPeriod, Course, Grade, TeacherComment } from '../../types';
@@ -51,25 +51,37 @@ const ClassBulletinListModal: React.FC<ClassBulletinListModalProps> = ({
           downloadStarted: 'Telechargement commence',
         };
 
-  const getStudentAbsences = (studentId: string) => {
+  // ⚡ Bolt: Pre-compute student absences map to prevent O(S*A) nested loop iteration during print and render
+  const absencesMap = useMemo(() => {
+    const map = new Map<string, { justified: number; unjustified: number; late: number }>();
     const periodStart = new Date(period.startDate);
     const periodEnd = new Date(period.endDate);
 
-    const studentAttendance = attendance.filter((a) => {
-      if (a.studentId !== studentId) return false;
+    // Initialize map for all students in this class
+    for (const student of students) {
+      map.set(student.id, { justified: 0, unjustified: 0, late: 0 });
+    }
+
+    // Single pass over attendance
+    for (const a of attendance) {
+      const studentStats = map.get(a.studentId);
+      if (!studentStats) continue;
+
       const recordDate = new Date(a.date);
-      return recordDate >= periodStart && recordDate <= periodEnd;
-    });
+      if (recordDate >= periodStart && recordDate <= periodEnd) {
+        if (a.status === 'absent') {
+          if (a.isJustified) studentStats.justified++;
+          else studentStats.unjustified++;
+        } else if (a.status === 'late') {
+          studentStats.late++;
+        }
+      }
+    }
+    return map;
+  }, [attendance, period, students]);
 
-    const justified = studentAttendance.filter(
-      (a) => a.status === 'absent' && a.isJustified === true
-    ).length;
-    const unjustified = studentAttendance.filter(
-      (a) => a.status === 'absent' && a.isJustified !== true
-    ).length;
-    const late = studentAttendance.filter((a) => a.status === 'late').length;
-
-    return { justified, unjustified, late };
+  const getStudentAbsences = (studentId: string) => {
+    return absencesMap.get(studentId) || { justified: 0, unjustified: 0, late: 0 };
   };
 
   const handlePrintAll = () => {
