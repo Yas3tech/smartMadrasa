@@ -30,6 +30,10 @@ service cloud.firestore {
       return !exists(/databases/$(database)/documents/_setup/config);
     }
 
+    function locksSetup() {
+      return existsAfter(/databases/$(database)/documents/_setup/config);
+    }
+
     // Helper to ensure user only updates their own non-sensitive fields
     function isOwnerSafeUpdate(userId) {
       return isOwner(userId) &&
@@ -127,7 +131,7 @@ service cloud.firestore {
 
       // 🛡️ SECURITY: Prevent Privilege Escalation
       // Allow superadmin creation ONLY if setup is open.
-      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin');
+      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && locksSetup() && request.resource.data.role == 'superadmin');
       // Only allow users to update their own profile fields.
       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
