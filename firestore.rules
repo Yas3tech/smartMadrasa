@@ -30,6 +30,11 @@ service cloud.firestore {
       return !exists(/databases/$(database)/documents/_setup/config);
     }
 
+    function isSetupClosing() {
+      // Require that the setup document is being created in the same batch
+      return existsAfter(/databases/$(database)/documents/_setup/config);
+    }
+
     // Helper to ensure user only updates their own non-sensitive fields
     function isOwnerSafeUpdate(userId) {
       return isOwner(userId) &&
@@ -126,8 +131,8 @@ service cloud.firestore {
       allow delete: if isDirector() || isSuperAdmin();
 
       // 🛡️ SECURITY: Prevent Privilege Escalation
-      // Allow superadmin creation ONLY if setup is open.
-      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && request.resource.data.role == 'superadmin');
+      // Allow superadmin creation ONLY if setup is open AND it is closed in the same batch.
+      allow create: if isDirector() || isSuperAdmin() || (isSetupOpen() && isSetupClosing() && request.resource.data.role == 'superadmin');
       // Only allow users to update their own profile fields.
       // Critical: Prevent updating 'role', 'classId', 'childrenIds', etc.
       allow update: if isDirector() || isSuperAdmin() || isOwnerSafeUpdate(userId);
