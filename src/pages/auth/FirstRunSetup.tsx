@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, runTransaction } from 'firebase/firestore';
 import { auth } from '../../config/firebase';
 import { db } from '../../config/db';
 import { Button, Input, Card } from '../../components/UI';
@@ -135,19 +135,23 @@ const FirstRunSetup: React.FC = () => {
       await updateProfile(user, { displayName: adminName });
       toast.success(copy.authCreated);
 
-      await setDoc(doc(db, 'users', user.uid), {
-        id: user.uid,
-        name: adminName,
-        email: adminEmail,
-        role: 'superadmin',
-        avatar: 'admin',
-        createdAt: new Date().toISOString(),
-      });
-
-      await setDoc(doc(db, '_setup', 'config'), {
-        setupCompletedAt: new Date().toISOString(),
-        completedBy: user.uid,
-        status: 'locked',
+      await runTransaction(db, async (transaction) => {
+        const setupRef = doc(db, '_setup', 'config');
+        const setupSnap = await transaction.get(setupRef);
+        if (setupSnap.exists()) throw new Error('setup_already_completed');
+        transaction.set(doc(db, 'users', user.uid), {
+          id: user.uid,
+          name: adminName,
+          email: adminEmail,
+          role: 'superadmin',
+          avatar: 'admin',
+          createdAt: new Date().toISOString(),
+        });
+        transaction.set(setupRef, {
+          setupCompletedAt: new Date().toISOString(),
+          completedBy: user.uid,
+          status: 'locked',
+        });
       });
 
       if (seedData) {
