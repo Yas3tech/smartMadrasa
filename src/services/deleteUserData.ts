@@ -188,6 +188,9 @@ export async function deleteAllUserData(
         const grades = await getDocumentRefsWhere('grades', 'studentId', userId);
         refsToDelete.push(...grades); result.deletedCounts.grades = grades.length;
 
+        const courseGrades = await getDocumentRefsWhere('courseGrades', 'studentId', userId);
+        refsToDelete.push(...courseGrades); result.deletedCounts.courseGrades = courseGrades.length;
+
         const attendance = await getDocumentRefsWhere('attendance', 'studentId', userId);
         refsToDelete.push(...attendance); result.deletedCounts.attendance = attendance.length;
 
@@ -313,6 +316,7 @@ export async function previewUserDataDeletion(
     { name: 'parents', field: null },
     { name: 'teachers', field: null },
     { name: 'grades', field: 'studentId' },
+    { name: 'courseGrades', field: 'studentId' },
     { name: 'attendance', field: 'studentId' },
     { name: 'homeworkSubmissions', field: 'studentId' },
     { name: 'messages', field: 'senderId' },

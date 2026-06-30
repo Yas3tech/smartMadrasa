@@ -52,6 +52,7 @@ export interface CourseGrade {
   comment?: string; // Optional comment for this grade
   teacherId: string;
   teacherName?: string; // Denormalized
+  status?: 'present' | 'absent'; // Absent = excluded from average calculation
 }
 
 /**

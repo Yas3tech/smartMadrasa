@@ -222,8 +222,10 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
       await addGradesBatch(formattedGrades);
       toast.success(t('grades.gradesSaved'));
       setIsBulkModalOpen(false);
-    } catch {
-      toast.error(t('grades.saveError'));
+    } catch (error) {
+      console.error('[handleBulkSave error]', error);
+      const msg = error instanceof Error ? error.message : t('grades.saveError');
+      toast.error(msg, { duration: 6000 });
     }
   };
 
@@ -239,13 +241,16 @@ export function useTeacherGrades(): UseTeacherGradesReturn {
       });
       toast.success(t('grades.gradeAdded'));
       setIsGradeModalOpen(false);
-    } catch {
-      toast.error(t('grades.saveError'));
+    } catch (error) {
+      console.error('[handleIndividualGradeSave error]', error);
+      const msg = error instanceof Error ? error.message : t('grades.saveError');
+      toast.error(msg, { duration: 6000 });
     }
   };
 
   const goBack = () => {
     if (selectedStudentId) {
+      cancelEditing();
       setSelectedStudentId('');
     } else if (selectedSubject) {
       setSelectedSubject('');

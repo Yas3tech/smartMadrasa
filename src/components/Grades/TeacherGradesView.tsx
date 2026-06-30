@@ -218,6 +218,9 @@ const TeacherGradesView = () => {
                         {t('grades.subject')}
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-slate-300">
+                        {t('grades.gradeTitle')}
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-slate-300">
                         {t('grades.score')}
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-slate-300">
@@ -240,6 +243,9 @@ const TeacherGradesView = () => {
                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                           {grade.subject}
                         </td>
+                        <td className="px-6 py-4 text-gray-500 dark:text-slate-400 text-sm">
+                          {grade.title || <span className="italic text-gray-300 dark:text-slate-600">—</span>}
+                        </td>
                         <td className="px-6 py-4">
                           {tg.editingGrade?.id === grade.id ? (
                             <div className="flex items-center gap-2">
@@ -254,6 +260,10 @@ const TeacherGradesView = () => {
                               />
                               <span className="text-gray-500">/{grade.maxScore}</span>
                             </div>
+                          ) : grade.status === 'absent' ? (
+                            <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                              ABS
+                            </span>
                           ) : (
                             <span
                               className={`font-bold ${grade.score < grade.maxScore / 2 ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}
@@ -355,6 +365,9 @@ const TeacherGradesView = () => {
                         {t('grades.student')}
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-slate-300">
+                        {t('grades.gradeTitle')}
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-slate-300">
                         {t('grades.score')}
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-slate-300">
@@ -379,6 +392,9 @@ const TeacherGradesView = () => {
                           <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                             {student?.name || t('common.unknown')}
                           </td>
+                          <td className="px-6 py-4 text-gray-500 dark:text-slate-400 text-sm">
+                            {grade.title || <span className="italic text-gray-300 dark:text-slate-600">—</span>}
+                          </td>
                           <td className="px-6 py-4">
                             {tg.editingGrade?.id === grade.id ? (
                               <div className="flex items-center gap-2">
@@ -393,6 +409,10 @@ const TeacherGradesView = () => {
                                 />
                                 <span className="text-gray-500">/{grade.maxScore}</span>
                               </div>
+                            ) : grade.status === 'absent' ? (
+                              <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                                ABS
+                              </span>
                             ) : (
                               <span
                                 className={`font-bold ${grade.score < grade.maxScore / 2 ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}

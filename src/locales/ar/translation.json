@@ -367,6 +367,7 @@
     "editGrade": "تعديل الدرجة",
     "student": "الطالب",
     "score": "النتيجة",
+    "gradeTitle": "العنوان",
     "maxScore": "النتيجة القصوى",
     "date": "التاريخ",
     "type": "النوع",
@@ -443,7 +444,8 @@
     "bySubjectDesc": "عرض جميع الطلاب لمادة معينة",
     "comment": "تعليق",
     "teacher": "المعلم",
-    "recentResults": "النتائج الأخيرة"
+    "recentResults": "النتائج الأخيرة",
+    "subject": "المادة"
   },
   "announcements": {
     "title": "الإعلانات",
@@ -731,7 +733,17 @@
     "unknownCourse": "مادة غير معروفة",
     "noRecords": "لا توجد سجلات حضور",
     "restrictedAccess": "وصول مقيد",
-    "restrictedAccessDesc": "هذه الصفحة مخصصة للمعلمين والمديرين فقط."
+    "restrictedAccessDesc": "هذه الصفحة مخصصة للمعلمين والمديرين فقط.",
+    "overviewTab": "نظرة عامة",
+    "markTab": "تسجيل الحضور",
+    "overview": "نظرة عامة على الغياب",
+    "absenceOverview": "ملخص الغياب",
+    "noAbsences": "لا توجد غيابات مسجلة لهذه المعايير.",
+    "exportExcel": "تصدير Excel",
+    "dateFrom": "من",
+    "dateTo": "إلى",
+    "allClasses": "جميع الفصول",
+    "notJustified": "غير مبرر"
   },
   "classes": {
     "title": "إدارة الفصول",
@@ -777,7 +789,8 @@
     "studentAdded": "تم إضافة الطالب إلى الفصل",
     "studentRemoved": "تم إزالة الطالب من الفصل",
     "studentAddError": "خطأ في إضافة الطالب",
-    "studentRemoveError": "خطأ في إزالة الطالب"
+    "studentRemoveError": "خطأ في إزالة الطالب",
+    "gradesTransferred": "درجة/درجات تم نقلها إلى الفصل الجديد"
   },
   "bulletinDashboard": {
     "title": "لوحة كشوف الدرجات",

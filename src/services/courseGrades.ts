@@ -119,6 +119,16 @@ export const deleteCourseGrade = async (id: string): Promise<void> => {
 };
 
 /**
+ * One-time fetch of all course grades for a student (used for class transfer)
+ */
+export const getCourseGradesByStudentId = async (studentId: string): Promise<CourseGrade[]> => {
+  const { getDocs } = await import('firebase/firestore');
+  const q = query(collection(getDb(), COLLECTION_NAME), where('studentId', '==', studentId));
+  const snapshot = await getDocs(q);
+  return mapQuerySnapshot<CourseGrade>(snapshot);
+};
+
+/**
  * Calculate average for a student in a course for a period
  */
 export const calculateCourseAverage = (grades: CourseGrade[]): number => {
@@ -128,6 +138,7 @@ export const calculateCourseAverage = (grades: CourseGrade[]): number => {
   let totalWeight = 0;
 
   grades.forEach((grade) => {
+    if (grade.status === 'absent') return; // Absences excluded from average
     const percentage = (grade.score / grade.maxScore) * 100;
     totalWeightedScore += percentage * grade.weight;
     totalWeight += grade.weight;

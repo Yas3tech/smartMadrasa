@@ -353,6 +353,7 @@
     "editGrade": "Cijfer bewerken",
     "student": "Leerling",
     "score": "Score",
+    "gradeTitle": "Titel",
     "maxScore": "Maximale score",
     "date": "Datum",
     "type": "Type",
@@ -427,7 +428,8 @@
     "bySubjectDesc": "Bekijk alle leerlingen voor een bepaald vak",
     "comment": "Opmerking",
     "teacher": "Leraar",
-    "recentResults": "Recente resultaten"
+    "recentResults": "Recente resultaten",
+    "subject": "Vak"
   },
   "announcements": {
     "title": "Mededelingen",
@@ -715,7 +717,17 @@
     "unknownCourse": "Onbekende cursus",
     "noRecords": "Geen aanwezigheidsgegevens.",
     "restrictedAccess": "Beperkte toegang",
-    "restrictedAccessDesc": "Deze pagina is voorbehouden aan leraren en directeuren."
+    "restrictedAccessDesc": "Deze pagina is voorbehouden aan leraren en directeuren.",
+    "overviewTab": "Overzicht",
+    "markTab": "Aanwezigheid markeren",
+    "overview": "Overzicht afwezigheden",
+    "absenceOverview": "Samenvatting afwezigheden",
+    "noAbsences": "Geen afwezigheden geregistreerd voor deze criteria.",
+    "exportExcel": "Exporteren Excel",
+    "dateFrom": "Van",
+    "dateTo": "Tot",
+    "allClasses": "Alle klassen",
+    "notJustified": "Niet gewettigd"
   },
   "classes": {
     "title": "Klasbeheer",
@@ -761,7 +773,8 @@
     "studentAdded": "Leerling toegevoegd aan de klas",
     "studentRemoved": "Leerling uit de klas verwijderd",
     "studentAddError": "Fout bij het toevoegen van de leerling",
-    "studentRemoveError": "Fout bij het verwijderen van de leerling"
+    "studentRemoveError": "Fout bij het verwijderen van de leerling",
+    "gradesTransferred": "cijfer(s) overgedragen naar de nieuwe klas"
   },
   "bulletinDashboard": {
     "title": "Rapportendashboard",

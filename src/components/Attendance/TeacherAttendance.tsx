@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Card, Button } from '../UI';
 import toast from 'react-hot-toast';
-import { Check, X, Clock, Users as UsersIcon, Calendar, BookOpen, AlertCircle } from 'lucide-react';
+import { Check, X, Clock, Users as UsersIcon, Calendar, BookOpen, AlertCircle, School } from 'lucide-react';
 import type { User, Course, Student, ClassGroup, Attendance } from '../../types';
 
 interface TeacherAttendanceProps {
@@ -30,23 +30,34 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedCourseId, setSelectedCourseId] = useState<string>('');
     const [justificationMap, setJustificationMap] = useState<Record<string, string>>({});
+    const [selectedClassFilter, setSelectedClassFilter] = useState<string>('');
+
+    const isDirector = user?.role === 'director' || user?.role === 'superadmin';
 
     // Filter courses for the current teacher and selected date
     const teacherCourses = useMemo(() => {
-        const date = new Date(selectedDate);
-        const day = date.getUTCDay(); // 0=Sun, 1=Mon...
-        const dayOfWeek = day === 0 ? 7 : day;
-
         let filtered = courses;
 
-        // Filter by role
+        // Teachers only see their own courses
         if (user?.role === 'teacher') {
             filtered = filtered.filter((c) => c.teacherId === user.id);
         }
 
-        // Filter by day of week
-        return filtered.filter((c) => c.dayOfWeek === dayOfWeek);
-    }, [courses, user, selectedDate]);
+        // Teachers: filter by day of week; directors: show all courses (across all days)
+        if (!isDirector) {
+            const date = new Date(selectedDate);
+            const day = date.getUTCDay(); // 0=Sun, 1=Mon...
+            const dayOfWeek = day === 0 ? 7 : day;
+            filtered = filtered.filter((c) => c.dayOfWeek === dayOfWeek);
+        }
+
+        // Directors: optional class filter
+        if (isDirector && selectedClassFilter) {
+            filtered = filtered.filter((c) => c.classId === selectedClassFilter);
+        }
+
+        return filtered;
+    }, [courses, user, selectedDate, isDirector, selectedClassFilter]);
 
     const selectedCourse = teacherCourses.find((c) => c.id === selectedCourseId);
 
@@ -148,6 +159,25 @@ const TeacherAttendance: React.FC<TeacherAttendanceProps> = ({
                             className={`${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 outline-none`}
                         />
                     </div>
+
+                    {isDirector && (
+                        <div className="relative min-w-[180px]">
+                            <School
+                                className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500`}
+                                size={18}
+                            />
+                            <select
+                                value={selectedClassFilter}
+                                onChange={(e) => { setSelectedClassFilter(e.target.value); setSelectedCourseId(''); }}
+                                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 rounded-xl border border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 focus:border-orange-500 outline-none appearance-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white`}
+                            >
+                                <option value="">{t('attendance.allClasses')}</option>
+                                {classes.map((cls) => (
+                                    <option key={cls.id} value={cls.id}>{cls.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="relative min-w-[200px]">
                         <BookOpen

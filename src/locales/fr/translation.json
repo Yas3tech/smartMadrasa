@@ -390,6 +390,7 @@
     "editGrade": "Modifier la note",
     "student": "Élève",
     "score": "Note",
+    "gradeTitle": "Titre",
     "maxScore": "Note maximale",
     "date": "Date",
     "type": "Type",
@@ -471,7 +472,8 @@
     "viewByStudent": "Par élève",
     "viewByStudentDesc": "Afficher les notes d'un élève spécifique",
     "viewBySubject": "Par matière",
-    "viewBySubjectDesc": "Afficher les notes d'une matière spécifique"
+    "viewBySubjectDesc": "Afficher les notes d'une matière spécifique",
+    "subject": "Matière"
   },
   "announcements": {
     "title": "Annonces",
@@ -761,7 +763,17 @@
     "unknownCourse": "Cours inconnu",
     "noRecords": "Aucun enregistrement d'assiduité.",
     "restrictedAccess": "Accès restreint",
-    "restrictedAccessDesc": "Cette page est réservée aux enseignants et directeurs."
+    "restrictedAccessDesc": "Cette page est réservée aux enseignants et directeurs.",
+    "overviewTab": "Vue générale",
+    "markTab": "Marquer présence",
+    "overview": "Vue générale des absences",
+    "absenceOverview": "Récapitulatif des absences",
+    "noAbsences": "Aucune absence enregistrée pour ces critères.",
+    "exportExcel": "Exporter Excel",
+    "dateFrom": "Du",
+    "dateTo": "Au",
+    "allClasses": "Toutes les classes",
+    "notJustified": "Non justifié"
   },
   "classes": {
     "title": "Gestion des Classes",
@@ -807,7 +819,8 @@
     "studentAdded": "Élève ajouté à la classe",
     "studentRemoved": "Élève retiré de la classe",
     "studentAddError": "Erreur lors de l'ajout de l'élève",
-    "studentRemoveError": "Erreur lors du retrait de l'élève"
+    "studentRemoveError": "Erreur lors du retrait de l'élève",
+    "gradesTransferred": "note(s) transférée(s) vers la nouvelle classe"
   },
   "bulletinDashboard": {
     "title": "Tableau de Bord Bulletins",

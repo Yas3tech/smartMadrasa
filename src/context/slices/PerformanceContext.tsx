@@ -91,6 +91,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           feedback: cg.comment,
           courseId: cg.courseId,
           className: undefined,
+          title: cg.title,
+          status: cg.status,
         }));
         setGrades(grades as Grade[]);
       };
@@ -187,11 +189,17 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           return gradeDate >= startDate && gradeDate <= endDate;
         });
 
-        // If no matching period found, use the most recent period or throw error
-        const periodId = matchingPeriod?.id;
+        // If no matching period found, fall back to the most recent period
+        let periodId = matchingPeriod?.id;
+        if (!periodId) {
+          const sorted = [...academicPeriods].sort(
+            (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+          );
+          periodId = sorted[0]?.id;
+        }
         if (!periodId) {
           throw new Error(
-            'Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.'
+            'Aucune période académique configurée. Veuillez en créer une dans Configuration > Périodes.'
           );
         }
 
@@ -218,7 +226,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
           classId: grade.classId,
-          eventId: grade.eventId,
+          ...(grade.eventId !== undefined ? { eventId: grade.eventId } : {}),
+          ...(grade.status !== undefined ? { status: grade.status } : {}),
         };
 
         await fbCreateCourseGrade(courseGrade);
@@ -250,10 +259,15 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           (period) => gradeTime >= period.startDate && gradeTime <= period.endDate
         );
 
-        const periodId = matchingPeriod?.id;
+        // Fall back to most recent period if no exact date match
+        let periodId = matchingPeriod?.id;
+        if (!periodId) {
+          const sorted = [...periodRanges].sort((a, b) => b.endDate - a.endDate);
+          periodId = sorted[0]?.id;
+        }
         if (!periodId) {
           throw new Error(
-            'Aucune période académique ne correspond à cette date. Veuillez contacter le directeur.'
+            'Aucune période académique configurée. Veuillez en créer une dans Configuration > Périodes.'
           );
         }
 
@@ -279,7 +293,8 @@ export const PerformanceProvider = ({ children }: { children: ReactNode }) => {
           teacherId: grade.teacherId || user?.id || 'unknown',
           comment: grade.feedback || '',
           classId: grade.classId,
-          eventId: grade.eventId,
+          ...(grade.eventId !== undefined ? { eventId: grade.eventId } : {}),
+          ...(grade.status !== undefined ? { status: grade.status } : {}),
         };
       });
 

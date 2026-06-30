@@ -6,13 +6,17 @@ import { Card, Button, Modal, Input } from '../../components/UI';
 import { Plus, Edit2, Users, GraduationCap, X, UserPlus, UserMinus, Search } from 'lucide-react';
 import type { ClassGroup, Student } from '../../types';
 import { updateUser } from '../../services/users';
+import {
+  getCourseGradesByStudentId,
+  updateCourseGrade,
+} from '../../services/courseGrades';
 import toast from 'react-hot-toast';
 
 const Classes = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { users, students } = useUsers();
-  const { classes, addClass, updateClass, deleteClass } = useAcademics();
+  const { classes, courses, addClass, updateClass, deleteClass } = useAcademics();
   const isRTL = i18n.language === 'ar';
   const placeholders = i18n.language.startsWith('nl')
     ? { className: 'Klas 1A', grade: '1e jaar' }
@@ -80,7 +84,48 @@ const Classes = () => {
 
     try {
       await updateUser(studentId, { classId: managingClass.id } as Partial<Student>);
-      toast.success(t('classes.studentAdded'));
+
+      // Remap any existing CourseGrades to the new class (match by subject name)
+      const existingGrades = await getCourseGradesByStudentId(studentId);
+      const gradesToRemap = existingGrades.filter(
+        (g) => g.classId && g.classId !== managingClass.id
+      );
+
+      if (gradesToRemap.length > 0) {
+        // Build subject → courseId map for the new class
+        const newClassCoursesBySubject = new Map<string, string>();
+        courses.forEach((c) => {
+          if (c.classId === managingClass.id && !newClassCoursesBySubject.has(c.subject)) {
+            newClassCoursesBySubject.set(c.subject, c.id);
+          }
+        });
+
+        // Find the subject for each old grade via its courseId, then remap
+        const oldCourseMap = new Map(courses.map((c) => [c.id, c]));
+        const remapPromises: Promise<void>[] = [];
+
+        gradesToRemap.forEach((grade) => {
+          const oldCourse = oldCourseMap.get(grade.courseId);
+          if (!oldCourse) return;
+          const newCourseId = newClassCoursesBySubject.get(oldCourse.subject);
+          if (newCourseId) {
+            remapPromises.push(
+              updateCourseGrade(grade.id, { courseId: newCourseId, classId: managingClass.id })
+            );
+          }
+        });
+
+        if (remapPromises.length > 0) {
+          await Promise.all(remapPromises);
+          toast.success(
+            `${t('classes.studentAdded')} — ${remapPromises.length} ${t('classes.gradesTransferred')}`
+          );
+        } else {
+          toast.success(t('classes.studentAdded'));
+        }
+      } else {
+        toast.success(t('classes.studentAdded'));
+      }
     } catch {
       toast.error(t('classes.studentAddError'));
     }
